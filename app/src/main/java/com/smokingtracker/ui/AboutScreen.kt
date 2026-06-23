@@ -1,6 +1,5 @@
 package com.smokingtracker.ui
 
-import android.content.pm.PackageManager
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -24,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -33,20 +31,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.smokingtracker.BuildConfig
 import com.smokingtracker.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AboutScreen(navController: NavHostController) {
     val cookieShape = MaterialShapes.Cookie12Sided.toShape()
-    val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
 
-    val version = try {
-        context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.0.0"
-    } catch (e: PackageManager.NameNotFoundException) {
-        "1.0.0"
-    }
+    val version = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
 
     val infiniteTransition = rememberInfiniteTransition(label = "rotation")
     val rotation by infiniteTransition.animateFloat(

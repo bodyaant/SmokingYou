@@ -11,8 +11,8 @@ android {
         applicationId = "com.smokingtracker"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = getGitCommitCount()
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -36,9 +36,9 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     
-    // For locale config
     androidResources {
         generateLocaleConfig = false
     }
@@ -69,4 +69,11 @@ dependencies {
 
     implementation(libs.gson)
     implementation(libs.androidx.material.icons.extended)
+}
+
+fun getGitCommitCount(): Int {
+    val process = ProcessBuilder("git", "rev-list", "--count", "HEAD").start()
+    val count = process.inputStream.bufferedReader().readText().trim()
+    process.waitFor()
+    return if (count.isNotEmpty()) count.toInt() else 1
 }
