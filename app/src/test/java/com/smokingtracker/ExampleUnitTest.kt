@@ -1,7 +1,6 @@
-package com.example.smokingyou
+package com.smokingtracker
 
 import org.junit.Test
-
 import org.junit.Assert.*
 
 /**
