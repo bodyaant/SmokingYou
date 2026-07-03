@@ -38,13 +38,15 @@ class MainActivity : ComponentActivity() {
             )
 
             val themePreference by viewModel.themePreference.collectAsState()
+            val fontPreset by viewModel.fontPreset.collectAsState()
+            val amoledTheme by viewModel.amoledTheme.collectAsState()
             val useDarkTheme = when (themePreference) {
                 ThemePreference.LIGHT -> false
                 ThemePreference.DARK -> true
                 ThemePreference.SYSTEM -> isSystemInDarkTheme()
             }
 
-            AppTheme(useDarkTheme = useDarkTheme) {
+            AppTheme(useDarkTheme = useDarkTheme, fontPreset = fontPreset, amoledThemeEnabled = amoledTheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
