@@ -110,4 +110,15 @@
     <string name="made_with_love">Made with ❤ by Bodyaant</string>
     <string name="link_github">GitHub</string>
     <string name="link_telegram">Telegram</string>
+    <string name="settings_font">Interface Font</string>
+    <string name="font_preset_wide">Wide</string>
+    <string name="font_preset_thin">Thin</string>
+    <string name="font_preset_system">System</string>
+    <string name="settings_amoled_theme">AMOLED Theme</string>
+    <string name="settings_amoled_theme_desc">Fully black background in dark mode</string>
+    <string name="time_over_limit_hm">+%1$02dh %2$02dm</string>
+    <string name="time_over_limit_m">+%1$02dm</string>
+    <string name="first_of_the_day">First of the day</string>
+    <string name="settings_appearance_desc">Theme, AMOLED mode, and font settings</string>
 </resources>
+

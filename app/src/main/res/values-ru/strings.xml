@@ -34,7 +34,7 @@
     <string name="tab_achievements">Достижения</string>
     <string name="settings_appearance">Внешний вид</string>
     <string name="settings_theme">Тема</string>
-    <string name="theme_system">Системная</string>
+    <string name="theme_system">Система</string>
     <string name="theme_light">Светлая</string>
     <string name="theme_dark">Тёмная</string>
     <string name="settings_general">Общие</string>
@@ -110,4 +110,14 @@
     <string name="made_with_love">Сделано с ❤ от Bodyaant</string>
     <string name="link_github">GitHub</string>
     <string name="link_telegram">Telegram</string>
+    <string name="settings_font">Шрифт интерфейса</string>
+    <string name="font_preset_wide">Широкий</string>
+    <string name="font_preset_thin">Тонкий</string>
+    <string name="font_preset_system">Система</string>
+    <string name="settings_amoled_theme">AMOLED тема</string>
+    <string name="settings_amoled_theme_desc">Полностью чёрный фон в тёмной теме</string>
+    <string name="time_over_limit_hm">+%1$02dч %2$02dм</string>
+    <string name="time_over_limit_m">+%1$02dм</string>
+    <string name="first_of_the_day">Первая за день</string>
+    <string name="settings_appearance_desc">Настройки темы, AMOLED режима и шрифтов</string>
 </resources>
