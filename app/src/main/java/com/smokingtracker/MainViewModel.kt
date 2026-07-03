@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.util.Calendar
@@ -51,18 +53,36 @@ class MainViewModel(private val dataStoreManager: DataStoreManager, private val 
         initialValue = 0
     )
 
-    init {
-        //generateTestStatistics()
+    val fontPreset: StateFlow<String> = dataStoreManager.fontPreset.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = "WIDE"
+    )
 
+    val amoledTheme: StateFlow<Boolean> = dataStoreManager.amoledTheme.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
+
+    val appLaunchDates: StateFlow<List<Long>> = dataStoreManager.appLaunchDates.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
+    init {
         viewModelScope.launch {
             val now = System.currentTimeMillis()
             val launches = dataStoreManager.appLaunchDates.first()
-            val calNow = Calendar.getInstance().apply { timeInMillis = now }
-            val todayStr = "${calNow.get(Calendar.YEAR)}-${calNow.get(Calendar.DAY_OF_YEAR)}"
+            val cal = Calendar.getInstance().apply { timeInMillis = now }
+            val todayYear = cal.get(Calendar.YEAR)
+            val todayDay = cal.get(Calendar.DAY_OF_YEAR)
             
+            val checkCal = Calendar.getInstance()
             val alreadyLoggedToday = launches.any {
-                val cal = Calendar.getInstance().apply { timeInMillis = it }
-                "${cal.get(Calendar.YEAR)}-${cal.get(Calendar.DAY_OF_YEAR)}" == todayStr
+                checkCal.timeInMillis = it
+                checkCal.get(Calendar.YEAR) == todayYear && checkCal.get(Calendar.DAY_OF_YEAR) == todayDay
             }
 
             if (!alreadyLoggedToday) {
@@ -70,19 +90,12 @@ class MainViewModel(private val dataStoreManager: DataStoreManager, private val 
             }
             checkAchievements()
         }
-
-        viewModelScope.launch {
-            while (true) {
-                checkAchievements()
-                delay(60000)
-            }
-        }
     }
 
-    private suspend fun checkAchievements() {
-        val entries = dataStoreManager.smokingEntries.first()
-        val launches = dataStoreManager.appLaunchDates.first()
-        val previouslyUnlocked = dataStoreManager.unlockedAchievements.first()
+    private suspend fun checkAchievements(updatedEntries: List<Long>? = null) = withContext(Dispatchers.Default) {
+        val entries = updatedEntries ?: smokingEntries.value
+        val launches = appLaunchDates.value
+        val previouslyUnlocked = unlockedAchievements.value
         
         val newUnlockedSet = AchievementsManager.calculateUnlockedAchievements(entries, launches)
 
@@ -103,20 +116,39 @@ class MainViewModel(private val dataStoreManager: DataStoreManager, private val 
     fun addSmokingEntry(timestamp: Long = System.currentTimeMillis()) {
         viewModelScope.launch {
             dataStoreManager.addSmokingEntry(timestamp)
-            checkAchievements()
+            val updated = smokingEntries.value.toMutableList().apply { 
+                add(timestamp)
+                sort()
+            }
+            checkAchievements(updated)
         }
     }
 
     fun removeSmokingEntry(timestamp: Long) {
         viewModelScope.launch {
             dataStoreManager.removeSmokingEntry(timestamp)
-            checkAchievements()
+            val updated = smokingEntries.value.toMutableList().apply { 
+                remove(timestamp)
+            }
+            checkAchievements(updated)
         }
     }
 
     fun updateThemePreference(theme: ThemePreference) {
         viewModelScope.launch {
             dataStoreManager.saveThemePreference(theme)
+        }
+    }
+
+    fun updateFontPreset(preset: String) {
+        viewModelScope.launch {
+            dataStoreManager.saveFontPreset(preset)
+        }
+    }
+
+    fun updateAmoledTheme(enabled: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.saveAmoledTheme(enabled)
         }
     }
     
@@ -182,44 +214,4 @@ class MainViewModel(private val dataStoreManager: DataStoreManager, private val 
             }
         }
     }
-
-//    fun generateTestStatistics() {
-//        viewModelScope.launch {
-//            val calendar = java.util.Calendar.getInstance()
-//            calendar.set(2023, java.util.Calendar.JANUARY, 1, 0, 0, 0)
-//            calendar.set(java.util.Calendar.MILLISECOND, 0)
-//
-//            val endDate = java.util.Calendar.getInstance()
-//            endDate.set(2026, java.util.Calendar.MAY, 31, 23, 59, 59)
-//
-//            val allEntries = mutableListOf<Long>()
-//            val random = java.util.Random()
-//
-//            while (calendar.before(endDate)) {
-//                val chance = random.nextFloat()
-//                val count = when {
-//                    chance < 0.05f -> 0
-//                    chance < 0.15f -> random.nextInt(2) + 6
-//                    else -> random.nextInt(4) + 2
-//                }
-//
-//                val currentDayStart = calendar.timeInMillis
-//                repeat(count) {
-//                    val randomTimeOffset = (random.nextFloat() * 24 * 60 * 60 * 1000L).toLong()
-//                    allEntries.add(currentDayStart + randomTimeOffset)
-//                }
-//                calendar.add(java.util.Calendar.DAY_OF_YEAR, 1)
-//            }
-//
-//            allEntries.sort()
-//
-//            dataStoreManager.restoreFromBackup(
-//                isReg = true,
-//                entries = allEntries,
-//                theme = com.smokingtracker.data.ThemePreference.SYSTEM.name,
-//                achievements = emptySet(),
-//                limit = 10
-//            )
-//        }
-//    }
 }
