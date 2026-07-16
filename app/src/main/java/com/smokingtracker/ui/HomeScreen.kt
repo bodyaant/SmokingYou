@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
@@ -36,10 +37,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.smokingtracker.MainViewModel
 import com.smokingtracker.R
+import com.smokingtracker.StatisticsManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -49,12 +52,22 @@ import java.util.concurrent.TimeUnit
 @Preview(showBackground = true)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun HomeScreen(viewModel: MainViewModel? = null) {
+private fun HomeScreenPreview() {
+    HomeScreenContent(entries = emptyList(), dailyLimit = 10, viewModel = null)
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun HomeScreen(viewModel: MainViewModel) {
+    val entries by viewModel.smokingEntries.collectAsState()
+    val dailyLimit by viewModel.dailyLimit.collectAsState()
+    HomeScreenContent(entries = entries, dailyLimit = dailyLimit, viewModel = viewModel)
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+internal fun HomeScreenContent(entries: List<Long>, dailyLimit: Int, viewModel: MainViewModel? = null) {
     val cookieShape = MaterialShapes.Cookie12Sided.toShape()
-    val entries by (viewModel?.smokingEntries ?: kotlinx.coroutines.flow.MutableStateFlow(emptyList())).collectAsState()
-    
-    val initialDailyLimit = if (LocalInspectionMode.current) 10 else 0
-    val dailyLimit by (viewModel?.dailyLimit ?: kotlinx.coroutines.flow.MutableStateFlow(initialDailyLimit)).collectAsState()
 
     var currentDate by remember { mutableStateOf(Calendar.getInstance()) }
 
@@ -68,24 +81,43 @@ fun HomeScreen(viewModel: MainViewModel? = null) {
     val formatMs = stringResource(R.string.duration_ms)
     
     var showLimitWarning by remember { mutableStateOf(false) }
+    var isProcessingAdd by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showTriggerDialog by remember { mutableStateOf(false) }
+    var pendingLogTime by remember { mutableLongStateOf(0L) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val scope = rememberCoroutineScope()
     val rotationAngle = remember { Animatable(0f) }
     var isAnimating by remember { mutableStateOf(false) }
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted -> }
+    ) { isGranted ->
+        if (!isGranted) {
+            android.widget.Toast.makeText(
+                context,
+                context.getString(R.string.notif_permission_rationale),
+                android.widget.Toast.LENGTH_LONG
+            ).show()
+        }
+    }
 
     LaunchedEffect(Unit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            val hasPermission = androidx.core.content.ContextCompat.checkSelfPermission(
+                context, Manifest.permission.POST_NOTIFICATIONS
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            if (!hasPermission) {
+                launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
         }
     }
 
     LaunchedEffect(entries, formatHm, formatHms, formatMs) {
-        if (timePassedText.isEmpty()) timePassedText = calculatingText
+        timePassedText = calculatingText
         while (true) {
             val lastEntry = entries.maxOrNull()
             if (lastEntry != null) {
@@ -126,10 +158,10 @@ fun HomeScreen(viewModel: MainViewModel? = null) {
         }.sortedDescending()
     }
 
-    val today = remember { Calendar.getInstance() }
-    val isToday = remember(currentDate, today) {
-        currentDate.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
-        currentDate.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)
+    val isToday = remember(currentDate) {
+        val now = Calendar.getInstance()
+        currentDate.get(Calendar.YEAR) == now.get(Calendar.YEAR) &&
+        currentDate.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)
     }
                   
     if (showLimitWarning) {
@@ -138,18 +170,25 @@ fun HomeScreen(viewModel: MainViewModel? = null) {
             title = { Text(stringResource(R.string.limit_warning_title)) },
             text = { Text(stringResource(R.string.limit_warning_message)) },
             confirmButton = {
-                TextButton(onClick = {
-                    val now = Calendar.getInstance()
-                    val entryDate = currentDate.clone() as Calendar
-                    entryDate.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY))
-                    entryDate.set(Calendar.MINUTE, now.get(Calendar.MINUTE))
-                    entryDate.set(Calendar.SECOND, now.get(Calendar.SECOND))
-                    entryDate.set(Calendar.MILLISECOND, now.get(Calendar.MILLISECOND))
-                    if (entryDate.timeInMillis <= now.timeInMillis) {
-                        viewModel?.addSmokingEntry(entryDate.timeInMillis)
+                TextButton(
+                    enabled = !isProcessingAdd,
+                    onClick = {
+                        if (!isProcessingAdd) {
+                            isProcessingAdd = true
+                            val now = Calendar.getInstance()
+                            val entryDate = currentDate.clone() as Calendar
+                            entryDate.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY))
+                            entryDate.set(Calendar.MINUTE, now.get(Calendar.MINUTE))
+                            entryDate.set(Calendar.SECOND, now.get(Calendar.SECOND))
+                            entryDate.set(Calendar.MILLISECOND, now.get(Calendar.MILLISECOND))
+                            if (entryDate.timeInMillis <= now.timeInMillis) {
+                                pendingLogTime = entryDate.timeInMillis
+                                showTriggerDialog = true
+                            }
+                            showLimitWarning = false
+                        }
                     }
-                    showLimitWarning = false
-                }) {
+                ) {
                     Text(stringResource(R.string.add_anyway))
                 }
             },
@@ -196,6 +235,82 @@ fun HomeScreen(viewModel: MainViewModel? = null) {
         }
     }
 
+    if (showTriggerDialog) {
+        BasicAlertDialog(onDismissRequest = { showTriggerDialog = false; isProcessingAdd = false }) {
+            Surface(shape = RoundedCornerShape(28.dp), color = MaterialTheme.colorScheme.surface) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.trigger_dialog_title),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        com.smokingtracker.data.TriggerType.allEntries().forEach { trigger ->
+                            Button(
+                                onClick = {
+                                    if (pendingLogTime > 0L) {
+                                        viewModel?.addSmokingEntryWithTrigger(pendingLogTime, trigger.key)
+                                    }
+                                    showTriggerDialog = false
+                                    isProcessingAdd = false
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            ) {
+                                Text(stringResource(trigger.labelResId), fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        TextButton(onClick = { showTriggerDialog = false; isProcessingAdd = false }) {
+                            Text(stringResource(R.string.dialog_cancel), fontWeight = FontWeight.Bold)
+                        }
+                        Button(
+                            onClick = {
+                                if (pendingLogTime > 0L) {
+                                    viewModel?.addSmokingEntryWithTrigger(pendingLogTime, null)
+                                }
+                                showTriggerDialog = false
+                                isProcessingAdd = false
+                            },
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(stringResource(R.string.trigger_skip), fontWeight = FontWeight.Bold)
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseAlpha by infiniteTransition.animateFloat(
         initialValue = 0.3f,
@@ -207,7 +322,84 @@ fun HomeScreen(viewModel: MainViewModel? = null) {
         label = "pulse_alpha"
     )
 
+    val undoDeleteStr = stringResource(R.string.undo_delete)
+    val undoStr = stringResource(R.string.undo)
+
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .padding(WindowInsets.navigationBars.asPaddingValues())
+                    .padding(bottom = 96.dp)
+                    .padding(horizontal = 16.dp)
+            ) { snackbarData ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                    ),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = 6.dp
+                    ),
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.errorContainer),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                            Text(
+                                text = snackbarData.visuals.message,
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        
+                        snackbarData.visuals.actionLabel?.let { actionLabel ->
+                            TextButton(
+                                onClick = { snackbarData.performAction() },
+                                colors = ButtonDefaults.textButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Text(
+                                    text = actionLabel,
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -287,8 +479,9 @@ fun HomeScreen(viewModel: MainViewModel? = null) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                val weeklyCount = remember(entries, currentDate) { getWeeklyCount(entries, currentDate) }
-                val monthlyCount = remember(entries, currentDate) { getMonthlyCount(entries, currentDate) }
+                val today = remember { Calendar.getInstance() }
+                val weeklyCount = remember(entries) { StatisticsManager.getWeeklyCount(entries, today) }
+                val monthlyCount = remember(entries) { StatisticsManager.getMonthlyCount(entries, today) }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -369,7 +562,7 @@ fun HomeScreen(viewModel: MainViewModel? = null) {
 
                 LazyColumn(
                     modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(bottom = 120.dp)
+                    contentPadding = PaddingValues(bottom = 190.dp)
                 ) {
                     itemsIndexed(
                         items = selectedDateEntries,
@@ -380,10 +573,22 @@ fun HomeScreen(viewModel: MainViewModel? = null) {
                             entryTime = entryTime,
                             prevEntryTime = prevTime,
                             index = index,
-                            onDelete = { viewModel?.removeSmokingEntry(entryTime) },
+                            onDelete = {
+                                scope.launch {
+                                    val trigger = viewModel?.entryTriggers?.value?.get(entryTime)
+                                    viewModel?.removeSmokingEntry(entryTime)
+                                    val result = snackbarHostState.showSnackbar(
+                                        message = undoDeleteStr,
+                                        actionLabel = undoStr,
+                                        duration = SnackbarDuration.Short
+                                    )
+                                    if (result == SnackbarResult.ActionPerformed) {
+                                        viewModel?.addSmokingEntryWithTrigger(entryTime, trigger)
+                                    }
+                                }
+                            },
                             onEdit = { newTime ->
-                                viewModel?.removeSmokingEntry(entryTime)
-                                viewModel?.addSmokingEntry(newTime)
+                                viewModel?.editSmokingEntry(entryTime, newTime)
                             }
                         )
                     }
@@ -430,7 +635,8 @@ fun HomeScreen(viewModel: MainViewModel? = null) {
                         entryDate.set(Calendar.MILLISECOND, now.get(Calendar.MILLISECOND))
 
                         if (entryDate.timeInMillis <= now.timeInMillis) {
-                            viewModel?.addSmokingEntry(entryDate.timeInMillis)
+                            pendingLogTime = entryDate.timeInMillis
+                            showTriggerDialog = true
                         }
                     }
                 },
@@ -452,33 +658,6 @@ fun HomeScreen(viewModel: MainViewModel? = null) {
     }
 }
 
-fun getWeeklyCount(entries: List<Long>, date: Calendar): Int {
-    val weekStart = date.clone() as Calendar
-    weekStart.set(Calendar.DAY_OF_WEEK, weekStart.firstDayOfWeek)
-    weekStart.set(Calendar.HOUR_OF_DAY, 0)
-    weekStart.set(Calendar.MINUTE, 0)
-    weekStart.set(Calendar.SECOND, 0)
-    weekStart.set(Calendar.MILLISECOND, 0)
-
-    val weekEnd = weekStart.clone() as Calendar
-    weekEnd.add(Calendar.DAY_OF_YEAR, 7)
-
-    return entries.count { it >= weekStart.timeInMillis && it < weekEnd.timeInMillis }
-}
-
-fun getMonthlyCount(entries: List<Long>, date: Calendar): Int {
-    val monthStart = date.clone() as Calendar
-    monthStart.set(Calendar.DAY_OF_MONTH, 1)
-    monthStart.set(Calendar.HOUR_OF_DAY, 0)
-    monthStart.set(Calendar.MINUTE, 0)
-    monthStart.set(Calendar.SECOND, 0)
-    monthStart.set(Calendar.MILLISECOND, 0)
-
-    val monthEnd = monthStart.clone() as Calendar
-    monthEnd.add(Calendar.MONTH, 1)
-
-    return entries.count { it >= monthStart.timeInMillis && it < monthEnd.timeInMillis }
-}
 
 @Composable
 fun StatItem(label: String, value: String, modifier: Modifier = Modifier) {
@@ -512,14 +691,6 @@ fun StatItem(label: String, value: String, modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-fun HomeScreenPreview() {
-    MaterialTheme {
-        HomeScreen()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
 fun EntryItemPreview() {
     EntryItem()
 }
@@ -536,6 +707,9 @@ fun EntryItem(
     val cookieShape = MaterialShapes.Cookie9Sided.toShape()
     val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(entryTime))
     var showTimePicker by remember { mutableStateOf(false) }
+    var editErrorToast by remember { mutableStateOf(false) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val futureDateError = if (!LocalInspectionMode.current) stringResource(R.string.edit_future_time_error) else ""
 
     val cal = Calendar.getInstance().apply { timeInMillis = entryTime }
     val timePickerState = rememberTimePickerState(
@@ -554,8 +728,12 @@ fun EntryItem(
                         val newCal = Calendar.getInstance().apply { timeInMillis = entryTime }
                         newCal.set(Calendar.HOUR_OF_DAY, timePickerState.hour)
                         newCal.set(Calendar.MINUTE, timePickerState.minute)
-                        onEdit(newCal.timeInMillis)
-                        showTimePicker = false
+                        if (newCal.timeInMillis > System.currentTimeMillis()) {
+                            android.widget.Toast.makeText(context, futureDateError, android.widget.Toast.LENGTH_SHORT).show()
+                        } else {
+                            onEdit(newCal.timeInMillis)
+                            showTimePicker = false
+                        }
                     }
                 ) { Text(stringResource(R.string.dialog_ok)) }
             },
@@ -598,12 +776,17 @@ fun EntryItem(
                 color = accentContainer,
                 contentColor = onAccentContainer
             ) {
-                Text(
-                    text = timeStr,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    maxLines = 1
-                )
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = timeStr,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
+                        textAlign = TextAlign.Center,
+                        maxLines = 1
+                    )
+                }
             }
 
             Surface(
@@ -640,7 +823,6 @@ fun EntryItem(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            val context = androidx.compose.ui.platform.LocalContext.current
             if (prevEntryTime != null) {
                 val intervalStr = remember(entryTime, prevEntryTime) {
                     val diffMs = entryTime - prevEntryTime
@@ -681,16 +863,20 @@ fun EntryItem(
                     color = accentContainer.copy(alpha = 0.15f),
                     contentColor = accentColor.copy(alpha = 0.8f)
                 ) {
-                    Text(
-                        text = stringResource(R.string.first_of_the_day),
-                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                    )
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.first_of_the_day),
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
-            Spacer(modifier = Modifier.width(56.dp))
         }
     }
 }
