@@ -63,7 +63,7 @@
 
     <string name="my_achievements">My Achievements</string>
 
-    <string name="ach_category_login">Login (Entries)</string>
+    <string name="ach_category_login">App Usage Streak</string>
     <string name="ach_category_nosmoke">Days without cigarettes</string>
 
     <string name="ach_curiosity_title">Curiosity</string>
@@ -98,7 +98,8 @@
 
     <string name="daily_limit_desc">Warn if you exceed this limit</string>
     <string name="limit_warning_title">Limit Exceeded</string>
-    <string name="limit_warning_message">You have reached your daily cigarette limit. Do you still want to add this entry?</string>
+    <string name="limit_warning_message">You have reached your daily cigarette limit. Do you still
+        want to add this entry?</string>
     <string name="add_anyway">Add Anyway</string>
     <string name="set_limit_title">Set Daily Limit</string>
     <string name="no_limit">0 (No limit)</string>
@@ -116,9 +117,87 @@
     <string name="font_preset_system">System</string>
     <string name="settings_amoled_theme">AMOLED Theme</string>
     <string name="settings_amoled_theme_desc">Fully black background in dark mode</string>
+    <string name="settings_color_preset">Color Scheme</string>
+    <string name="color_preset_system">System</string>
+    <string name="color_preset_sage">Forest Sage</string>
+    <string name="color_preset_rose">Sunset Rose</string>
+    <string name="color_preset_ocean">Ocean Deep</string>
     <string name="time_over_limit_hm">+%1$02dh %2$02dm</string>
     <string name="time_over_limit_m">+%1$02dm</string>
     <string name="first_of_the_day">First of the day</string>
     <string name="settings_appearance_desc">Theme, AMOLED mode, and font settings</string>
-</resources>
 
+    <string name="trigger_dialog_title">What caused the craving?</string>
+    <string name="trigger_skip">Skip</string>
+    <string name="trigger_stress">Stress</string>
+    <string name="trigger_boredom">Boredom</string>
+    <string name="trigger_social">Social</string>
+    <string name="trigger_routine">Routine</string>
+    <string name="trigger_food_coffee">Food / Coffee</string>
+
+    <string name="tab_graphs">Charts</string>
+    <string name="tab_triggers">Triggers</string>
+    <string name="triggers_no_data">Add triggers when logging smoking to see analytics here.</string>
+    <string name="main_trigger">Main trigger</string>
+    <string name="triggers_title">Smoking Triggers</string>
+    <string name="trigger_count_pattern">%1$d times (%2$d%%)</string>
+
+    <string name="settings_cigarette_params">Cigarette Settings</string>
+    <string name="settings_pack_params">Pack Settings</string>
+    <string name="settings_pack_price">Pack Price</string>
+    <string name="settings_pack_size">Cigarettes in pack</string>
+    <string name="settings_currency">Currency</string>
+    <string name="settings_tap_configure">Tap to configure</string>
+    <string name="settings_pack_subtitle_pattern">%1$s %2$s (%3$d pcs)</string>
+
+    <string name="stats_money_saved">Money Saved</string>
+    <string name="stats_life_saved">Life Reclaimed</string>
+    <string name="stats_savings_lifetime">Lifetime Savings</string>
+    <string name="stats_savings_current_streak">Current Streak Savings</string>
+    <string name="stats_savings_setup_warning">Configure daily limit and pack details in Settings to
+        start tracking money and life saved.</string>
+    <string name="stats_body_recovery_who">Body Recovery (WHO)</string>
+    <string name="stats_recovery_no_data">Add a smoking record to see health recovery progress.</string>
+
+    <string name="who_bp_desc">Pulse and blood pressure return to normal</string>
+    <string name="who_bp_time">20 minutes</string>
+    <string name="who_oxygen_desc">Blood oxygen level returns to normal</string>
+    <string name="who_oxygen_time">8 hours</string>
+    <string name="who_co_desc">Carbon monoxide cleared from body</string>
+    <string name="who_co_time">12 hours</string>
+    <string name="who_lung_desc">Lung function and circulation improve</string>
+    <string name="who_lung_time">2 weeks</string>
+
+    <string name="minutes_format_zero">0m</string>
+    <string name="minutes_format_day">%1$dd </string>
+    <string name="minutes_format_hour">%1$dh </string>
+    <string name="minutes_format_min">%1$dm</string>
+
+    <string name="stats_go_to_settings">Go to Settings</string>
+    <string name="stats_days_saved">Days of Life Saved</string>
+    <string name="stats_current_streak_days">Current Smoke-Free Streak</string>
+    <string name="stats_days_unit_short">%d d</string>
+
+    <string name="notif_permission_rationale">Enable notifications to receive achievement alerts.</string>
+    <string name="undo_delete">Entry deleted</string>
+    <string name="undo">Undo</string>
+    <string name="edit_future_time_error">Cannot set a time in the future</string>
+    <string name="notification_channel_name">Achievements</string>
+    <string name="notification_channel_desc">Achievement unlock notifications</string>
+    <string name="error_invalid_price">Enter a valid price</string>
+    <string name="settings_saved">Saved</string>
+    <string name="graph_no_data">No data for this period</string>
+
+    <!-- Update checker strings -->
+    <string name="settings_check_updates_on_start">Check for updates on launch</string>
+    <string name="settings_check_updates_on_start_desc">Automatically look for new versions of SmokingYou</string>
+    <string name="settings_check_updates">Check for Updates</string>
+    <string name="settings_check_updates_desc">Manually check if a newer version is available on GitHub</string>
+    <string name="update_dialog_title">New Version Available</string>
+    <string name="update_dialog_message">A new version of SmokingYou (%1$s) is available. Would you like to download it now?</string>
+    <string name="update_dialog_download">Download</string>
+    <string name="update_dialog_later">Later</string>
+    <string name="update_checking">Checking for updates...</string>
+    <string name="update_no_updates">You are using the latest version</string>
+    <string name="update_error">Error checking for updates: %1$s</string>
+</resources>
