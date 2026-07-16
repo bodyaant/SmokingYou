@@ -33,6 +33,7 @@ class DataStoreManager(private val context: Context) {
         val COLOR_PRESET = stringPreferencesKey("color_preset")
         val ENTRY_TRIGGERS = stringPreferencesKey("entry_triggers")
         val CHECK_UPDATES_ON_START = booleanPreferencesKey("check_updates_on_start")
+        val APP_ICON = stringPreferencesKey("app_icon")
     }
 
     val isRegistered: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -90,6 +91,10 @@ class DataStoreManager(private val context: Context) {
 
     val checkUpdatesOnStart: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[CHECK_UPDATES_ON_START] ?: true
+    }
+
+    val appIcon: Flow<String> = context.dataStore.data.map { preferences ->
+        preferences[APP_ICON] ?: "DEFAULT"
     }
 
     val hasOldData: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -191,6 +196,12 @@ class DataStoreManager(private val context: Context) {
     suspend fun saveCheckUpdatesOnStart(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[CHECK_UPDATES_ON_START] = enabled
+        }
+    }
+
+    suspend fun saveAppIcon(iconKey: String) {
+        context.dataStore.edit { preferences ->
+            preferences[APP_ICON] = iconKey
         }
     }
 
