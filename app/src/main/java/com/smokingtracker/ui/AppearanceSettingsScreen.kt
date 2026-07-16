@@ -27,6 +27,7 @@ import com.smokingtracker.R
 import com.smokingtracker.data.ThemePreference
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -49,6 +50,7 @@ fun AppearanceSettingsScreen(
     val fontPreset by viewModel.fontPreset.collectAsState()
     val amoledTheme by viewModel.amoledTheme.collectAsState()
     val colorPreset by viewModel.colorPreset.collectAsState()
+    val appIcon by viewModel.appIcon.collectAsState()
 
     val useDarkTheme = when (themePreference) {
         ThemePreference.LIGHT -> false
@@ -228,6 +230,60 @@ fun AppearanceSettingsScreen(
                             currentPreset = colorPreset,
                             useDarkTheme = useDarkTheme,
                             onPresetChange = viewModel::updateColorPreset
+                        )
+                    }
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.settings_app_icon),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 8.dp, start = 8.dp)
+                )
+            }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = androidx.compose.material.icons.Icons.Filled.Palette,
+                                        contentDescription = null
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    stringResource(R.string.settings_app_icon),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                                )
+                                Text(
+                                    stringResource(R.string.settings_app_icon_desc),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(20.dp))
+                        AppIconSelector(
+                            currentIcon = appIcon,
+                            onIconChange = viewModel::updateAppIcon
                         )
                     }
                 }
@@ -517,11 +573,106 @@ fun ColorPresetSelector(
                     text = title,
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium),
                     color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 2.dp)
                 )
             }
         }
     }
 }
+
+data class AppIconOption(
+    val key: String,
+    val nameRes: Int,
+    val drawableRes: Int
+)
+
+@Composable
+fun AppIconSelector(
+    currentIcon: String,
+    onIconChange: (String) -> Unit
+) {
+    val options = listOf(
+        AppIconOption("DEFAULT", R.string.app_icon_classic, R.drawable.ic_launcher_classic),
+        AppIconOption("DARK", R.string.app_icon_dark, R.drawable.ic_launcher_dark),
+        AppIconOption("SUNSET", R.string.app_icon_sunset, R.drawable.ic_launcher_sunset),
+        AppIconOption("CREAM", R.string.app_icon_cream, R.drawable.ic_launcher_cream),
+        AppIconOption("NEON", R.string.app_icon_neon, R.drawable.ic_launcher_neon),
+        AppIconOption("GREEN", R.string.app_icon_organic, R.drawable.ic_launcher_green),
+        AppIconOption("NIGHT", R.string.app_icon_midnight, R.drawable.ic_launcher_night),
+        AppIconOption("MONOCHROME", R.string.app_icon_monochrome, R.drawable.ic_launcher_monochrome_variant)
+    )
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        val chunkedOptions = options.chunked(4)
+        chunkedOptions.forEach { rowItems ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                rowItems.forEach { option ->
+                    val isSelected = currentIcon == option.key
+                    
+                    val scale by androidx.compose.animation.core.animateFloatAsState(
+                        targetValue = if (isSelected) 1.1f else 1.0f,
+                        animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
+                        label = "icon_scale_${option.key}"
+                    )
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(1f)
+                            .scale(scale)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = { onIconChange(option.key) }
+                            )
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(64.dp)
+                                .border(
+                                    border = BorderStroke(
+                                        width = if (isSelected) 3.dp else 0.dp,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
+                                    ),
+                                    shape = CircleShape
+                                )
+                                .padding(if (isSelected) 4.dp else 0.dp)
+                        ) {
+                            androidx.compose.foundation.Image(
+                                painter = androidx.compose.ui.res.painterResource(id = option.drawableRes),
+                                contentDescription = stringResource(id = option.nameRes),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(CircleShape)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Text(
+                            text = stringResource(id = option.nameRes),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium
+                            ),
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center,
+                            maxLines = 1
+                        )
+                    }
+                }
+                if (rowItems.size < 4) {
+                    repeat(4 - rowItems.size) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+    }
+}
+
