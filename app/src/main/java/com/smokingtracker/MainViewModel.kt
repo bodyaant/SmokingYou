@@ -114,6 +114,12 @@ class MainViewModel(
         initialValue = true
     )
 
+    val appIcon: StateFlow<String> = dataStoreManager.appIcon.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = "DEFAULT"
+    )
+
     private val _updateCheckState = MutableStateFlow<UpdateCheckState>(UpdateCheckState.Idle)
     val updateCheckState: StateFlow<UpdateCheckState> = _updateCheckState.asStateFlow()
 
@@ -290,6 +296,51 @@ class MainViewModel(
     fun updateAmoledTheme(enabled: Boolean) {
         viewModelScope.launch {
             dataStoreManager.saveAmoledTheme(enabled)
+        }
+    }
+
+    fun updateAppIcon(iconKey: String) {
+        viewModelScope.launch {
+            dataStoreManager.saveAppIcon(iconKey)
+            val pm = context.packageManager
+            val packageName = context.packageName
+            val targetAlias = when (iconKey) {
+                "DEFAULT" -> "$packageName.MainActivityDefault"
+                "DARK" -> "$packageName.MainActivityDark"
+                "SUNSET" -> "$packageName.MainActivitySunset"
+                "CREAM" -> "$packageName.MainActivityCream"
+                "NEON" -> "$packageName.MainActivityNeon"
+                "GREEN" -> "$packageName.MainActivityGreen"
+                "NIGHT" -> "$packageName.MainActivityNight"
+                "MONOCHROME" -> "$packageName.MainActivityMonochrome"
+                else -> "$packageName.MainActivityDefault"
+            }
+            val aliases = listOf(
+                "$packageName.MainActivityDefault",
+                "$packageName.MainActivityDark",
+                "$packageName.MainActivitySunset",
+                "$packageName.MainActivityCream",
+                "$packageName.MainActivityNeon",
+                "$packageName.MainActivityGreen",
+                "$packageName.MainActivityNight",
+                "$packageName.MainActivityMonochrome"
+            )
+            aliases.forEach { alias ->
+                val state = if (alias == targetAlias) {
+                    android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                } else {
+                    android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                }
+                try {
+                    pm.setComponentEnabledSetting(
+                        android.content.ComponentName(context, alias),
+                        state,
+                        android.content.pm.PackageManager.DONT_KILL_APP
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
         }
     }
     
