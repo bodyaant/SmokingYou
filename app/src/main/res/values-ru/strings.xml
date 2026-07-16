@@ -63,7 +63,7 @@
 
     <string name="my_achievements">Мои Достижения</string>
 
-    <string name="ach_category_login">Логин</string>
+    <string name="ach_category_login">Использование приложения</string>
     <string name="ach_category_nosmoke">Дни без сигарет</string>
 
     <string name="ach_curiosity_title">Любопытство</string>
@@ -116,8 +116,85 @@
     <string name="font_preset_system">Система</string>
     <string name="settings_amoled_theme">AMOLED тема</string>
     <string name="settings_amoled_theme_desc">Полностью чёрный фон в тёмной теме</string>
+    <string name="settings_color_preset">Цветовая схема</string>
+    <string name="color_preset_system">Системная</string>
+    <string name="color_preset_sage">Лесной шалфей</string>
+    <string name="color_preset_rose">Закатная роза</string>
+    <string name="color_preset_ocean">Глубокий океан</string>
     <string name="time_over_limit_hm">+%1$02dч %2$02dм</string>
     <string name="time_over_limit_m">+%1$02dм</string>
     <string name="first_of_the_day">Первая за день</string>
     <string name="settings_appearance_desc">Настройки темы, AMOLED режима и шрифтов</string>
+
+    <string name="trigger_dialog_title">Что вызвало тягу?</string>
+    <string name="trigger_skip">Пропустить</string>
+    <string name="trigger_stress">Стресс</string>
+    <string name="trigger_boredom">Скука</string>
+    <string name="trigger_social">Компания</string>
+    <string name="trigger_routine">Привычка</string>
+    <string name="trigger_food_coffee">Еда / Кофе</string>
+
+    <string name="tab_graphs">Графики</string>
+    <string name="tab_triggers">Причины</string>
+    <string name="triggers_no_data">Добавляйте причины при записи курения, чтобы увидеть здесь аналитику.</string>
+    <string name="main_trigger">Главный триггер</string>
+    <string name="triggers_title">Причины курения</string>
+    <string name="trigger_count_pattern">%1$d раз (%2$d%%)</string>
+
+    <string name="settings_cigarette_params">Параметры сигарет</string>
+    <string name="settings_pack_params">Параметры пачки</string>
+    <string name="settings_pack_price">Стоимость пачки</string>
+    <string name="settings_pack_size">Сигарет в пачке</string>
+    <string name="settings_currency">Валюта</string>
+    <string name="settings_tap_configure">Нажмите для настройки</string>
+    <string name="settings_pack_subtitle_pattern">%1$s %2$s (%3$d шт.)</string>
+
+    <string name="stats_money_saved">Сэкономлено денег</string>
+    <string name="stats_life_saved">Сэкономлено жизни</string>
+    <string name="stats_savings_lifetime">Экономия за всё время</string>
+    <string name="stats_savings_current_streak">Экономия за текущий отказ</string>
+    <string name="stats_savings_setup_warning">Настройте лимит курения и параметры пачки в настройках, чтобы начать отслеживать сэкономленные деньги и время жизни.</string>
+    <string name="stats_body_recovery_who">Восстановление организма (ВОЗ)</string>
+    <string name="stats_recovery_no_data">Добавьте запись о курении, чтобы увидеть прогресс восстановления здоровья.</string>
+
+    <string name="who_bp_desc">Пульс и артериальное давление возвращаются в норму</string>
+    <string name="who_bp_time">20 минут</string>
+    <string name="who_oxygen_desc">Уровень кислорода в крови приходит в норму</string>
+    <string name="who_oxygen_time">8 часов</string>
+    <string name="who_co_desc">Очищение организма от окиси углерода</string>
+    <string name="who_co_time">12 часов</string>
+    <string name="who_lung_desc">Улучшение работы легких и кровообращения</string>
+    <string name="who_lung_time">2 недели</string>
+
+    <string name="minutes_format_zero">0 мин</string>
+    <string name="minutes_format_day">%1$dд </string>
+    <string name="minutes_format_hour">%1$dч </string>
+    <string name="minutes_format_min">%1$dм</string>
+
+    <string name="notif_permission_rationale">Включите уведомления, чтобы получать оповещения о достижениях.</string>
+    <string name="undo_delete">Запись удалена</string>
+    <string name="undo">Отмена</string>
+    <string name="edit_future_time_error">Нельзя установить время в будущем</string>
+    <string name="notification_channel_name">Достижения</string>
+    <string name="notification_channel_desc">Уведомления о разблокированных достижениях</string>
+    <string name="error_invalid_price">Введите корректную цену</string>
+    <string name="settings_saved">Сохранено</string>
+    <string name="graph_no_data">Нет данных за этот период</string>
+    <string name="stats_go_to_settings">Перейти в настройки</string>
+    <string name="stats_days_saved">Дней жизни сэкономлено</string>
+    <string name="stats_current_streak_days">Текущая серия без курения</string>
+    <string name="stats_days_unit_short">%d д.</string>
+
+    <!-- Update checker strings -->
+    <string name="settings_check_updates_on_start">Проверять обновления при запуске</string>
+    <string name="settings_check_updates_on_start_desc">Автоматически искать новые версии SmokingYou</string>
+    <string name="settings_check_updates">Проверить обновления</string>
+    <string name="settings_check_updates_desc">Вручную проверить наличие новых версий на GitHub</string>
+    <string name="update_dialog_title">Доступно обновление</string>
+    <string name="update_dialog_message">Доступна новая версия SmokingYou (%1$s). Хотите скачать её сейчас?</string>
+    <string name="update_dialog_download">Скачать</string>
+    <string name="update_dialog_later">Позже</string>
+    <string name="update_checking">Проверка обновлений...</string>
+    <string name="update_no_updates">У вас установлена последняя версия</string>
+    <string name="update_error">Ошибка проверки обновлений: %1$s</string>
 </resources>
