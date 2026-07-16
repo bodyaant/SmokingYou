@@ -22,6 +22,10 @@ import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toShape
 import androidx.compose.material3.NavigationItemIconPosition
 import androidx.compose.runtime.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,7 +43,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.smokingtracker.MainViewModel
 import com.smokingtracker.R
-import kotlinx.coroutines.delay
 
 sealed class Screen(val route: String, val titleResId: Int, val icon: ImageVector) {
     object Registration : Screen("registration", R.string.registration_title, Icons.Filled.Home)
@@ -52,41 +55,104 @@ sealed class Screen(val route: String, val titleResId: Int, val icon: ImageVecto
     object AppearanceSettings : Screen("appearance_settings", R.string.settings_appearance, Icons.Filled.Brightness4)
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun LoadingWrapper(content: @Composable () -> Unit) {
-    var isLoading by remember { mutableStateOf(true) }
-    
-    LaunchedEffect(Unit) {
-        val randomDelay = (100..300).random().toLong()
-        delay(randomDelay)
-        isLoading = false
-    }
-    
-    Crossfade(
-        targetState = isLoading,
-        animationSpec = tween(500),
-        label = "loading_crossfade"
-    ) { loading ->
-        if (loading) {
-            Box(
-                modifier = Modifier.fillMaxSize(), 
-                contentAlignment = Alignment.Center
-            ) {
-                LoadingIndicator(
-                    modifier = Modifier.size(64.dp)
-                )
-            }
-        } else {
-            content()
-        }
-    }
-}
 
 @Composable
 fun MainApp(viewModel: MainViewModel) {
     val navController = rememberNavController()
     val isRegistered by viewModel.isRegistered.collectAsState()
+
+    val context = LocalContext.current
+    val checkUpdatesOnStart by viewModel.checkUpdatesOnStart.collectAsState()
+    val updateCheckState by viewModel.updateCheckState.collectAsState()
+
+    var showUpdateDialog by remember { mutableStateOf(false) }
+    var latestRelease by remember { mutableStateOf<com.smokingtracker.data.manager.GitHubRelease?>(null) }
+
+    LaunchedEffect(checkUpdatesOnStart) {
+        if (checkUpdatesOnStart) {
+            viewModel.checkForUpdates(isManual = false)
+        }
+    }
+
+    LaunchedEffect(updateCheckState) {
+        if (updateCheckState is MainViewModel.UpdateCheckState.NewUpdate) {
+            latestRelease = (updateCheckState as MainViewModel.UpdateCheckState.NewUpdate).release
+            showUpdateDialog = true
+        }
+    }
+
+    if (showUpdateDialog && latestRelease != null) {
+        AlertDialog(
+            onDismissRequest = {
+                showUpdateDialog = false
+                viewModel.resetUpdateCheckState()
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val apkAsset = latestRelease!!.assets.firstOrNull { it.name.endsWith(".apk") }
+                        val downloadUrl = apkAsset?.browserDownloadUrl ?: latestRelease!!.htmlUrl
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(downloadUrl))
+                        context.startActivity(intent)
+                        showUpdateDialog = false
+                        viewModel.resetUpdateCheckState()
+                    }
+                ) {
+                    Text(stringResource(R.string.update_dialog_download), fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showUpdateDialog = false
+                        viewModel.resetUpdateCheckState()
+                    }
+                ) {
+                    Text(stringResource(R.string.update_dialog_later), fontWeight = FontWeight.Bold)
+                }
+            },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.SystemUpdate,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(36.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = stringResource(R.string.update_dialog_title),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                )
+            },
+            text = {
+                Column {
+                    Text(
+                        text = stringResource(R.string.update_dialog_message, latestRelease!!.tagName),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    if (latestRelease!!.body.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Surface(
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.fillMaxWidth().heightIn(max = 150.dp)
+                        ) {
+                            Box(modifier = Modifier.verticalScroll(rememberScrollState()).padding(12.dp)) {
+                                Text(
+                                    text = latestRelease!!.body,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            shape = RoundedCornerShape(28.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -126,42 +192,49 @@ fun MainApp(viewModel: MainViewModel) {
                     fadeOut(animationSpec = tween(300))
                 }
             ) {
-                composable(Screen.Registration.route) { 
-                    LoadingWrapper { RegistrationScreen(viewModel, navController) } 
+                composable(Screen.Registration.route) {
+                    RegistrationScreen(viewModel, navController)
                 }
-                composable(Screen.Home.route) { 
-                    LoadingWrapper { HomeScreen(viewModel) } 
+                composable(Screen.Home.route) {
+                    HomeScreen(viewModel)
                 }
-                composable(Screen.Graph.route) { 
-                    LoadingWrapper { 
-                        GraphScreen(
-                            viewModel = viewModel,
-                            onNavigateToStatistics = { navController.navigate(Screen.Statistics.route) }
-                        ) 
-                    } 
+                composable(Screen.Graph.route) {
+                    GraphScreen(
+                        viewModel = viewModel,
+                        onNavigateToStatistics = { navController.navigate(Screen.Statistics.route) }
+                    )
                 }
-                composable(Screen.Personal.route) { 
-                    LoadingWrapper {
-                        PersonalScreen(
-                            viewModel = viewModel, 
-                            onNavigateToAbout = { navController.navigate(Screen.About.route) },
-                            onNavigateToAchievements = { navController.navigate(Screen.Achievements.route) },
-                            onNavigateToStatistics = { navController.navigate(Screen.Statistics.route) },
-                            onNavigateToAppearance = { navController.navigate(Screen.AppearanceSettings.route) }
-                        ) 
-                    }
+                composable(Screen.Personal.route) {
+                    PersonalScreen(
+                        viewModel = viewModel,
+                        onNavigateToAbout = { navController.navigate(Screen.About.route) },
+                        onNavigateToAchievements = { navController.navigate(Screen.Achievements.route) },
+                        onNavigateToStatistics = { navController.navigate(Screen.Statistics.route) },
+                        onNavigateToAppearance = { navController.navigate(Screen.AppearanceSettings.route) }
+                    )
                 }
-                composable(Screen.About.route) { 
-                    LoadingWrapper { AboutScreen(navController) } 
+                composable(Screen.About.route) {
+                    AboutScreen(onBack = { navController.navigateUp() })
                 }
                 composable(Screen.Achievements.route) {
-                    LoadingWrapper { AchievementsScreen(viewModel, onBack = { navController.popBackStack() }) }
+                    AchievementsScreen(viewModel, onBack = { navController.popBackStack() })
                 }
                 composable(Screen.Statistics.route) {
-                    LoadingWrapper { StatisticsScreen(viewModel, onBack = { navController.popBackStack() }) }
+                    StatisticsScreen(
+                        viewModel = viewModel,
+                        onBack = { navController.popBackStack() },
+                        onNavigateToSettings = {
+                            navController.popBackStack()
+                            navController.navigate(Screen.Personal.route) {
+                                popUpTo(Screen.Home.route) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
                 }
                 composable(Screen.AppearanceSettings.route) {
-                    LoadingWrapper { AppearanceSettingsScreen(viewModel, onBack = { navController.popBackStack() }) }
+                    AppearanceSettingsScreen(viewModel, onBack = { navController.popBackStack() })
                 }
             }
         }
