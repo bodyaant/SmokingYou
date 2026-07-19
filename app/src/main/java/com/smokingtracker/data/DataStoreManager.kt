@@ -27,16 +27,17 @@ class DataStoreManager(private val context: Context) {
         val APP_LAUNCH_DATES = stringPreferencesKey("app_launch_dates")
         val FONT_PRESET = stringPreferencesKey("font_preset")
         val AMOLED_THEME = booleanPreferencesKey("amoled_theme")
+        val PACK_PRICE = floatPreferencesKey("pack_price")
+        val PACK_SIZE = intPreferencesKey("pack_size")
+        val CURRENCY = stringPreferencesKey("currency")
+        val COLOR_PRESET = stringPreferencesKey("color_preset")
+        val ENTRY_TRIGGERS = stringPreferencesKey("entry_triggers")
+        val CHECK_UPDATES_ON_START = booleanPreferencesKey("check_updates_on_start")
+        val APP_ICON = stringPreferencesKey("app_icon")
     }
 
     val isRegistered: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[IS_REGISTERED] ?: false
-    }
-
-    val smokingEntries: Flow<List<Long>> = context.dataStore.data.map { preferences ->
-        val entriesJson = preferences[SMOKING_ENTRIES] ?: "[]"
-        val listType = object : TypeToken<List<Long>>() {}.type
-        gson.fromJson(entriesJson, listType) ?: emptyList()
     }
 
     val appTheme: Flow<ThemePreference> = context.dataStore.data.map { preferences ->
@@ -72,6 +73,55 @@ class DataStoreManager(private val context: Context) {
         preferences[AMOLED_THEME] ?: false
     }
 
+    val packPrice: Flow<Float> = context.dataStore.data.map { preferences ->
+        preferences[PACK_PRICE] ?: 0.0f
+    }
+
+    val packSize: Flow<Int> = context.dataStore.data.map { preferences ->
+        preferences[PACK_SIZE] ?: 20
+    }
+
+    val currency: Flow<String> = context.dataStore.data.map { preferences ->
+        preferences[CURRENCY] ?: "USD"
+    }
+
+    val colorPreset: Flow<String> = context.dataStore.data.map { preferences ->
+        preferences[COLOR_PRESET] ?: "SYSTEM"
+    }
+
+    val checkUpdatesOnStart: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[CHECK_UPDATES_ON_START] ?: true
+    }
+
+    val appIcon: Flow<String> = context.dataStore.data.map { preferences ->
+        preferences[APP_ICON] ?: "DEFAULT"
+    }
+
+    val hasOldData: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences.contains(SMOKING_ENTRIES)
+    }
+
+    suspend fun getOldEntriesAndClear(): Pair<List<Long>, Map<Long, String>> {
+        var oldEntries: List<Long> = emptyList()
+        var oldTriggers: Map<Long, String> = emptyMap()
+
+        context.dataStore.edit { preferences ->
+            val entriesJson = preferences[SMOKING_ENTRIES]
+            if (entriesJson != null) {
+                val listType = object : TypeToken<List<Long>>() {}.type
+                oldEntries = gson.fromJson(entriesJson, listType) ?: emptyList()
+            }
+            val triggersJson = preferences[ENTRY_TRIGGERS]
+            if (triggersJson != null) {
+                val type = object : TypeToken<Map<Long, String>>() {}.type
+                oldTriggers = gson.fromJson(triggersJson, type) ?: emptyMap()
+            }
+            preferences.remove(SMOKING_ENTRIES)
+            preferences.remove(ENTRY_TRIGGERS)
+        }
+        return Pair(oldEntries, oldTriggers)
+    }
+
     suspend fun saveAmoledTheme(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[AMOLED_THEME] = enabled
@@ -87,27 +137,6 @@ class DataStoreManager(private val context: Context) {
     suspend fun saveUserProfile() {
         context.dataStore.edit { preferences ->
             preferences[IS_REGISTERED] = true
-        }
-    }
-
-    suspend fun addSmokingEntry(timestamp: Long) {
-        context.dataStore.edit { preferences ->
-            val entriesJson = preferences[SMOKING_ENTRIES] ?: "[]"
-            val listType = object : TypeToken<List<Long>>() {}.type
-            val currentEntries: MutableList<Long> = gson.fromJson(entriesJson, listType) ?: mutableListOf()
-            currentEntries.add(timestamp)
-            currentEntries.sort()
-            preferences[SMOKING_ENTRIES] = gson.toJson(currentEntries)
-        }
-    }
-
-    suspend fun removeSmokingEntry(timestamp: Long) {
-        context.dataStore.edit { preferences ->
-            val entriesJson = preferences[SMOKING_ENTRIES] ?: "[]"
-            val listType = object : TypeToken<List<Long>>() {}.type
-            val currentEntries: MutableList<Long> = gson.fromJson(entriesJson, listType) ?: mutableListOf()
-            currentEntries.remove(timestamp)
-            preferences[SMOKING_ENTRIES] = gson.toJson(currentEntries)
         }
     }
 
@@ -150,19 +179,55 @@ class DataStoreManager(private val context: Context) {
         }
     }
 
+    suspend fun savePackDetails(price: Float, size: Int, curr: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PACK_PRICE] = price
+            preferences[PACK_SIZE] = size
+            preferences[CURRENCY] = curr
+        }
+    }
+
+    suspend fun saveColorPreset(preset: String) {
+        context.dataStore.edit { preferences ->
+            preferences[COLOR_PRESET] = preset
+        }
+    }
+
+    suspend fun saveCheckUpdatesOnStart(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[CHECK_UPDATES_ON_START] = enabled
+        }
+    }
+
+    suspend fun saveAppIcon(iconKey: String) {
+        context.dataStore.edit { preferences ->
+            preferences[APP_ICON] = iconKey
+        }
+    }
+
     suspend fun restoreFromBackup(
         isReg: Boolean,
-        entries: List<Long>,
         theme: String,
         achievements: Set<String>,
-        limit: Int
+        limit: Int,
+        price: Float,
+        size: Int,
+        curr: String,
+        colorPresetVal: String,
+        fontPresetVal: String,
+        amoledThemeVal: Boolean
     ) {
         context.dataStore.edit { preferences ->
             preferences[IS_REGISTERED] = isReg
-            preferences[SMOKING_ENTRIES] = gson.toJson(entries)
             preferences[APP_THEME] = theme
             preferences[UNLOCKED_ACHIEVEMENTS] = gson.toJson(achievements)
             preferences[DAILY_LIMIT] = limit
+            preferences[PACK_PRICE] = price
+            preferences[PACK_SIZE] = size
+            preferences[CURRENCY] = curr
+            preferences[COLOR_PRESET] = colorPresetVal
+            preferences[FONT_PRESET] = fontPresetVal
+            preferences[AMOLED_THEME] = amoledThemeVal
         }
     }
 }

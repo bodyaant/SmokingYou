@@ -30,14 +30,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.smokingtracker.BuildConfig
 import com.smokingtracker.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun AboutScreen(navController: NavHostController) {
+fun AboutScreen(onBack: () -> Unit) {
     val cookieShape = MaterialShapes.Cookie12Sided.toShape()
     val uriHandler = LocalUriHandler.current
 
@@ -66,7 +64,7 @@ fun AboutScreen(navController: NavHostController) {
                 },
                 navigationIcon = {
                     FilledTonalIconButton(
-                        onClick = { navController.navigateUp() },
+                        onClick = onBack,
                         colors = IconButtonDefaults.filledTonalIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
                             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -205,6 +203,6 @@ fun LinkPill(text: String, onClick: () -> Unit) {
 @Composable
 fun AboutScreenPreview() {
     MaterialTheme {
-        AboutScreen(rememberNavController())
+        AboutScreen(onBack = {})
     }
 }
