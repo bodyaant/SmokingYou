@@ -525,16 +525,18 @@ fun ColorPresetSelector(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .size(56.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = CircleShape
-                        )
-                        .border(
-                            border = BorderStroke(
-                                width = if (isSelected) 3.dp else 1.dp,
-                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                            ),
-                            shape = CircleShape
+                        .then(
+                            if (isSelected) {
+                                Modifier.border(
+                                    border = BorderStroke(
+                                        width = 3.dp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    ),
+                                    shape = CircleShape
+                                )
+                            } else {
+                                Modifier
+                            }
                         )
                         .padding(4.dp)
                 ) {
