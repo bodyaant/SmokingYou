@@ -8,51 +8,47 @@
         <path
             android:fillColor="#121212"
             android:pathData="M0,0 h108 v108 h-108 z" />
-        
-        <!-- Cigarette neon glow layer 1 (wide, low opacity) -->
         <path
             android:strokeColor="#50FF9100"
             android:strokeWidth="5"
             android:fillColor="#00000000"
             android:strokeLineCap="round"
             android:strokeLineJoin="round"
-            android:pathData="M28,44 h16 v20 h-16 c-2.2,0 -4,-1.8 -4,-4 v-12 c0,-2.2 1.8,-4 4,-4 z"/>
+            android:pathData="M28,44 h16 v20 h-16 c-2.2,0 -4,-1.8 -4,-4 v-12 c0,-2.2 1.8,-4 4,-4 z" />
         <path
             android:strokeColor="#50E0F7FA"
             android:strokeWidth="5"
             android:fillColor="#00000000"
             android:strokeLineCap="round"
             android:strokeLineJoin="round"
-            android:pathData="M46,44 h30 v20 h-30 z"/>
+            android:pathData="M46,44 h30 v20 h-30 z" />
         <path
             android:strokeColor="#50B0BEC5"
             android:strokeWidth="5"
             android:fillColor="#00000000"
             android:strokeLineCap="round"
             android:strokeLineJoin="round"
-            android:pathData="M78,44 h2 c2.2,0 4,1.8 4,4 v12 c0,2.2 -1.8,4 -4,4 h-2 z"/>
-
-        <!-- Cigarette neon layer 2 (sharp, full opacity) -->
+            android:pathData="M78,44 h2 c2.2,0 4,1.8 4,4 v12 c0,2.2 -1.8,4 -4,4 h-2 z" />
         <path
             android:strokeColor="#FFAB40"
             android:strokeWidth="2"
             android:fillColor="#00000000"
             android:strokeLineCap="round"
             android:strokeLineJoin="round"
-            android:pathData="M28,44 h16 v20 h-16 c-2.2,0 -4,-1.8 -4,-4 v-12 c0,-2.2 1.8,-4 4,-4 z"/>
+            android:pathData="M28,44 h16 v20 h-16 c-2.2,0 -4,-1.8 -4,-4 v-12 c0,-2.2 1.8,-4 4,-4 z" />
         <path
             android:strokeColor="#E0F7FA"
             android:strokeWidth="2"
             android:fillColor="#00000000"
             android:strokeLineCap="round"
             android:strokeLineJoin="round"
-            android:pathData="M46,44 h30 v20 h-30 z"/>
+            android:pathData="M46,44 h30 v20 h-30 z" />
         <path
             android:strokeColor="#FFFFFF"
             android:strokeWidth="2"
             android:fillColor="#00000000"
             android:strokeLineCap="round"
             android:strokeLineJoin="round"
-            android:pathData="M78,44 h2 c2.2,0 4,1.8 4,4 v12 c0,2.2 -1.8,4 -4,4 h-2 z"/>
+            android:pathData="M78,44 h2 c2.2,0 4,1.8 4,4 v12 c0,2.2 -1.8,4 -4,4 h-2 z" />
     </group>
 </vector>
