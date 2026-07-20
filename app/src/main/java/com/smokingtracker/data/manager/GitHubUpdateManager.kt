@@ -33,7 +33,7 @@ class GitHubUpdateManager(private val context: Context) {
                     val currentVersion = BuildConfig.VERSION_NAME
                     val latestVersion = release.tagName
 
-                    if (isNewerVersion(latestVersion, currentVersion)) {
+                    if (latestVersion != null && isNewerVersion(latestVersion, currentVersion)) {
                         UpdateResult.NewUpdate(release)
                     } else {
                         UpdateResult.NoUpdate
@@ -74,16 +74,16 @@ class GitHubUpdateManager(private val context: Context) {
 }
 
 data class GitHubRelease(
-    @com.google.gson.annotations.SerializedName("tag_name") val tagName: String,
-    val name: String,
-    val body: String,
-    @com.google.gson.annotations.SerializedName("html_url") val htmlUrl: String,
+    @com.google.gson.annotations.SerializedName("tag_name") val tagName: String?,
+    val name: String?,
+    val body: String?,
+    @com.google.gson.annotations.SerializedName("html_url") val htmlUrl: String?,
     @com.google.gson.annotations.SerializedName("published_at") val publishedAt: String? = null,
-    val assets: List<GitHubAsset> = emptyList()
+    val assets: List<GitHubAsset>? = emptyList()
 )
 
 data class GitHubAsset(
-    val name: String,
-    @com.google.gson.annotations.SerializedName("browser_download_url") val browserDownloadUrl: String,
-    val size: Long
+    val name: String?,
+    @com.google.gson.annotations.SerializedName("browser_download_url") val browserDownloadUrl: String?,
+    val size: Long?
 )

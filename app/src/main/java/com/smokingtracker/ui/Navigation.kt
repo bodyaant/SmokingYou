@@ -90,10 +90,16 @@ fun MainApp(viewModel: MainViewModel) {
             confirmButton = {
                 Button(
                     onClick = {
-                        val apkAsset = latestRelease!!.assets.firstOrNull { it.name.endsWith(".apk") }
-                        val downloadUrl = apkAsset?.browserDownloadUrl ?: latestRelease!!.htmlUrl
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(downloadUrl))
-                        context.startActivity(intent)
+                        val apkAsset = latestRelease?.assets?.firstOrNull { it.name?.endsWith(".apk") == true }
+                        val downloadUrl = apkAsset?.browserDownloadUrl ?: latestRelease?.htmlUrl
+                        if (!downloadUrl.isNullOrEmpty()) {
+                            try {
+                                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(downloadUrl))
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
                         showUpdateDialog = false
                         viewModel.resetUpdateCheckState()
                     }
@@ -128,10 +134,11 @@ fun MainApp(viewModel: MainViewModel) {
             text = {
                 Column {
                     Text(
-                        text = stringResource(R.string.update_dialog_message, latestRelease!!.tagName),
+                        text = stringResource(R.string.update_dialog_message, latestRelease?.tagName.orEmpty()),
                         style = MaterialTheme.typography.bodyMedium
                     )
-                    if (latestRelease!!.body.isNotEmpty()) {
+                    val bodyText = latestRelease?.body
+                    if (!bodyText.isNullOrEmpty()) {
                         Spacer(modifier = Modifier.height(12.dp))
                         Surface(
                             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
@@ -140,7 +147,7 @@ fun MainApp(viewModel: MainViewModel) {
                         ) {
                             Box(modifier = Modifier.verticalScroll(rememberScrollState()).padding(12.dp)) {
                                 Text(
-                                    text = latestRelease!!.body,
+                                    text = bodyText,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
