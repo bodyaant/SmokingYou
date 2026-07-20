@@ -2,15 +2,14 @@ package com.smokingtracker
 
 import org.junit.Test
 import org.junit.Assert.*
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.WavyProgressIndicatorDefaults
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 class ExampleUnitTest {
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Test
     fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+        println("LinearContainerHeight: ${WavyProgressIndicatorDefaults.LinearContainerHeight}")
+        println("LinearDeterminateWavelength: ${WavyProgressIndicatorDefaults.LinearDeterminateWavelength}")
     }
 }
