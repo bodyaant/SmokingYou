@@ -58,16 +58,26 @@ SmokingYou is designed to help you track and manage your smoking habits. By offe
 - **Detailed History:** View, edit, or delete past logs.
 - **Analytics:** Visualize daily and weekly patterns using interactive charts.
 - **Statistics:** Track total count, averages, daily extremes, and your longest smoke-free streak.
-- **Achievements:** Stay motivated with milestone badges for consistency and smoke-free intervals.
+- **Achievements & Notifications:** Stay motivated with milestone badges for consistency and smoke-free intervals, with instant local notifications on unlock.
 - **Daily Limit:** Define a daily cigarette limit to monitor consumption.
-- **Data Portability:** Local backup and restore functionality to secure your logs.
-- **Modern Themes:** Fully native design supporting light, dark, and system themes.
+- **Data Portability:** Local backup and restore (JSON export/import) to secure your logs.
+- **Highly Customizable Themes:**
+  - Standard Light, Dark, and System themes.
+  - **AMOLED Dark Mode** for extra power saving.
+  - **Dynamic Colors (Material You)** matching system wallpaper on Android 12+.
+  - Curated color presets (Classic, Sage, Rose, Ocean, Lavender).
+  - Custom font presets.
+  - **Dynamic App Icons** (change the app icon directly from settings).
 
 ## Tech Stack
 
 - **Language:** [Kotlin](https://kotlinlang.org/) (Coroutines, Flow)
 - **UI Framework:** [Jetpack Compose](https://developer.android.com/jetpack/compose) with Material 3 Expressive
-- **Data Persistence:** [Jetpack DataStore](https://developer.android.com/topic/libraries/architecture/datastore) & GSON
+- **Data Persistence:** 
+  - [Room Database](https://developer.android.com/training/data-storage/room) — for secure local storage of logs and history.
+  - [Jetpack DataStore](https://developer.android.com/topic/libraries/architecture/datastore) — for settings and configuration parameters.
+  - GSON — for data backup serialization.
+- **Dependency Injection:** [Koin](https://insert-koin.io/) — lightweight dependency injection framework.
 
 ## Localization
 
@@ -89,4 +99,3 @@ Special thanks to the following projects for design ideas and inspiration:
 ## Contributing
 
 Contributions are welcome. If you find a bug or have a feature suggestion, please open an issue or submit a pull request.
-
