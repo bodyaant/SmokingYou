@@ -20,12 +20,24 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material3.*
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material.icons.filled.SmokingRooms
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.HourglassEmpty
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.LocalCafe
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.smokingtracker.data.TriggerType
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toShape
+import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.WavyProgressIndicatorDefaults
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -596,6 +608,7 @@ private fun LineGraphPreview() {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TriggersTab(triggerCounts: Map<String, Int>, totalCount: Int) {
     if (totalCount == 0) {
@@ -690,22 +703,41 @@ fun TriggersTab(triggerCounts: Map<String, Int>, totalCount: Int) {
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text = triggerName,
-                                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    val cookieShape = MaterialShapes.Cookie9Sided.toShape()
+                                    Box(
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .clip(cookieShape)
+                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = getTriggerIcon(triggerKey),
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                    Text(
+                                        text = triggerName,
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                                    )
+                                }
                                 Text(
                                     text = stringResource(R.string.trigger_count_pattern, count, (percent * 100).toInt()),
                                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            LinearProgressIndicator(
-                                progress = { percent },
+                            AnimatedTriggerProgressBar(
+                                targetProgress = percent,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(10.dp)
-                                    .clip(CircleShape),
+                                    .height(10.dp),
                                 color = MaterialTheme.colorScheme.primary,
                                 trackColor = MaterialTheme.colorScheme.surfaceVariant
                             )
@@ -801,5 +833,74 @@ fun ExpressiveTabSelector(
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun AnimatedTriggerProgressBar(
+    targetProgress: Float,
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.primary,
+    trackColor: Color = MaterialTheme.colorScheme.surfaceVariant
+) {
+    val animProgress = remember { Animatable(0f) }
+    val animWaveScale = remember { Animatable(1f) }
+
+    LaunchedEffect(targetProgress) {
+        if (targetProgress > 0f) {
+            animWaveScale.snapTo(1f)
+            launch {
+                animProgress.animateTo(
+                    targetValue = targetProgress,
+                    animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing)
+                )
+            }
+            launch {
+                animWaveScale.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing)
+                )
+            }
+        } else {
+            animProgress.snapTo(0f)
+            animWaveScale.snapTo(0f)
+        }
+    }
+
+    val progressValue = animProgress.value
+    val waveScale = animWaveScale.value
+
+    if (waveScale > 0f) {
+        LinearWavyProgressIndicator(
+            progress = { progressValue },
+            modifier = modifier,
+            color = color,
+            trackColor = trackColor,
+            amplitude = { progressFraction ->
+                WavyProgressIndicatorDefaults.indicatorAmplitude(progressFraction) * waveScale
+            }
+        )
+    } else {
+        LinearWavyProgressIndicator(
+            progress = { progressValue },
+            modifier = modifier,
+            color = color,
+            trackColor = trackColor,
+            amplitude = { 0f },
+            waveSpeed = 0.dp
+        )
+    }
+}
+
+private fun getTriggerIcon(triggerKey: String?): ImageVector {
+    val trigger = triggerKey?.let { TriggerType.fromKey(it) }
+    return when (trigger) {
+        TriggerType.STRESS -> Icons.Filled.Bolt
+        TriggerType.BOREDOM -> Icons.Filled.HourglassEmpty
+        TriggerType.SOCIAL -> Icons.Filled.People
+        TriggerType.ROUTINE -> Icons.Filled.Repeat
+        TriggerType.FOOD_COFFEE -> Icons.Filled.LocalCafe
+        else -> Icons.Filled.SmokingRooms
     }
 }
