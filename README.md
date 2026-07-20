@@ -48,7 +48,7 @@ SmokingYou is designed to help you track and manage your smoking habits. By offe
 ## Screenshots
 
 <p align="center">
-  <img src="images/1.png" width="33%"><img src="images/2.png" width="33%"><img src="images/3.png" width="33%"><br/>
+  <img src="images/1.png" width="33%"><img src="images/2.png" width="33%"><img src="images/3.png" width="33%">
   <img src="images/4.png" width="33%"><img src="images/5.png" width="33%"><img src="images/6.png" width="33%">
 </p>
 
