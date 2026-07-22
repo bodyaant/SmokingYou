@@ -34,6 +34,13 @@ class DataStoreManager(private val context: Context) {
         val ENTRY_TRIGGERS = stringPreferencesKey("entry_triggers")
         val CHECK_UPDATES_ON_START = booleanPreferencesKey("check_updates_on_start")
         val APP_ICON = stringPreferencesKey("app_icon")
+        val HAS_MADE_BACKUP = booleanPreferencesKey("has_made_backup")
+        val HAS_CHANGED_PACK_PRICE = booleanPreferencesKey("has_changed_pack_price")
+        val HAS_CANCELLED_WITHIN_10S = booleanPreferencesKey("has_cancelled_within_10s")
+        val THEME_LANG_CHANGE_COUNT = intPreferencesKey("theme_lang_change_count")
+        val THEME_LANG_CHANGE_DATE = longPreferencesKey("theme_lang_change_date")
+        val ANALYTICS_VISIT_COUNT = intPreferencesKey("analytics_visit_count")
+        val ANALYTICS_VISIT_DATE = longPreferencesKey("analytics_visit_date")
     }
 
     val isRegistered: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -229,5 +236,73 @@ class DataStoreManager(private val context: Context) {
             preferences[FONT_PRESET] = fontPresetVal
             preferences[AMOLED_THEME] = amoledThemeVal
         }
+    }
+
+    val hasMadeBackup: Flow<Boolean> = context.dataStore.data.map { it[HAS_MADE_BACKUP] ?: false }
+    val hasChangedPackPrice: Flow<Boolean> = context.dataStore.data.map { it[HAS_CHANGED_PACK_PRICE] ?: false }
+    val hasCancelledWithin10s: Flow<Boolean> = context.dataStore.data.map { it[HAS_CANCELLED_WITHIN_10S] ?: false }
+
+    val themeLangChangeCount: Flow<Int> = context.dataStore.data.map { prefs ->
+        val today = getStartOfToday()
+        if ((prefs[THEME_LANG_CHANGE_DATE] ?: 0L) == today) prefs[THEME_LANG_CHANGE_COUNT] ?: 0 else 0
+    }
+
+    val analyticsVisitCount: Flow<Int> = context.dataStore.data.map { prefs ->
+        val today = getStartOfToday()
+        if ((prefs[ANALYTICS_VISIT_DATE] ?: 0L) == today) prefs[ANALYTICS_VISIT_COUNT] ?: 0 else 0
+    }
+
+    suspend fun setHasMadeBackup(value: Boolean = true) {
+        context.dataStore.edit { it[HAS_MADE_BACKUP] = value }
+    }
+
+    suspend fun setHasChangedPackPrice(value: Boolean = true) {
+        context.dataStore.edit { it[HAS_CHANGED_PACK_PRICE] = value }
+    }
+
+    suspend fun setHasCancelledWithin10s(value: Boolean = true) {
+        context.dataStore.edit { it[HAS_CANCELLED_WITHIN_10S] = value }
+    }
+
+    suspend fun recordThemeOrLangChange(): Int {
+        val today = getStartOfToday()
+        var newCount = 1
+        context.dataStore.edit { prefs ->
+            val lastDate = prefs[THEME_LANG_CHANGE_DATE] ?: 0L
+            if (lastDate == today) {
+                newCount = (prefs[THEME_LANG_CHANGE_COUNT] ?: 0) + 1
+            } else {
+                newCount = 1
+            }
+            prefs[THEME_LANG_CHANGE_DATE] = today
+            prefs[THEME_LANG_CHANGE_COUNT] = newCount
+        }
+        return newCount
+    }
+
+    suspend fun recordAnalyticsVisit(): Int {
+        val today = getStartOfToday()
+        var newCount = 1
+        context.dataStore.edit { prefs ->
+            val lastDate = prefs[ANALYTICS_VISIT_DATE] ?: 0L
+            if (lastDate == today) {
+                newCount = (prefs[ANALYTICS_VISIT_COUNT] ?: 0) + 1
+            } else {
+                newCount = 1
+            }
+            prefs[ANALYTICS_VISIT_DATE] = today
+            prefs[ANALYTICS_VISIT_COUNT] = newCount
+        }
+        return newCount
+    }
+
+    private fun getStartOfToday(): Long {
+        val cal = java.util.Calendar.getInstance().apply {
+            set(java.util.Calendar.HOUR_OF_DAY, 0)
+            set(java.util.Calendar.MINUTE, 0)
+            set(java.util.Calendar.SECOND, 0)
+            set(java.util.Calendar.MILLISECOND, 0)
+        }
+        return cal.timeInMillis
     }
 }
