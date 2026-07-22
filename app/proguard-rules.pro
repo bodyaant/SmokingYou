@@ -1,21 +1,18 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Preserve line number information for debugging stack traces
+-keepattributes SourceFile,LineNumberTable, *Annotation*, Signature, InnerClasses, EnclosingMethod
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep classes and members annotated with @Keep
+-keep class * {
+    @androidx.annotation.Keep <fields>;
+    @androidx.annotation.Keep <methods>;
+}
+-keep @androidx.annotation.Keep class * { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep BackupData specifically for Gson serialization
+-keepclassmembers class com.smokingtracker.MainViewModel$BackupData { *; }
+-keep class com.smokingtracker.MainViewModel$BackupData { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keep Gson SerializedName fields
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
