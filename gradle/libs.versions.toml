@@ -16,7 +16,7 @@ material3 = "1.5.0-alpha24"
 googleFonts = "1.11.4"
 coreSplashscreen = "1.2.0"
 room = "2.8.4"
-koin = "4.0.0"
+koin = "4.2.2"
 ksp = "2.3.9"
 
 [libraries]
