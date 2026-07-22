@@ -26,6 +26,7 @@ import com.google.gson.annotations.SerializedName
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.util.Calendar
+import com.smokingtracker.widget.WidgetUpdateManager
 
 class MainViewModel(
     private val repository: SmokingRepository,
@@ -333,6 +334,7 @@ class MainViewModel(
                 sort()
             }
             checkAchievements(updated)
+            WidgetUpdateManager.updateAllAsync(context)
         }
     }
 
@@ -416,6 +418,7 @@ class MainViewModel(
                 remove(timestamp)
             }
             checkAchievements(updated, wasEntryRemoved = true)
+            WidgetUpdateManager.updateAllAsync(context)
         }
     }
 
@@ -430,6 +433,7 @@ class MainViewModel(
                 sort()
             }
             checkAchievements(updated)
+            WidgetUpdateManager.updateAllAsync(context)
         }
     }
 
@@ -617,6 +621,7 @@ class MainViewModel(
                                 )
                             }
                             repository.clearAndInsertEntries(newEntities)
+                            WidgetUpdateManager.updateAllAsync(context)
                             onSuccess()
                         } else {
                             onError()
