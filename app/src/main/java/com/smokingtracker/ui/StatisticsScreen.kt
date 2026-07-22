@@ -34,15 +34,37 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+import androidx.compose.material.icons.filled.Shield
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(viewModel: MainViewModel, onBack: () -> Unit, onNavigateToSettings: (() -> Unit)? = null) {
     val entries by viewModel.smokingEntries.collectAsState()
+    val resistedEntries by viewModel.resistedEntries.collectAsState()
     val dailyLimit by viewModel.dailyLimit.collectAsState()
     val packPrice by viewModel.packPrice.collectAsState()
     val packSize by viewModel.packSize.collectAsState()
     val currency by viewModel.currency.collectAsState()
+    val hasHistoricalBaseline by viewModel.hasHistoricalBaseline.collectAsState()
+    val historicalStartDate by viewModel.historicalStartDate.collectAsState()
+    val historicalDailyAvg by viewModel.historicalDailyAvg.collectAsState()
+    val historicalPackPrice by viewModel.historicalPackPrice.collectAsState()
+    val historicalPackSize by viewModel.historicalPackSize.collectAsState()
+    val historicalTriggerPriorities by viewModel.historicalTriggerPriorities.collectAsState()
+
     val stats = remember(entries) { StatisticsManager.calculateStats(entries) }
+
+    val baselineStats = remember(hasHistoricalBaseline, historicalStartDate, historicalDailyAvg, historicalPackPrice, historicalPackSize, historicalTriggerPriorities) {
+        if (hasHistoricalBaseline) {
+            StatisticsManager.calculateHistoricalBaseline(
+                startDate = historicalStartDate,
+                dailyAvg = historicalDailyAvg,
+                packPrice = historicalPackPrice,
+                packSize = historicalPackSize,
+                rankedTriggers = historicalTriggerPriorities
+            )
+        } else null
+    }
 
     Scaffold(
         topBar = {
@@ -58,8 +80,8 @@ fun StatisticsScreen(viewModel: MainViewModel, onBack: () -> Unit, onNavigateToS
                     FilledTonalIconButton(
                         onClick = onBack,
                         colors = IconButtonDefaults.filledTonalIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            contentColor = MaterialTheme.colorScheme.onSurface
                         )
                     ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -69,7 +91,7 @@ fun StatisticsScreen(viewModel: MainViewModel, onBack: () -> Unit, onNavigateToS
             )
         }
     ) { paddingValues ->
-        if (entries.isEmpty()) {
+        if (entries.isEmpty() && resistedEntries.isEmpty() && baselineStats == null) {
             Box(
                 modifier = Modifier.fillMaxSize().padding(paddingValues),
                 contentAlignment = Alignment.Center
@@ -81,10 +103,12 @@ fun StatisticsScreen(viewModel: MainViewModel, onBack: () -> Unit, onNavigateToS
                 modifier = Modifier.padding(paddingValues),
                 stats = stats,
                 entries = entries,
+                resistedCount = resistedEntries.size,
                 dailyLimit = dailyLimit,
                 packPrice = packPrice,
                 packSize = packSize,
                 currency = currency,
+                baselineStats = baselineStats,
                 onNavigateToSettings = onNavigateToSettings
             )
         }
@@ -96,11 +120,14 @@ fun StatisticsList(
     modifier: Modifier = Modifier,
     stats: StatisticsData,
     entries: List<Long>,
+    resistedCount: Int = 0,
     dailyLimit: Int,
     packPrice: Float,
     packSize: Int,
     currency: String,
-    onNavigateToSettings: (() -> Unit)? = null
+    baselineStats: StatisticsManager.HistoricalBaselineStats? = null,
+    onNavigateToSettings: (() -> Unit)? = null,
+    contentPadding: PaddingValues = PaddingValues(top = 16.dp, bottom = 120.dp)
 ) {
     val dateFormat = SimpleDateFormat("d MMMM yyyy, HH:mm", Locale.getDefault())
     val trackingSinceStr = stats.trackingSince?.let { dateFormat.format(Date(it)) }
@@ -116,11 +143,118 @@ fun StatisticsList(
     val streakMoneySaved = if (packSize > 0) streakCigarettesSaved.toFloat() * (packPrice / packSize.toFloat()) else 0f
     val streakLifeMinutesSaved = streakCigarettesSaved * 11
 
+    val currencySymbol = remember(currency) {
+        when (currency) {
+            "RUB" -> "₽"
+            "USD" -> "$"
+            "EUR" -> "€"
+            "GBP" -> "£"
+            "TRY" -> "₺"
+            "KZT" -> "₸"
+            "UAH" -> "₴"
+            else -> currency
+        }
+    }
+
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        contentPadding = contentPadding,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        if (baselineStats != null && baselineStats.totalCigarettes > 0) {
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                    ),
+                    shape = RoundedCornerShape(24.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.BarChart,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.history_preview_title),
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.2f))
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.history_preview_total_cigs),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
+                                )
+                                Text(
+                                    text = stringResource(
+                                        R.string.history_cigs_count_format,
+                                        String.format(Locale.getDefault(), "%,d", baselineStats.totalCigarettes)
+                                    ),
+                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    text = stringResource(R.string.history_preview_total_cost),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
+                                )
+                                Text(
+                                    text = String.format(Locale.getDefault(), "%,.0f %s", baselineStats.totalMoneySpent, currencySymbol),
+                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (resistedCount > 0) {
+            item {
+                Text(
+                    text = stringResource(R.string.stats_resisted_cravings),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp, start = 8.dp)
+                )
+            }
+            item {
+                val resistedMoneySaved = if (packSize > 0 && packPrice > 0f) {
+                    resistedCount * (packPrice / packSize.toFloat())
+                } else 0f
+
+                val formattedSavedStr = if (packPrice > 0f) String.format(Locale.getDefault(), "%.1f %s", resistedMoneySaved, currency) else ""
+
+                StatCard(
+                    title = stringResource(R.string.stats_resisted_cravings),
+                    value = if (packPrice > 0f) {
+                        stringResource(R.string.stats_resisted_cravings_desc, resistedCount, formattedSavedStr)
+                    } else {
+                        pluralStringResource(R.plurals.stats_days_plural, resistedCount, resistedCount)
+                    },
+                    icon = Icons.Default.Shield,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+
         if (dailyLimit > 0 && packPrice > 0f) {
             item {
                 Text(
