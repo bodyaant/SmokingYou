@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.LocalCafe
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.smokingtracker.data.TriggerType
 import androidx.compose.material3.*
@@ -66,15 +67,28 @@ private fun HomeScreenPreview() {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun HomeScreen(viewModel: MainViewModel) {
+fun HomeScreen(viewModel: MainViewModel, onNavigateToAchievements: () -> Unit = {}) {
     val entries by viewModel.smokingEntries.collectAsState()
     val dailyLimit by viewModel.dailyLimit.collectAsState()
-    HomeScreenContent(entries = entries, dailyLimit = dailyLimit, viewModel = viewModel)
+    val unlockedAchievements by viewModel.unlockedAchievements.collectAsState()
+    HomeScreenContent(
+        entries = entries,
+        dailyLimit = dailyLimit,
+        unlockedAchievements = unlockedAchievements,
+        viewModel = viewModel,
+        onNavigateToAchievements = onNavigateToAchievements
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun HomeScreenContent(entries: List<Long>, dailyLimit: Int, viewModel: MainViewModel? = null) {
+internal fun HomeScreenContent(
+    entries: List<Long>,
+    dailyLimit: Int,
+    unlockedAchievements: Set<String> = emptySet(),
+    viewModel: MainViewModel? = null,
+    onNavigateToAchievements: () -> Unit = {}
+) {
     val cookieShape = MaterialShapes.Cookie12Sided.toShape()
 
     var currentDate by remember { mutableStateOf(Calendar.getInstance()) }
@@ -258,45 +272,65 @@ internal fun HomeScreenContent(entries: List<Long>, dailyLimit: Int, viewModel: 
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     
+                    val triggers = com.smokingtracker.data.TriggerType.allEntries()
+                    val chunkedTriggers = triggers.chunked(2)
+
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        com.smokingtracker.data.TriggerType.allEntries().forEach { trigger ->
-                            Button(
-                                onClick = {
-                                    if (pendingLogTime > 0L) {
-                                        viewModel?.addSmokingEntryWithTrigger(pendingLogTime, trigger.key)
-                                    }
-                                    showTriggerDialog = false
-                                    isProcessingAdd = false
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                        chunkedTriggers.forEach { rowTriggers ->
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    val cookieShape = MaterialShapes.Cookie9Sided.toShape()
-                                    Box(
+                                rowTriggers.forEach { trigger ->
+                                    Surface(
+                                        onClick = {
+                                            if (pendingLogTime > 0L) {
+                                                viewModel?.addSmokingEntryWithTrigger(pendingLogTime, trigger.key)
+                                            }
+                                            showTriggerDialog = false
+                                            isProcessingAdd = false
+                                        },
                                         modifier = Modifier
-                                            .size(32.dp)
-                                            .clip(cookieShape)
-                                            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f)),
-                                        contentAlignment = Alignment.Center
+                                            .weight(1f)
+                                            .height(72.dp),
+                                        shape = RoundedCornerShape(20.dp),
+                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
                                     ) {
-                                        Icon(
-                                            imageVector = getTriggerIcon(trigger.key),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(16.dp)
-                                        )
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center,
+                                            modifier = Modifier.padding(8.dp)
+                                        ) {
+                                            val cookieShape = MaterialShapes.Cookie9Sided.toShape()
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(28.dp)
+                                                    .clip(cookieShape)
+                                                    .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f)),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = getTriggerIcon(trigger.key),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text(
+                                                text = stringResource(trigger.labelResId),
+                                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                maxLines = 1
+                                            )
+                                        }
                                     }
-                                    Text(stringResource(trigger.labelResId), fontWeight = FontWeight.Bold)
+                                }
+                                if (rowTriggers.size == 1) {
+                                    Spacer(modifier = Modifier.weight(1f))
                                 }
                             }
                         }
@@ -436,6 +470,31 @@ internal fun HomeScreenContent(entries: List<Long>, dailyLimit: Int, viewModel: 
                         style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
                         color = MaterialTheme.colorScheme.onBackground
                     )
+                },
+                actions = {
+                    Surface(
+                        onClick = onNavigateToAchievements,
+                        shape = RoundedCornerShape(100),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(end = 16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.EmojiEvents,
+                                contentDescription = stringResource(R.string.settings_achievements),
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = "${unlockedAchievements.size}/${com.smokingtracker.AchievementsManager.achievementsList.size}",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                            )
+                        }
+                    }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color.Transparent
@@ -810,42 +869,72 @@ fun EntryItem(
                         color = colorScheme.onSurface
                     )
                     
+                    val editTriggers = TriggerType.allEntries()
+                    val chunkedEditTriggers = editTriggers.chunked(2)
+
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        TriggerType.allEntries().forEach { type ->
-                            Button(
-                                onClick = {
-                                    onUpdateTrigger(type.key)
-                                    showEditTriggerDialog = false
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = colorScheme.surfaceVariant,
-                                    contentColor = colorScheme.onSurfaceVariant
-                                )
+                        chunkedEditTriggers.forEach { rowTriggers ->
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    val cookieShape = MaterialShapes.Cookie9Sided.toShape()
-                                    Box(
+                                rowTriggers.forEach { type ->
+                                    val isSelected = trigger == type.key
+                                    Surface(
+                                        onClick = {
+                                            onUpdateTrigger(type.key)
+                                            showEditTriggerDialog = false
+                                        },
                                         modifier = Modifier
-                                            .size(32.dp)
-                                            .clip(cookieShape)
-                                            .background(colorScheme.onSurfaceVariant.copy(alpha = 0.15f)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = getTriggerIcon(type.key),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(16.dp)
+                                            .weight(1f)
+                                            .height(72.dp),
+                                        shape = RoundedCornerShape(20.dp),
+                                        color = if (isSelected) colorScheme.primaryContainer else colorScheme.surfaceVariant,
+                                        border = BorderStroke(
+                                            1.dp,
+                                            if (isSelected) colorScheme.primary else colorScheme.outlineVariant.copy(alpha = 0.3f)
                                         )
+                                    ) {
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center,
+                                            modifier = Modifier.padding(8.dp)
+                                        ) {
+                                            val cookieShape = MaterialShapes.Cookie9Sided.toShape()
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(28.dp)
+                                                    .clip(cookieShape)
+                                                    .background(
+                                                        if (isSelected) colorScheme.primary.copy(alpha = 0.2f)
+                                                        else colorScheme.onSurfaceVariant.copy(alpha = 0.15f)
+                                                    ),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = getTriggerIcon(type.key),
+                                                    contentDescription = null,
+                                                    tint = if (isSelected) colorScheme.primary else colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text(
+                                                text = stringResource(type.labelResId),
+                                                style = MaterialTheme.typography.labelMedium.copy(
+                                                    fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold
+                                                ),
+                                                color = if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurfaceVariant,
+                                                maxLines = 1
+                                            )
+                                        }
                                     }
-                                    Text(stringResource(type.labelResId), fontWeight = FontWeight.Bold)
+                                }
+                                if (rowTriggers.size == 1) {
+                                    Spacer(modifier = Modifier.weight(1f))
                                 }
                             }
                         }
