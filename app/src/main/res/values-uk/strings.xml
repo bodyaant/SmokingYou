@@ -181,6 +181,7 @@
     <string name="trigger_social">Компанія</string>
     <string name="trigger_routine">Звичка</string>
     <string name="trigger_food_coffee">Їжа / Кава</string>
+    <string name="trigger_alcohol">Алкоголь</string>
 
     <string name="tab_graphs">Графіки</string>
     <string name="tab_triggers">Причини</string>
@@ -267,4 +268,70 @@
     <string name="crypto_wallets">Криптогаманці (USDT)</string>
     <string name="address_copied">Адресу скопійовано в буфер обміну!</string>
     <string name="copy_address">Скопіювати адресу</string>
+
+    <string name="mindful_pause_button">Подолати тягу</string>
+    <string name="mindful_pause_header">Подолання тяги</string>
+    <string name="mindful_pause_or_resist">Або якщо намагаєтеся стриматися:</string>
+    <string name="mindful_pause_resisted">Подолано</string>
+    <string name="mindful_pause_add_15s">+15 сек</string>
+    <string name="mindful_pause_already_held">Вже витримав</string>
+    <string name="mindful_pause_smoked_after_all">Все ж викурив сигарету</string>
+    <string name="mindful_pause_well_done">Ви чудово впоралися!</string>
+    <string name="mindful_pause_breathe_in">Глубокий вдих...</string>
+    <string name="mindful_pause_hold_breath">Затримка дихання...</string>
+    <string name="mindful_pause_breathe_out">Повільний видих...</string>
+    <string name="mindful_pause_sec">сек</string>
+    <string name="mindful_pause_tip_1">Піковий порив куріння триває лише 15–30 секунд. Ви
+        впораєтеся!</string>
+    <string name="mindful_pause_tip_2">Зробіть глибокий вдих через ніс і повільний видих через рот.</string>
+    <string name="mindful_pause_tip_3">Зробіть ковток холодної води — це миттєво перемикає мозок.</string>
+    <string name="mindful_pause_tip_4">Кожен подоланий порив робить вашу волю сильнішою.</string>
+    <string name="mindful_pause_tip_5">Ваші легені починають очищатися вже через 20 хвилин без
+        куріння.</string>
+
+    <string name="tapering_plan_title">План зниження ліміту</string>
+    <string name="tapering_plan_dialog_title">План поступового зниження</string>
+    <string name="tapering_plan_switch_label">Щотижневе зниження</string>
+    <string name="tapering_plan_slider_label">Пропонувати знизити ліміт кожні %1$d дн.</string>
+    <string name="tapering_plan_subtitle_active">Зниження на 1 циг. кожні %1$d дн.</string>
+    <string name="tapering_plan_subtitle_off">Вимкнено</string>
+
+    <string name="tapering_checkin_title">План поступового зниження</string>
+    <string name="tapering_checkin_desc">Минув рівно тиждень з вашого минулого кроку! Ви чудово
+        впоралися з лімітом у %1$d сигарет.</string>
+    <string name="tapering_checkin_was">Було</string>
+    <string name="tapering_checkin_will_be">Стане</string>
+    <string name="tapering_checkin_reduce_to">Знизити ліміт до %1$d циг/день</string>
+    <string name="tapering_checkin_keep_limit">Залишити ліміт %1$d сигарет</string>
+    <string name="tapering_checkin_snooze">Нагадати через 3 дні</string>
+
+    <string name="stats_resisted_cravings">Подолані пориви</string>
+    <string name="stats_resisted_cravings_desc">Ви встояли %1$d разів і заощадили %2$s</string>
+
+    <string name="history_generator_title">Минулий стаж куріння</string>
+    <string name="history_generator_description">Оцініть ваш досвід куріння до початку використання
+        додатка, щоб заповнити аналітику початковими даними.</string>
+    <string name="history_start_date_label">Дата початку куріння</string>
+    <string name="history_daily_avg_label">Середня кількість цигарок на день</string>
+    <string name="history_daily_avg_unit">%1$d шт./день</string>
+    <string name="history_pack_details_title">Ціна та об\'єм пачки</string>
+    <string name="history_pack_price_label">Ціна пачки</string>
+    <string name="history_pack_size_label">Цигарок у пачці</string>
+    <string name="history_trigger_ranking_title">Причини тяги (Пріоритет)</string>
+    <string name="history_trigger_ranking_hint">Розставити від найчастішої причини (#1) до найрідшої</string>
+    <string name="history_preview_title">Розрахункова оцінка минулих років</string>
+    <string name="history_preview_total_cigs">Викурено до додатка</string>
+    <string name="history_preview_total_cost">Витрачено за стаж</string>
+    <string name="history_save_button">Зберегти минулий досвід</string>
+    <string name="history_reset_button">Скинути минулий досвід</string>
+    <string name="history_reset_dialog_title">Скинути минулий досвід?</string>
+    <string name="history_reset_dialog_desc">Це видалить розрахункову оцінку минулих років з
+        аналітики.</string>
+    <string name="history_banner_title">У вас вже є стаж куріння?</string>
+    <string name="history_banner_desc">Заповніть минулий досвід, щоб побачити загальні витрати та
+        викурені цигарки.</string>
+    <string name="registration_history_note">Ви також зможете заповнити минулий досвід куріння в
+        будь-який момент у Налаштуваннях!</string>
+    <string name="history_cigs_count_format">%1$s шт.</string>
+    <string name="history_duration_days_y_m">%1$d дн. (%2$dр %3$dм)</string>
 </resources>
