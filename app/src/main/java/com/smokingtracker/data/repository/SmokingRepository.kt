@@ -29,6 +29,10 @@ class SmokingRepository(
         }
     }
 
+    suspend fun getAllEntries(): List<SmokingEntryEntity> {
+        return smokingDao.getAllEntriesList()
+    }
+
     suspend fun addEntry(timestamp: Long, trigger: String?) {
         smokingDao.insertEntry(SmokingEntryEntity(timestamp = timestamp, trigger = trigger, isResisted = false))
     }
