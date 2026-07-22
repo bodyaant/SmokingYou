@@ -183,6 +183,7 @@
     <string name="trigger_social">Social</string>
     <string name="trigger_routine">Rutina</string>
     <string name="trigger_food_coffee">Comida / Café</string>
+    <string name="trigger_alcohol">Alcohol</string>
 
     <string name="tab_graphs">Gráficos</string>
     <string name="tab_triggers">Motivos</string>
@@ -270,4 +271,70 @@
     <string name="crypto_wallets">Monederos cripto (USDT)</string>
     <string name="address_copied">¡Dirección copiada al portapapeles!</string>
     <string name="copy_address">Copiar dirección</string>
+
+    <string name="mindful_pause_button">Superar deseo</string>
+    <string name="mindful_pause_header">Pausa consciente</string>
+    <string name="mindful_pause_or_resist">O si intentas resistir:</string>
+    <string name="mindful_pause_resisted">Resistido</string>
+    <string name="mindful_pause_add_15s">+15 seg</string>
+    <string name="mindful_pause_already_held">Ya lo logré</string>
+    <string name="mindful_pause_smoked_after_all">Terminé fumando</string>
+    <string name="mindful_pause_well_done">¡Lo hiciste genial!</string>
+    <string name="mindful_pause_breathe_in">Inhala profundo...</string>
+    <string name="mindful_pause_hold_breath">Mantén la respiración...</string>
+    <string name="mindful_pause_breathe_out">Exhala despacio...</string>
+    <string name="mindful_pause_sec">seg</string>
+    <string name="mindful_pause_tip_1">El pico de ansiedad dura solo 15–30 segundos. ¡Tú puedes!</string>
+    <string name="mindful_pause_tip_2">Inhala profundo por la nariz y exhala lentamente por la boca.</string>
+    <string name="mindful_pause_tip_3">Bebe un sorbo de agua fría — distrae tu cerebro al instante.</string>
+    <string name="mindful_pause_tip_4">Cada impulso resistido fortalece tu fuerza de voluntad.</string>
+    <string name="mindful_pause_tip_5">Tus pulmones comienzan a limpiarse solo 20 minutos después de
+        fumar.</string>
+
+    <string name="tapering_plan_title">Plan de reducción</string>
+    <string name="tapering_plan_dialog_title">Plan de reducción gradual</string>
+    <string name="tapering_plan_switch_label">Reducción semanal</string>
+    <string name="tapering_plan_slider_label">Sugerir reducción cada %1$d días</string>
+    <string name="tapering_plan_subtitle_active">Reducción de 1 cig. cada %1$d días</string>
+    <string name="tapering_plan_subtitle_off">Desactivado</string>
+
+    <string name="tapering_checkin_title">Plan de reducción gradual</string>
+    <string name="tapering_checkin_desc">¡Ha pasado una semana desde tu último paso! Lo hiciste muy
+        bien con el límite de %1$d cigarrillos.</string>
+    <string name="tapering_checkin_was">Antes</string>
+    <string name="tapering_checkin_will_be">Nuevo</string>
+    <string name="tapering_checkin_reduce_to">Reducir límite a %1$d cig/día</string>
+    <string name="tapering_checkin_keep_limit">Mantener límite de %1$d cigarrillos</string>
+    <string name="tapering_checkin_snooze">Recordar en 3 días</string>
+
+    <string name="stats_resisted_cravings">Deseos resistidos</string>
+    <string name="stats_resisted_cravings_desc">Resististe %1$d veces y ahorraste %2$s</string>
+
+    <string name="history_generator_title">Experiencia previa como fumador</string>
+    <string name="history_generator_description">Evalúa tu historial previo como fumador antes de
+        usar la aplicación para completar tus estadísticas.</string>
+    <string name="history_start_date_label">Fecha de inicio de fumar</string>
+    <string name="history_daily_avg_label">Promedio de cigarrillos por día</string>
+    <string name="history_daily_avg_unit">%1$d uds/día</string>
+    <string name="history_pack_details_title">Precio y tamaño de la cajetilla</string>
+    <string name="history_pack_price_label">Precio de cajetilla</string>
+    <string name="history_pack_size_label">Cigarrillos por cajetilla</string>
+    <string name="history_trigger_ranking_title">Prioridad de disparadores de ansia</string>
+    <string name="history_trigger_ranking_hint">Organiza de la causa más frecuente (#1) a la menos
+        frecuente</string>
+    <string name="history_preview_title">Estimación del historial previo</string>
+    <string name="history_preview_total_cigs">Total fumado antes</string>
+    <string name="history_preview_total_cost">Total gastado antes</string>
+    <string name="history_save_button">Guardar experiencia previa</string>
+    <string name="history_reset_button">Restablecer experiencia previa</string>
+    <string name="history_reset_dialog_title">¿Restablecer experiencia previa?</string>
+    <string name="history_reset_dialog_desc">Esto eliminará tus estadísticas previas estimadas de
+        los análisis.</string>
+    <string name="history_banner_title">¿Tienes historial como fumador?</string>
+    <string name="history_banner_desc">Completa tu experiencia previa para ver tus gastos y
+        estadísticas totales.</string>
+    <string name="registration_history_note">¡También puedes configurar tu historial previo en
+        cualquier momento en Ajustes!</string>
+    <string name="history_cigs_count_format">%1$s uds.</string>
+    <string name="history_duration_days_y_m">%1$d días (%2$da %3$dm)</string>
 </resources>
