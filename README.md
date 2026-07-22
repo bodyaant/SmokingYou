@@ -22,7 +22,7 @@
       <img src="https://img.shields.io/github/issues/mem2sp/SmokingYou?logo=github&labelColor=1a1a1a&color=B3261E&style=flat-square" alt="Issues">
     </a>
     <a href="LICENSE">
-      <img src="https://img.shields.io/github/license/mem2sp/SmokingYou?logo=apache&labelColor=1a1a1a&color=blue&style=flat-square" alt="License">
+      <img src="https://img.shields.io/github/license/mem2sp/SmokingYou?logo=gnu&labelColor=1a1a1a&color=blue&style=flat-square" alt="License">
     </a>
   </p>
 
