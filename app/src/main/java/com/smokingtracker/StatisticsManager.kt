@@ -254,4 +254,59 @@ object StatisticsManager {
         }
         return monthlyCounts.toList()
     }
+
+    data class HistoricalBaselineStats(
+        val totalCigarettes: Int,
+        val totalMoneySpent: Double,
+        val totalDays: Int,
+        val estimatedTriggerCounts: Map<String, Int>
+    )
+
+    fun calculateHistoricalBaseline(
+        startDate: Long,
+        dailyAvg: Int,
+        packPrice: Float,
+        packSize: Int,
+        rankedTriggers: List<String>
+    ): HistoricalBaselineStats {
+        if (startDate <= 0L || dailyAvg <= 0) {
+            return HistoricalBaselineStats(0, 0.0, 0, emptyMap())
+        }
+
+        val now = System.currentTimeMillis()
+        if (startDate >= now) {
+            return HistoricalBaselineStats(0, 0.0, 0, emptyMap())
+        }
+
+        val diffMs = now - startDate
+        val totalDays = (TimeUnit.MILLISECONDS.toDays(diffMs)).toInt().coerceAtLeast(1)
+        val totalCigarettes = totalDays * dailyAvg
+        val pricePerCigarette = if (packSize > 0) packPrice / packSize.toDouble() else 0.0
+        val totalMoneySpent = totalCigarettes * pricePerCigarette
+
+        val triggerCounts = mutableMapOf<String, Int>()
+        if (rankedTriggers.isNotEmpty()) {
+            val n = rankedTriggers.size
+            val totalWeight = (n * (n + 1)) / 2
+            var remaining = totalCigarettes
+
+            rankedTriggers.forEachIndexed { index, triggerKey ->
+                val weight = n - index
+                val count = Math.round((weight.toDouble() / totalWeight) * totalCigarettes).toInt()
+                triggerCounts[triggerKey] = count
+                remaining -= count
+            }
+            if (remaining != 0 && rankedTriggers.isNotEmpty()) {
+                val firstKey = rankedTriggers.first()
+                triggerCounts[firstKey] = (triggerCounts[firstKey] ?: 0) + remaining
+            }
+        }
+
+        return HistoricalBaselineStats(
+            totalCigarettes = totalCigarettes,
+            totalMoneySpent = totalMoneySpent,
+            totalDays = totalDays,
+            estimatedTriggerCounts = triggerCounts
+        )
+    }
 }
