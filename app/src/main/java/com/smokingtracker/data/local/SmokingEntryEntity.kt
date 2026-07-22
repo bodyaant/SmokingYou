@@ -7,5 +7,7 @@ import androidx.room.PrimaryKey
 data class SmokingEntryEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val timestamp: Long,
-    val trigger: String?
+    val trigger: String? = null,
+    val isResisted: Boolean = false
 )
+
