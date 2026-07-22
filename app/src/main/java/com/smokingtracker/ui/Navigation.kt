@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Brightness4
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialShapes
@@ -53,6 +54,7 @@ sealed class Screen(val route: String, val titleResId: Int, val icon: ImageVecto
     object Achievements : Screen("achievements", R.string.settings_achievements, Icons.Filled.EmojiEvents)
     object Statistics : Screen("statistics", R.string.settings_statistics, Icons.Filled.BarChart)
     object AppearanceSettings : Screen("appearance_settings", R.string.settings_appearance, Icons.Filled.Brightness4)
+    object HistoryGenerator : Screen("history_generator", R.string.history_generator_title, Icons.Filled.AutoAwesome)
 }
 
 
@@ -168,7 +170,8 @@ fun MainApp(viewModel: MainViewModel) {
                        currentRoute != Screen.About.route &&
                        currentRoute != Screen.Achievements.route &&
                        currentRoute != Screen.Statistics.route &&
-                       currentRoute != Screen.AppearanceSettings.route
+                       currentRoute != Screen.AppearanceSettings.route &&
+                       currentRoute != Screen.HistoryGenerator.route
 
     if (isRegistered == null) {
         Box(modifier = Modifier.fillMaxSize())
@@ -217,7 +220,8 @@ fun MainApp(viewModel: MainViewModel) {
                         onNavigateToAbout = { navController.navigate(Screen.About.route) },
                         onNavigateToAchievements = { navController.navigate(Screen.Achievements.route) },
                         onNavigateToStatistics = { navController.navigate(Screen.Statistics.route) },
-                        onNavigateToAppearance = { navController.navigate(Screen.AppearanceSettings.route) }
+                        onNavigateToAppearance = { navController.navigate(Screen.AppearanceSettings.route) },
+                        onNavigateToHistoryGenerator = { navController.navigate(Screen.HistoryGenerator.route) }
                     )
                 }
                 composable(Screen.About.route) {
@@ -242,6 +246,9 @@ fun MainApp(viewModel: MainViewModel) {
                 }
                 composable(Screen.AppearanceSettings.route) {
                     AppearanceSettingsScreen(viewModel, onBack = { navController.popBackStack() })
+                }
+                composable(Screen.HistoryGenerator.route) {
+                    HistoryGeneratorScreen(viewModel, navController)
                 }
             }
         }
