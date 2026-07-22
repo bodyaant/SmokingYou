@@ -61,13 +61,25 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GraphScreen(viewModel: MainViewModel, onNavigateToStatistics: () -> Unit) {
+fun GraphScreen(viewModel: MainViewModel) {
     val entries by viewModel.smokingEntries.collectAsState()
     val entryTriggers by viewModel.entryTriggers.collectAsState()
+    val dailyLimit by viewModel.dailyLimit.collectAsState()
+    val packPrice by viewModel.packPrice.collectAsState()
+    val packSize by viewModel.packSize.collectAsState()
+    val currency by viewModel.currency.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.onAnalyticsTabVisited()
+    }
+
     GraphScreenContent(
         entries = entries,
         entryTriggers = entryTriggers,
-        onNavigateToStatistics = onNavigateToStatistics
+        dailyLimit = dailyLimit,
+        packPrice = packPrice,
+        packSize = packSize,
+        currency = currency
     )
 }
 
@@ -76,7 +88,10 @@ fun GraphScreen(viewModel: MainViewModel, onNavigateToStatistics: () -> Unit) {
 fun GraphScreenContent(
     entries: List<Long>,
     entryTriggers: Map<Long, String>,
-    onNavigateToStatistics: () -> Unit = {}
+    dailyLimit: Int = 0,
+    packPrice: Float = 0f,
+    packSize: Int = 20,
+    currency: String = ""
 ) {
     var selectedTab by remember { mutableStateOf(0) }
 
@@ -158,6 +173,7 @@ fun GraphScreenContent(
                     onTabSelected = { selectedTab = it },
                     tabs = listOf(
                         stringResource(R.string.tab_graphs),
+                        stringResource(R.string.settings_statistics),
                         stringResource(R.string.tab_triggers)
                     ),
                     modifier = Modifier
@@ -177,50 +193,6 @@ fun GraphScreenContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 val dateFormat = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
-
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)),
-                        onClick = onNavigateToStatistics,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f))
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(20.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Surface(
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(44.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(Icons.Filled.BarChart, contentDescription = null, modifier = Modifier.size(24.dp))
-                                }
-                            }
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = stringResource(R.string.settings_statistics),
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                                Text(
-                                    text = stringResource(R.string.statistics_desc),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                                )
-                            }
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
-                            )
-                        }
-                    }
-                }
 
                 item {
                     val dailyStr = remember(dailyDate) { dateFormat.format(dailyDate.time) }
@@ -313,6 +285,27 @@ fun GraphScreenContent(
                         onDateClick = { activeDatePickerTarget = "yearly" }
                     )
                 }
+            }
+        } else if (selectedTab == 1) {
+            val stats = remember(entries) { StatisticsManager.calculateStats(entries) }
+            if (entries.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(stringResource(R.string.stats_no_data), style = MaterialTheme.typography.titleMedium)
+                }
+            } else {
+                StatisticsList(
+                    modifier = Modifier.padding(paddingValues),
+                    stats = stats,
+                    entries = entries,
+                    dailyLimit = dailyLimit,
+                    packPrice = packPrice,
+                    packSize = packSize,
+                    currency = currency,
+                    onNavigateToSettings = null
+                )
             }
         } else {
             val triggerCounts = remember(entries, entryTriggers) {
