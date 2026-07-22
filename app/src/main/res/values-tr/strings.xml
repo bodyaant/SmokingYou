@@ -177,6 +177,7 @@
     <string name="trigger_social">Sosyal / Ortam</string>
     <string name="trigger_routine">Rutin / Alışkanlık</string>
     <string name="trigger_food_coffee">Yemek / Kahve</string>
+    <string name="trigger_alcohol">Alkol</string>
 
     <string name="tab_graphs">Grafikler</string>
     <string name="tab_triggers">Tetikleyiciler</string>
@@ -265,4 +266,72 @@
     <string name="crypto_wallets">Kripto Cüzdanları (USDT)</string>
     <string name="address_copied">Adres panoya kopyalandı!</string>
     <string name="copy_address">Adresi kopyala</string>
+
+    <string name="mindful_pause_button">İsteği Yen</string>
+    <string name="mindful_pause_header">Bilinçli Mola</string>
+    <string name="mindful_pause_or_resist">Veya direnmeye çalışıyorsanız:</string>
+    <string name="mindful_pause_resisted">Yenildi</string>
+    <string name="mindful_pause_add_15s">+15 sn</string>
+    <string name="mindful_pause_already_held">Zaten dayandım</string>
+    <string name="mindful_pause_smoked_after_all">Yine de sigara içtim</string>
+    <string name="mindful_pause_well_done">Harika başardınız!</string>
+    <string name="mindful_pause_breathe_in">Derin nefes alın...</string>
+    <string name="mindful_pause_hold_breath">Nefesinizi tutun...</string>
+    <string name="mindful_pause_breathe_out">Yavaşça nefes verin...</string>
+    <string name="mindful_pause_sec">sn</string>
+    <string name="mindful_pause_tip_1">En güçlü sigara arzusu sadece 15–30 saniye sürer.
+        Başarabilirsiniz!</string>
+    <string name="mindful_pause_tip_2">Burnunuzdan derin nefes alın ve ağzınızdan yavaşça verin.</string>
+    <string name="mindful_pause_tip_3">Bir yudum soğuk su içim — beyninizin odak noktasını anında
+        değiştirir.</string>
+    <string name="mindful_pause_tip_4">Yendiğiniz her kriz iradenizi daha da güçlendirir.</string>
+    <string name="mindful_pause_tip_5">Akciğerleriniz son sigaradan sadece 20 dakika sonra
+        temizlenmeye başlar.</string>
+
+    <string name="tapering_plan_title">Azaltma Planı</string>
+    <string name="tapering_plan_dialog_title">Kademeli Azaltma Planı</string>
+    <string name="tapering_plan_switch_label">Haftalık azaltma</string>
+    <string name="tapering_plan_slider_label">Her %1$d günde bir azaltma öner</string>
+    <string name="tapering_plan_subtitle_active">Her %1$d günde 1 sigara azaltma</string>
+    <string name="tapering_plan_subtitle_off">Kapalı</string>
+
+    <string name="tapering_checkin_title">Kademeli Azaltma Planı</string>
+    <string name="tapering_checkin_desc">Son adımınızdan bu yana tam bir hafta geçti! %1$d sigaralık
+        limitle harika gittiniz.</string>
+    <string name="tapering_checkin_was">Önceki</string>
+    <string name="tapering_checkin_will_be">Yeni</string>
+    <string name="tapering_checkin_reduce_to">Limiti günde %1$d sigaraya düşür</string>
+    <string name="tapering_checkin_keep_limit">%1$d sigaralık limiti koru</string>
+    <string name="tapering_checkin_snooze">3 gün sonra hatırlat</string>
+
+    <string name="stats_resisted_cravings">Yenilen İstekler</string>
+    <string name="stats_resisted_cravings_desc">%1$d kez direndiniz ve %2$s tasarruf ettiniz</string>
+
+    <string name="history_generator_title">Geçmiş Sigara Deneyimi</string>
+    <string name="history_generator_description">Uygulamayı kullanmadan önceki sigara geçmişinizi
+        tahmin ederek analitiklerinizi temel verilerle doldurun.</string>
+    <string name="history_start_date_label">Sigaraya Başlama Tarihi</string>
+    <string name="history_daily_avg_label">Günlük Ortalama Sigara</string>
+    <string name="history_daily_avg_unit">%1$d adet/gün</string>
+    <string name="history_pack_details_title">Paket Fiyatı ve Boyutu</string>
+    <string name="history_pack_price_label">Paket Fiyatı</string>
+    <string name="history_pack_size_label">Paketteki Adet</string>
+    <string name="history_trigger_ranking_title">İstek Tetikleyicileri Önceliği</string>
+    <string name="history_trigger_ranking_hint">En sık nedenden (#1) en seyrek nedene doğru
+        sıralayın</string>
+    <string name="history_preview_title">Geçmiş Veri Tahmini</string>
+    <string name="history_preview_total_cigs">Önceden İçilen Toplam</string>
+    <string name="history_preview_total_cost">Önceden Harcanan Toplam</string>
+    <string name="history_save_button">Geçmiş Deneyimi Kaydet</string>
+    <string name="history_reset_button">Geçmiş Deneyimi Sıfırla</string>
+    <string name="history_reset_dialog_title">Geçmiş Deneyim Sıfırlansın mı?</string>
+    <string name="history_reset_dialog_desc">Bu işlem tahmini geçmiş istatistiklerinizi analitikten
+        kaldıracaktır.</string>
+    <string name="history_banner_title">Sigara geçmişiniz var mı?</string>
+    <string name="history_banner_desc">Toplam harcamanızı ve istatistiklerinizi görmek için geçmiş
+        deneyiminizi girin.</string>
+    <string name="registration_history_note">Geçmiş sigara deneyiminizi istediğiniz zaman
+        Ayarlar\'dan ayarlayabilirsiniz!</string>
+    <string name="history_cigs_count_format">%1$s adet</string>
+    <string name="history_duration_days_y_m">%1$d gün (%2$dy %3$da)</string>
 </resources>
