@@ -65,15 +65,21 @@
 
     <string name="ach_category_login">Assiduité d\'utilisation</string>
     <string name="ach_category_nosmoke">Jours sans cigarette</string>
+    <string name="ach_category_secret">Succès secrets</string>
+    <string name="ach_secret_hidden_desc">Les conditions pour ce succès sont secrètes...</string>
 
     <string name="ach_curiosity_title">Curiosité</string>
-    <string name="ach_curiosity_desc">Première cigarette enregistrée</string>
+    <string name="ach_curiosity_desc">Premier lancement de l\'application</string>
     <string name="ach_interest_title">Intérêt</string>
     <string name="ach_interest_desc">Enregistré 3 jours consécutifs</string>
     <string name="ach_exploration_title">Exploration</string>
     <string name="ach_exploration_desc">Enregistré 7 jours consécutifs</string>
     <string name="ach_discipline_title">Discipline</string>
     <string name="ach_discipline_desc">Enregistré 30 jours consécutifs</string>
+    <string name="ach_habit_title">Habitude</string>
+    <string name="ach_habit_desc">Connecté 90 jours consécutifs (3 mois)</string>
+    <string name="ach_dedication_title">Dévouement</string>
+    <string name="ach_dedication_desc">Connecté 180 jours consécutifs (6 mois)</string>
     <string name="ach_statistics_title">Statistiques</string>
     <string name="ach_statistics_desc">Enregistré 365 jours consécutifs</string>
 
@@ -85,8 +91,46 @@
     <string name="ach_nosmoke_1w_desc">1 semaine sans fumer</string>
     <string name="ach_nosmoke_1m_title">Le Chemin</string>
     <string name="ach_nosmoke_1m_desc">1 mois sans fumer</string>
+    <string name="ach_nosmoke_3m_title">Renaissance</string>
+    <string name="ach_nosmoke_3m_desc">3 mois sans fumer</string>
+    <string name="ach_nosmoke_6m_title">Liberté</string>
+    <string name="ach_nosmoke_6m_desc">6 mois sans fumer</string>
     <string name="ach_nosmoke_1y_title">Pureté</string>
     <string name="ach_nosmoke_1y_desc">1 an sans fumer</string>
+
+    <string name="ach_night_owl_title">Oiseau de nuit</string>
+    <string name="ach_night_owl_desc">Fumer une cigarette entre 03:00 et 05:00 du matin</string>
+    <string name="ach_morning_ritual_title">Rituel du matin</string>
+    <string name="ach_morning_ritual_desc">Enregistrez votre première cigarette avant 07:00 pendant
+        5 jours consécutifs</string>
+    <string name="ach_synchronization_title">Synchronisation</string>
+    <string name="ach_synchronization_desc">Enregistrez une cigarette à 00:00 ou 12:00 pile</string>
+    <string name="ach_punctuality_title">Ponctualité</string>
+    <string name="ach_punctuality_desc">Fumez 3 cigarettes d\'affilée avec exactement le même
+        intervalle</string>
+
+    <string name="ach_hesitant_title">Hésitant</string>
+    <string name="ach_hesitant_desc">Enregistrez une cigarette et annulez ou supprimez-la dans les
+        10 secondes</string>
+    <string name="ach_explorer_title">Explorateur</string>
+    <string name="ach_explorer_desc">Changez de langue ou de thème plus de 3 fois dans la journée</string>
+    <string name="ach_archivist_title">Archiviste</string>
+    <string name="ach_archivist_desc">Faites votre première sauvegarde dans les Paramètres</string>
+    <string name="ach_analytics_collector_title">Collecteur d\'analyses</string>
+    <string name="ach_analytics_collector_desc">Visitez l\'onglet Analyses plus de 10 fois dans la
+        journée</string>
+
+    <string name="ach_double_damage_title">Double dégât</string>
+    <string name="ach_double_damage_desc">Enregistrez 2 cigarettes en moins de 10 minutes. Journée
+        difficile ?</string>
+    <string name="ach_inflation_title">Inflation</string>
+    <string name="ach_inflation_desc">Modifiez le prix du paquet dans les Paramètres</string>
+    <string name="ach_crisis_title">Crise</string>
+    <string name="ach_crisis_desc">Fumez exactement autant de cigarettes en une journée que votre
+        limite quotidienne</string>
+    <string name="ach_blind_eye_title">Je ne vois rien</string>
+    <string name="ach_blind_eye_desc">Dépassez votre limite quotidienne de 5+ cigarettes en une
+        journée. Limite ? Quelle limite ?</string>
 
     <string name="notification_title">Succès déverrouillé : %1$s</string>
     <string name="backup_success">Sauvegarde réussie !</string>
@@ -117,11 +161,15 @@
     <string name="font_preset_system">Système</string>
     <string name="settings_amoled_theme">Thème AMOLED</string>
     <string name="settings_amoled_theme_desc">Fond complètement noir en mode sombre</string>
-    <string name="settings_color_preset">Palette de couleurs</string>
+    <string name="settings_color_preset">Thème de couleurs</string>
     <string name="color_preset_system">Système</string>
-    <string name="color_preset_sage">Sauge des forêts</string>
+    <string name="color_preset_sage">Sauge forestière</string>
     <string name="color_preset_rose">Rose crépuscule</string>
     <string name="color_preset_ocean">Océan profond</string>
+    <string name="color_preset_purple">Velours violet</string>
+    <string name="color_preset_amber">Miel d\'ambre</string>
+    <string name="color_preset_crimson">Baie cramoisie</string>
+    <string name="color_preset_slate">Ardoise de minuit</string>
     <string name="time_over_limit_hm">+%1$02dh %2$02dm</string>
     <string name="time_over_limit_m">+%1$02dm</string>
     <string name="first_of_the_day">Première de la journée</string>

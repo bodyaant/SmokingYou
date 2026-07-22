@@ -65,15 +65,21 @@
 
     <string name="ach_category_login">App Usage Streak</string>
     <string name="ach_category_nosmoke">Days without cigarettes</string>
+    <string name="ach_category_secret">Secret Achievements</string>
+    <string name="ach_secret_hidden_desc">Conditions for this achievement are secret...</string>
 
     <string name="ach_curiosity_title">Curiosity</string>
-    <string name="ach_curiosity_desc">Logged your first cigarette</string>
+    <string name="ach_curiosity_desc">First app launch</string>
     <string name="ach_interest_title">Interest</string>
     <string name="ach_interest_desc">Logged 3 consecutive days</string>
     <string name="ach_exploration_title">Exploration</string>
     <string name="ach_exploration_desc">Logged 7 consecutive days</string>
     <string name="ach_discipline_title">Discipline</string>
     <string name="ach_discipline_desc">Logged 30 consecutive days</string>
+    <string name="ach_habit_title">Habit</string>
+    <string name="ach_habit_desc">Logged 90 consecutive days (3 months)</string>
+    <string name="ach_dedication_title">Dedication</string>
+    <string name="ach_dedication_desc">Logged 180 consecutive days (6 months)</string>
     <string name="ach_statistics_title">Statistics</string>
     <string name="ach_statistics_desc">Logged 365 consecutive days</string>
 
@@ -85,8 +91,39 @@
     <string name="ach_nosmoke_1w_desc">1 week without smoking</string>
     <string name="ach_nosmoke_1m_title">The Path</string>
     <string name="ach_nosmoke_1m_desc">1 month without smoking</string>
+    <string name="ach_nosmoke_3m_title">Rebirth</string>
+    <string name="ach_nosmoke_3m_desc">3 months without smoking</string>
+    <string name="ach_nosmoke_6m_title">Freedom</string>
+    <string name="ach_nosmoke_6m_desc">6 months without smoking</string>
     <string name="ach_nosmoke_1y_title">Purity</string>
     <string name="ach_nosmoke_1y_desc">1 year without smoking</string>
+
+    <string name="ach_night_owl_title">Night Owl</string>
+    <string name="ach_night_owl_desc">Smoke a cigarette between 03:00 and 05:00 AM</string>
+    <string name="ach_morning_ritual_title">Morning Ritual</string>
+    <string name="ach_morning_ritual_desc">Log your first cigarette before 07:00 AM for 5 consecutive days</string>
+    <string name="ach_synchronization_title">Synchronization</string>
+    <string name="ach_synchronization_desc">Log a cigarette at exactly 00:00 or 12:00</string>
+    <string name="ach_punctuality_title">Punctuality</string>
+    <string name="ach_punctuality_desc">Smoke 3 cigarettes in a row with the exact same interval</string>
+
+    <string name="ach_hesitant_title">Hesitant</string>
+    <string name="ach_hesitant_desc">Log a cigarette and immediately cancel or delete it within 10 seconds</string>
+    <string name="ach_explorer_title">Explorer</string>
+    <string name="ach_explorer_desc">Switch language or theme more than 3 times in a day</string>
+    <string name="ach_archivist_title">Archivist</string>
+    <string name="ach_archivist_desc">Make your first data backup in Settings</string>
+    <string name="ach_analytics_collector_title">Analytics Collector</string>
+    <string name="ach_analytics_collector_desc">Visit Analytics tab more than 10 times in a day</string>
+
+    <string name="ach_double_damage_title">Double Damage</string>
+    <string name="ach_double_damage_desc">Log 2 cigarettes within less than 10 minutes. Rough day?</string>
+    <string name="ach_inflation_title">Inflation</string>
+    <string name="ach_inflation_desc">Change pack price in Settings</string>
+    <string name="ach_crisis_title">Crisis</string>
+    <string name="ach_crisis_desc">Smoke exactly as many cigarettes in a day as set in daily limit</string>
+    <string name="ach_blind_eye_title">I See Nothing</string>
+    <string name="ach_blind_eye_desc">Exceed set daily limit by 5+ cigarettes in a day. Limit? What limit?</string>
 
     <string name="notification_title">Achievement Unlocked: %1$s</string>
     <string name="backup_success">Backup completed successfully!</string>
@@ -122,6 +159,10 @@
     <string name="color_preset_sage">Forest Sage</string>
     <string name="color_preset_rose">Sunset Rose</string>
     <string name="color_preset_ocean">Ocean Deep</string>
+    <string name="color_preset_purple">Purple Velvet</string>
+    <string name="color_preset_amber">Amber Honey</string>
+    <string name="color_preset_crimson">Crimson Berry</string>
+    <string name="color_preset_slate">Midnight Slate</string>
     <string name="time_over_limit_hm">+%1$02dh %2$02dm</string>
     <string name="time_over_limit_m">+%1$02dm</string>
     <string name="first_of_the_day">First of the day</string>

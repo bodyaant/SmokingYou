@@ -65,15 +65,21 @@
 
     <string name="ach_category_login">Uygulama Kullanım Serisi</string>
     <string name="ach_category_nosmoke">Sigarasız Günler</string>
+    <string name="ach_category_secret">Gizli Başarılar</string>
+    <string name="ach_secret_hidden_desc">Bu başarının koşulları gizlidir...</string>
 
     <string name="ach_curiosity_title">Merak</string>
-    <string name="ach_curiosity_desc">İlk sigaranızı kaydettiniz</string>
+    <string name="ach_curiosity_desc">İlk uygulama başlatma</string>
     <string name="ach_interest_title">İlgi</string>
     <string name="ach_interest_desc">Üst üste 3 gün kaydettiniz</string>
     <string name="ach_exploration_title">Keşif</string>
     <string name="ach_exploration_desc">Üst üste 7 gün kaydettiniz</string>
     <string name="ach_discipline_title">Disiplin</string>
     <string name="ach_discipline_desc">Üst üste 30 gün kaydettiniz</string>
+    <string name="ach_habit_title">Alışkanlık</string>
+    <string name="ach_habit_desc">Üst üste 90 gün giriş yapıldı (3 ay)</string>
+    <string name="ach_dedication_title">Adanmışlık</string>
+    <string name="ach_dedication_desc">Üst üste 180 gün giriş yapıldı (6 ay)</string>
     <string name="ach_statistics_title">İstatistikler</string>
     <string name="ach_statistics_desc">Üst üste 365 gün kaydettiniz</string>
 
@@ -85,8 +91,40 @@
     <string name="ach_nosmoke_1w_desc">1 hafta sigarasız</string>
     <string name="ach_nosmoke_1m_title">Yolculuk</string>
     <string name="ach_nosmoke_1m_desc">1 ay sigarasız</string>
+    <string name="ach_nosmoke_3m_title">Yeniden Doğuş</string>
+    <string name="ach_nosmoke_3m_desc">Sigarasız 3 ay</string>
+    <string name="ach_nosmoke_6m_title">Özgürlük</string>
+    <string name="ach_nosmoke_6m_desc">Sigarasız 6 ay</string>
     <string name="ach_nosmoke_1y_title">Arınma</string>
     <string name="ach_nosmoke_1y_desc">1 yıl sigarasız</string>
+
+    <string name="ach_night_owl_title">Gece Kuşu</string>
+    <string name="ach_night_owl_desc">Saat 03:00 ile 05:00 arasında sigara iç</string>
+    <string name="ach_morning_ritual_title">Sabah Ritüeli</string>
+    <string name="ach_morning_ritual_desc">Üst üste 5 gün boyunca ilk sigaranı saat 07:00\'den önce
+        kaydet</string>
+    <string name="ach_synchronization_title">Senkronizasyon</string>
+    <string name="ach_synchronization_desc">Tam saat 00:00 veya 12:00\'de bir sigara kaydet</string>
+    <string name="ach_punctuality_title">Dakiklik</string>
+    <string name="ach_punctuality_desc">Tam olarak aynı aralıklarla arkaya 3 sigara iç</string>
+
+    <string name="ach_hesitant_title">Tereddütlü</string>
+    <string name="ach_hesitant_desc">Bir sigara kaydet ve 10 saniye içinde hemen iptal et veya sil</string>
+    <string name="ach_explorer_title">Kaşif</string>
+    <string name="ach_explorer_desc">Bir günde dili veya temayı 3 kereden fazla değiştir</string>
+    <string name="ach_archivist_title">Arşivci</string>
+    <string name="ach_archivist_desc">Ayarlar\'da ilk veri yedeğini al</string>
+    <string name="ach_analytics_collector_title">Analiz Toplayıcı</string>
+    <string name="ach_analytics_collector_desc">Bir günde Analiz sekmesini 10\'dan fazla ziyaret et</string>
+
+    <string name="ach_double_damage_title">Çift Hasar</string>
+    <string name="ach_double_damage_desc">10 dakikadan az arayla 2 sigara kaydet. Zor bir gün mü?</string>
+    <string name="ach_inflation_title">Enflasyon</string>
+    <string name="ach_inflation_desc">Ayarlar\'da paket fiyatını değiştir</string>
+    <string name="ach_crisis_title">Kriz</string>
+    <string name="ach_crisis_desc">Bir günde tam olarak günlük limitin kadar sigara iç</string>
+    <string name="ach_blind_eye_title">Gözlerimi Kaparım</string>
+    <string name="ach_blind_eye_desc">Günlük limitini bir günde 5+ sigara aş. Limit mi? Ne limiti?</string>
 
     <string name="notification_title">Başarım Açıldı: %1$s</string>
     <string name="backup_success">Yedekleme başarıyla tamamlandı!</string>
@@ -117,11 +155,15 @@
     <string name="font_preset_system">Sistem</string>
     <string name="settings_amoled_theme">AMOLED Teması</string>
     <string name="settings_amoled_theme_desc">Karanlık modda tamamen siyah arka plan</string>
-    <string name="settings_color_preset">Renk Şeması</string>
+    <string name="settings_color_preset">Renk Düzeni</string>
     <string name="color_preset_system">Sistem</string>
     <string name="color_preset_sage">Orman Adaçayı</string>
     <string name="color_preset_rose">Gün Batımı Gülü</string>
     <string name="color_preset_ocean">Derin Okyanus</string>
+    <string name="color_preset_purple">Mor Kadife</string>
+    <string name="color_preset_amber">Kehribar Balı</string>
+    <string name="color_preset_crimson">Koyu Kırmızı</string>
+    <string name="color_preset_slate">Gece Grafiti</string>
     <string name="time_over_limit_hm">+%1$02dsa %2$02ddk</string>
     <string name="time_over_limit_m">+%1$02ddk</string>
     <string name="first_of_the_day">Günün ilki</string>

@@ -16,9 +16,9 @@
     <string name="next_day">Наступний день</string>
     <string name="delete_entry">Видалити запис</string>
     <string name="edit_entry">Змінити запис</string>
-    <string name="duration_hms">%1$02dг %2$02dхв %3$02дс</string>
+    <string name="duration_hms">%1$02dг %2$02dхв %3$02dс</string>
     <string name="duration_hm">%1$02dг %2$02dхв</string>
-    <string name="duration_ms">%1$02dхв %2$02дс</string>
+    <string name="duration_ms">%1$02dхв %2$02dс</string>
     <string name="dialog_ok">ОК</string>
     <string name="dialog_cancel">Скасувати</string>
     <string name="nav_home">Головна</string>
@@ -65,6 +65,8 @@
 
     <string name="ach_category_login">Використання додатка</string>
     <string name="ach_category_nosmoke">Дні без сигарет</string>
+    <string name="ach_category_secret">Секретні досягнення</string>
+    <string name="ach_secret_hidden_desc">Умови цього досягнення засекречені...</string>
 
     <string name="ach_curiosity_title">Допитливість</string>
     <string name="ach_curiosity_desc">Перший вхід у додаток</string>
@@ -74,6 +76,10 @@
     <string name="ach_exploration_desc">Тиждень поспіль входу в додаток</string>
     <string name="ach_discipline_title">Дисципліна</string>
     <string name="ach_discipline_desc">Місяць поспіль входу в додаток</string>
+    <string name="ach_habit_title">Звичка</string>
+    <string name="ach_habit_desc">3 місяці поспіль входу в додаток</string>
+    <string name="ach_dedication_title">Преданість</string>
+    <string name="ach_dedication_desc">Пів року поспіль входу в додаток</string>
     <string name="ach_statistics_title">Статистика</string>
     <string name="ach_statistics_desc">Рік поспіль входу в додаток</string>
 
@@ -85,8 +91,44 @@
     <string name="ach_nosmoke_1w_desc">Тиждень без сигарет</string>
     <string name="ach_nosmoke_1m_title">Шлях</string>
     <string name="ach_nosmoke_1m_desc">Місяць без сигарет</string>
+    <string name="ach_nosmoke_3m_title">Переродження</string>
+    <string name="ach_nosmoke_3m_desc">3 місяці без сигарет</string>
+    <string name="ach_nosmoke_6m_title">Свобода</string>
+    <string name="ach_nosmoke_6m_desc">Пів року без сигарет</string>
     <string name="ach_nosmoke_1y_title">Чистота</string>
     <string name="ach_nosmoke_1y_desc">Рік без сигарет</string>
+
+    <string name="ach_night_owl_title">Сова</string>
+    <string name="ach_night_owl_desc">Викурити цигарку між 03:00 та 05:00 ранку</string>
+    <string name="ach_morning_ritual_title">Ранковий ритуал</string>
+    <string name="ach_morning_ritual_desc">Залогінити першу цигарку до 07:00 ранку 5 днів поспіль</string>
+    <string name="ach_synchronization_title">Синхронізація</string>
+    <string name="ach_synchronization_desc">Залогінити цигарку рівно о 00:00 або 12:00</string>
+    <string name="ach_punctuality_title">Пунктуальність</string>
+    <string name="ach_punctuality_desc">Викурити 3 цигарки поспіль з однаковим інтервалом</string>
+
+    <string name="ach_hesitant_title">Сумнівний</string>
+    <string name="ach_hesitant_desc">Занести цигарку і одразу ж натиснути «Скасувати» або «Видалити»
+        протягом 10 секунд</string>
+    <string name="ach_explorer_title">Дослідник</string>
+    <string name="ach_explorer_desc">Переключити мову або змінити тему оформлення більше 3 разів за
+        день</string>
+    <string name="ach_archivist_title">Архіваріус</string>
+    <string name="ach_archivist_desc">Зробити перший бекап даних у Налаштуваннях</string>
+    <string name="ach_analytics_collector_title">Збирач аналітики</string>
+    <string name="ach_analytics_collector_desc">Зайти на вкладку Analytics більше 10 разів за день</string>
+
+    <string name="ach_double_damage_title">Подвійний урон</string>
+    <string name="ach_double_damage_desc">Залогінити 2 цигарки з різницею менше 10 хвилин. Важкий
+        день?</string>
+    <string name="ach_inflation_title">Інфляція</string>
+    <string name="ach_inflation_desc">Змінити ціну пачки в налаштуваннях</string>
+    <string name="ach_crisis_title">Криза</string>
+    <string name="ach_crisis_desc">Викурити за день рівно стільки ж цигарок, скільки вказано в
+        лиміті</string>
+    <string name="ach_blind_eye_title">Нічого не бачу</string>
+    <string name="ach_blind_eye_desc">Перевищити встановлений ліміт на 5+ цигарок за день. Ліміт?
+        Який ліміт?</string>
 
     <string name="notification_title">Розблокировано досягнення: %1$s</string>
     <string name="backup_success">Резервне копіювання успішно завершено!</string>
@@ -117,11 +159,15 @@
     <string name="font_preset_system">Системний</string>
     <string name="settings_amoled_theme">AMOLED тема</string>
     <string name="settings_amoled_theme_desc">Повністю чорний фон у темній темі</string>
-    <string name="settings_color_preset">Колірна схема</string>
+    <string name="settings_color_preset">Кольорова схема</string>
     <string name="color_preset_system">Системна</string>
-    <string name="color_preset_sage">Лісова шавлія</string>
+    <string name="color_preset_sage">Лісовий шавлія</string>
     <string name="color_preset_rose">Західна троянда</string>
-    <string name="color_preset_ocean">Глубокий океан</string>
+    <string name="color_preset_ocean">Глибокий океан</string>
+    <string name="color_preset_purple">Фіолетовий оксамит</string>
+    <string name="color_preset_amber">Бурштиновий мед</string>
+    <string name="color_preset_crimson">Ягідний рубін</string>
+    <string name="color_preset_slate">Темний графіт</string>
     <string name="time_over_limit_hm">+%1$02dг %2$02dхв</string>
     <string name="time_over_limit_m">+%1$02dхв</string>
     <string name="first_of_the_day">Перша за день</string>

@@ -65,15 +65,21 @@
 
     <string name="ach_category_login">Sequência de uso do app</string>
     <string name="ach_category_nosmoke">Dias sem fumar</string>
+    <string name="ach_category_secret">Conquistas secretas</string>
+    <string name="ach_secret_hidden_desc">As condições para esta conquista são secretas...</string>
 
     <string name="ach_curiosity_title">Curiosidade</string>
-    <string name="ach_curiosity_desc">Registrou o seu primeiro cigarro</string>
+    <string name="ach_curiosity_desc">Primeira inicialização do aplicativo</string>
     <string name="ach_interest_title">Interesse</string>
     <string name="ach_interest_desc">Registrou 3 dias consecutivos</string>
     <string name="ach_exploration_title">Exploração</string>
     <string name="ach_exploration_desc">Registrou 7 dias consecutivos</string>
     <string name="ach_discipline_title">Disciplina</string>
     <string name="ach_discipline_desc">Registrou 30 dias consecutivos</string>
+    <string name="ach_habit_title">Hábito</string>
+    <string name="ach_habit_desc">Entrou por 90 dias consecutivos (3 meses)</string>
+    <string name="ach_dedication_title">Dedicação</string>
+    <string name="ach_dedication_desc">Entrou por 180 dias consecutivos (6 meses)</string>
     <string name="ach_statistics_title">Estatísticas</string>
     <string name="ach_statistics_desc">Registrou 365 dias consecutivos</string>
 
@@ -85,8 +91,42 @@
     <string name="ach_nosmoke_1w_desc">1 semana sem fumar</string>
     <string name="ach_nosmoke_1m_title">O Caminho</string>
     <string name="ach_nosmoke_1m_desc">1 mês sem fumar</string>
+    <string name="ach_nosmoke_3m_title">Renascentismo</string>
+    <string name="ach_nosmoke_3m_desc">3 meses sem fumar</string>
+    <string name="ach_nosmoke_6m_title">Liberdade</string>
+    <string name="ach_nosmoke_6m_desc">6 meses sem fumar</string>
     <string name="ach_nosmoke_1y_title">Pureza</string>
     <string name="ach_nosmoke_1y_desc">1 ano sem fumar</string>
+
+    <string name="ach_night_owl_title">Coruja noturna</string>
+    <string name="ach_night_owl_desc">Fumar um cigarro entre 03:00 e 05:00</string>
+    <string name="ach_morning_ritual_title">Ritual matinal</string>
+    <string name="ach_morning_ritual_desc">Registre seu primeiro cigarro antes das 07:00 por 5 dias
+        consecutivos</string>
+    <string name="ach_synchronization_title">Sincronização</string>
+    <string name="ach_synchronization_desc">Registre um cigarro exatamente às 00:00 ou 12:00</string>
+    <string name="ach_punctuality_title">Pontualidade</string>
+    <string name="ach_punctuality_desc">Fume 3 cigarros seguidos exatamente com o mesmo intervalo</string>
+
+    <string name="ach_hesitant_title">Hesitante</string>
+    <string name="ach_hesitant_desc">Registre um cigarro e cancele ou exclua-o em até 10 segundos</string>
+    <string name="ach_explorer_title">Explorador</string>
+    <string name="ach_explorer_desc">Mude o idioma ou tema mais de 3 vezes em um dia</string>
+    <string name="ach_archivist_title">Arquivista</string>
+    <string name="ach_archivist_desc">Faça seu primeiro backup nas Configurações</string>
+    <string name="ach_analytics_collector_title">Colecionador de análises</string>
+    <string name="ach_analytics_collector_desc">Visite a guia Análises mais de 10 vezes em um dia</string>
+
+    <string name="ach_double_damage_title">Dano duplo</string>
+    <string name="ach_double_damage_desc">Registre 2 cigarros em menos de 10 minutos. Dia difícil?</string>
+    <string name="ach_inflation_title">Inflação</string>
+    <string name="ach_inflation_desc">Altere o preço do maço nas Configurações</string>
+    <string name="ach_crisis_title">Crise</string>
+    <string name="ach_crisis_desc">Fume exatamente a quantidade de cigarros do seu limite diário em
+        um dia</string>
+    <string name="ach_blind_eye_title">Não vejo nada</string>
+    <string name="ach_blind_eye_desc">Exceda seu limite diário em 5+ cigarros em um dia. Limite? Que
+        limite?</string>
 
     <string name="notification_title">Conquista desbloqueada: %1$s</string>
     <string name="backup_success">Backup concluído com sucesso!</string>
@@ -119,9 +159,13 @@
     <string name="settings_amoled_theme_desc">Fundo totalmente preto no modo escuro</string>
     <string name="settings_color_preset">Esquema de cores</string>
     <string name="color_preset_system">Sistema</string>
-    <string name="color_preset_sage">Salvia da floresta</string>
+    <string name="color_preset_sage">Sálvia florestal</string>
     <string name="color_preset_rose">Rosa do pôr do sol</string>
-    <string name="color_preset_ocean">Oceano profundo</string>
+    <string name="color_preset_ocean">Océano profundo</string>
+    <string name="color_preset_purple">Veludo roxo</string>
+    <string name="color_preset_amber">Mel de âmbar</string>
+    <string name="color_preset_crimson">Baga carmesim</string>
+    <string name="color_preset_slate">Grafite da meia-noite</string>
     <string name="time_over_limit_hm">+%1$02dh %2$02dm</string>
     <string name="time_over_limit_m">+%1$02dm</string>
     <string name="first_of_the_day">Primeiro do dia</string>

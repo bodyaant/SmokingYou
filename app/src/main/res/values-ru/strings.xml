@@ -65,6 +65,8 @@
 
     <string name="ach_category_login">Использование приложения</string>
     <string name="ach_category_nosmoke">Дни без сигарет</string>
+    <string name="ach_category_secret">Секретные достижения</string>
+    <string name="ach_secret_hidden_desc">Условия этой ачивки засекречены...</string>
 
     <string name="ach_curiosity_title">Любопытство</string>
     <string name="ach_curiosity_desc">Первый вход в приложение</string>
@@ -74,6 +76,10 @@
     <string name="ach_exploration_desc">Неделя подряд входа в приложение</string>
     <string name="ach_discipline_title">Дисциплина</string>
     <string name="ach_discipline_desc">Месяц подряд входа в приложение</string>
+    <string name="ach_habit_title">Привычка</string>
+    <string name="ach_habit_desc">3 месяца подряд входа в приложение</string>
+    <string name="ach_dedication_title">Преданность</string>
+    <string name="ach_dedication_desc">Полгода подряд входа в приложение</string>
     <string name="ach_statistics_title">Статистика</string>
     <string name="ach_statistics_desc">Год подряд входа в приложение</string>
 
@@ -85,8 +91,44 @@
     <string name="ach_nosmoke_1w_desc">Неделя без сигарет</string>
     <string name="ach_nosmoke_1m_title">Путь</string>
     <string name="ach_nosmoke_1m_desc">Месяц без сигарет</string>
+    <string name="ach_nosmoke_3m_title">Перерождение</string>
+    <string name="ach_nosmoke_3m_desc">3 месяца без сигарет</string>
+    <string name="ach_nosmoke_6m_title">Свобода</string>
+    <string name="ach_nosmoke_6m_desc">Полгода без сигарет</string>
     <string name="ach_nosmoke_1y_title">Чистота</string>
     <string name="ach_nosmoke_1y_desc">Год без сигарет</string>
+
+    <string name="ach_night_owl_title">Сова</string>
+    <string name="ach_night_owl_desc">Выкурить сигарету между 03:00 и 05:00 утра</string>
+    <string name="ach_morning_ritual_title">Утренний ритуал</string>
+    <string name="ach_morning_ritual_desc">Залогировать первую сигарету до 07:00 утра 5 дней подряд</string>
+    <string name="ach_synchronization_title">Синхронизация</string>
+    <string name="ach_synchronization_desc">Залогировать сигарету ровно в 00:00 или 12:00</string>
+    <string name="ach_punctuality_title">Пунктуальность</string>
+    <string name="ach_punctuality_desc">Выкурить 3 сигареты подряд с абсолютно одинаковым интервалом</string>
+
+    <string name="ach_hesitant_title">Сомневающийся</string>
+    <string name="ach_hesitant_desc">Занести сигарету и тут же нажать «Отмена» или «Удалить» в
+        течение 10 секунд</string>
+    <string name="ach_explorer_title">Исследователь</string>
+    <string name="ach_explorer_desc">Переключить язык или поменять тему оформления больше 3 раз за
+        день</string>
+    <string name="ach_archivist_title">Архивариус</string>
+    <string name="ach_archivist_desc">Сделать первый бэкап данных в Настройках</string>
+    <string name="ach_analytics_collector_title">Сборщик аналитики</string>
+    <string name="ach_analytics_collector_desc">Зайти на вкладку Analytics более 10 раз за один день</string>
+
+    <string name="ach_double_damage_title">Двойной урон</string>
+    <string name="ach_double_damage_desc">Залогировать 2 сигареты с разницей менее 10 минут. Тяжелый
+        день?</string>
+    <string name="ach_inflation_title">Инфляция</string>
+    <string name="ach_inflation_desc">Изменить цену пачки в настройках</string>
+    <string name="ach_crisis_title">Кризис</string>
+    <string name="ach_crisis_desc">Выкурить за день ровно столько же сигарет, сколько указано в
+        вашем Daily Cigarette Limit</string>
+    <string name="ach_blind_eye_title">Ничего не вижу</string>
+    <string name="ach_blind_eye_desc">Превысить установленный лимит на 5+ сигарет за день. Лимит?
+        Какой лимит?</string>
 
     <string name="notification_title">Разблокировано достижение: %1$s</string>
     <string name="backup_success">Резервное копирование успешно завершено!</string>
@@ -122,6 +164,10 @@
     <string name="color_preset_sage">Лесной шалфей</string>
     <string name="color_preset_rose">Закатная роза</string>
     <string name="color_preset_ocean">Глубокий океан</string>
+    <string name="color_preset_purple">Фиолетовый бархат</string>
+    <string name="color_preset_amber">Янтарный мед</string>
+    <string name="color_preset_crimson">Ягодный рубин</string>
+    <string name="color_preset_slate">Тёмный графит</string>
     <string name="time_over_limit_hm">+%1$02dч %2$02dм</string>
     <string name="time_over_limit_m">+%1$02dм</string>
     <string name="first_of_the_day">Первая за день</string>

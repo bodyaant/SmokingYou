@@ -65,15 +65,21 @@
 
     <string name="ach_category_login">App-Nutzungsserie</string>
     <string name="ach_category_nosmoke">Tage ohne Zigaretten</string>
+    <string name="ach_category_secret">Geheime Erfolge</string>
+    <string name="ach_secret_hidden_desc">Bedingungen für diesen Erfolg sind geheim...</string>
 
     <string name="ach_curiosity_title">Neugier</string>
-    <string name="ach_curiosity_desc">Erste Zigarette protokolliert</string>
+    <string name="ach_curiosity_desc">Erster App-Start</string>
     <string name="ach_interest_title">Interesse</string>
     <string name="ach_interest_desc">3 Tage in Folge protokolliert</string>
     <string name="ach_exploration_title">Entdeckung</string>
     <string name="ach_exploration_desc">7 Tage in Folge protokolliert</string>
     <string name="ach_discipline_title">Disziplin</string>
     <string name="ach_discipline_desc">30 Tage in Folge protokolliert</string>
+    <string name="ach_habit_title">Gewohnheit</string>
+    <string name="ach_habit_desc">An 90 aufeinanderfolgenden Tagen angemeldet (3 Monate)</string>
+    <string name="ach_dedication_title">Hingabe</string>
+    <string name="ach_dedication_desc">An 180 aufeinanderfolgenden Tagen angemeldet (6 Monate)</string>
     <string name="ach_statistics_title">Statistik</string>
     <string name="ach_statistics_desc">365 Tage in Folge protokolliert</string>
 
@@ -85,8 +91,43 @@
     <string name="ach_nosmoke_1w_desc">1 Woche ohne Rauchen</string>
     <string name="ach_nosmoke_1m_title">Der Weg</string>
     <string name="ach_nosmoke_1m_desc">1 Monat ohne Rauchen</string>
+    <string name="ach_nosmoke_3m_title">Wiedergeburt</string>
+    <string name="ach_nosmoke_3m_desc">3 Monate ohne Rauchen</string>
+    <string name="ach_nosmoke_6m_title">Freiheit</string>
+    <string name="ach_nosmoke_6m_desc">6 Monate ohne Rauchen</string>
     <string name="ach_nosmoke_1y_title">Reinheit</string>
     <string name="ach_nosmoke_1y_desc">1 Jahr ohne Rauchen</string>
+
+    <string name="ach_night_owl_title">Nachteule</string>
+    <string name="ach_night_owl_desc">Rauche eine Zigarette zwischen 03:00 und 05:00 Uhr</string>
+    <string name="ach_morning_ritual_title">Morgenritual</string>
+    <string name="ach_morning_ritual_desc">Trage deine erste Zigarette an 5 aufeinanderfolgenden
+        Tagen vor 07:00 Uhr ein</string>
+    <string name="ach_synchronization_title">Synchronisation</string>
+    <string name="ach_synchronization_desc">Trage eine Zigarette genau um 00:00 oder 12:00 Uhr ein</string>
+    <string name="ach_punctuality_title">Pünktlichkeit</string>
+    <string name="ach_punctuality_desc">Rauche 3 Zigaretten in Folge im genau gleichen Abstand</string>
+
+    <string name="ach_hesitant_title">Zögerlich</string>
+    <string name="ach_hesitant_desc">Trage eine Zigarette ein und storniere oder lösche sie
+        innerhalb von 10 Sekunden</string>
+    <string name="ach_explorer_title">Entdecker</string>
+    <string name="ach_explorer_desc">Wechsle Sprache oder Design an einem Tag mehr als 3 Mal</string>
+    <string name="ach_archivist_title">Archivar</string>
+    <string name="ach_archivist_desc">Erstelle deine erste Datensicherung in den Einstellungen</string>
+    <string name="ach_analytics_collector_title">Analysesammler</string>
+    <string name="ach_analytics_collector_desc">Besuche den Analyse-Tab mehr als 10 Mal an einem Tag</string>
+
+    <string name="ach_double_damage_title">Doppelter Schaden</string>
+    <string name="ach_double_damage_desc">Trage 2 Zigaretten in weniger als 10 Minuten ein. Schwerer
+        Tag?</string>
+    <string name="ach_inflation_title">Inflation</string>
+    <string name="ach_inflation_desc">Ändere den Schachtelpreis in den Einstellungen</string>
+    <string name="ach_crisis_title">Krise</string>
+    <string name="ach_crisis_desc">Rauche an einem Tag genau so viele Zigaretten wie dein Tageslimit</string>
+    <string name="ach_blind_eye_title">Ich sehe nichts</string>
+    <string name="ach_blind_eye_desc">Überschreite dein Tageslimit um 5+ Zigaretten an einem Tag.
+        Limit? Welches Limit?</string>
 
     <string name="notification_title">Erfolg freigeschaltet: %1$s</string>
     <string name="backup_success">Datensicherung erfolgreich abgeschlossen!</string>
@@ -119,9 +160,13 @@
     <string name="settings_amoled_theme_desc">Vollständig schwarzer Hintergrund im dunklen Modus</string>
     <string name="settings_color_preset">Farbschema</string>
     <string name="color_preset_system">System</string>
-    <string name="color_preset_sage">Waldsalbei</string>
+    <string name="color_preset_sage">Wald-Salbei</string>
     <string name="color_preset_rose">Sonnenuntergang-Rose</string>
-    <string name="color_preset_ocean">Tiefsee</string>
+    <string name="color_preset_ocean">Tiefer Ozean</string>
+    <string name="color_preset_purple">Purpurroter Samt</string>
+    <string name="color_preset_amber">Bernstein-Honig</string>
+    <string name="color_preset_crimson">Karmesin-Beere</string>
+    <string name="color_preset_slate">Mitternachtsschiefer</string>
     <string name="time_over_limit_hm">+%1$02d Std. %2$02d Min.</string>
     <string name="time_over_limit_m">+%1$02d Min.</string>
     <string name="first_of_the_day">Erste des Tages</string>
