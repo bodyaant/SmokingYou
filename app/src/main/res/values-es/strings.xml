@@ -40,7 +40,8 @@
     <string name="theme_system">Sistema</string>
     <string name="theme_light">Claro</string>
     <string name="theme_dark">Oscuro</string>
-    <string name="settings_general">General</string>
+    <string name="settings_section_interface">Interfaz y apariencia</string>
+    <string name="settings_section_goals">Objetivos y economía</string>
     <string name="settings_language">Idioma</string>
     <string name="language_value">Español</string>
     <string name="settings_statistics">Estadísticas</string>
@@ -49,7 +50,7 @@
     <string name="achievements_desc">Ver tu progreso y recompensas</string>
     <string name="settings_notifications">Notificaciones</string>
     <string name="notifications_desc">Gestionar alertas</string>
-    <string name="settings_data">Datos</string>
+    <string name="settings_data">Datos y copia de seguridad</string>
     <string name="settings_backup">Copia de seguridad</string>
     <string name="backup_desc">Guardar copia de seguridad en el dispositivo</string>
     <string name="settings_restore">Restaurar</string>
@@ -151,7 +152,7 @@
     <string name="set_limit_title">Establecer límite diario</string>
     <string name="no_limit">0 (Sin límite)</string>
 
-    <string name="settings_info">Información</string>
+    <string name="settings_info">Acerca de y actualizaciones</string>
     <string name="about_app">Acerca de la app</string>
     <string name="about_app_desc">Versión, desarrollador y enlaces</string>
     <string name="app_version">Versión de la app: %1$s</string>
@@ -195,7 +196,6 @@
     <string name="triggers_title">Disparadores de antojo</string>
     <string name="trigger_count_pattern">%1$d veces (%2$d%%)</string>
 
-    <string name="settings_cigarette_params">Ajustes de cigarrillos</string>
     <string name="settings_pack_params">Ajustes de cajetilla</string>
     <string name="settings_pack_price">Precio de la cajetilla</string>
     <string name="settings_pack_size">Cigarrillos por cajetilla</string>

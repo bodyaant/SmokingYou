@@ -40,7 +40,8 @@
     <string name="theme_system">Системна</string>
     <string name="theme_light">Світла</string>
     <string name="theme_dark">Темна</string>
-    <string name="settings_general">Загальні</string>
+    <string name="settings_section_interface">Інтерфейс та зовнішній вигляд</string>
+    <string name="settings_section_goals">Цілі та економія</string>
     <string name="settings_language">Мова</string>
     <string name="language_value">Українська</string>
     <string name="settings_statistics">Статистика</string>
@@ -49,7 +50,7 @@
     <string name="achievements_desc">Перегляд вашого прогресу та нагород</string>
     <string name="settings_notifications">Сповіщення</string>
     <string name="notifications_desc">Керування сповіщеннями</string>
-    <string name="settings_data">Дані</string>
+    <string name="settings_data">Дані та резервні копії</string>
     <string name="settings_backup">Резервне копіювання</string>
     <string name="backup_desc">Зберегти резервну копію на пристрій</string>
     <string name="settings_restore">Відновити</string>
@@ -149,7 +150,7 @@
     <string name="set_limit_title">Встановити ліміт</string>
     <string name="no_limit">0 (Без ліміту)</string>
 
-    <string name="settings_info">Інформація</string>
+    <string name="settings_info">Про додаток та оновлення</string>
     <string name="about_app">Про додаток</string>
     <string name="about_app_desc">Версія, розробник та посилання</string>
     <string name="app_version">Версія додатка: %1$s</string>
@@ -194,7 +195,6 @@
     <string name="triggers_title">Причини куріння</string>
     <string name="trigger_count_pattern">%1$d разів (%2$d%%)</string>
 
-    <string name="settings_cigarette_params">Параметри сигарет</string>
     <string name="settings_pack_params">Параметри пачки</string>
     <string name="settings_pack_price">Вартість пачки</string>
     <string name="settings_pack_size">Сигарет у пачці</string>

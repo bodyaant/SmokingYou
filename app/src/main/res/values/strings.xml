@@ -40,7 +40,8 @@
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
-    <string name="settings_general">General</string>
+    <string name="settings_section_interface">Interface &amp; Appearance</string>
+    <string name="settings_section_goals">Goals &amp; Economy</string>
     <string name="settings_language">Language</string>
     <string name="language_value">English</string>
     <string name="settings_statistics">Statistics</string>
@@ -49,7 +50,7 @@
     <string name="achievements_desc">View your progress and rewards</string>
     <string name="settings_notifications">Notifications</string>
     <string name="notifications_desc">Manage alerts</string>
-    <string name="settings_data">Data</string>
+    <string name="settings_data">Data &amp; Backup</string>
     <string name="settings_backup">Backup</string>
     <string name="backup_desc">Backup data to device</string>
     <string name="settings_restore">Restore</string>
@@ -147,7 +148,7 @@
     <string name="set_limit_title">Set Daily Limit</string>
     <string name="no_limit">0 (No limit)</string>
 
-    <string name="settings_info">Info</string>
+    <string name="settings_info">About &amp; Updates</string>
     <string name="about_app">About the app</string>
     <string name="about_app_desc">Version, developer, and links</string>
     <string name="app_version">App Version: %1$s</string>
@@ -191,7 +192,6 @@
     <string name="triggers_title">Smoking Triggers</string>
     <string name="trigger_count_pattern">%1$d times (%2$d%%)</string>
 
-    <string name="settings_cigarette_params">Cigarette Settings</string>
     <string name="settings_pack_params">Pack Settings</string>
     <string name="settings_pack_price">Pack Price</string>
     <string name="settings_pack_size">Cigarettes in pack</string>

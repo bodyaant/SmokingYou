@@ -40,7 +40,8 @@
     <string name="theme_system">Sistema</string>
     <string name="theme_light">Claro</string>
     <string name="theme_dark">Escuro</string>
-    <string name="settings_general">Geral</string>
+    <string name="settings_section_interface">Interface e aparência</string>
+    <string name="settings_section_goals">Objetivos e economia</string>
     <string name="settings_language">Idioma</string>
     <string name="language_value">Português</string>
     <string name="settings_statistics">Estatísticas</string>
@@ -49,7 +50,7 @@
     <string name="achievements_desc">Ver o seu progresso e recompensas</string>
     <string name="settings_notifications">Notificações</string>
     <string name="notifications_desc">Gerenciar alertas</string>
-    <string name="settings_data">Dados</string>
+    <string name="settings_data">Dados e backup</string>
     <string name="settings_backup">Backup</string>
     <string name="backup_desc">Salvar backup no dispositivo</string>
     <string name="settings_restore">Restaurar</string>
@@ -147,7 +148,7 @@
     <string name="set_limit_title">Definir limite diário</string>
     <string name="no_limit">0 (Sem limite)</string>
 
-    <string name="settings_info">Informações</string>
+    <string name="settings_info">Sobre e atualizações</string>
     <string name="about_app">Sobre o aplicativo</string>
     <string name="about_app_desc">Versão, desenvolvedor e links</string>
     <string name="app_version">Versão do app: %1$s</string>
@@ -191,7 +192,6 @@
     <string name="triggers_title">Gatilhos do tabagismo</string>
     <string name="trigger_count_pattern">%1$d vezes (%2$d%%)</string>
 
-    <string name="settings_cigarette_params">Configurações de cigarro</string>
     <string name="settings_pack_params">Configurações do maço</string>
     <string name="settings_pack_price">Preço do maço</string>
     <string name="settings_pack_size">Cigarros no maço</string>

@@ -40,7 +40,8 @@
     <string name="theme_system">Система</string>
     <string name="theme_light">Светлая</string>
     <string name="theme_dark">Тёмная</string>
-    <string name="settings_general">Общие</string>
+    <string name="settings_section_interface">Интерфейс и внешний вид</string>
+    <string name="settings_section_goals">Цели и экономика</string>
     <string name="settings_language">Язык</string>
     <string name="language_value">Русский</string>
     <string name="settings_statistics">Статистика</string>
@@ -49,7 +50,7 @@
     <string name="achievements_desc">Просмотр вашего прогресса и наград</string>
     <string name="settings_notifications">Уведомления</string>
     <string name="notifications_desc">Управление оповещениями</string>
-    <string name="settings_data">Данные</string>
+    <string name="settings_data">Данные и резервные копии</string>
     <string name="settings_backup">Резервное копирование</string>
     <string name="backup_desc">Сохранить данные на устройство</string>
     <string name="settings_restore">Восстановить</string>
@@ -149,7 +150,7 @@
     <string name="set_limit_title">Установить лимит</string>
     <string name="no_limit">0 (Без лимита)</string>
 
-    <string name="settings_info">Информация</string>
+    <string name="settings_info">О приложении и обновления</string>
     <string name="about_app">О приложении</string>
     <string name="about_app_desc">Версия, разработчик и ссылки</string>
     <string name="app_version">Версия приложения: %1$s</string>
@@ -194,7 +195,6 @@
     <string name="triggers_title">Причины курения</string>
     <string name="trigger_count_pattern">%1$d раз (%2$d%%)</string>
 
-    <string name="settings_cigarette_params">Параметры сигарет</string>
     <string name="settings_pack_params">Параметры пачки</string>
     <string name="settings_pack_price">Стоимость пачки</string>
     <string name="settings_pack_size">Сигарет в пачке</string>

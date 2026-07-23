@@ -40,7 +40,8 @@
     <string name="theme_system">Sistem</string>
     <string name="theme_light">Açık</string>
     <string name="theme_dark">Karanlık</string>
-    <string name="settings_general">Genel</string>
+    <string name="settings_section_interface">Arayüz ve Görünüm</string>
+    <string name="settings_section_goals">Hedefler ve Ekonomi</string>
     <string name="settings_language">Dil</string>
     <string name="language_value">Türkçe</string>
     <string name="settings_statistics">İstatistikler</string>
@@ -49,7 +50,7 @@
     <string name="achievements_desc">İlerlemenizi ve ödüllerinizi görüntüleyin</string>
     <string name="settings_notifications">Bildirimler</string>
     <string name="notifications_desc">Bildirimleri yönetin</string>
-    <string name="settings_data">Veri</string>
+    <string name="settings_data">Veriler ve Yedekleme</string>
     <string name="settings_backup">Yedekle</string>
     <string name="backup_desc">Verileri cihaza yedekle</string>
     <string name="settings_restore">Geri Yükle</string>
@@ -145,7 +146,7 @@
     <string name="set_limit_title">Günlük Limit Belirle</string>
     <string name="no_limit">0 (Limit yok)</string>
 
-    <string name="settings_info">Bilgi</string>
+    <string name="settings_info">Hakkında ve Güncellemeler</string>
     <string name="about_app">Uygulama hakkında</string>
     <string name="about_app_desc">Sürüm, geliştirici ve bağlantılar</string>
     <string name="app_version">Uygulama Sürümü: %1$s</string>
@@ -190,7 +191,6 @@
     <string name="triggers_title">Sigara Tetikleyicileri</string>
     <string name="trigger_count_pattern">%1$d kez (%2$d%%)</string>
 
-    <string name="settings_cigarette_params">Sigara Ayarları</string>
     <string name="settings_pack_params">Paket Ayarları</string>
     <string name="settings_pack_price">Paket Fiyatı</string>
     <string name="settings_pack_size">Paketteki sigara sayısı</string>

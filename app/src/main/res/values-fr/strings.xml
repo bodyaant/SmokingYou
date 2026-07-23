@@ -40,7 +40,8 @@
     <string name="theme_system">Système</string>
     <string name="theme_light">Clair</string>
     <string name="theme_dark">Sombre</string>
-    <string name="settings_general">Général</string>
+    <string name="settings_section_interface">Interface et apparence</string>
+    <string name="settings_section_goals">Objectifs et économie</string>
     <string name="settings_language">Langue</string>
     <string name="language_value">Français</string>
     <string name="settings_statistics">Statistiques</string>
@@ -49,7 +50,7 @@
     <string name="achievements_desc">Afficher vos progrès et récompenses</string>
     <string name="settings_notifications">Notifications</string>
     <string name="notifications_desc">Gérer les alertes</string>
-    <string name="settings_data">Données</string>
+    <string name="settings_data">Données et sauvegarde</string>
     <string name="settings_backup">Sauvegarde</string>
     <string name="backup_desc">Sauvegarder les données sur l\'appareil</string>
     <string name="settings_restore">Restaurer</string>
@@ -151,7 +152,7 @@
     <string name="set_limit_title">Définir la limite quotidienne</string>
     <string name="no_limit">0 (Pas de limite)</string>
 
-    <string name="settings_info">Infos</string>
+    <string name="settings_info">À propos et mises à jour</string>
     <string name="about_app">À propos de l\'application</string>
     <string name="about_app_desc">Version, développeur et liens</string>
     <string name="app_version">Version de l\'application : %1$s</string>
@@ -196,7 +197,6 @@
     <string name="triggers_title">Déclencheurs de tabagisme</string>
     <string name="trigger_count_pattern">%1$d fois (%2$d%%)</string>
 
-    <string name="settings_cigarette_params">Paramètres de cigarette</string>
     <string name="settings_pack_params">Paramètres du paquet</string>
     <string name="settings_pack_price">Prix du paquet</string>
     <string name="settings_pack_size">Cigarettes par paquet</string>

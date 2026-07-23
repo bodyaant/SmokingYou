@@ -40,7 +40,8 @@
     <string name="theme_system">System</string>
     <string name="theme_light">Hell</string>
     <string name="theme_dark">Dunkel</string>
-    <string name="settings_general">Allgemein</string>
+    <string name="settings_section_interface">Oberfläche &amp; Erscheinungsbild</string>
+    <string name="settings_section_goals">Ziele &amp; Finanzen</string>
     <string name="settings_language">Sprache</string>
     <string name="language_value">Deutsch</string>
     <string name="settings_statistics">Statistik</string>
@@ -49,7 +50,7 @@
     <string name="achievements_desc">Sieh dir deinen Fortschritt und deine Auszeichnungen an</string>
     <string name="settings_notifications">Benachrichtigungen</string>
     <string name="notifications_desc">Benachrichtigungen verwalten</string>
-    <string name="settings_data">Daten</string>
+    <string name="settings_data">Daten &amp; Sicherung</string>
     <string name="settings_backup">Datensicherung</string>
     <string name="backup_desc">Daten auf dem Gerät sichern</string>
     <string name="settings_restore">Wiederherstellen</string>
@@ -148,7 +149,7 @@
     <string name="set_limit_title">Tägliches Limit festlegen</string>
     <string name="no_limit">0 (Kein Limit)</string>
 
-    <string name="settings_info">Info</string>
+    <string name="settings_info">Über die App &amp; Updates</string>
     <string name="about_app">Über die App</string>
     <string name="about_app_desc">Version, Entwickler und Links</string>
     <string name="app_version">App-Version: %1$s</string>
@@ -193,7 +194,6 @@
     <string name="triggers_title">Rauchauslöser</string>
     <string name="trigger_count_pattern">%1$d Mal (%2$d%%)</string>
 
-    <string name="settings_cigarette_params">Zigaretten-Einstellungen</string>
     <string name="settings_pack_params">Schachtel-Einstellungen</string>
     <string name="settings_pack_price">Schachtelpreis</string>
     <string name="settings_pack_size">Zigaretten pro Schachtel</string>
