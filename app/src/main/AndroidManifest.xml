@@ -17,10 +17,6 @@
         android:localeConfig="@xml/locales_config">
 
         <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_cigarettebase" />
-
-        <meta-data
             android:name="autoStoreLocales"
             android:value="true" />
 
