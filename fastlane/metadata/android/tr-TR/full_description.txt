@@ -1,0 +1,11 @@
+SmokingYou, Material 3 Expressive tabanlı Android için minimalist ve veri odaklı bir sigara takip uygulamasıdır.
+
+Özellikler:
+- Alışkanlık Takibi: Tek dokunuşla kayıt. Gerçek zamanlı sigarasızlık zamanlayıcısı.
+- Ana Ekran Widget'ları: Hızlı Ekleme widget'ı (1x1) ve Canlı Zamanlayıcı widget'ı (3x1).
+- Bilinçli Mola: Sigara krizlerine karşı koymak için nefes egzersizi molası.
+- Azaltma Planı: Günlük limitler belirleyin ve sigarayı kendi hızınızda azaltın.
+- Detaylı Analiz: İnteraktif grafikler, kriz tetikleyicileri, para tasarrufu ve DSÖ sağlık kilometre taşları.
+- Başarı Sistemi: Sigarasız geçen süreler için rozetler kazanın.
+- Veri Yedekleme: JSON formatında yerel yedekleme ve geri yükleme.
+- Gizlilik Odaklı: %100 çevrimdışı, reklamsız, takipçisiz, açık kaynak.

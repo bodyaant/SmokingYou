@@ -1,0 +1,11 @@
+SmokingYou is a minimalist, data-oriented smoking tracker for Android based on Material 3 Expressive.
+
+Key Features:
+- Habit Tracking: Log entries with a single tap, real-time smoke-free timer.
+- Home Screen Widgets: Quick Add widget (1x1) and live Timer & Counter widget (3x1).
+- Mindful Craving Pause: Guided breathing pause to resist cravings and track attempts.
+- Tapering Reduction Plan: Set gradual reduction goals and track daily limits.
+- Detailed Analytics: Interactive daily/weekly charts, craving triggers, financial savings, and WHO health milestones.
+- Achievements System: Unlock milestone badges for smoke-free streaks.
+- Data Portability: Local JSON backup and restore.
+- Privacy First: 100% offline, no ads, no trackers, open source.

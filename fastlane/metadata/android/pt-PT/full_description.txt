@@ -1,0 +1,11 @@
+SmokingYou é um rastreador de tabagismo minimalista para Android baseado em Material 3 Expressive.
+
+Recursos:
+- Registo de hábitos: Registe com apenas um toque. Temporizador sem fumar em tempo real.
+- Widgets do ecrã principal: Widget de adição rápida (1x1) e widget temporizador (3x1).
+- Pausa consciente: Exercícios de respiração para resistir aos desejos.
+- Plano de redução gradual: Defina limites diários e reduza ao seu próprio ritmo.
+- Análise detalhada: Gráficos interativos, gatilhos de desejo, poupança financeira e metas de saúde da OMS.
+- Sistema de conquistas: Desbloqueie medalhas pelos seus dias sem fumar.
+- Portabilidade de dados: Cópia de segurança e restauração local em JSON.
+- Privacidade total: 100% offline, sem anúncios, sem rastreadores, código aberto.

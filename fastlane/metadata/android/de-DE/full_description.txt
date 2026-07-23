@@ -1,0 +1,11 @@
+SmokingYou ist ein minimalistischer, datenorientierter Raucher-Tracker für Android, basierend auf Material 3 Expressive.
+
+Funktionen:
+- Gewohnheits-Tracking: Erfassung mit einem Tippen. Echtzeit-Rauchfrei-Timer.
+- Startbildschirm-Widgets: Schnellhinzufügen-Widget (1x1) und Live-Timer & Zähler-Widget (3x1).
+- Achtsame Pause: Atemübungen zur Überwindung von Verlangen.
+- Reduktionsplan: Setzen Sie schrittweise Ziele und verfolgen Sie tägliche Limits.
+- Detaillierte Analysen: Interaktive Diagramme, Auslöser-Verteilung, Ersparnisse und WHO-Meilensteine.
+- Erfolge-System: Schalten Sie Meilensteine und Abzeichen frei.
+- Datensicherung: Lokales Sichern und Wiederherstellen (JSON).
+- Datenschutz an erster Stelle: 100% offline, keine Werbung, keine Tracker, Open Source.
