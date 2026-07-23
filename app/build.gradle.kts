@@ -43,6 +43,11 @@ android {
     androidResources {
         generateLocaleConfig = false
     }
+
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
 }
 
 dependencies {
