@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="images/preview.png" alt="SmokingYou Showcase" width="100%">
+  <img src="fastlane/metadata/android/en-US/images/featureGraphic.png" alt="SmokingYou Showcase" width="100%">
 
   # SmokingYou
 
@@ -40,8 +40,8 @@ SmokingYou is designed to help you track and manage your smoking habits. By offe
 ## Screenshots
 
 <p align="center">
-  <img src="images/1.png" width="33%"><img src="images/2.png" width="33%"><img src="images/3.png" width="33%">
-  <img src="images/4.png" width="33%"><img src="images/5.png" width="33%"><img src="images/6.png" width="33%">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="33%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="33%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="33%">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="33%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" width="33%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="33%">
 </p>
 
 ## Features
