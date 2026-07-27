@@ -123,6 +123,7 @@ internal fun HomeScreenContent(
     var isAnimating by remember { mutableStateOf(false) }
 
     val context = androidx.compose.ui.platform.LocalContext.current
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -295,6 +296,7 @@ internal fun HomeScreenContent(
                                 rowTriggers.forEach { trigger ->
                                     Surface(
                                         onClick = {
+                                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(haptic, context)
                                             if (pendingLogTime > 0L) {
                                                 viewModel?.addSmokingEntryWithTrigger(pendingLogTime, trigger.key)
                                             }
@@ -395,6 +397,7 @@ internal fun HomeScreenContent(
                         }
                         Button(
                             onClick = {
+                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(haptic, context)
                                 if (pendingLogTime > 0L) {
                                     viewModel?.addSmokingEntryWithTrigger(pendingLogTime, null)
                                 }
@@ -662,6 +665,7 @@ internal fun HomeScreenContent(
 
                     Surface(
                         onClick = {
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
                             val newDate = currentDate.clone() as Calendar
                             newDate.add(Calendar.DAY_OF_YEAR, -1)
                             currentDate = newDate
@@ -677,7 +681,10 @@ internal fun HomeScreenContent(
                     }
 
                     Surface(
-                        onClick = { showDatePicker = true },
+                        onClick = {
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                            showDatePicker = true
+                        },
                         shape = RoundedCornerShape(24.dp),
                         color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -702,6 +709,7 @@ internal fun HomeScreenContent(
 
                     Surface(
                         onClick = {
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
                             val newDate = currentDate.clone() as Calendar
                             newDate.add(Calendar.DAY_OF_YEAR, 1)
                             currentDate = newDate
@@ -746,6 +754,7 @@ internal fun HomeScreenContent(
                             index = index,
                             trigger = entity.trigger,
                             onDelete = {
+                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
                                 scope.launch {
                                     viewModel?.removeSmokingEntry(entity.timestamp)
                                     val result = snackbarHostState.showSnackbar(
@@ -781,6 +790,7 @@ internal fun HomeScreenContent(
                         rotationZ = rotationAngle.value
                     },
                 onClick = {
+                    com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
                     if (isAnimating) return@FloatingActionButton
 
                     scope.launch {
