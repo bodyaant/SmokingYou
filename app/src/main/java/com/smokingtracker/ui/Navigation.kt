@@ -180,6 +180,20 @@ fun MainApp(viewModel: MainViewModel) {
 
     val startDest = if (isRegistered == true) Screen.Home.route else Screen.Registration.route
 
+    val pendingAchievementPopup by viewModel.pendingAchievementPopup.collectAsState()
+
+    if (currentRoute != Screen.Registration.route) {
+        pendingAchievementPopup?.let { achievement ->
+            AchievementUnlockDialog(
+                achievement = achievement,
+                onDismiss = { viewModel.dismissAchievementPopup() },
+                onNavigateToAchievements = {
+                    navController.navigate(Screen.Achievements.route)
+                }
+            )
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -283,6 +297,8 @@ fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(Screen.Home, Screen.Graph, Screen.Personal)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val context = LocalContext.current
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
 
     HorizontalFloatingToolbar(
         expanded = true,
@@ -300,6 +316,7 @@ fun BottomNavigationBar(navController: NavHostController) {
             ShortNavigationBarItem(
                 selected = selected,
                 onClick = {
+                    com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
                     if (currentRoute != screen.route) {
                         navController.navigate(screen.route) {
                             popUpTo(Screen.Home.route) { saveState = true }
