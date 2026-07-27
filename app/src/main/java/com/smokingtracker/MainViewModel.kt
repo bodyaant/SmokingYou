@@ -208,6 +208,19 @@ class MainViewModel(
     private val _showTaperingCheckIn = MutableStateFlow(false)
     val showTaperingCheckIn: StateFlow<Boolean> = _showTaperingCheckIn.asStateFlow()
 
+    private val _achievementPopupQueue = MutableStateFlow<List<com.smokingtracker.Achievement>>(emptyList())
+    val pendingAchievementPopup: StateFlow<com.smokingtracker.Achievement?> = _achievementPopupQueue
+        .map { it.firstOrNull() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
+
+    fun dismissAchievementPopup() {
+        _achievementPopupQueue.value = _achievementPopupQueue.value.drop(1)
+    }
+
     init {
         viewModelScope.launch {
             val now = System.currentTimeMillis()
@@ -225,12 +238,18 @@ class MainViewModel(
             if (!alreadyLoggedToday) {
                 dataStoreManager.recordAppLaunch(now)
             }
-            checkAchievements()
-            checkTaperingPlanEligibility()
+            val isReg = dataStoreManager.isRegistered.first()
+            if (isReg == true) {
+                checkAchievements()
+                checkTaperingPlanEligibility()
+            }
         }
     }
 
     fun checkAchievements(updatedEntries: List<Long>? = null, wasEntryRemoved: Boolean = false) = viewModelScope.launch(Dispatchers.Default) {
+        val isReg = dataStoreManager.isRegistered.first()
+        if (isReg != true) return@launch
+
         val entries = updatedEntries ?: repository.smokingEntries.first().map { it.timestamp }
         val launches = dataStoreManager.appLaunchDates.first()
         val dailyLimit = dataStoreManager.dailyLimit.first()
@@ -272,6 +291,9 @@ class MainViewModel(
         val newlyUnlocked = effectiveUnlockedSet - previouslyUnlocked
         newlyUnlocked.forEach { achievementId ->
             AchievementsManager.sendNotificationForAchievement(context, achievementId)
+            AchievementsManager.getAchievementById(achievementId)?.let { ach ->
+                _achievementPopupQueue.value = _achievementPopupQueue.value + ach
+            }
         }
 
         dataStoreManager.setUnlockedAchievements(effectiveUnlockedSet)
@@ -280,6 +302,7 @@ class MainViewModel(
     fun registerUser() {
         viewModelScope.launch {
             dataStoreManager.saveUserProfile()
+            checkAchievements()
         }
     }
 
