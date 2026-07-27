@@ -12,7 +12,7 @@ android {
         applicationId = "com.smokingtracker"
         minSdk = 26
         targetSdk = 36
-        versionCode = getGitCommitCount()
+        versionCode = 189
         versionName = "1.3.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -101,4 +101,23 @@ fun getGitCommitCount(): Int {
         1
     }
 }
+
+tasks.register("updateVersionCode") {
+    description = "Updates the versionCode in build.gradle.kts based on git commit count"
+    group = "versioning"
+    doLast {
+        val count = getGitCommitCount()
+        val gradleFile = project.file("build.gradle.kts")
+        val content = gradleFile.readText()
+        val regex = Regex("""versionCode\s*=\s*\d+""")
+        val updatedContent = content.replace(regex, "versionCode = $count")
+        if (content != updatedContent) {
+            gradleFile.writeText(updatedContent)
+            println("Successfully updated versionCode to $count in build.gradle.kts")
+        } else {
+            println("versionCode is already up to date: $count")
+        }
+    }
+}
+
 
