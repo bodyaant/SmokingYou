@@ -27,6 +27,10 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.LocalCafe
 import androidx.compose.material.icons.filled.LocalBar
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.smokingtracker.data.TriggerType
 import androidx.compose.material3.MaterialShapes
@@ -107,6 +111,9 @@ fun GraphScreenContent(
     val monthlyData = remember(entries, monthlyDate) { StatisticsManager.generateMonthlyData(entries, monthlyDate) }
     val yearlyData = remember(entries, yearlyDate) { StatisticsManager.generateYearlyData(entries, yearlyDate) }
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+
     var activeDatePickerTarget by remember { mutableStateOf<String?>(null) }
 
     activeDatePickerTarget?.let { target ->
@@ -130,13 +137,14 @@ fun GraphScreenContent(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        datePickerState.selectedDateMillis?.let { millis ->
-                            val newDate = Calendar.getInstance().apply { timeInMillis = millis }
+                        datePickerState.selectedDateMillis?.let { selectedMillis ->
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                            val cal = Calendar.getInstance().apply { timeInMillis = selectedMillis }
                             when (target) {
-                                "daily" -> dailyDate = newDate
-                                "weekly" -> weeklyDate = newDate
-                                "monthly" -> monthlyDate = newDate
-                                "yearly" -> yearlyDate = newDate
+                                "daily" -> dailyDate = cal
+                                "weekly" -> weeklyDate = cal
+                                "monthly" -> monthlyDate = cal
+                                "yearly" -> yearlyDate = cal
                             }
                         }
                         activeDatePickerTarget = null
@@ -172,7 +180,10 @@ fun GraphScreenContent(
                 )
                 ExpressiveTabSelector(
                     selectedTab = selectedTab,
-                    onTabSelected = { selectedTab = it },
+                    onTabSelected = {
+                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                        selectedTab = it
+                    },
                     tabs = listOf(
                         stringResource(R.string.tab_graphs),
                         stringResource(R.string.settings_statistics),
@@ -186,6 +197,9 @@ fun GraphScreenContent(
         }
     ) { paddingValues ->
         if (selectedTab == 0) {
+            val weeklyComparison = remember(entries) { StatisticsManager.calculateWeeklyComparison(entries) }
+            val hourlyDistribution = remember(entries) { StatisticsManager.calculateHourlyDistribution(entries) }
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -195,6 +209,14 @@ fun GraphScreenContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 val dateFormat = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
+
+                item {
+                    WeeklyComparisonCard(comparison = weeklyComparison)
+                }
+
+                item {
+                    PeakSmokingHoursSection(distribution = hourlyDistribution)
+                }
 
                 item {
                     val dailyStr = remember(dailyDate) { dateFormat.format(dailyDate.time) }
@@ -343,6 +365,8 @@ fun GraphSection(
     canGoNext: Boolean = true,
     onDateClick: (() -> Unit)? = null
 ) {
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val context = androidx.compose.ui.platform.LocalContext.current
     val cookieShape = MaterialShapes.Cookie12Sided.toShape()
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -407,7 +431,10 @@ fun GraphSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Surface(
-                    onClick = onPrevious,
+                    onClick = {
+                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                        onPrevious()
+                    },
                     shape = cookieShape,
                     color = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -419,7 +446,10 @@ fun GraphSection(
                 }
 
                 Surface(
-                    onClick = { onDateClick?.invoke() },
+                    onClick = {
+                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                        onDateClick?.invoke()
+                    },
                     enabled = onDateClick != null,
                     shape = RoundedCornerShape(24.dp),
                     color = if (onDateClick != null) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainer,
@@ -446,7 +476,10 @@ fun GraphSection(
                 }
 
                 Surface(
-                    onClick = onNext,
+                    onClick = {
+                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                        onNext()
+                    },
                     enabled = canGoNext,
                     shape = cookieShape,
                     color = if (canGoNext) MaterialTheme.colorScheme.secondaryContainer
@@ -900,3 +933,260 @@ private fun getTriggerIcon(triggerKey: String?): ImageVector {
         else -> Icons.Filled.SmokingRooms
     }
 }
+
+@Composable
+private fun WeeklyComparisonCard(comparison: StatisticsManager.WeeklyComparisonData) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
+        border = containerBorder()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.weekly_comparison_title),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                val (badgeBg, badgeFg, badgeText, badgeIcon) = when (comparison.trend) {
+                    StatisticsManager.ComparisonTrend.DECREASED -> Quadruple(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        MaterialTheme.colorScheme.onPrimaryContainer,
+                        stringResource(R.string.weekly_comparison_decrease, comparison.percentChange),
+                        Icons.AutoMirrored.Filled.TrendingDown
+                    )
+                    StatisticsManager.ComparisonTrend.INCREASED -> Quadruple(
+                        MaterialTheme.colorScheme.errorContainer,
+                        MaterialTheme.colorScheme.onErrorContainer,
+                        stringResource(R.string.weekly_comparison_increase, comparison.percentChange),
+                        Icons.AutoMirrored.Filled.TrendingUp
+                    )
+                    StatisticsManager.ComparisonTrend.NO_CHANGE -> Quadruple(
+                        MaterialTheme.colorScheme.surfaceContainerHigh,
+                        MaterialTheme.colorScheme.onSurfaceVariant,
+                        stringResource(R.string.weekly_comparison_no_change),
+                        Icons.Filled.Remove
+                    )
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = badgeBg
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = badgeIcon,
+                            contentDescription = null,
+                            tint = badgeFg,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = badgeText,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = badgeFg
+                        )
+                    }
+                }
+            }
+
+            val desc = when (comparison.trend) {
+                StatisticsManager.ComparisonTrend.DECREASED -> stringResource(R.string.weekly_comparison_desc_decrease, Math.abs(comparison.difference))
+                StatisticsManager.ComparisonTrend.INCREASED -> stringResource(R.string.weekly_comparison_desc_increase, Math.abs(comparison.difference))
+                StatisticsManager.ComparisonTrend.NO_CHANGE -> stringResource(R.string.weekly_comparison_desc_no_change)
+            }
+
+            Text(
+                text = desc,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = stringResource(R.string.weekly_comparison_this_week, comparison.thisWeekCount),
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = stringResource(R.string.weekly_comparison_last_week, comparison.lastWeekCount),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+private data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
+
+@Composable
+private fun PeakSmokingHoursSection(distribution: StatisticsManager.HourlyDistributionData) {
+    var selectedHour by remember { mutableStateOf<Int?>(null) }
+    var isAnimated by remember { mutableStateOf(false) }
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    LaunchedEffect(Unit) {
+        isAnimated = true
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
+        border = containerBorder()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Column {
+                Text(
+                    text = stringResource(R.string.peak_hours_title),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = stringResource(R.string.peak_hours_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            if (distribution.hourlyCounts.all { it == 0 }) {
+                Text(
+                    text = stringResource(R.string.peak_hours_no_data),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                val periodText = stringResource(distribution.peakPeriodNameResId)
+                val summaryText = if (selectedHour != null) {
+                    val selCount = distribution.hourlyCounts[selectedHour!!]
+                    val startH = selectedHour!!
+                    val endH = (selectedHour!! + 1) % 24
+                    val formatTime = String.format(Locale.getDefault(), "%02d:00 - %02d:00", startH, endH)
+                    "$formatTime • $selCount шт."
+                } else {
+                    stringResource(R.string.peak_hours_summary, periodText, distribution.peakPeriodPercent)
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AccessTime,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = summaryText,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+
+                // 24-Hour Animated & Interactive Column Chart
+                val maxCount = distribution.hourlyCounts.maxOrNull()?.coerceAtLeast(1) ?: 1
+                val primaryColor = MaterialTheme.colorScheme.primary
+
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp),
+                        horizontalArrangement = Arrangement.spacedBy(3.dp),
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        distribution.hourlyCounts.forEachIndexed { hour, count ->
+                            val targetFraction = if (count == 0) 0.05f else (count.toFloat() / maxCount).coerceIn(0.08f, 1.0f)
+                            val animatedFraction by animateFloatAsState(
+                                targetValue = if (isAnimated) targetFraction else 0.03f,
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                    stiffness = Spring.StiffnessLow
+                                ),
+                                label = "bar_$hour"
+                            )
+
+                            val isPeak = hour == distribution.peakHour && count > 0
+                            val isSelected = hour == selectedHour
+
+                            val barColor = when {
+                                isSelected -> MaterialTheme.colorScheme.tertiary
+                                isPeak -> primaryColor
+                                count > 0 -> primaryColor.copy(alpha = 0.45f)
+                                else -> primaryColor.copy(alpha = 0.12f)
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(animatedFraction)
+                                    .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
+                                    .background(barColor)
+                                    .clickable {
+                                        selectedHour = if (selectedHour == hour) null else hour
+                                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                                    }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        listOf("00:00", "06:00", "12:00", "18:00", "23:00").forEach { label ->
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
