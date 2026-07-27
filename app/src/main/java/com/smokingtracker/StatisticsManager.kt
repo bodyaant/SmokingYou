@@ -309,4 +309,110 @@ object StatisticsManager {
             estimatedTriggerCounts = triggerCounts
         )
     }
+
+    enum class ComparisonTrend {
+        DECREASED, INCREASED, NO_CHANGE
+    }
+
+    data class WeeklyComparisonData(
+        val thisWeekCount: Int,
+        val lastWeekCount: Int,
+        val difference: Int,
+        val percentChange: Int,
+        val trend: ComparisonTrend
+    )
+
+    fun calculateWeeklyComparison(entries: List<Long>, referenceDate: Calendar = Calendar.getInstance()): WeeklyComparisonData {
+        val cal = referenceDate.clone() as Calendar
+        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+
+        // Set to start of week (Monday)
+        val firstDay = cal.firstDayOfWeek
+        while (cal.get(Calendar.DAY_OF_WEEK) != firstDay) {
+            cal.add(Calendar.DAY_OF_YEAR, -1)
+        }
+        val thisWeekStart = cal.timeInMillis
+
+        val prevWeekStartCal = cal.clone() as Calendar
+        prevWeekStartCal.add(Calendar.WEEK_OF_YEAR, -1)
+        val prevWeekStart = prevWeekStartCal.timeInMillis
+
+        val prevWeekEnd = thisWeekStart
+
+        val thisWeekEntries = entries.filter { it >= thisWeekStart }
+        val prevWeekEntries = entries.filter { it >= prevWeekStart && it < prevWeekEnd }
+
+        val thisWeekCount = thisWeekEntries.size
+        val lastWeekCount = prevWeekEntries.size
+        val diff = thisWeekCount - lastWeekCount
+
+        val percentChange = if (lastWeekCount == 0) {
+            if (thisWeekCount > 0) 100 else 0
+        } else {
+            Math.round(Math.abs(diff.toDouble()) * 100.0 / lastWeekCount).toInt()
+        }
+
+        val trend = when {
+            diff < 0 -> ComparisonTrend.DECREASED
+            diff > 0 -> ComparisonTrend.INCREASED
+            else -> ComparisonTrend.NO_CHANGE
+        }
+
+        return WeeklyComparisonData(
+            thisWeekCount = thisWeekCount,
+            lastWeekCount = lastWeekCount,
+            difference = diff,
+            percentChange = percentChange,
+            trend = trend
+        )
+    }
+
+    data class HourlyDistributionData(
+        val hourlyCounts: List<Int>,
+        val peakHour: Int,
+        val peakHourCount: Int,
+        val peakPeriodNameResId: Int,
+        val peakPeriodPercent: Int
+    )
+
+    fun calculateHourlyDistribution(entries: List<Long>): HourlyDistributionData {
+        val hourly = IntArray(24) { 0 }
+        val cal = Calendar.getInstance()
+        entries.forEach { ts ->
+            cal.timeInMillis = ts
+            val hour = cal.get(Calendar.HOUR_OF_DAY)
+            if (hour in 0..23) hourly[hour]++
+        }
+
+        val total = entries.size
+        val peakHour = hourly.indices.maxByOrNull { hourly[it] } ?: 0
+        val peakHourCount = hourly[peakHour]
+
+        val nightSum = hourly.slice(0..5).sum()
+        val morningSum = hourly.slice(6..11).sum()
+        val afternoonSum = hourly.slice(12..17).sum()
+        val eveningSum = hourly.slice(18..23).sum()
+
+        val periods = listOf(
+            nightSum to R.string.peak_period_night,
+            morningSum to R.string.peak_period_morning,
+            afternoonSum to R.string.peak_period_afternoon,
+            eveningSum to R.string.peak_period_evening
+        )
+
+        val bestPeriod = periods.maxByOrNull { it.first } ?: (0 to R.string.peak_period_afternoon)
+        val peakPeriodPercent = if (total > 0) Math.round((bestPeriod.first.toDouble() * 100.0) / total).toInt() else 0
+
+        return HourlyDistributionData(
+            hourlyCounts = hourly.toList(),
+            peakHour = peakHour,
+            peakHourCount = peakHourCount,
+            peakPeriodNameResId = bestPeriod.second,
+            peakPeriodPercent = peakPeriodPercent
+        )
+    }
 }
+
