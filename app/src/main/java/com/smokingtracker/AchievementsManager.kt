@@ -38,6 +38,8 @@ data class Achievement(
 
 object AchievementsManager {
 
+    fun getAchievementById(id: String): Achievement? = achievementsList.find { it.id == id }
+
     val achievementsList = listOf(
         Achievement("login_1", R.string.ach_curiosity_title, R.string.ach_curiosity_desc, AchievementCategory.LOGIN) { ctx ->
             ctx.launches.isNotEmpty()
