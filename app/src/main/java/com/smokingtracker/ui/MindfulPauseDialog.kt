@@ -85,7 +85,7 @@ fun MindfulPauseDialog(
             isTimerRunning = false
             isTimerFinished = true
             try {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(haptic, context)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -212,6 +212,7 @@ fun MindfulPauseDialog(
                 ) {
                     OutlinedButton(
                         onClick = {
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
                             totalSeconds += 15
                             secondsRemaining += 15
                         },
@@ -225,6 +226,7 @@ fun MindfulPauseDialog(
 
                     Button(
                         onClick = {
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(haptic, context)
                             isTimerRunning = false
                             isTimerFinished = true
                             elapsedTimeMs = totalSeconds * 1000L
@@ -246,7 +248,10 @@ fun MindfulPauseDialog(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Button(
-                        onClick = { onSuccess(selectedTrigger) },
+                        onClick = {
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(haptic, context)
+                            onSuccess(selectedTrigger)
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -265,7 +270,10 @@ fun MindfulPauseDialog(
                     }
 
                     TextButton(
-                        onClick = { onFailure(selectedTrigger) },
+                        onClick = {
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                            onFailure(selectedTrigger)
+                        },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(
