@@ -356,4 +356,28 @@
     <string name="widget_pin_button_1x1">Add 1x1</string>
     <string name="widget_pin_button_3x1">Add 3x1</string>
     <string name="widget_pin_unsupported_toast">Press and hold home screen to add widget</string>
+
+    <string name="weekly_comparison_title">Weekly Comparison</string>
+    <string name="weekly_comparison_decrease">Decreased by %1$d%%</string>
+    <string name="weekly_comparison_increase">Increased by %1$d%%</string>
+    <string name="weekly_comparison_no_change">No change vs last week</string>
+    <string name="weekly_comparison_desc_decrease">Great job! You smoked %1$d fewer cigarettes than
+        last week.</string>
+    <string name="weekly_comparison_desc_increase">You smoked %1$d more cigarettes than last week.</string>
+    <string name="weekly_comparison_desc_no_change">You smoked the exact same amount as last week.</string>
+    <string name="weekly_comparison_this_week">This week: %1$d</string>
+    <string name="weekly_comparison_last_week">Last week: %1$d</string>
+
+    <string name="peak_hours_title">Peak Smoking Hours</string>
+    <string name="peak_hours_subtitle">Hourly distribution throughout the day</string>
+    <string name="peak_hours_summary">Peak intensity: %1$s (%2$d%% of all cigarettes)</string>
+    <string name="peak_period_morning">Morning (06:00 - 12:00)</string>
+    <string name="peak_period_afternoon">Afternoon (12:00 - 18:00)</string>
+    <string name="peak_period_evening">Evening (18:00 - 00:00)</string>
+    <string name="peak_period_night">Night (00:00 - 06:00)</string>
+    <string name="peak_hours_no_data">Not enough data to calculate peak hours</string>
+
+    <string name="achievement_unlocked_dialog_title">Achievement Unlocked!</string>
+    <string name="achievement_view_all">View All</string>
+    <string name="dialog_awesome">Awesome!</string>
 </resources>

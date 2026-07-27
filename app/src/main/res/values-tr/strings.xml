@@ -35,7 +35,8 @@
     <string name="settings_appearance">Görünüm</string>
     <string name="settings_theme">Tema</string>
     <string name="settings_container_border">Kapsayıcı kenarlıkları</string>
-    <string name="settings_container_border_desc">Kartların ve kapsayıcıların etrafında ince kenarlık göster</string>
+    <string name="settings_container_border_desc">Kartların ve kapsayıcıların etrafında ince
+        kenarlık göster</string>
     <string name="limit_dialog_helper">Sınırsız günlük sigara için 0 yapın</string>
     <string name="theme_system">Sistem</string>
     <string name="theme_light">Açık</string>
@@ -357,4 +358,29 @@
     <string name="widget_pin_button_1x1">1x1 Ekle</string>
     <string name="widget_pin_button_3x1">3x1 Ekle</string>
     <string name="widget_pin_unsupported_toast">Araç takımı eklemek için ana ekrana basılı tutun</string>
+
+    <string name="weekly_comparison_title">Haftalık Karşılaştırma</string>
+    <string name="weekly_comparison_decrease">%%%1$d azaldı</string>
+    <string name="weekly_comparison_increase">%%%1$d arttı</string>
+    <string name="weekly_comparison_no_change">Geçen haftaya göre değişim yok</string>
+    <string name="weekly_comparison_desc_decrease">Tebrikler! Geçen haftaya göre %1$d daha az sigara
+        içtiniz.</string>
+    <string name="weekly_comparison_desc_increase">Geçen haftaya göre %1$d daha fazla sigara
+        içtiniz.</string>
+    <string name="weekly_comparison_desc_no_change">Geçen haftayla tam olarak aynı miktarda içtiniz.</string>
+    <string name="weekly_comparison_this_week">Bu hafta: %1$d</string>
+    <string name="weekly_comparison_last_week">Geçen hafta: %1$d</string>
+
+    <string name="peak_hours_title">En Yoğun İçim Saatleri</string>
+    <string name="peak_hours_subtitle">Gün içindeki saatlik dağılım</string>
+    <string name="peak_hours_summary">En yoğun dönem: %1$s (Sigaraların %%%2$d\'si)</string>
+    <string name="peak_period_morning">Sabah (06:00 - 12:00)</string>
+    <string name="peak_period_afternoon">Öğleden sonra (12:00 - 18:00)</string>
+    <string name="peak_period_evening">Akşam (18:00 - 00:00)</string>
+    <string name="peak_period_night">Gece (00:00 - 06:00)</string>
+    <string name="peak_hours_no_data">Yoğun saatleri hesaplamak için yeterli veri yok</string>
+
+    <string name="achievement_unlocked_dialog_title">Başarım Açıldı!</string>
+    <string name="achievement_view_all">Tüm Başarımlar</string>
+    <string name="dialog_awesome">Harika!</string>
 </resources>

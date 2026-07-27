@@ -358,4 +358,30 @@
     <string name="widget_pin_button_1x1">Добавить 1x1</string>
     <string name="widget_pin_button_3x1">Добавить 3x1</string>
     <string name="widget_pin_unsupported_toast">Зажмите рабочий стол для добавления виджета</string>
+
+    <string name="weekly_comparison_title">Динамика недели</string>
+    <string name="weekly_comparison_decrease">Снижение на %1$d%%</string>
+    <string name="weekly_comparison_increase">Увеличение на %1$d%%</string>
+    <string name="weekly_comparison_no_change">Без изменений</string>
+    <string name="weekly_comparison_desc_decrease">Отличная работа! Вы выкурили на %1$d сигарет
+        меньше, чем на прошлой неделе.</string>
+    <string name="weekly_comparison_desc_increase">Вы выкурили на %1$d сигарет больше, чем на
+        прошлой неделе.</string>
+    <string name="weekly_comparison_desc_no_change">Вы выкурили то же количество сигарет, что и на
+        прошлой неделе.</string>
+    <string name="weekly_comparison_this_week">На этой неделе: %1$d</string>
+    <string name="weekly_comparison_last_week">На прошлой неделе: %1$d</string>
+
+    <string name="peak_hours_title">Пиковые часы курения</string>
+    <string name="peak_hours_subtitle">Распределение покуров по часам суток</string>
+    <string name="peak_hours_summary">Пик активности: %1$s (%2$d%% всех сигарет)</string>
+    <string name="peak_period_morning">Утром (06:00 - 12:00)</string>
+    <string name="peak_period_afternoon">Днем (12:00 - 18:00)</string>
+    <string name="peak_period_evening">Вечером (18:00 - 00:00)</string>
+    <string name="peak_period_night">Ночью (00:00 - 06:00)</string>
+    <string name="peak_hours_no_data">Недостаточно данных для пиковых часов</string>
+
+    <string name="achievement_unlocked_dialog_title">Достижение разблокировано!</string>
+    <string name="achievement_view_all">Все достижения</string>
+    <string name="dialog_awesome">Отлично!</string>
 </resources>

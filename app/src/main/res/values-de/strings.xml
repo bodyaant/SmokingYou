@@ -345,7 +345,8 @@
     <string name="widget_quick_add_title">Schnell hinzufügen</string>
     <string name="widget_quick_add_description">1x1 Widget zum sofortigen Erfassen einer Zigarette</string>
     <string name="widget_timer_title">Timer &amp; Schnell hinzufügen</string>
-    <string name="widget_timer_description">Zeit seit der letzten Zigarette und Schnell-Erfassungstaste</string>
+    <string name="widget_timer_description">Zeit seit der letzten Zigarette und
+        Schnell-Erfassungstaste</string>
     <string name="widget_last_smoke">Seit der letzten:</string>
     <string name="widget_just_now">Gerade eben</string>
     <string name="widget_no_entries">Noch keine Einträge</string>
@@ -360,5 +361,31 @@
     <string name="settings_widgets_desc">Schneller Timer &amp; Schnell-Taste auf dem Startbildschirm</string>
     <string name="widget_pin_button_1x1">1x1 hinzufügen</string>
     <string name="widget_pin_button_3x1">3x1 hinzufügen</string>
-    <string name="widget_pin_unsupported_toast">Startbildschirm gedrückt halten, um Widget hinzuzufügen</string>
+    <string name="widget_pin_unsupported_toast">Startbildschirm gedrückt halten, um Widget
+        hinzuzufügen</string>
+
+    <string name="weekly_comparison_title">Wochenvergleich</string>
+    <string name="weekly_comparison_decrease">Um %1$d%% gesunken</string>
+    <string name="weekly_comparison_increase">Um %1$d%% gestiegen</string>
+    <string name="weekly_comparison_no_change">Keine Änderung zur Vorwoche</string>
+    <string name="weekly_comparison_desc_decrease">Gute Arbeit! Du hast %1$d Zigaretten weniger
+        geraucht als letzte Woche.</string>
+    <string name="weekly_comparison_desc_increase">Du hast %1$d Zigaretten mehr geraucht als letzte
+        Woche.</string>
+    <string name="weekly_comparison_desc_no_change">Du hast exakt so viel geraucht wie letzte Woche.</string>
+    <string name="weekly_comparison_this_week">Diese Woche: %1$d</string>
+    <string name="weekly_comparison_last_week">Letzte Woche: %1$d</string>
+
+    <string name="peak_hours_title">Spitzenzeiten des Rauchens</string>
+    <string name="peak_hours_subtitle">Stündliche Verteilung über den Tag</string>
+    <string name="peak_hours_summary">Höchste Intensität: %1$s (%2$d%% aller Zigaretten)</string>
+    <string name="peak_period_morning">Morgens (06:00 - 12:00)</string>
+    <string name="peak_period_afternoon">Nachmittags (12:00 - 18:00)</string>
+    <string name="peak_period_evening">Abends (18:00 - 00:00)</string>
+    <string name="peak_period_night">Nachts (00:00 - 06:00)</string>
+    <string name="peak_hours_no_data">Nicht genügend Daten für Spitzenzeiten</string>
+
+    <string name="achievement_unlocked_dialog_title">Erfolg freigeschaltet!</string>
+    <string name="achievement_view_all">Alle Erfolge</string>
+    <string name="dialog_awesome">Großartig!</string>
 </resources>

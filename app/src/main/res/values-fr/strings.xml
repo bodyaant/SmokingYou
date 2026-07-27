@@ -35,8 +35,10 @@
     <string name="settings_appearance">Thème</string>
     <string name="settings_theme">Thème</string>
     <string name="settings_container_border">Bordures des conteneurs</string>
-    <string name="settings_container_border_desc">Afficher une bordure subtile autour des cartes et conteneurs</string>
-    <string name="limit_dialog_helper">Régler sur 0 pour un nombre illimité de cigarettes quotidiennes</string>
+    <string name="settings_container_border_desc">Afficher une bordure subtile autour des cartes et
+        conteneurs</string>
+    <string name="limit_dialog_helper">Régler sur 0 pour un nombre illimité de cigarettes
+        quotidiennes</string>
     <string name="theme_system">Système</string>
     <string name="theme_light">Clair</string>
     <string name="theme_dark">Sombre</string>
@@ -346,9 +348,11 @@
     <string name="history_duration_days_y_m">%1$d jours (%2$da %3$dm)</string>
 
     <string name="widget_quick_add_title">Ajout rapide</string>
-    <string name="widget_quick_add_description">Widget 1x1 pour enregistrer une cigarette instantanément</string>
+    <string name="widget_quick_add_description">Widget 1x1 pour enregistrer une cigarette
+        instantanément</string>
     <string name="widget_timer_title">Minuteur et Ajout</string>
-    <string name="widget_timer_description">Temps depuis la dernière cigarette et bouton d\'ajout rapide</string>
+    <string name="widget_timer_description">Temps depuis la dernière cigarette et bouton d\'ajout
+        rapide</string>
     <string name="widget_last_smoke">Depuis la dernière :</string>
     <string name="widget_just_now">À l\'instant</string>
     <string name="widget_no_entries">Aucune entrée</string>
@@ -363,5 +367,32 @@
     <string name="settings_widgets_desc">Minuteur et bouton rapide sur l\'écran d\'accueil</string>
     <string name="widget_pin_button_1x1">Ajouter 1x1</string>
     <string name="widget_pin_button_3x1">Ajouter 3x1</string>
-    <string name="widget_pin_unsupported_toast">Appuyez longuement sur l\'écran d\'accueil pour ajouter le widget</string>
+    <string name="widget_pin_unsupported_toast">Appuyez longuement sur l\'écran d\'accueil pour
+        ajouter le widget</string>
+
+    <string name="weekly_comparison_title">Comparaison hebdomadaire</string>
+    <string name="weekly_comparison_decrease">Diminution de %1$d%%</string>
+    <string name="weekly_comparison_increase">Augmentation de %1$d%%</string>
+    <string name="weekly_comparison_no_change">Aucun changement par rapport à la semaine dernière</string>
+    <string name="weekly_comparison_desc_decrease">Beau travail ! Vous avez fumé %1$d cigarettes de
+        moins que la semaine dernière.</string>
+    <string name="weekly_comparison_desc_increase">Vous avez fumé %1$d cigarettes de plus que la
+        semaine dernière.</string>
+    <string name="weekly_comparison_desc_no_change">Vous avez fumé exactement la même quantité que
+        la semaine dernière.</string>
+    <string name="weekly_comparison_this_week">Cette semaine : %1$d</string>
+    <string name="weekly_comparison_last_week">Semaine dernière : %1$d</string>
+
+    <string name="peak_hours_title">Heures de pointe de consommation</string>
+    <string name="peak_hours_subtitle">Distribution horaire sur la journée</string>
+    <string name="peak_hours_summary">Pic de consommation : %1$s (%2$d%% du total)</string>
+    <string name="peak_period_morning">Matin (06:00 - 12:00)</string>
+    <string name="peak_period_afternoon">Après-midi (12:00 - 18:00)</string>
+    <string name="peak_period_evening">Soir (18:00 - 00:00)</string>
+    <string name="peak_period_night">Nuit (00:00 - 06:00)</string>
+    <string name="peak_hours_no_data">Pas assez de données pour les heures de pointe</string>
+
+    <string name="achievement_unlocked_dialog_title">Succès déverrouillé !</string>
+    <string name="achievement_view_all">Voir tous les succès</string>
+    <string name="dialog_awesome">Super !</string>
 </resources>

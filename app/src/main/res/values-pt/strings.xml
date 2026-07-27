@@ -35,7 +35,8 @@
     <string name="settings_appearance">Tema</string>
     <string name="settings_theme">Tema</string>
     <string name="settings_container_border">Bordas dos recipientes</string>
-    <string name="settings_container_border_desc">Mostrar contorno sutil ao redor de cartões e recipientes</string>
+    <string name="settings_container_border_desc">Mostrar contorno sutil ao redor de cartões e
+        recipientes</string>
     <string name="limit_dialog_helper">Defina como 0 para cigarros diários ilimitados</string>
     <string name="theme_system">Sistema</string>
     <string name="theme_light">Claro</string>
@@ -358,5 +359,32 @@
     <string name="settings_widgets_desc">Temporizador e botão rápido na tela inicial</string>
     <string name="widget_pin_button_1x1">Adicionar 1x1</string>
     <string name="widget_pin_button_3x1">Adicionar 3x1</string>
-    <string name="widget_pin_unsupported_toast">Pressione e segure a tela inicial para adicionar o widget</string>
+    <string name="widget_pin_unsupported_toast">Pressione e segure a tela inicial para adicionar o
+        widget</string>
+
+    <string name="weekly_comparison_title">Comparativo semanal</string>
+    <string name="weekly_comparison_decrease">Redução de %1$d%%</string>
+    <string name="weekly_comparison_increase">Aumento de %1$d%%</string>
+    <string name="weekly_comparison_no_change">Sem alteração em relação à semana passada</string>
+    <string name="weekly_comparison_desc_decrease">Bom trabalho! Você fumou %1$d cigarros a menos
+        que na semana passada.</string>
+    <string name="weekly_comparison_desc_increase">Você fumou %1$d cigarros a mais que na semana
+        passada.</string>
+    <string name="weekly_comparison_desc_no_change">Você fumou exatamente a mesma quantidade da
+        semana passada.</string>
+    <string name="weekly_comparison_this_week">Esta semana: %1$d</string>
+    <string name="weekly_comparison_last_week">Semana passada: %1$d</string>
+
+    <string name="peak_hours_title">Horários de pico de consumo</string>
+    <string name="peak_hours_subtitle">Distribuição horária ao longo do dia</string>
+    <string name="peak_hours_summary">Pico de consumo: %1$s (%2$d%% do total)</string>
+    <string name="peak_period_morning">Manhã (06:00 - 12:00)</string>
+    <string name="peak_period_afternoon">Tarde (12:00 - 18:00)</string>
+    <string name="peak_period_evening">Noite (18:00 - 00:00)</string>
+    <string name="peak_period_night">Madrugada (00:00 - 06:00)</string>
+    <string name="peak_hours_no_data">Dados insuficientes para calcular os horários de pico</string>
+
+    <string name="achievement_unlocked_dialog_title">Conquista desbloqueada!</string>
+    <string name="achievement_view_all">Ver todas as conquistas</string>
+    <string name="dialog_awesome">Incrível!</string>
 </resources>

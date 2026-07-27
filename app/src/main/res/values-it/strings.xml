@@ -35,7 +35,8 @@
     <string name="settings_appearance">Tema</string>
     <string name="settings_theme">Tema</string>
     <string name="settings_container_border">Bordi dei contenitori</string>
-    <string name="settings_container_border_desc">Mostra un bordo sottile attorno a schede e contenitori</string>
+    <string name="settings_container_border_desc">Mostra un bordo sottile attorno a schede e
+        contenitori</string>
     <string name="limit_dialog_helper">Imposta a 0 per sigarette giornaliere illimitate</string>
     <string name="theme_system">Sistema</string>
     <string name="theme_light">Chiaro</string>
@@ -363,5 +364,32 @@
     <string name="settings_widgets_desc">Timer e pulsante rapido sulla schermata home</string>
     <string name="widget_pin_button_1x1">Aggiungi 1x1</string>
     <string name="widget_pin_button_3x1">Aggiungi 3x1</string>
-    <string name="widget_pin_unsupported_toast">Tieni premuta la schermata home per aggiungere il widget</string>
+    <string name="widget_pin_unsupported_toast">Tieni premuta la schermata home per aggiungere il
+        widget</string>
+
+    <string name="weekly_comparison_title">Confronto settimanale</string>
+    <string name="weekly_comparison_decrease">Riduzione del %1$d%%</string>
+    <string name="weekly_comparison_increase">Aumento del %1$d%%</string>
+    <string name="weekly_comparison_no_change">Nessuna variazione rispetto alla settimana scorsa</string>
+    <string name="weekly_comparison_desc_decrease">Ottimo lavoro! Hai fumato %1$d sigarette in meno
+        rispetto alla settimana scorsa.</string>
+    <string name="weekly_comparison_desc_increase">Hai fumato %1$d sigarette in più rispetto alla
+        settimana scorsa.</string>
+    <string name="weekly_comparison_desc_no_change">Hai fumato esattamente la stessa quantità della
+        settimana scorsa.</string>
+    <string name="weekly_comparison_this_week">Questa settimana: %1$d</string>
+    <string name="weekly_comparison_last_week">Settimana scorsa: %1$d</string>
+
+    <string name="peak_hours_title">Ore di picco di fumo</string>
+    <string name="peak_hours_subtitle">Distribuzione oraria durante il giorno</string>
+    <string name="peak_hours_summary">Picco di consumo: %1$s (%2$d%% del totale)</string>
+    <string name="peak_period_morning">Mattina (06:00 - 12:00)</string>
+    <string name="peak_period_afternoon">Pomeriggio (12:00 - 18:00)</string>
+    <string name="peak_period_evening">Sera (18:00 - 00:00)</string>
+    <string name="peak_period_night">Notte (00:00 - 06:00)</string>
+    <string name="peak_hours_no_data">Dati insufficienti per calcolare le ore di picco</string>
+
+    <string name="achievement_unlocked_dialog_title">Obiettivo sbloccato!</string>
+    <string name="achievement_view_all">Tutti gli obiettivi</string>
+    <string name="dialog_awesome">Fantastico!</string>
 </resources>
