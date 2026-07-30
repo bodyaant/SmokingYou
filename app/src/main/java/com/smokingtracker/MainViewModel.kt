@@ -96,6 +96,12 @@ class MainViewModel(
         initialValue = false
     )
 
+    val vibrationEnabled: StateFlow<Boolean> = dataStoreManager.vibrationEnabled.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
+
     val appLaunchDates: StateFlow<List<Long>> = dataStoreManager.appLaunchDates.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -278,14 +284,17 @@ class MainViewModel(
         val previouslyUnlocked = dataStoreManager.unlockedAchievements.first()
         val newUnlockedSet = AchievementsManager.calculateUnlockedAchievements(ctx)
 
+        val noSmokeIds = AchievementsManager.achievementsList
+            .filter { it.category == AchievementCategory.NO_SMOKE }
+            .map { it.id }.toSet()
+
+        val preservedNonNoSmoke = previouslyUnlocked - noSmokeIds
+
         val effectiveUnlockedSet = if (wasEntryRemoved) {
-            val noSmokeIds = AchievementsManager.achievementsList
-                .filter { it.category == AchievementCategory.NO_SMOKE }
-                .map { it.id }.toSet()
             val preservedNoSmoke = previouslyUnlocked.intersect(noSmokeIds)
-            newUnlockedSet + preservedNoSmoke
+            preservedNonNoSmoke + newUnlockedSet + preservedNoSmoke
         } else {
-            newUnlockedSet
+            preservedNonNoSmoke + newUnlockedSet
         }
 
         val newlyUnlocked = effectiveUnlockedSet - previouslyUnlocked
@@ -529,6 +538,12 @@ class MainViewModel(
         }
     }
 
+    fun updateVibrationEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.saveVibrationEnabled(enabled)
+        }
+    }
+
     fun updateAppIcon(iconKey: String) {
         viewModelScope.launch {
             dataStoreManager.saveAppIcon(iconKey)
@@ -594,7 +609,12 @@ class MainViewModel(
         @SerializedName("colorPreset") val colorPreset: String? = "SYSTEM",
         @SerializedName("entryTriggers") val entryTriggers: Map<Long, String>? = emptyMap(),
         @SerializedName("fontPreset") val fontPreset: String? = "WIDE",
-        @SerializedName("amoledTheme") val amoledTheme: Boolean? = false
+        @SerializedName("amoledTheme") val amoledTheme: Boolean? = false,
+        @SerializedName("vibrationEnabled") val vibrationEnabled: Boolean? = false,
+        @SerializedName("hasMadeBackup") val hasMadeBackup: Boolean? = false,
+        @SerializedName("hasChangedPackPrice") val hasChangedPackPrice: Boolean? = false,
+        @SerializedName("hasCancelledWithin10s") val hasCancelledWithin10s: Boolean? = false,
+        @SerializedName("appLaunchDates") val appLaunchDates: List<Long>? = emptyList()
     )
 
     fun backupData(uri: Uri, onSuccess: () -> Unit, onError: () -> Unit) {
@@ -613,7 +633,12 @@ class MainViewModel(
                     colorPreset = dataStoreManager.colorPreset.first(),
                     entryTriggers = currentEntries.filter { it.trigger != null }.associate { it.timestamp to it.trigger!! },
                     fontPreset = dataStoreManager.fontPreset.first(),
-                    amoledTheme = dataStoreManager.amoledTheme.first()
+                    amoledTheme = dataStoreManager.amoledTheme.first(),
+                    vibrationEnabled = dataStoreManager.vibrationEnabled.first(),
+                    hasMadeBackup = dataStoreManager.hasMadeBackup.first(),
+                    hasChangedPackPrice = dataStoreManager.hasChangedPackPrice.first(),
+                    hasCancelledWithin10s = dataStoreManager.hasCancelledWithin10s.first(),
+                    appLaunchDates = dataStoreManager.appLaunchDates.first()
                 )
                 
                 context.contentResolver.openOutputStream(uri)?.use { outputStream ->
@@ -647,7 +672,12 @@ class MainViewModel(
                                 curr = data.currency ?: "USD",
                                 colorPresetVal = data.colorPreset ?: "SYSTEM",
                                 fontPresetVal = data.fontPreset ?: "WIDE",
-                                amoledThemeVal = data.amoledTheme ?: false
+                                amoledThemeVal = data.amoledTheme ?: false,
+                                vibrationEnabledVal = data.vibrationEnabled ?: false,
+                                hasBackupVal = data.hasMadeBackup ?: false,
+                                hasPriceChangedVal = data.hasChangedPackPrice ?: false,
+                                hasCancelled10sVal = data.hasCancelledWithin10s ?: false,
+                                launchesVal = data.appLaunchDates ?: emptyList()
                             )
                             val newEntities = data.smokingEntries.map { ts ->
                                 SmokingEntryEntity(
