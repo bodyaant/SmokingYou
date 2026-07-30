@@ -37,6 +37,8 @@
     <string name="settings_container_border">Bordes de contenedores</string>
     <string name="settings_container_border_desc">Mostrar borde sutil alrededor de tarjetas y
         contenedores</string>
+    <string name="settings_vibration">Vibración</string>
+    <string name="settings_vibration_desc">Vibración al pulsar y realizar acciones</string>
     <string name="limit_dialog_helper">Establecer en 0 para cigarrillos diarios ilimitados</string>
     <string name="theme_system">Sistema</string>
     <string name="theme_light">Claro</string>

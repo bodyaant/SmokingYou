@@ -37,6 +37,8 @@
     <string name="settings_container_border">Bordi dei contenitori</string>
     <string name="settings_container_border_desc">Mostra un bordo sottile attorno a schede e
         contenitori</string>
+    <string name="settings_vibration">Feedback aptico</string>
+    <string name="settings_vibration_desc">Vibrazione al tocco e durante le azioni</string>
     <string name="limit_dialog_helper">Imposta a 0 per sigarette giornaliere illimitate</string>
     <string name="theme_system">Sistema</string>
     <string name="theme_light">Chiaro</string>

@@ -36,6 +36,8 @@
     <string name="settings_theme">Theme</string>
     <string name="settings_container_border">Container borders</string>
     <string name="settings_container_border_desc">Show subtle outline around cards and containers</string>
+    <string name="settings_vibration">Haptic feedback</string>
+    <string name="settings_vibration_desc">Vibrate on touches and interactions</string>
     <string name="limit_dialog_helper">Set to 0 for unlimited daily cigarettes</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>

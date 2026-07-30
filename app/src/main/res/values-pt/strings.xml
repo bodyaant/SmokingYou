@@ -37,6 +37,8 @@
     <string name="settings_container_border">Bordas dos recipientes</string>
     <string name="settings_container_border_desc">Mostrar contorno sutil ao redor de cartões e
         recipientes</string>
+    <string name="settings_vibration">Feedback tátil</string>
+    <string name="settings_vibration_desc">Vibração ao tocar e realizar ações</string>
     <string name="limit_dialog_helper">Defina como 0 para cigarros diários ilimitados</string>
     <string name="theme_system">Sistema</string>
     <string name="theme_light">Claro</string>

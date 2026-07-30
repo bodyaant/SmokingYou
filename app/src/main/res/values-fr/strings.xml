@@ -37,6 +37,8 @@
     <string name="settings_container_border">Bordures des conteneurs</string>
     <string name="settings_container_border_desc">Afficher une bordure subtile autour des cartes et
         conteneurs</string>
+    <string name="settings_vibration">Retour haptique</string>
+    <string name="settings_vibration_desc">Vibration lors des appuis et actions</string>
     <string name="limit_dialog_helper">Régler sur 0 pour un nombre illimité de cigarettes
         quotidiennes</string>
     <string name="theme_system">Système</string>

@@ -36,6 +36,8 @@
     <string name="settings_theme">Тема</string>
     <string name="settings_container_border">Обводка контейнерів</string>
     <string name="settings_container_border_desc">Показувати тонку обводку у карток та контейнерів</string>
+    <string name="settings_vibration">Вібровідгук</string>
+    <string name="settings_vibration_desc">Вібрація при натисканнях та діях</string>
     <string name="limit_dialog_helper">Вкажіть 0 для куріння без щоденного ліміту</string>
     <string name="theme_system">Системна</string>
     <string name="theme_light">Світла</string>

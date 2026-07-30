@@ -37,6 +37,8 @@
     <string name="settings_container_border">Kapsayıcı kenarlıkları</string>
     <string name="settings_container_border_desc">Kartların ve kapsayıcıların etrafında ince
         kenarlık göster</string>
+    <string name="settings_vibration">Titreşim geri bildirimi</string>
+    <string name="settings_vibration_desc">Dokunma ve işlemlerde titreşim</string>
     <string name="limit_dialog_helper">Sınırsız günlük sigara için 0 yapın</string>
     <string name="theme_system">Sistem</string>
     <string name="theme_light">Açık</string>
