@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.CropSquare
+import androidx.compose.material.icons.filled.TouchApp
 import com.smokingtracker.ui.theme.containerBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -55,6 +56,8 @@ fun AppearanceSettingsScreen(
     val colorPreset by viewModel.colorPreset.collectAsState()
     val appIcon by viewModel.appIcon.collectAsState()
     val containerBorderEnabled by viewModel.containerBorderEnabled.collectAsState()
+    val vibrationEnabled by viewModel.vibrationEnabled.collectAsState()
+    val context = LocalContext.current
 
     val useDarkTheme = when (themePreference) {
         ThemePreference.LIGHT -> false
@@ -197,7 +200,7 @@ fun AppearanceSettingsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
+                    shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                     border = containerBorder()
                 ) {
@@ -235,6 +238,65 @@ fun AppearanceSettingsScreen(
                             onCheckedChange = viewModel::updateContainerBorderEnabled,
                             thumbContent = {
                                 if (containerBorderEnabled) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                                    )
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                    border = containerBorder()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 18.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(Icons.Filled.TouchApp, contentDescription = null)
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.settings_vibration),
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_vibration_desc),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                            )
+                        }
+                        Switch(
+                            checked = vibrationEnabled,
+                            onCheckedChange = { enabled ->
+                                viewModel.updateVibrationEnabled(enabled)
+                                if (enabled) {
+                                    com.smokingtracker.ui.theme.HapticFeedbackHelper.isVibrationEnabled = true
+                                    com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(null, context)
+                                }
+                            },
+                            thumbContent = {
+                                if (vibrationEnabled) {
                                     Icon(
                                         imageVector = Icons.Filled.Check,
                                         contentDescription = null,
