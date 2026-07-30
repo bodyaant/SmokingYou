@@ -51,6 +51,7 @@ class DataStoreManager(private val context: Context) {
         val HISTORICAL_PACK_SIZE = intPreferencesKey("historical_pack_size")
         val HISTORICAL_TRIGGER_PRIORITIES = stringPreferencesKey("historical_trigger_priorities")
         val CONTAINER_BORDER_ENABLED = booleanPreferencesKey("container_border_enabled")
+        val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
     }
 
     val isRegistered: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -232,7 +233,12 @@ class DataStoreManager(private val context: Context) {
         curr: String,
         colorPresetVal: String,
         fontPresetVal: String,
-        amoledThemeVal: Boolean
+        amoledThemeVal: Boolean,
+        vibrationEnabledVal: Boolean = false,
+        hasBackupVal: Boolean = false,
+        hasPriceChangedVal: Boolean = false,
+        hasCancelled10sVal: Boolean = false,
+        launchesVal: List<Long> = emptyList()
     ) {
         context.dataStore.edit { preferences ->
             preferences[IS_REGISTERED] = isReg
@@ -245,6 +251,11 @@ class DataStoreManager(private val context: Context) {
             preferences[COLOR_PRESET] = colorPresetVal
             preferences[FONT_PRESET] = fontPresetVal
             preferences[AMOLED_THEME] = amoledThemeVal
+            preferences[VIBRATION_ENABLED] = vibrationEnabledVal
+            preferences[HAS_MADE_BACKUP] = hasBackupVal
+            preferences[HAS_CHANGED_PACK_PRICE] = hasPriceChangedVal
+            preferences[HAS_CANCELLED_WITHIN_10S] = hasCancelled10sVal
+            preferences[APP_LAUNCH_DATES] = gson.toJson(launchesVal)
         }
     }
 
@@ -368,6 +379,16 @@ class DataStoreManager(private val context: Context) {
     suspend fun saveContainerBorderEnabled(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[CONTAINER_BORDER_ENABLED] = enabled
+        }
+    }
+
+    val vibrationEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[VIBRATION_ENABLED] ?: false
+    }
+
+    suspend fun saveVibrationEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[VIBRATION_ENABLED] = enabled
         }
     }
 
