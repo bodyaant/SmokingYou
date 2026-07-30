@@ -1,3 +1,4 @@
+// Centralized plugin management for multi-module setup
 pluginManagement {
     repositories {
         google()
