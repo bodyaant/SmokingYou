@@ -197,11 +197,17 @@ fun AboutScreen(onBack: () -> Unit) {
                         
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        LinkPill(text = stringResource(R.string.link_github)) {
+                        LinkPill(
+                            text = stringResource(R.string.link_github),
+                            iconRes = R.drawable.ic_github
+                        ) {
                             uriHandler.openUri("https://github.com/bodyaant/SmokingYou")
                         }
                         Spacer(modifier = Modifier.height(12.dp))
-                        LinkPill(text = stringResource(R.string.link_telegram)) {
+                        LinkPill(
+                            text = stringResource(R.string.link_telegram),
+                            iconRes = R.drawable.ic_telegram
+                        ) {
                             uriHandler.openUri("https://t.me/SmokingYouApp")
                         }
 
@@ -239,18 +245,21 @@ fun AboutScreen(onBack: () -> Unit) {
                         CryptoWalletItem(
                             network = "USDT (TRC20)",
                             address = usdtTrc20,
+                            iconRes = R.drawable.ic_tron,
                             onCopy = { copyToClipboard(usdtTrc20) }
                         )
 
                         CryptoWalletItem(
                             network = "USDT (ERC20)",
                             address = usdtErc20,
+                            iconRes = R.drawable.ic_ethereum,
                             onCopy = { copyToClipboard(usdtErc20) }
                         )
 
                         CryptoWalletItem(
                             network = "USDT (TON)",
                             address = usdtTon,
+                            iconRes = R.drawable.ic_ton,
                             onCopy = { copyToClipboard(usdtTon) }
                         )
                     }
@@ -261,7 +270,11 @@ fun AboutScreen(onBack: () -> Unit) {
 }
 
 @Composable
-fun LinkPill(text: String, onClick: () -> Unit) {
+fun LinkPill(
+    text: String,
+    iconRes: Int? = null,
+    onClick: () -> Unit
+) {
     Surface(
         modifier = Modifier.fillMaxWidth().height(48.dp),
         shape = CircleShape,
@@ -269,7 +282,19 @@ fun LinkPill(text: String, onClick: () -> Unit) {
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         onClick = onClick
     ) {
-        Box(contentAlignment = Alignment.Center) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            if (iconRes != null) {
+                Icon(
+                    painter = painterResource(id = iconRes),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
             Text(
                 text = text,
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
@@ -316,6 +341,7 @@ fun SupportLinkPill(
 fun CryptoWalletItem(
     network: String,
     address: String,
+    iconRes: Int? = null,
     onCopy: () -> Unit
 ) {
     val shortenedAddress = if (address.length > 16) {
@@ -339,6 +365,23 @@ fun CryptoWalletItem(
                 .padding(horizontal = 16.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            if (iconRes != null) {
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            painter = painterResource(id = iconRes),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+            }
             Column(
                 modifier = Modifier.weight(1f)
             ) {
