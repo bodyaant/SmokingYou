@@ -10,7 +10,10 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 object HapticFeedbackHelper {
 
+    var isVibrationEnabled: Boolean = false
+
     fun performClick(haptic: HapticFeedback?, context: Context? = null) {
+        if (!isVibrationEnabled) return
         try {
             haptic?.performHapticFeedback(HapticFeedbackType.TextHandleMove)
             context?.let { ctx ->
@@ -22,6 +25,7 @@ object HapticFeedbackHelper {
     }
 
     fun performSuccess(haptic: HapticFeedback?, context: Context? = null) {
+        if (!isVibrationEnabled) return
         try {
             haptic?.performHapticFeedback(HapticFeedbackType.LongPress)
             context?.let { ctx ->
@@ -33,6 +37,7 @@ object HapticFeedbackHelper {
     }
 
     fun performAchievementUnlock(context: Context) {
+        if (!isVibrationEnabled) return
         try {
             vibratePattern(context, longArrayOf(0, 80, 50, 100, 50, 120))
         } catch (e: Exception) {
