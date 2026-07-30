@@ -52,6 +52,12 @@ class MainActivity : ComponentActivity() {
             val amoledTheme by viewModel.amoledTheme.collectAsState()
             val colorPreset by viewModel.colorPreset.collectAsState()
             val containerBorderEnabled by viewModel.containerBorderEnabled.collectAsState()
+            val vibrationEnabled by viewModel.vibrationEnabled.collectAsState()
+
+            androidx.compose.runtime.LaunchedEffect(vibrationEnabled) {
+                com.smokingtracker.ui.theme.HapticFeedbackHelper.isVibrationEnabled = vibrationEnabled
+            }
+
             val useDarkTheme = when (themePreference) {
                 ThemePreference.LIGHT -> false
                 ThemePreference.DARK -> true
