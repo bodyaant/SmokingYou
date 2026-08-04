@@ -36,7 +36,7 @@ data class Achievement(
     val condition: (AchievementContext) -> Boolean
 )
 
-object AchievementsManager {
+class AchievementsManager {
 
     fun getAchievementById(id: String): Achievement? = achievementsList.find { it.id == id }
 
