@@ -39,6 +39,10 @@
         kenarlık göster</string>
     <string name="settings_vibration">Titreşim geri bildirimi</string>
     <string name="settings_vibration_desc">Dokunma ve işlemlerde titreşim</string>
+    <string name="settings_container_style">Görsel stil</string>
+    <string name="settings_container_style_desc">Kartların, kapsayıcıların ve gezinmenin görsel stilini seçin</string>
+    <string name="container_style_expressive">Expressive</string>
+    <string name="container_style_standard">Standart</string>
     <string name="limit_dialog_helper">Sınırsız günlük sigara için 0 yapın</string>
     <string name="theme_system">Sistem</string>
     <string name="theme_light">Açık</string>
@@ -138,6 +142,18 @@
     <string name="backup_error">Yedek kaydedilirken hata oluştu</string>
     <string name="restore_success">Veriler başarıyla geri yüklendi!</string>
     <string name="restore_error">Veriler geri yüklenirken hata oluştu</string>
+    <string name="backup_dialog_title">Veri Yedekleme</string>
+    <string name="backup_dialog_desc">İstatistikleriniz, geçmişiniz ve ayarlarınız seçtiğiniz konumdaki bir dosyaya kaydedilecektir. Bu verileri dilediğiniz zaman geri yükleyebilirsiniz.</string>
+    <string name="backup_choose_file_location">Konum seçin</string>
+    <string name="backup_start_action">Yedek Oluştur</string>
+    <string name="backup_done_title">Yedek Oluşturuldu</string>
+    <string name="restore_dialog_title">Verileri Geri Yükle</string>
+    <string name="restore_dialog_desc">Mevcut istatistikleriniz, geçmişiniz ve ayarlarınız yedek dosyasındaki verilerle değiştirilecektir.</string>
+    <string name="restore_choose_file">Yedek dosyası seçin</string>
+    <string name="restore_start_action">Geri Yükle</string>
+    <string name="restore_done_title">Veriler Geri Yüklendi</string>
+    <string name="backup_restore_cancel">İptal</string>
+    <string name="backup_restore_close">Kapat</string>
     <string name="language_dialog_title">Dil Seçin</string>
     <string name="settings_daily_limit">Günlük Sigara Limiti</string>
 
