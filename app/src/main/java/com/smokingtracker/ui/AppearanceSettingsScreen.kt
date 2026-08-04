@@ -15,8 +15,14 @@ import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.CropSquare
+import androidx.compose.material.icons.filled.ViewAgenda
 import androidx.compose.material.icons.filled.TouchApp
 import com.smokingtracker.ui.theme.containerBorder
+import com.smokingtracker.ui.theme.containerShape
+import com.smokingtracker.ui.theme.containerPadding
+import com.smokingtracker.ui.theme.containerGroupGap
+import com.smokingtracker.ui.theme.LocalContainerStyle
+import com.smokingtracker.ui.theme.ContainerGroupPosition
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,6 +33,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.smokingtracker.MainViewModel
 import com.smokingtracker.R
+import com.smokingtracker.data.AppIconPreset
+import com.smokingtracker.data.ColorPreset
+import com.smokingtracker.data.ContainerStyle
+import com.smokingtracker.data.FontPreset
 import com.smokingtracker.data.ThemePreference
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.ui.draw.scale
@@ -44,19 +54,23 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 
 
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppearanceSettingsScreen(
     viewModel: MainViewModel,
     onBack: () -> Unit
 ) {
-    val themePreference by viewModel.themePreference.collectAsState()
-    val fontPreset by viewModel.fontPreset.collectAsState()
-    val amoledTheme by viewModel.amoledTheme.collectAsState()
-    val colorPreset by viewModel.colorPreset.collectAsState()
-    val appIcon by viewModel.appIcon.collectAsState()
-    val containerBorderEnabled by viewModel.containerBorderEnabled.collectAsState()
-    val vibrationEnabled by viewModel.vibrationEnabled.collectAsState()
+    val themePreference by viewModel.themePreference.collectAsStateWithLifecycle()
+    val fontPreset by viewModel.fontPreset.collectAsStateWithLifecycle()
+    val amoledTheme by viewModel.amoledTheme.collectAsStateWithLifecycle()
+    val colorPreset by viewModel.colorPreset.collectAsStateWithLifecycle()
+    val appIcon by viewModel.appIcon.collectAsStateWithLifecycle()
+    val containerBorderEnabled by viewModel.containerBorderEnabled.collectAsStateWithLifecycle()
+    val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
+    val containerStyle by viewModel.containerStyle.collectAsStateWithLifecycle()
+    val isStandardStyle = containerStyle == ContainerStyle.STANDARD
     val context = LocalContext.current
 
     val useDarkTheme = when (themePreference) {
@@ -97,7 +111,7 @@ fun AppearanceSettingsScreen(
                 .fillMaxSize()
                 .padding(paddingValues),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(containerGroupGap())
         ) {
             item {
                 Text(
@@ -111,23 +125,25 @@ fun AppearanceSettingsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp),
+                    shape = containerShape(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp), ContainerGroupPosition.FIRST),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                     border = containerBorder()
                 ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
+                    Column(modifier = Modifier.padding(containerPadding(20.dp, 20.dp))) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Surface(
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.size(48.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(Icons.Filled.Brightness4, contentDescription = null)
+                            if (!isStandardStyle) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(Icons.Filled.Brightness4, contentDescription = null)
+                                    }
                                 }
+                                Spacer(modifier = Modifier.width(16.dp))
                             }
-                            Spacer(modifier = Modifier.width(16.dp))
                             Text(
                                 stringResource(R.string.settings_theme),
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
@@ -145,7 +161,48 @@ fun AppearanceSettingsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = containerShape(RoundedCornerShape(8.dp), ContainerGroupPosition.MIDDLE),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                    border = containerBorder()
+                ) {
+                    Column(modifier = Modifier.padding(containerPadding(20.dp, 20.dp))) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (!isStandardStyle) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(Icons.Filled.ViewAgenda, contentDescription = null)
+                                    }
+                                }
+                                Spacer(modifier = Modifier.width(16.dp))
+                            }
+                            Text(
+                                stringResource(R.string.settings_container_style),
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                            )
+                        }
+                        Text(
+                            stringResource(R.string.settings_container_style_desc),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        ContainerStyleSegmentedButton(
+                            currentStyle = containerStyle,
+                            onStyleChange = viewModel::updateContainerStyle
+                        )
+                    }
+                }
+            }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = containerShape(RoundedCornerShape(8.dp), ContainerGroupPosition.MIDDLE),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                     border = containerBorder()
                 ) {
@@ -153,20 +210,22 @@ fun AppearanceSettingsScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 18.dp),
+                            .padding(containerPadding(20.dp, 18.dp)),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = if (isAmoledSwitchEnabled) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.38f),
-                            contentColor = if (isAmoledSwitchEnabled) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.38f),
-                            modifier = Modifier.size(48.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(Icons.Filled.Brightness4, contentDescription = null)
+                        if (!isStandardStyle) {
+                            Surface(
+                                shape = CircleShape,
+                                color = if (isAmoledSwitchEnabled) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.38f),
+                                contentColor = if (isAmoledSwitchEnabled) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.38f),
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Filled.Brightness4, contentDescription = null)
+                                }
                             }
+                            Spacer(modifier = Modifier.width(16.dp))
                         }
-                        Spacer(modifier = Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = stringResource(R.string.settings_amoled_theme),
@@ -200,27 +259,29 @@ fun AppearanceSettingsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = containerShape(RoundedCornerShape(8.dp), ContainerGroupPosition.MIDDLE),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                     border = containerBorder()
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 18.dp),
+                            .padding(containerPadding(20.dp, 18.dp)),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier.size(48.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(Icons.Filled.CropSquare, contentDescription = null)
+                        if (!isStandardStyle) {
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Filled.CropSquare, contentDescription = null)
+                                }
                             }
+                            Spacer(modifier = Modifier.width(16.dp))
                         }
-                        Spacer(modifier = Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = stringResource(R.string.settings_container_border),
@@ -253,27 +314,29 @@ fun AppearanceSettingsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
+                    shape = containerShape(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp), ContainerGroupPosition.LAST),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                     border = containerBorder()
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 18.dp),
+                            .padding(containerPadding(20.dp, 18.dp)),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier.size(48.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(Icons.Filled.TouchApp, contentDescription = null)
+                        if (!isStandardStyle) {
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Filled.TouchApp, contentDescription = null)
+                                }
                             }
+                            Spacer(modifier = Modifier.width(16.dp))
                         }
-                        Spacer(modifier = Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = stringResource(R.string.settings_vibration),
@@ -291,8 +354,7 @@ fun AppearanceSettingsScreen(
                             onCheckedChange = { enabled ->
                                 viewModel.updateVibrationEnabled(enabled)
                                 if (enabled) {
-                                    com.smokingtracker.ui.theme.HapticFeedbackHelper.isVibrationEnabled = true
-                                    com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(null, context)
+                                    com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(true, null, context)
                                 }
                             },
                             thumbContent = {
@@ -322,23 +384,25 @@ fun AppearanceSettingsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
+                    shape = containerShape(RoundedCornerShape(24.dp)),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                     border = containerBorder()
                 ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
+                    Column(modifier = Modifier.padding(containerPadding(20.dp, 20.dp))) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Surface(
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.size(48.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(Icons.Filled.Palette, contentDescription = null)
+                            if (!isStandardStyle) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(Icons.Filled.Palette, contentDescription = null)
+                                    }
                                 }
+                                Spacer(modifier = Modifier.width(16.dp))
                             }
-                            Spacer(modifier = Modifier.width(16.dp))
                             Text(
                                 stringResource(R.string.settings_color_preset),
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
@@ -367,26 +431,28 @@ fun AppearanceSettingsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
+                    shape = containerShape(RoundedCornerShape(24.dp)),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                     border = containerBorder()
                 ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
+                    Column(modifier = Modifier.padding(containerPadding(20.dp, 20.dp))) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Surface(
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.size(48.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = androidx.compose.material.icons.Icons.Filled.Palette,
-                                        contentDescription = null
-                                    )
+                            if (!isStandardStyle) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = androidx.compose.material.icons.Icons.Filled.Palette,
+                                            contentDescription = null
+                                        )
+                                    }
                                 }
+                                Spacer(modifier = Modifier.width(16.dp))
                             }
-                            Spacer(modifier = Modifier.width(16.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     stringResource(R.string.settings_app_icon),
@@ -421,23 +487,25 @@ fun AppearanceSettingsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
+                    shape = containerShape(RoundedCornerShape(24.dp)),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                     border = containerBorder()
                 ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
+                    Column(modifier = Modifier.padding(containerPadding(20.dp, 20.dp))) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Surface(
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.size(48.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(Icons.Filled.TextFields, contentDescription = null)
+                            if (!isStandardStyle) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(Icons.Filled.TextFields, contentDescription = null)
+                                    }
                                 }
+                                Spacer(modifier = Modifier.width(16.dp))
                             }
-                            Spacer(modifier = Modifier.width(16.dp))
                             Text(
                                 stringResource(R.string.settings_font),
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
@@ -522,14 +590,79 @@ fun ThemeSegmentedButton(
 }
 
 @Composable
-fun FontSegmentedButton(
-    currentPreset: String,
-    onPresetChange: (String) -> Unit
+fun ContainerStyleSegmentedButton(
+    currentStyle: ContainerStyle,
+    onStyleChange: (ContainerStyle) -> Unit
 ) {
     val options = listOf(
-        "WIDE" to stringResource(R.string.font_preset_wide),
-        "AIRY" to stringResource(R.string.font_preset_thin),
-        "SYSTEM" to stringResource(R.string.font_preset_system)
+        ContainerStyle.EXPRESSIVE to stringResource(R.string.container_style_expressive),
+        ContainerStyle.STANDARD to stringResource(R.string.container_style_standard)
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        options.forEachIndexed { index, (style, title) ->
+            val isSelected = currentStyle == style
+
+            val animatedWeight by androidx.compose.animation.core.animateFloatAsState(
+                targetValue = if (isSelected) 1.2f else 1.0f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
+                label = "container_style_weight_$index"
+            )
+
+            val startR by animateDpAsState(
+                targetValue = if (isSelected || index == 0) 24.dp else 8.dp,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
+                label = "container_style_startR_$index"
+            )
+            val endR by animateDpAsState(
+                targetValue = if (isSelected || index == options.size - 1) 24.dp else 8.dp,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
+                label = "container_style_endR_$index"
+            )
+
+            val containerColor by animateColorAsState(
+                targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
+                label = "container_style_container_$index"
+            )
+            val contentColor by animateColorAsState(
+                targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer,
+                label = "container_style_content_$index"
+            )
+
+            Surface(
+                onClick = { onStyleChange(style) },
+                modifier = Modifier
+                    .weight(animatedWeight)
+                    .height(48.dp),
+                shape = RoundedCornerShape(topStart = startR, bottomStart = startR, topEnd = endR, bottomEnd = endR),
+                color = containerColor,
+                contentColor = contentColor
+            ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun FontSegmentedButton(
+    currentPreset: FontPreset,
+    onPresetChange: (FontPreset) -> Unit
+) {
+    val options = listOf(
+        FontPreset.WIDE to stringResource(R.string.font_preset_wide),
+        FontPreset.AIRY to stringResource(R.string.font_preset_thin),
+        FontPreset.SYSTEM to stringResource(R.string.font_preset_system)
     )
 
     Row(
@@ -588,9 +721,9 @@ fun FontSegmentedButton(
 }
 @Composable
 fun ColorPresetSelector(
-    currentPreset: String,
+    currentPreset: ColorPreset,
     useDarkTheme: Boolean,
-    onPresetChange: (String) -> Unit
+    onPresetChange: (ColorPreset) -> Unit
 ) {
     val context = LocalContext.current
     val systemColor = remember(useDarkTheme) {
@@ -607,14 +740,14 @@ fun ColorPresetSelector(
     }
 
     val options = listOf(
-        Triple("SYSTEM", stringResource(R.string.color_preset_system), systemColor),
-        Triple("FOREST_SAGE", stringResource(R.string.color_preset_sage), if (useDarkTheme) Color(0xFFB1D18A) else Color(0xFF4C662B)),
-        Triple("SUNSET_ROSE", stringResource(R.string.color_preset_rose), if (useDarkTheme) Color(0xFFF5B5A1) else Color(0xFF8F4C38)),
-        Triple("OCEAN_DEEP", stringResource(R.string.color_preset_ocean), if (useDarkTheme) Color(0xFF76D1FF) else Color(0xFF006689)),
-        Triple("PURPLE_NEBULA", stringResource(R.string.color_preset_purple), if (useDarkTheme) Color(0xFFD4BBFF) else Color(0xFF6B4EA2)),
-        Triple("AMBER_GOLD", stringResource(R.string.color_preset_amber), if (useDarkTheme) Color(0xFFFFB95B) else Color(0xFF825500)),
-        Triple("CRIMSON_BERRY", stringResource(R.string.color_preset_crimson), if (useDarkTheme) Color(0xFFFFB2BE) else Color(0xFF980038)),
-        Triple("SLATE_MONO", stringResource(R.string.color_preset_slate), if (useDarkTheme) Color(0xFFC6C6C6) else Color(0xFF474747))
+        Triple(ColorPreset.SYSTEM, stringResource(R.string.color_preset_system), systemColor),
+        Triple(ColorPreset.FOREST_SAGE, stringResource(R.string.color_preset_sage), if (useDarkTheme) Color(0xFFB1D18A) else Color(0xFF4C662B)),
+        Triple(ColorPreset.SUNSET_ROSE, stringResource(R.string.color_preset_rose), if (useDarkTheme) Color(0xFFF5B5A1) else Color(0xFF8F4C38)),
+        Triple(ColorPreset.OCEAN_DEEP, stringResource(R.string.color_preset_ocean), if (useDarkTheme) Color(0xFF76D1FF) else Color(0xFF006689)),
+        Triple(ColorPreset.PURPLE_NEBULA, stringResource(R.string.color_preset_purple), if (useDarkTheme) Color(0xFFD4BBFF) else Color(0xFF6B4EA2)),
+        Triple(ColorPreset.AMBER_GOLD, stringResource(R.string.color_preset_amber), if (useDarkTheme) Color(0xFFFFB95B) else Color(0xFF825500)),
+        Triple(ColorPreset.CRIMSON_BERRY, stringResource(R.string.color_preset_crimson), if (useDarkTheme) Color(0xFFFFB2BE) else Color(0xFF980038)),
+        Triple(ColorPreset.SLATE_MONO, stringResource(R.string.color_preset_slate), if (useDarkTheme) Color(0xFFC6C6C6) else Color(0xFF474747))
     )
 
     Column(
@@ -724,25 +857,25 @@ fun ColorPresetSelector(
 }
 
 data class AppIconOption(
-    val key: String,
+    val preset: AppIconPreset,
     val nameRes: Int,
     val drawableRes: Int
 )
 
 @Composable
 fun AppIconSelector(
-    currentIcon: String,
-    onIconChange: (String) -> Unit
+    currentIcon: AppIconPreset,
+    onIconChange: (AppIconPreset) -> Unit
 ) {
     val options = listOf(
-        AppIconOption("DEFAULT", R.string.app_icon_classic, R.drawable.ic_launcher_classic),
-        AppIconOption("DARK", R.string.app_icon_dark, R.drawable.ic_launcher_dark),
-        AppIconOption("SUNSET", R.string.app_icon_sunset, R.drawable.ic_launcher_sunset),
-        AppIconOption("CREAM", R.string.app_icon_cream, R.drawable.ic_launcher_cream),
-        AppIconOption("NEON", R.string.app_icon_neon, R.drawable.ic_launcher_neon),
-        AppIconOption("GREEN", R.string.app_icon_organic, R.drawable.ic_launcher_green),
-        AppIconOption("NIGHT", R.string.app_icon_midnight, R.drawable.ic_launcher_night),
-        AppIconOption("MONOCHROME", R.string.app_icon_monochrome, R.drawable.ic_launcher_monochrome_variant)
+        AppIconOption(AppIconPreset.DEFAULT, R.string.app_icon_classic, R.drawable.ic_launcher_classic),
+        AppIconOption(AppIconPreset.DARK, R.string.app_icon_dark, R.drawable.ic_launcher_dark),
+        AppIconOption(AppIconPreset.SUNSET, R.string.app_icon_sunset, R.drawable.ic_launcher_sunset),
+        AppIconOption(AppIconPreset.CREAM, R.string.app_icon_cream, R.drawable.ic_launcher_cream),
+        AppIconOption(AppIconPreset.NEON, R.string.app_icon_neon, R.drawable.ic_launcher_neon),
+        AppIconOption(AppIconPreset.GREEN, R.string.app_icon_organic, R.drawable.ic_launcher_green),
+        AppIconOption(AppIconPreset.NIGHT, R.string.app_icon_midnight, R.drawable.ic_launcher_night),
+        AppIconOption(AppIconPreset.MONOCHROME, R.string.app_icon_monochrome, R.drawable.ic_launcher_monochrome_variant)
     )
 
     Column(
@@ -756,12 +889,12 @@ fun AppIconSelector(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 rowItems.forEach { option ->
-                    val isSelected = currentIcon == option.key
+                    val isSelected = currentIcon == option.preset
                     
                     val scale by androidx.compose.animation.core.animateFloatAsState(
                         targetValue = if (isSelected) 1.1f else 1.0f,
                         animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
-                        label = "icon_scale_${option.key}"
+                        label = "icon_scale_${option.preset.name}"
                     )
 
                     Column(
@@ -772,7 +905,7 @@ fun AppIconSelector(
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
-                                onClick = { onIconChange(option.key) }
+                                onClick = { onIconChange(option.preset) }
                             )
                     ) {
                         Box(
