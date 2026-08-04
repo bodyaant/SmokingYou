@@ -30,11 +30,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import com.smokingtracker.R
+import com.smokingtracker.ui.theme.containerShape
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MindfulPauseDialog(
     selectedTrigger: String?,
+    vibrationEnabled: Boolean = false,
     onDismiss: () -> Unit,
     onSuccess: (String?) -> Unit,
     onFailure: (String?) -> Unit
@@ -85,7 +87,7 @@ fun MindfulPauseDialog(
             isTimerRunning = false
             isTimerFinished = true
             try {
-                com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(haptic, context)
+                com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -189,7 +191,7 @@ fun MindfulPauseDialog(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 ),
-                shape = RoundedCornerShape(16.dp),
+                shape = containerShape(RoundedCornerShape(16.dp)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -212,7 +214,7 @@ fun MindfulPauseDialog(
                 ) {
                     OutlinedButton(
                         onClick = {
-                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                             totalSeconds += 15
                             secondsRemaining += 15
                         },
@@ -226,7 +228,7 @@ fun MindfulPauseDialog(
 
                     Button(
                         onClick = {
-                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(haptic, context)
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
                             isTimerRunning = false
                             isTimerFinished = true
                             elapsedTimeMs = totalSeconds * 1000L
@@ -249,7 +251,7 @@ fun MindfulPauseDialog(
                 ) {
                     Button(
                         onClick = {
-                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(haptic, context)
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
                             onSuccess(selectedTrigger)
                         },
                         colors = ButtonDefaults.buttonColors(
@@ -271,7 +273,7 @@ fun MindfulPauseDialog(
 
                     TextButton(
                         onClick = {
-                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                             onFailure(selectedTrigger)
                         },
                         modifier = Modifier.fillMaxWidth()
