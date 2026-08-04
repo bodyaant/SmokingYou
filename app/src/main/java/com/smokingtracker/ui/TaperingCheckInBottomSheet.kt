@@ -3,7 +3,7 @@ package com.smokingtracker.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -14,6 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import com.smokingtracker.R
+import com.smokingtracker.ui.theme.containerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,7 +29,10 @@ fun TaperingCheckInBottomSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = rememberBottomSheetState(
+            initialValue = SheetValue.Hidden,
+            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+        ),
         containerColor = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
@@ -46,7 +50,7 @@ fun TaperingCheckInBottomSheet(
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
-                        imageVector = Icons.Default.TrendingDown,
+                        imageVector = Icons.AutoMirrored.Filled.TrendingDown,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(36.dp)
@@ -78,7 +82,7 @@ fun TaperingCheckInBottomSheet(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
                 ),
-                shape = RoundedCornerShape(16.dp),
+                shape = containerShape(RoundedCornerShape(16.dp)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -139,7 +143,7 @@ fun TaperingCheckInBottomSheet(
                         .height(50.dp),
                     shape = RoundedCornerShape(14.dp)
                 ) {
-                    Icon(imageVector = Icons.Default.TrendingDown, contentDescription = null)
+                    Icon(imageVector = Icons.AutoMirrored.Filled.TrendingDown, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = stringResource(R.string.tapering_checkin_reduce_to, newLimit),
