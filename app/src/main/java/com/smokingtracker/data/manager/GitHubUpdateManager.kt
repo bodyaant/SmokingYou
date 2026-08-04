@@ -3,7 +3,11 @@ package com.smokingtracker.data.manager
 import android.content.Context
 import com.google.gson.Gson
 import com.smokingtracker.BuildConfig
+import com.smokingtracker.UpdateCheckState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
@@ -12,6 +16,22 @@ import java.net.URL
 class GitHubUpdateManager(private val context: Context) {
 
     private val gson = Gson()
+
+    private val _updateCheckState = MutableStateFlow<UpdateCheckState>(UpdateCheckState.Idle)
+    val updateCheckState: StateFlow<UpdateCheckState> = _updateCheckState.asStateFlow()
+
+    suspend fun checkForUpdatesWithState(isManual: Boolean) {
+        if (isManual) _updateCheckState.value = UpdateCheckState.Checking
+        _updateCheckState.value = when (val result = checkForUpdates()) {
+            is UpdateResult.NewUpdate -> UpdateCheckState.NewUpdate(result.release)
+            is UpdateResult.NoUpdate  -> if (isManual) UpdateCheckState.NoUpdate else UpdateCheckState.Idle
+            is UpdateResult.Error     -> if (isManual) UpdateCheckState.Error(result.message) else UpdateCheckState.Idle
+        }
+    }
+
+    fun resetUpdateCheckState() {
+        _updateCheckState.value = UpdateCheckState.Idle
+    }
 
     suspend fun checkForUpdates(): UpdateResult = withContext(Dispatchers.IO) {
         try {
@@ -68,7 +88,7 @@ class GitHubUpdateManager(private val context: Context) {
 
     sealed class UpdateResult {
         data class NewUpdate(val release: GitHubRelease) : UpdateResult()
-        object NoUpdate : UpdateResult()
+        data object NoUpdate : UpdateResult() 
         data class Error(val message: String) : UpdateResult()
     }
 }
