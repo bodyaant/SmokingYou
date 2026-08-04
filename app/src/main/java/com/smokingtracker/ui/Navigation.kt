@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toShape
 import androidx.compose.material3.NavigationItemIconPosition
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.platform.LocalContext
@@ -42,30 +43,36 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.smokingtracker.HomeViewModel
 import com.smokingtracker.MainViewModel
+import com.smokingtracker.UpdateCheckState
 import com.smokingtracker.R
+import com.smokingtracker.ui.theme.LocalContainerStyle
+import com.smokingtracker.data.ContainerStyle
 
 sealed class Screen(val route: String, val titleResId: Int, val icon: ImageVector) {
-    object Registration : Screen("registration", R.string.registration_title, Icons.Filled.Home)
-    object Home : Screen("home", R.string.nav_home, Icons.Filled.Home)
-    object Graph : Screen("graph", R.string.analytics_title, Icons.Filled.BarChart)
-    object Personal : Screen("personal", R.string.nav_personal, Icons.Filled.Settings)
-    object About : Screen("about", R.string.about_app, Icons.Filled.Info)
-    object Achievements : Screen("achievements", R.string.settings_achievements, Icons.Filled.EmojiEvents)
-    object Statistics : Screen("statistics", R.string.settings_statistics, Icons.Filled.BarChart)
-    object AppearanceSettings : Screen("appearance_settings", R.string.settings_appearance, Icons.Filled.Brightness4)
-    object HistoryGenerator : Screen("history_generator", R.string.history_generator_title, Icons.Filled.AutoAwesome)
+    data object Registration : Screen("registration", R.string.registration_title, Icons.Filled.Home)
+    data object Home : Screen("home", R.string.nav_home, Icons.Filled.Home)
+    data object Graph : Screen("graph", R.string.analytics_title, Icons.Filled.BarChart)
+    data object Personal : Screen("personal", R.string.nav_personal, Icons.Filled.Settings)
+    data object About : Screen("about", R.string.about_app, Icons.Filled.Info)
+    data object Achievements : Screen("achievements", R.string.settings_achievements, Icons.Filled.EmojiEvents)
+    data object Statistics : Screen("statistics", R.string.settings_statistics, Icons.Filled.BarChart)
+    data object AppearanceSettings : Screen("appearance_settings", R.string.settings_appearance, Icons.Filled.Brightness4)
+    data object HistoryGenerator : Screen("history_generator", R.string.history_generator_title, Icons.Filled.AutoAwesome)
 }
 
 
 @Composable
 fun MainApp(viewModel: MainViewModel) {
     val navController = rememberNavController()
-    val isRegistered by viewModel.isRegistered.collectAsState()
+    val homeViewModel: HomeViewModel = org.koin.androidx.compose.koinViewModel()
+    val isRegistered by viewModel.isRegistered.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
-    val checkUpdatesOnStart by viewModel.checkUpdatesOnStart.collectAsState()
-    val updateCheckState by viewModel.updateCheckState.collectAsState()
+    val checkUpdatesOnStart by viewModel.checkUpdatesOnStart.collectAsStateWithLifecycle()
+    val updateCheckState by viewModel.updateCheckState.collectAsStateWithLifecycle()
+    val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
 
     var showUpdateDialog by remember { mutableStateOf(false) }
     var latestRelease by remember { mutableStateOf<com.smokingtracker.data.manager.GitHubRelease?>(null) }
@@ -77,8 +84,8 @@ fun MainApp(viewModel: MainViewModel) {
     }
 
     LaunchedEffect(updateCheckState) {
-        if (updateCheckState is MainViewModel.UpdateCheckState.NewUpdate) {
-            latestRelease = (updateCheckState as MainViewModel.UpdateCheckState.NewUpdate).release
+        if (updateCheckState is UpdateCheckState.NewUpdate) {
+            latestRelease = (updateCheckState as UpdateCheckState.NewUpdate).release
             showUpdateDialog = true
         }
     }
@@ -180,12 +187,13 @@ fun MainApp(viewModel: MainViewModel) {
 
     val startDest = if (isRegistered == true) Screen.Home.route else Screen.Registration.route
 
-    val pendingAchievementPopup by viewModel.pendingAchievementPopup.collectAsState()
+    val pendingAchievementPopup by viewModel.pendingAchievementPopup.collectAsStateWithLifecycle()
 
     if (currentRoute != Screen.Registration.route) {
         pendingAchievementPopup?.let { achievement ->
             AchievementUnlockDialog(
                 achievement = achievement,
+                vibrationEnabled = vibrationEnabled,
                 onDismiss = { viewModel.dismissAchievementPopup() },
                 onNavigateToAchievements = {
                     navController.navigate(Screen.Achievements.route)
@@ -221,7 +229,8 @@ fun MainApp(viewModel: MainViewModel) {
                 }
                 composable(Screen.Home.route) {
                     HomeScreen(
-                        viewModel = viewModel,
+                        viewModel = homeViewModel,
+                        vibrationEnabled = vibrationEnabled,
                         onNavigateToAchievements = { navController.navigate(Screen.Achievements.route) }
                     )
                 }
@@ -285,7 +294,7 @@ fun MainApp(viewModel: MainViewModel) {
                     animationSpec = tween(300)
                 ) + fadeOut(tween(300))
             ) {
-                BottomNavigationBar(navController = navController)
+                BottomNavigationBar(navController = navController, vibrationEnabled = vibrationEnabled)
             }
         }
     }
@@ -293,7 +302,12 @@ fun MainApp(viewModel: MainViewModel) {
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun BottomNavigationBar(navController: NavHostController) {
+fun BottomNavigationBar(navController: NavHostController, vibrationEnabled: Boolean = false) {
+    if (LocalContainerStyle.current == ContainerStyle.STANDARD) {
+        StandardBottomNavigationBar(navController = navController, vibrationEnabled = vibrationEnabled)
+        return
+    }
+
     val items = listOf(Screen.Home, Screen.Graph, Screen.Personal)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -316,7 +330,7 @@ fun BottomNavigationBar(navController: NavHostController) {
             ShortNavigationBarItem(
                 selected = selected,
                 onClick = {
-                    com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                    com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                     if (currentRoute != screen.route) {
                         navController.navigate(screen.route) {
                             popUpTo(Screen.Home.route) { saveState = true }
@@ -380,6 +394,84 @@ fun BottomNavigationBar(navController: NavHostController) {
                     .padding(horizontal = 4.dp)
                     .fillMaxHeight()
             )
+        }
+    }
+}
+
+@Composable
+fun StandardBottomNavigationBar(navController: NavHostController, vibrationEnabled: Boolean = false) {
+    val items = listOf(Screen.Home, Screen.Graph, Screen.Personal)
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    val context = LocalContext.current
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+
+    Surface(
+        shape = RoundedCornerShape(percent = 50),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh
+    ) {
+        Row(
+            modifier = Modifier.padding(7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            items.forEach { screen ->
+                val selected = currentRoute == screen.route
+                val contentColor by animateColorAsState(
+                    targetValue = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                    label = "standard_nav_content_${screen.route}"
+                )
+                val backgroundColor by animateColorAsState(
+                    targetValue = if (selected) MaterialTheme.colorScheme.surfaceContainerHighest else Color.Transparent,
+                    label = "standard_nav_bg_${screen.route}"
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(percent = 50))
+                        .background(backgroundColor)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = {
+                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                if (currentRoute != screen.route) {
+                                    navController.navigate(screen.route) {
+                                        popUpTo(Screen.Home.route) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            }
+                        )
+                        .animateContentSize()
+                        .padding(horizontal = 18.dp, vertical = 12.dp)
+                ) {
+                    AnimatedVisibility(
+                        visible = selected,
+                        enter = fadeIn() + expandHorizontally(),
+                        exit = fadeOut() + shrinkHorizontally()
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = screen.icon,
+                                contentDescription = null,
+                                tint = contentColor,
+                                modifier = Modifier.size(21.dp)
+                            )
+                            Spacer(modifier = Modifier.width(7.dp))
+                        }
+                    }
+                    Text(
+                        text = stringResource(screen.titleResId),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                        color = contentColor,
+                        maxLines = 1
+                    )
+                }
+            }
         }
     }
 }
