@@ -12,7 +12,7 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
     }
 }
 
-@Database(entities = [SmokingEntryEntity::class], version = 2, exportSchema = false)
+@Database(entities = [SmokingEntryEntity::class], version = 2, exportSchema = true)
 abstract class SmokingDatabase : RoomDatabase() {
     abstract fun smokingDao(): SmokingDao
 }
