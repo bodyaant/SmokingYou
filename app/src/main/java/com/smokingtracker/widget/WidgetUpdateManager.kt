@@ -4,10 +4,11 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
-object WidgetUpdateManager {
+object WidgetUpdateManager : KoinComponent {
 
     fun updateAll(context: Context) {
         val appWidgetManager = AppWidgetManager.getInstance(context)
@@ -26,7 +27,7 @@ object WidgetUpdateManager {
     }
 
     fun updateAllAsync(context: Context) {
-        CoroutineScope(Dispatchers.IO).launch {
+        get<CoroutineScope>().launch {
             updateAll(context)
         }
     }
