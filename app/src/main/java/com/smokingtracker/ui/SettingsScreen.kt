@@ -31,6 +31,12 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Speed
 import com.smokingtracker.ui.theme.containerBorder
+import com.smokingtracker.ui.theme.containerShape
+import com.smokingtracker.ui.theme.containerPadding
+import com.smokingtracker.ui.theme.containerGroupGap
+import com.smokingtracker.ui.theme.LocalContainerStyle
+import com.smokingtracker.ui.theme.ContainerGroupPosition
+import com.smokingtracker.data.ContainerStyle
 import androidx.compose.material.icons.filled.Widgets
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
@@ -49,12 +55,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.smokingtracker.MainViewModel
-import com.smokingtracker.MainViewModel.UpdateCheckState
+import com.smokingtracker.UpdateCheckState
 import com.smokingtracker.R
+import com.smokingtracker.data.FontPreset
 import com.smokingtracker.data.ThemePreference
-import androidx.compose.material.icons.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.SystemUpdate
 import java.util.Locale
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,17 +74,17 @@ fun PersonalScreen(
     onNavigateToAppearance: () -> Unit,
     onNavigateToHistoryGenerator: () -> Unit = {}
 ) {
-    val themePreference by viewModel.themePreference.collectAsState()
-    val dailyLimit by viewModel.dailyLimit.collectAsState()
-    val fontPreset by viewModel.fontPreset.collectAsState()
-    val packPrice by viewModel.packPrice.collectAsState()
-    val packSize by viewModel.packSize.collectAsState()
-    val currency by viewModel.currency.collectAsState()
-    val checkUpdatesOnStart by viewModel.checkUpdatesOnStart.collectAsState()
-    val updateCheckState by viewModel.updateCheckState.collectAsState()
-    val taperingPlanEnabled by viewModel.taperingPlanEnabled.collectAsState()
-    val taperingIntervalDays by viewModel.taperingIntervalDays.collectAsState()
-    val hasHistoricalBaseline by viewModel.hasHistoricalBaseline.collectAsState()
+    val themePreference by viewModel.themePreference.collectAsStateWithLifecycle()
+    val dailyLimit by viewModel.dailyLimit.collectAsStateWithLifecycle()
+    val fontPreset by viewModel.fontPreset.collectAsStateWithLifecycle()
+    val packPrice by viewModel.packPrice.collectAsStateWithLifecycle()
+    val packSize by viewModel.packSize.collectAsStateWithLifecycle()
+    val currency by viewModel.currency.collectAsStateWithLifecycle()
+    val checkUpdatesOnStart by viewModel.checkUpdatesOnStart.collectAsStateWithLifecycle()
+    val updateCheckState by viewModel.updateCheckState.collectAsStateWithLifecycle()
+    val taperingPlanEnabled by viewModel.taperingPlanEnabled.collectAsStateWithLifecycle()
+    val taperingIntervalDays by viewModel.taperingIntervalDays.collectAsStateWithLifecycle()
+    val hasHistoricalBaseline by viewModel.hasHistoricalBaseline.collectAsStateWithLifecycle()
 
     PersonalScreenContent(
         themePreference = themePreference,
@@ -115,7 +123,7 @@ fun PersonalScreen(
 fun PersonalScreenContent(
     themePreference: ThemePreference,
     dailyLimit: Int,
-    fontPreset: String,
+    fontPreset: FontPreset,
     packPrice: Float,
     packSize: Int,
     currency: String,
@@ -127,7 +135,7 @@ fun PersonalScreenContent(
     onSetTaperingPlanSettings: (Boolean, Int) -> Unit = { _, _ -> },
     onThemeChange: (ThemePreference) -> Unit,
     onSetDailyLimit: (Int) -> Unit,
-    onFontPresetChange: (String) -> Unit,
+    onFontPresetChange: (FontPreset) -> Unit,
     onUpdatePackDetails: (Float, Int, String) -> Unit,
     onCheckUpdatesOnStartChange: (Boolean) -> Unit,
     onCheckForUpdates: () -> Unit,
@@ -152,7 +160,7 @@ fun PersonalScreenContent(
                         color = MaterialTheme.colorScheme.onBackground
                     )
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
                 ),
             )
@@ -199,7 +207,7 @@ fun SettingsTab(
     modifier: Modifier = Modifier,
     currentTheme: ThemePreference,
     dailyLimit: Int,
-    currentFontPreset: String,
+    currentFontPreset: FontPreset,
     packPrice: Float,
     packSize: Int,
     currency: String,
@@ -211,7 +219,7 @@ fun SettingsTab(
     onSetTaperingPlanSettings: (Boolean, Int) -> Unit = { _, _ -> },
     onThemeChange: (ThemePreference) -> Unit,
     onSetDailyLimit: (Int) -> Unit,
-    onFontPresetChange: (String) -> Unit,
+    onFontPresetChange: (FontPreset) -> Unit,
     onUpdatePackDetails: (Float, Int, String) -> Unit,
     onCheckUpdatesOnStartChange: (Boolean) -> Unit,
     onCheckForUpdates: () -> Unit,
@@ -230,6 +238,8 @@ fun SettingsTab(
     var showLimitDialog by remember { mutableStateOf(false) }
     var showPackDialog by remember { mutableStateOf(false) }
     var showWidgetDialog by remember { mutableStateOf(false) }
+    var showBackupSheet by remember { mutableStateOf(false) }
+    var showRestoreSheet by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -262,28 +272,42 @@ fun SettingsTab(
     val restoreErrorStr = stringResource(R.string.restore_error)
     val savedStr = stringResource(R.string.settings_saved)
 
-    val backupLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/json")
-    ) { uri ->
-        uri?.let {
-            onBackupData(
-                it,
-                { Toast.makeText(context, backupSuccessStr, Toast.LENGTH_SHORT).show() },
-                { Toast.makeText(context, backupErrorStr, Toast.LENGTH_SHORT).show() }
-            )
-        }
+    if (showBackupSheet) {
+        BackupBottomSheet(
+            onDismissRequest = { showBackupSheet = false },
+            onBackupData = { uri, onSuccess, onError ->
+                onBackupData(
+                    uri,
+                    {
+                        Toast.makeText(context, backupSuccessStr, Toast.LENGTH_SHORT).show()
+                        onSuccess()
+                    },
+                    {
+                        Toast.makeText(context, backupErrorStr, Toast.LENGTH_SHORT).show()
+                        onError()
+                    }
+                )
+            }
+        )
     }
 
-    val restoreLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        uri?.let {
-            onRestoreData(
-                it,
-                { Toast.makeText(context, restoreSuccessStr, Toast.LENGTH_SHORT).show() },
-                { Toast.makeText(context, restoreErrorStr, Toast.LENGTH_SHORT).show() }
-            )
-        }
+    if (showRestoreSheet) {
+        RestoreBottomSheet(
+            onDismissRequest = { showRestoreSheet = false },
+            onRestoreData = { uri, onSuccess, onError ->
+                onRestoreData(
+                    uri,
+                    {
+                        Toast.makeText(context, restoreSuccessStr, Toast.LENGTH_SHORT).show()
+                        onSuccess()
+                    },
+                    {
+                        Toast.makeText(context, restoreErrorStr, Toast.LENGTH_SHORT).show()
+                        onError()
+                    }
+                )
+            }
+        )
     }
 
     if (showLanguageDialog) {
@@ -300,7 +324,7 @@ fun SettingsTab(
         )
         ModalBottomSheet(
             onDismissRequest = { showLanguageDialog = false },
-            sheetState = rememberModalBottomSheetState(),
+            sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden),
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ) {
             Column(
@@ -317,11 +341,19 @@ fun SettingsTab(
                 )
 
                 languages.forEachIndexed { index, (langCode, langName) ->
-                    val shape = when (index) {
-                        0 -> RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp)
-                        languages.lastIndex -> RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp)
-                        else -> RoundedCornerShape(8.dp)
+                    val groupPosition = when (index) {
+                        0 -> ContainerGroupPosition.FIRST
+                        languages.lastIndex -> ContainerGroupPosition.LAST
+                        else -> ContainerGroupPosition.MIDDLE
                     }
+                    val shape = containerShape(
+                        when (index) {
+                            0 -> RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp)
+                            languages.lastIndex -> RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp)
+                            else -> RoundedCornerShape(8.dp)
+                        },
+                        groupPosition
+                    )
                     val isSelected = currentLocale == langCode
 
                     Surface(
@@ -350,7 +382,7 @@ fun SettingsTab(
                     }
 
                     if (index < languages.lastIndex) {
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(containerGroupGap()))
                     }
                 }
             }
@@ -362,7 +394,7 @@ fun SettingsTab(
         val limitValid = newLimit.isEmpty() || newLimit.toIntOrNull() != null
 
         BasicAlertDialog(onDismissRequest = { showLimitDialog = false }) {
-            Surface(shape = RoundedCornerShape(28.dp), color = MaterialTheme.colorScheme.surface) {
+            Surface(shape = containerShape(RoundedCornerShape(28.dp)), color = MaterialTheme.colorScheme.surface) {
                 Column(modifier = Modifier.padding(24.dp)) {
                     Text(
                         stringResource(R.string.set_limit_title),
@@ -410,7 +442,7 @@ fun SettingsTab(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(36.dp),
-                                shape = RoundedCornerShape(12.dp),
+                                shape = containerShape(RoundedCornerShape(12.dp)),
                                 color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                                 contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                                 border = containerBorder(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
@@ -454,7 +486,7 @@ fun SettingsTab(
         val priceValid = priceInput.isEmpty() || priceInput.toFloatOrNull() != null
 
         BasicAlertDialog(onDismissRequest = { showPackDialog = false }) {
-            Surface(shape = RoundedCornerShape(28.dp), color = MaterialTheme.colorScheme.surface) {
+            Surface(shape = containerShape(RoundedCornerShape(28.dp)), color = MaterialTheme.colorScheme.surface) {
                 Column(modifier = Modifier.padding(24.dp)) {
                     Text(
                         stringResource(R.string.settings_pack_params),
@@ -528,7 +560,7 @@ fun SettingsTab(
                             Surface(
                                 onClick = { selectedCurrency = curr },
                                 modifier = Modifier.height(36.dp),
-                                shape = RoundedCornerShape(12.dp),
+                                shape = containerShape(RoundedCornerShape(12.dp)),
                                 color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                                 contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                                 border = containerBorder(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
@@ -579,9 +611,8 @@ fun SettingsTab(
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(containerGroupGap())
     ) {
-        // Section 1: Interface & Appearance
         item {
             Text(
                 text = stringResource(R.string.settings_section_interface),
@@ -596,6 +627,7 @@ fun SettingsTab(
                 title = stringResource(R.string.settings_appearance),
                 subtitle = stringResource(R.string.settings_appearance_desc),
                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp),
+                groupPosition = ContainerGroupPosition.FIRST,
                 onClick = onNavigateToAppearance
             )
         }
@@ -607,6 +639,7 @@ fun SettingsTab(
                 title = stringResource(R.string.settings_language),
                 subtitle = langDisplay,
                 shape = RoundedCornerShape(8.dp),
+                groupPosition = ContainerGroupPosition.MIDDLE,
                 onClick = { showLanguageDialog = true }
             )
         }
@@ -616,11 +649,11 @@ fun SettingsTab(
                 title = stringResource(R.string.settings_widgets_title),
                 subtitle = stringResource(R.string.settings_widgets_desc),
                 shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
+                groupPosition = ContainerGroupPosition.LAST,
                 onClick = { showWidgetDialog = true }
             )
         }
 
-        // Section 2: Goals & Economy
         item {
             Text(
                 text = stringResource(R.string.settings_section_goals),
@@ -635,6 +668,7 @@ fun SettingsTab(
                 title = stringResource(R.string.settings_daily_limit),
                 subtitle = if (dailyLimit > 0) dailyLimit.toString() else stringResource(R.string.no_limit),
                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp),
+                groupPosition = ContainerGroupPosition.FIRST,
                 onClick = { showLimitDialog = true }
             )
         }
@@ -647,7 +681,7 @@ fun SettingsTab(
 
                 ModalBottomSheet(
                     onDismissRequest = { showTaperingDialog = false },
-                    sheetState = rememberModalBottomSheetState(),
+                    sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden),
                     containerColor = MaterialTheme.colorScheme.surfaceContainerLow
                 ) {
                     Column(
@@ -714,10 +748,11 @@ fun SettingsTab(
             }
 
             SettingItem(
-                icon = Icons.Filled.TrendingDown,
+                icon = Icons.AutoMirrored.Filled.TrendingDown,
                 title = stringResource(R.string.tapering_plan_title),
                 subtitle = if (taperingPlanEnabled) stringResource(R.string.tapering_plan_subtitle_active, taperingIntervalDays) else stringResource(R.string.tapering_plan_subtitle_off),
                 shape = RoundedCornerShape(8.dp),
+                groupPosition = ContainerGroupPosition.MIDDLE,
                 onClick = { showTaperingDialog = true }
             )
         }
@@ -731,11 +766,11 @@ fun SettingsTab(
                     stringResource(R.string.settings_tap_configure)
                 },
                 shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
+                groupPosition = ContainerGroupPosition.LAST,
                 onClick = { showPackDialog = true }
             )
         }
 
-        // Section 3: Data & Backup
         item {
             Text(
                 text = stringResource(R.string.settings_data),
@@ -750,7 +785,8 @@ fun SettingsTab(
                 title = stringResource(R.string.settings_backup),
                 subtitle = stringResource(R.string.backup_desc),
                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp),
-                onClick = { backupLauncher.launch("smoking_tracker_backup.json") }
+                groupPosition = ContainerGroupPosition.FIRST,
+                onClick = { showBackupSheet = true }
             )
         }
         item {
@@ -759,7 +795,8 @@ fun SettingsTab(
                 title = stringResource(R.string.settings_restore),
                 subtitle = stringResource(R.string.restore_desc),
                 shape = RoundedCornerShape(8.dp),
-                onClick = { restoreLauncher.launch(arrayOf("application/json")) }
+                groupPosition = ContainerGroupPosition.MIDDLE,
+                onClick = { showRestoreSheet = true }
             )
         }
         item {
@@ -768,6 +805,7 @@ fun SettingsTab(
                 title = stringResource(R.string.history_generator_title),
                 subtitle = if (hasHistoricalBaseline) stringResource(R.string.history_preview_title) else stringResource(R.string.history_banner_desc),
                 shape = if (hasHistoricalBaseline) RoundedCornerShape(8.dp) else RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
+                groupPosition = if (hasHistoricalBaseline) ContainerGroupPosition.MIDDLE else ContainerGroupPosition.LAST,
                 onClick = onNavigateToHistoryGenerator
             )
         }
@@ -804,12 +842,12 @@ fun SettingsTab(
                     title = stringResource(R.string.history_reset_button),
                     subtitle = stringResource(R.string.history_reset_dialog_desc),
                     shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
+                    groupPosition = ContainerGroupPosition.LAST,
                     onClick = { showResetDialog = true }
                 )
             }
         }
 
-        // Section 4: About & Updates
         item {
             Text(
                 text = stringResource(R.string.settings_info),
@@ -824,6 +862,7 @@ fun SettingsTab(
                 title = stringResource(R.string.about_app),
                 subtitle = stringResource(R.string.about_app_desc),
                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp),
+                groupPosition = ContainerGroupPosition.FIRST,
                 onClick = onNavigateToAbout
             )
         }
@@ -833,6 +872,7 @@ fun SettingsTab(
                 title = stringResource(R.string.settings_check_updates),
                 subtitle = stringResource(R.string.settings_check_updates_desc),
                 shape = RoundedCornerShape(8.dp),
+                groupPosition = ContainerGroupPosition.MIDDLE,
                 onClick = onCheckForUpdates
             )
         }
@@ -843,7 +883,8 @@ fun SettingsTab(
                 subtitle = stringResource(R.string.settings_check_updates_on_start_desc),
                 checked = checkUpdatesOnStart,
                 onCheckedChange = onCheckUpdatesOnStartChange,
-                shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp)
+                shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
+                groupPosition = ContainerGroupPosition.LAST
             )
         }
     }
@@ -856,11 +897,13 @@ fun SettingItemWithSwitch(
     subtitle: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(28.dp)
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(28.dp),
+    groupPosition: ContainerGroupPosition = ContainerGroupPosition.SINGLE
 ) {
+    val isStandardStyle = LocalContainerStyle.current == ContainerStyle.STANDARD
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = shape,
+        shape = containerShape(shape, groupPosition),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         border = containerBorder()
     ) {
@@ -868,20 +911,22 @@ fun SettingItemWithSwitch(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onCheckedChange(!checked) }
-                .padding(horizontal = 20.dp, vertical = 18.dp),
+                .padding(containerPadding(20.dp, 18.dp)),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
-                contentColor = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(40.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+            if (!isStandardStyle) {
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                    contentColor = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+                    }
                 }
+                Spacer(modifier = Modifier.width(16.dp))
             }
-            Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
@@ -913,11 +958,12 @@ fun SettingItem(
     title: String,
     subtitle: String,
     shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(28.dp),
+    groupPosition: ContainerGroupPosition = ContainerGroupPosition.SINGLE,
     onClick: (() -> Unit)? = null
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = shape,
+        shape = containerShape(shape, groupPosition),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         border = containerBorder()
     ) {
@@ -932,23 +978,26 @@ fun SettingItemContent(
     subtitle: String,
     onClick: (() -> Unit)? = null
 ) {
+    val isStandardStyle = LocalContainerStyle.current == ContainerStyle.STANDARD
     val rowModifier = Modifier
         .fillMaxWidth()
         .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-        .padding(horizontal = 20.dp, vertical = 18.dp)
+        .padding(containerPadding(20.dp, 18.dp))
 
     Row(modifier = rowModifier, verticalAlignment = Alignment.CenterVertically) {
-        Surface(
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
-            contentColor = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(40.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+        if (!isStandardStyle) {
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                contentColor = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+                }
             }
+            Spacer(modifier = Modifier.width(16.dp))
         }
-        Spacer(modifier = Modifier.width(16.dp))
         Column {
             Text(
                 text = title,
@@ -1003,7 +1052,7 @@ fun WidgetPinDialog(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(),
+        sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden),
         containerColor = MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         Column(
@@ -1030,7 +1079,7 @@ fun WidgetPinDialog(
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = containerShape(RoundedCornerShape(16.dp)),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
             ) {
                 Column(
@@ -1075,7 +1124,7 @@ fun WidgetPinDialog(
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = containerShape(RoundedCornerShape(16.dp)),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
             ) {
                 Column(
