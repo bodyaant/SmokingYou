@@ -15,6 +15,11 @@ enum class ThemePreference {
     SYSTEM, LIGHT, DARK
 }
 
+enum class FontPreset { WIDE, AIRY, SYSTEM, OUTFIT }
+enum class ColorPreset { SYSTEM, FOREST_SAGE, SUNSET_ROSE, OCEAN_DEEP, PURPLE_NEBULA, AMBER_GOLD, CRIMSON_BERRY, SLATE_MONO }
+enum class AppIconPreset { DEFAULT, DARK, SUNSET, CREAM, NEON, GREEN, NIGHT, MONOCHROME }
+enum class ContainerStyle { EXPRESSIVE, STANDARD }
+
 class DataStoreManager(private val context: Context) {
     private val gson = Gson()
 
@@ -23,6 +28,7 @@ class DataStoreManager(private val context: Context) {
         val SMOKING_ENTRIES = stringPreferencesKey("smoking_entries")
         val APP_THEME = stringPreferencesKey("app_theme")
         val UNLOCKED_ACHIEVEMENTS = stringPreferencesKey("unlocked_achievements")
+        val UNLOCKED_ACHIEVEMENTS_SET = stringSetPreferencesKey("unlocked_achievements_set")
         val DAILY_LIMIT = intPreferencesKey("daily_limit")
         val APP_LAUNCH_DATES = stringPreferencesKey("app_launch_dates")
         val FONT_PRESET = stringPreferencesKey("font_preset")
@@ -52,6 +58,7 @@ class DataStoreManager(private val context: Context) {
         val HISTORICAL_TRIGGER_PRIORITIES = stringPreferencesKey("historical_trigger_priorities")
         val CONTAINER_BORDER_ENABLED = booleanPreferencesKey("container_border_enabled")
         val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
+        val CONTAINER_STYLE = stringPreferencesKey("container_style")
     }
 
     val isRegistered: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -68,9 +75,16 @@ class DataStoreManager(private val context: Context) {
     }
 
     val unlockedAchievements: Flow<Set<String>> = context.dataStore.data.map { preferences ->
-        val json = preferences[UNLOCKED_ACHIEVEMENTS] ?: "[]"
-        val listType = object : TypeToken<Set<String>>() {}.type
-        gson.fromJson(json, listType) ?: emptySet()
+        preferences[UNLOCKED_ACHIEVEMENTS_SET]
+            ?: run {
+                val json = preferences[UNLOCKED_ACHIEVEMENTS]
+                if (json != null) {
+                    val listType = object : TypeToken<Set<String>>() {}.type
+                    gson.fromJson(json, listType) ?: emptySet()
+                } else {
+                    emptySet()
+                }
+            }
     }
     
     val dailyLimit: Flow<Int> = context.dataStore.data.map { preferences ->
@@ -83,8 +97,9 @@ class DataStoreManager(private val context: Context) {
         gson.fromJson(json, listType) ?: emptyList()
     }
 
-    val fontPreset: Flow<String> = context.dataStore.data.map { preferences ->
-        preferences[FONT_PRESET] ?: "WIDE"
+    val fontPreset: Flow<FontPreset> = context.dataStore.data.map { preferences ->
+        val name = preferences[FONT_PRESET] ?: FontPreset.WIDE.name
+        try { FontPreset.valueOf(name) } catch (_: Exception) { FontPreset.WIDE }
     }
 
     val amoledTheme: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -103,16 +118,18 @@ class DataStoreManager(private val context: Context) {
         preferences[CURRENCY] ?: "USD"
     }
 
-    val colorPreset: Flow<String> = context.dataStore.data.map { preferences ->
-        preferences[COLOR_PRESET] ?: "SYSTEM"
+    val colorPreset: Flow<ColorPreset> = context.dataStore.data.map { preferences ->
+        val name = preferences[COLOR_PRESET] ?: ColorPreset.SYSTEM.name
+        try { ColorPreset.valueOf(name) } catch (_: Exception) { ColorPreset.SYSTEM }
     }
 
     val checkUpdatesOnStart: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[CHECK_UPDATES_ON_START] ?: true
     }
 
-    val appIcon: Flow<String> = context.dataStore.data.map { preferences ->
-        preferences[APP_ICON] ?: "DEFAULT"
+    val appIcon: Flow<AppIconPreset> = context.dataStore.data.map { preferences ->
+        val name = preferences[APP_ICON] ?: AppIconPreset.DEFAULT.name
+        try { AppIconPreset.valueOf(name) } catch (_: Exception) { AppIconPreset.DEFAULT }
     }
 
     val hasOldData: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -146,9 +163,9 @@ class DataStoreManager(private val context: Context) {
         }
     }
 
-    suspend fun saveFontPreset(preset: String) {
+    suspend fun saveFontPreset(preset: FontPreset) {
         context.dataStore.edit { preferences ->
-            preferences[FONT_PRESET] = preset
+            preferences[FONT_PRESET] = preset.name
         }
     }
 
@@ -177,17 +194,25 @@ class DataStoreManager(private val context: Context) {
 
     suspend fun saveUnlockedAchievement(achievementId: String) {
         context.dataStore.edit { preferences ->
-            val json = preferences[UNLOCKED_ACHIEVEMENTS] ?: "[]"
-            val listType = object : TypeToken<MutableSet<String>>() {}.type
-            val current: MutableSet<String> = gson.fromJson(json, listType) ?: mutableSetOf()
+            val current = preferences[UNLOCKED_ACHIEVEMENTS_SET]?.toMutableSet()
+                ?: run {
+                    val json = preferences[UNLOCKED_ACHIEVEMENTS]
+                    val migrated: MutableSet<String> = if (json != null) {
+                        val listType = object : TypeToken<Set<String>>() {}.type
+                        gson.fromJson<Set<String>>(json, listType)?.toMutableSet() ?: mutableSetOf()
+                    } else mutableSetOf()
+                    preferences.remove(UNLOCKED_ACHIEVEMENTS)
+                    migrated
+                }
             current.add(achievementId)
-            preferences[UNLOCKED_ACHIEVEMENTS] = gson.toJson(current)
+            preferences[UNLOCKED_ACHIEVEMENTS_SET] = current
         }
     }
 
     suspend fun setUnlockedAchievements(achievements: Set<String>) {
         context.dataStore.edit { preferences ->
-            preferences[UNLOCKED_ACHIEVEMENTS] = gson.toJson(achievements)
+            preferences[UNLOCKED_ACHIEVEMENTS_SET] = achievements
+            preferences.remove(UNLOCKED_ACHIEVEMENTS)
         }
     }
     
@@ -205,9 +230,9 @@ class DataStoreManager(private val context: Context) {
         }
     }
 
-    suspend fun saveColorPreset(preset: String) {
+    suspend fun saveColorPreset(preset: ColorPreset) {
         context.dataStore.edit { preferences ->
-            preferences[COLOR_PRESET] = preset
+            preferences[COLOR_PRESET] = preset.name
         }
     }
 
@@ -217,9 +242,9 @@ class DataStoreManager(private val context: Context) {
         }
     }
 
-    suspend fun saveAppIcon(iconKey: String) {
+    suspend fun saveAppIcon(preset: AppIconPreset) {
         context.dataStore.edit { preferences ->
-            preferences[APP_ICON] = iconKey
+            preferences[APP_ICON] = preset.name
         }
     }
 
@@ -243,7 +268,8 @@ class DataStoreManager(private val context: Context) {
         context.dataStore.edit { preferences ->
             preferences[IS_REGISTERED] = isReg
             preferences[APP_THEME] = theme
-            preferences[UNLOCKED_ACHIEVEMENTS] = gson.toJson(achievements)
+            preferences[UNLOCKED_ACHIEVEMENTS_SET] = achievements
+            preferences.remove(UNLOCKED_ACHIEVEMENTS)
             preferences[DAILY_LIMIT] = limit
             preferences[PACK_PRICE] = price
             preferences[PACK_SIZE] = size
@@ -389,6 +415,17 @@ class DataStoreManager(private val context: Context) {
     suspend fun saveVibrationEnabled(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[VIBRATION_ENABLED] = enabled
+        }
+    }
+
+    val containerStyle: Flow<ContainerStyle> = context.dataStore.data.map { preferences ->
+        val name = preferences[CONTAINER_STYLE] ?: ContainerStyle.EXPRESSIVE.name
+        try { ContainerStyle.valueOf(name) } catch (_: Exception) { ContainerStyle.EXPRESSIVE }
+    }
+
+    suspend fun saveContainerStyle(style: ContainerStyle) {
+        context.dataStore.edit { preferences ->
+            preferences[CONTAINER_STYLE] = style.name
         }
     }
 
