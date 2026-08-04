@@ -11,15 +11,19 @@ android {
     defaultConfig {
         applicationId = "com.smokingtracker"
         minSdk = 26
-        targetSdk = 36
-        versionCode = 10302
-        versionName = "1.3.2"
+        targetSdk = 37
+        versionCode = 10400
+        versionName = "1.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
         
+    }
+
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
     }
 
     buildTypes {
