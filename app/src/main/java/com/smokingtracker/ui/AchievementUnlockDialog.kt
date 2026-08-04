@@ -25,18 +25,22 @@ import com.smokingtracker.Achievement
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
 import com.smokingtracker.ui.theme.containerBorder
+import com.smokingtracker.ui.theme.containerShape
+import com.smokingtracker.ui.theme.LocalContainerStyle
+import com.smokingtracker.data.ContainerStyle
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AchievementUnlockDialog(
     achievement: Achievement,
+    vibrationEnabled: Boolean,
     onDismiss: () -> Unit,
     onNavigateToAchievements: () -> Unit
 ) {
     val context = LocalContext.current
 
     LaunchedEffect(achievement.id) {
-        HapticFeedbackHelper.performAchievementUnlock(context)
+        HapticFeedbackHelper.performAchievementUnlock(vibrationEnabled, context)
     }
 
     var scaleAnim by remember { mutableFloatStateOf(0.3f) }
@@ -59,12 +63,13 @@ fun AchievementUnlockDialog(
                 .fillMaxWidth()
                 .padding(16.dp)
                 .scale(animatedScale),
-            shape = RoundedCornerShape(28.dp),
+            shape = containerShape(RoundedCornerShape(28.dp)),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
             ),
             border = containerBorder()
         ) {
+            val isStandardStyle = LocalContainerStyle.current == ContainerStyle.STANDARD
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -75,8 +80,8 @@ fun AchievementUnlockDialog(
                 Box(
                     modifier = Modifier
                         .size(72.dp)
-                        .clip(MaterialShapes.Cookie12Sided.toShape())
-                        .background(MaterialTheme.colorScheme.primaryContainer),
+                        .clip(if (isStandardStyle) CircleShape else MaterialShapes.Cookie12Sided.toShape())
+                        .background(if (isStandardStyle) Color.Transparent else MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
