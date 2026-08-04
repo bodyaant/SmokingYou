@@ -13,7 +13,7 @@ data class StatisticsData(
     val totalTrackingDays: Int
 )
 
-object StatisticsManager {
+class StatisticsManager {
 
     fun calculateStats(entries: List<Long>): StatisticsData {
         if (entries.isEmpty()) {
@@ -329,7 +329,6 @@ object StatisticsManager {
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
 
-        // Set to start of week (Monday)
         val firstDay = cal.firstDayOfWeek
         while (cal.get(Calendar.DAY_OF_WEEK) != firstDay) {
             cal.add(Calendar.DAY_OF_YEAR, -1)
