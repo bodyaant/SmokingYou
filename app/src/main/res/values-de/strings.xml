@@ -38,6 +38,10 @@
     <string name="settings_container_border_desc">Feinen Rahmen um Karten und Container anzeigen</string>
     <string name="settings_vibration">Vibrationsfeedback</string>
     <string name="settings_vibration_desc">Vibration bei Berührungen und Aktionen</string>
+    <string name="settings_container_style">Visueller Stil</string>
+    <string name="settings_container_style_desc">Visuellen Stil von Karten, Containern und Navigation wählen</string>
+    <string name="container_style_expressive">Expressive</string>
+    <string name="container_style_standard">Standard</string>
     <string name="limit_dialog_helper">Auf 0 setzen für unbegrenzte tägliche Zigaretten</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Hell</string>
@@ -140,6 +144,18 @@
     <string name="backup_error">Fehler beim Speichern der Sicherung</string>
     <string name="restore_success">Daten erfolgreich wiederhergestellt!</string>
     <string name="restore_error">Fehler beim Wiederherstellen der Daten</string>
+    <string name="backup_dialog_title">Datensicherung</string>
+    <string name="backup_dialog_desc">Deine Statistiken, Historie und Einstellungen werden in einer Datei am ausgewählten Ort gespeichert. Du kannst diese Daten jederzeit wiederherstellen.</string>
+    <string name="backup_choose_file_location">Speicherort auswählen</string>
+    <string name="backup_start_action">Sicherung erstellen</string>
+    <string name="backup_done_title">Sicherung erstellt</string>
+    <string name="restore_dialog_title">Daten wiederherstellen</string>
+    <string name="restore_dialog_desc">Deine aktuellen Statistiken, Historie und Einstellungen werden durch die Daten aus der Sicherungsdatei ersetzt.</string>
+    <string name="restore_choose_file">Sicherungsdatei auswählen</string>
+    <string name="restore_start_action">Wiederherstellen</string>
+    <string name="restore_done_title">Daten wiederhergestellt</string>
+    <string name="backup_restore_cancel">Abbrechen</string>
+    <string name="backup_restore_close">Schließen</string>
     <string name="language_dialog_title">Sprache auswählen</string>
     <string name="settings_daily_limit">Tägliches Zigarettenlimit</string>
 
