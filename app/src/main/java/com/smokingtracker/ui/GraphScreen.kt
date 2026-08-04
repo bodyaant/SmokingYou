@@ -48,6 +48,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.BorderStroke
 import com.smokingtracker.ui.theme.containerBorder
+import com.smokingtracker.ui.theme.containerShape
+import com.smokingtracker.ui.theme.ContainerIcon
+import com.smokingtracker.ui.theme.LocalContainerStyle
+import com.smokingtracker.data.ContainerStyle
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -64,16 +68,18 @@ import com.smokingtracker.StatisticsManager
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GraphScreen(viewModel: MainViewModel) {
-    val entries by viewModel.smokingEntries.collectAsState()
-    val entryTriggers by viewModel.entryTriggers.collectAsState()
-    val dailyLimit by viewModel.dailyLimit.collectAsState()
-    val packPrice by viewModel.packPrice.collectAsState()
-    val packSize by viewModel.packSize.collectAsState()
-    val currency by viewModel.currency.collectAsState()
+    val entries by viewModel.smokingEntries.collectAsStateWithLifecycle()
+    val entryTriggers by viewModel.entryTriggers.collectAsStateWithLifecycle()
+    val dailyLimit by viewModel.dailyLimit.collectAsStateWithLifecycle()
+    val packPrice by viewModel.packPrice.collectAsStateWithLifecycle()
+    val packSize by viewModel.packSize.collectAsStateWithLifecycle()
+    val currency by viewModel.currency.collectAsStateWithLifecycle()
+    val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.onAnalyticsTabVisited()
@@ -85,7 +91,8 @@ fun GraphScreen(viewModel: MainViewModel) {
         dailyLimit = dailyLimit,
         packPrice = packPrice,
         packSize = packSize,
-        currency = currency
+        currency = currency,
+        vibrationEnabled = vibrationEnabled
     )
 }
 
@@ -97,7 +104,8 @@ fun GraphScreenContent(
     dailyLimit: Int = 0,
     packPrice: Float = 0f,
     packSize: Int = 20,
-    currency: String = ""
+    currency: String = "",
+    vibrationEnabled: Boolean = false
 ) {
     var selectedTab by remember { mutableStateOf(0) }
 
@@ -106,10 +114,10 @@ fun GraphScreenContent(
     var monthlyDate by remember { mutableStateOf(Calendar.getInstance()) }
     var yearlyDate by remember { mutableStateOf(Calendar.getInstance()) }
 
-    val dailyData = remember(entries, dailyDate) { StatisticsManager.generateDailyData(entries, dailyDate) }
-    val weeklyData = remember(entries, weeklyDate) { StatisticsManager.generateWeeklyData(entries, weeklyDate) }
-    val monthlyData = remember(entries, monthlyDate) { StatisticsManager.generateMonthlyData(entries, monthlyDate) }
-    val yearlyData = remember(entries, yearlyDate) { StatisticsManager.generateYearlyData(entries, yearlyDate) }
+    val dailyData = remember(entries, dailyDate) { StatisticsManager().generateDailyData(entries, dailyDate) }
+    val weeklyData = remember(entries, weeklyDate) { StatisticsManager().generateWeeklyData(entries, weeklyDate) }
+    val monthlyData = remember(entries, monthlyDate) { StatisticsManager().generateMonthlyData(entries, monthlyDate) }
+    val yearlyData = remember(entries, yearlyDate) { StatisticsManager().generateYearlyData(entries, yearlyDate) }
 
     val context = androidx.compose.ui.platform.LocalContext.current
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
@@ -138,7 +146,7 @@ fun GraphScreenContent(
                 TextButton(
                     onClick = {
                         datePickerState.selectedDateMillis?.let { selectedMillis ->
-                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                             val cal = Calendar.getInstance().apply { timeInMillis = selectedMillis }
                             when (target) {
                                 "daily" -> dailyDate = cal
@@ -181,7 +189,7 @@ fun GraphScreenContent(
                 ExpressiveTabSelector(
                     selectedTab = selectedTab,
                     onTabSelected = {
-                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                         selectedTab = it
                     },
                     tabs = listOf(
@@ -197,8 +205,8 @@ fun GraphScreenContent(
         }
     ) { paddingValues ->
         if (selectedTab == 0) {
-            val weeklyComparison = remember(entries) { StatisticsManager.calculateWeeklyComparison(entries) }
-            val hourlyDistribution = remember(entries) { StatisticsManager.calculateHourlyDistribution(entries) }
+            val weeklyComparison = remember(entries) { StatisticsManager().calculateWeeklyComparison(entries) }
+            val hourlyDistribution = remember(entries) { StatisticsManager().calculateHourlyDistribution(entries) }
 
             LazyColumn(
                 modifier = Modifier
@@ -215,7 +223,7 @@ fun GraphScreenContent(
                 }
 
                 item {
-                    PeakSmokingHoursSection(distribution = hourlyDistribution)
+                    PeakSmokingHoursSection(distribution = hourlyDistribution, vibrationEnabled = vibrationEnabled)
                 }
 
                 item {
@@ -234,7 +242,8 @@ fun GraphScreenContent(
                         canGoNext = canGoNextDaily,
                         onPrevious = { dailyDate = dailyDate.clone().apply { (this as Calendar).add(Calendar.DAY_OF_YEAR, -1) } as Calendar },
                         onNext = { dailyDate = dailyDate.clone().apply { (this as Calendar).add(Calendar.DAY_OF_YEAR, 1) } as Calendar },
-                        onDateClick = { activeDatePickerTarget = "daily" }
+                        onDateClick = { activeDatePickerTarget = "daily" },
+                        vibrationEnabled = vibrationEnabled
                     )
                 }
 
@@ -264,7 +273,8 @@ fun GraphScreenContent(
                         canGoNext = canGoNextWeekly,
                         onPrevious = { weeklyDate = weeklyDate.clone().apply { (this as Calendar).add(Calendar.WEEK_OF_YEAR, -1) } as Calendar },
                         onNext = { weeklyDate = weeklyDate.clone().apply { (this as Calendar).add(Calendar.WEEK_OF_YEAR, 1) } as Calendar },
-                        onDateClick = { activeDatePickerTarget = "weekly" }
+                        onDateClick = { activeDatePickerTarget = "weekly" },
+                        vibrationEnabled = vibrationEnabled
                     )
                 }
 
@@ -286,7 +296,8 @@ fun GraphScreenContent(
                         canGoNext = canGoNextMonthly,
                         onPrevious = { monthlyDate = monthlyDate.clone().apply { (this as Calendar).add(Calendar.MONTH, -1) } as Calendar },
                         onNext = { monthlyDate = monthlyDate.clone().apply { (this as Calendar).add(Calendar.MONTH, 1) } as Calendar },
-                        onDateClick = { activeDatePickerTarget = "monthly" }
+                        onDateClick = { activeDatePickerTarget = "monthly" },
+                        vibrationEnabled = vibrationEnabled
                     )
                 }
 
@@ -306,12 +317,13 @@ fun GraphScreenContent(
                         canGoNext = canGoNextYearly,
                         onPrevious = { yearlyDate = yearlyDate.clone().apply { (this as Calendar).add(Calendar.YEAR, -1) } as Calendar },
                         onNext = { yearlyDate = yearlyDate.clone().apply { (this as Calendar).add(Calendar.YEAR, 1) } as Calendar },
-                        onDateClick = { activeDatePickerTarget = "yearly" }
+                        onDateClick = { activeDatePickerTarget = "yearly" },
+                        vibrationEnabled = vibrationEnabled
                     )
                 }
             }
         } else if (selectedTab == 1) {
-            val stats = remember(entries) { StatisticsManager.calculateStats(entries) }
+            val stats = remember(entries) { StatisticsManager().calculateStats(entries) }
             if (entries.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize().padding(paddingValues),
@@ -363,7 +375,8 @@ fun GraphSection(
     onPrevious: () -> Unit,
     onNext: () -> Unit,
     canGoNext: Boolean = true,
-    onDateClick: (() -> Unit)? = null
+    onDateClick: (() -> Unit)? = null,
+    vibrationEnabled: Boolean = false
 ) {
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -373,7 +386,7 @@ fun GraphSection(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
-        shape = RoundedCornerShape(32.dp),
+        shape = containerShape(RoundedCornerShape(32.dp)),
         border = containerBorder()
     ) {
         Column(
@@ -392,7 +405,7 @@ fun GraphSection(
                 )
 
                 Surface(
-                    shape = CircleShape,
+                    shape = containerShape(CircleShape),
                     color = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ) {
@@ -432,7 +445,7 @@ fun GraphSection(
             ) {
                 Surface(
                     onClick = {
-                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                         onPrevious()
                     },
                     shape = cookieShape,
@@ -447,7 +460,7 @@ fun GraphSection(
 
                 Surface(
                     onClick = {
-                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                         onDateClick?.invoke()
                     },
                     enabled = onDateClick != null,
@@ -477,7 +490,7 @@ fun GraphSection(
 
                 Surface(
                     onClick = {
-                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                         onNext()
                     },
                     enabled = canGoNext,
@@ -667,7 +680,7 @@ fun TriggersTab(triggerCounts: Map<String, Int>, totalCount: Int) {
                 val triggerName = triggerType?.let { stringResource(it.labelResId) } ?: mostFrequent.first
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
+                    shape = containerShape(RoundedCornerShape(24.dp)),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
                     border = containerBorder(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.25f))
                 ) {
@@ -676,16 +689,12 @@ fun TriggersTab(triggerCounts: Map<String, Int>, totalCount: Int) {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.tertiary,
-                            contentColor = MaterialTheme.colorScheme.onTertiary,
-                            modifier = Modifier.size(44.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(Icons.Filled.BarChart, contentDescription = null, modifier = Modifier.size(24.dp))
-                            }
-                        }
+                        ContainerIcon(
+                            icon = Icons.Filled.BarChart,
+                            tint = MaterialTheme.colorScheme.onTertiary,
+                            backdropColor = MaterialTheme.colorScheme.tertiary,
+                            size = 44.dp
+                        )
                         Column {
                             Text(
                                 stringResource(R.string.main_trigger),
@@ -715,16 +724,17 @@ fun TriggersTab(triggerCounts: Map<String, Int>, totalCount: Int) {
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(28.dp),
+                shape = containerShape(RoundedCornerShape(28.dp)),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                 border = containerBorder()
             ) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                    val isStandardStyle = LocalContainerStyle.current == ContainerStyle.STANDARD
                     sortedTriggers.forEach { (triggerKey, count) ->
                         val triggerType = com.smokingtracker.data.TriggerType.fromKey(triggerKey)
                         val triggerName = triggerType?.let { stringResource(it.labelResId) } ?: triggerKey
                         val percent = if (totalCount > 0) count.toFloat() / totalCount.toFloat() else 0f
-                        
+
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -739,8 +749,8 @@ fun TriggersTab(triggerCounts: Map<String, Int>, totalCount: Int) {
                                     Box(
                                         modifier = Modifier
                                             .size(32.dp)
-                                            .clip(cookieShape)
-                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                                            .clip(if (isStandardStyle) CircleShape else cookieShape)
+                                            .background(if (isStandardStyle) Color.Transparent else MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Icon(
@@ -938,7 +948,7 @@ private fun getTriggerIcon(triggerKey: String?): ImageVector {
 private fun WeeklyComparisonCard(comparison: StatisticsManager.WeeklyComparisonData) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = containerShape(RoundedCornerShape(24.dp)),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
@@ -983,7 +993,7 @@ private fun WeeklyComparisonCard(comparison: StatisticsManager.WeeklyComparisonD
                 }
 
                 Surface(
-                    shape = RoundedCornerShape(12.dp),
+                    shape = containerShape(RoundedCornerShape(12.dp)),
                     color = badgeBg
                 ) {
                     Row(
@@ -1042,7 +1052,7 @@ private fun WeeklyComparisonCard(comparison: StatisticsManager.WeeklyComparisonD
 private data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 
 @Composable
-private fun PeakSmokingHoursSection(distribution: StatisticsManager.HourlyDistributionData) {
+private fun PeakSmokingHoursSection(distribution: StatisticsManager.HourlyDistributionData, vibrationEnabled: Boolean = false) {
     var selectedHour by remember { mutableStateOf<Int?>(null) }
     var isAnimated by remember { mutableStateOf(false) }
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
@@ -1054,7 +1064,7 @@ private fun PeakSmokingHoursSection(distribution: StatisticsManager.HourlyDistri
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = containerShape(RoundedCornerShape(24.dp)),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
@@ -1098,7 +1108,7 @@ private fun PeakSmokingHoursSection(distribution: StatisticsManager.HourlyDistri
                 }
 
                 Surface(
-                    shape = RoundedCornerShape(16.dp),
+                    shape = containerShape(RoundedCornerShape(16.dp)),
                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -1123,7 +1133,6 @@ private fun PeakSmokingHoursSection(distribution: StatisticsManager.HourlyDistri
                     }
                 }
 
-                // 24-Hour Animated & Interactive Column Chart
                 val maxCount = distribution.hourlyCounts.maxOrNull()?.coerceAtLeast(1) ?: 1
                 val primaryColor = MaterialTheme.colorScheme.primary
 
@@ -1164,7 +1173,7 @@ private fun PeakSmokingHoursSection(distribution: StatisticsManager.HourlyDistri
                                     .background(barColor)
                                     .clickable {
                                         selectedHour = if (selectedHour == hour) null else hour
-                                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(haptic, context)
+                                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                                     }
                             )
                         }
