@@ -38,6 +38,10 @@
     <string name="settings_container_border_desc">Показувати тонку обводку у карток та контейнерів</string>
     <string name="settings_vibration">Вібровідгук</string>
     <string name="settings_vibration_desc">Вібрація при натисканнях та діях</string>
+    <string name="settings_container_style">Візуальний стиль</string>
+    <string name="settings_container_style_desc">Виберіть візуальний стиль карток, контейнерів і навігації</string>
+    <string name="container_style_expressive">Виразний</string>
+    <string name="container_style_standard">Стандартний</string>
     <string name="limit_dialog_helper">Вкажіть 0 для куріння без щоденного ліміту</string>
     <string name="theme_system">Системна</string>
     <string name="theme_light">Світла</string>
@@ -141,6 +145,18 @@
     <string name="backup_error">Помилка збереження резервної копії</string>
     <string name="restore_success">Дані успішно відновлено!</string>
     <string name="restore_error">Помилка відновлення даних</string>
+    <string name="backup_dialog_title">Резервне копіювання</string>
+    <string name="backup_dialog_desc">Ваша статистика, історія та налаштування будуть збережені у файл у вибраній папці. Ви зможете відновити ці дані у будь-який момент.</string>
+    <string name="backup_choose_file_location">Виберіть місце збереження</string>
+    <string name="backup_start_action">Створити бэкап</string>
+    <string name="backup_done_title">Бэкап створено</string>
+    <string name="restore_dialog_title">Відновлення даних</string>
+    <string name="restore_dialog_desc">Ваша поточна статистика, історія та налаштування будуть замінені даними з вибраного файлу резервної копії.</string>
+    <string name="restore_choose_file">Виберіть файл бэкапу</string>
+    <string name="restore_start_action">Відновити</string>
+    <string name="restore_done_title">Дані відновлено</string>
+    <string name="backup_restore_cancel">Скасувати</string>
+    <string name="backup_restore_close">Закрити</string>
     <string name="language_dialog_title">Виберіть мову</string>
     <string name="settings_daily_limit">Денний ліміт сигарет</string>
 
