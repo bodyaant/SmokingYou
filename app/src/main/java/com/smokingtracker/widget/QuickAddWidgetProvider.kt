@@ -13,7 +13,6 @@ import androidx.annotation.Keep
 import com.smokingtracker.R
 import com.smokingtracker.data.repository.SmokingRepository
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -33,7 +32,7 @@ class QuickAddWidgetProvider : AppWidgetProvider(), KoinComponent {
         super.onReceive(context, intent)
         if (intent.action == ACTION_QUICK_ADD) {
             val pendingResult = goAsync()
-            CoroutineScope(Dispatchers.IO).launch {
+            get<CoroutineScope>().launch {
                 try {
                     val repository: SmokingRepository = get()
                     repository.addEntry(System.currentTimeMillis(), trigger = null)
