@@ -2,6 +2,9 @@ package com.smokingtracker.ui
 
 import androidx.compose.foundation.BorderStroke
 import com.smokingtracker.ui.theme.containerBorder
+import com.smokingtracker.ui.theme.containerShape
+import com.smokingtracker.ui.theme.containerPadding
+import com.smokingtracker.ui.theme.ContainerIcon
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -34,30 +37,30 @@ import com.smokingtracker.StatisticsManager
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
 import androidx.compose.material.icons.filled.Shield
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(viewModel: MainViewModel, onBack: () -> Unit, onNavigateToSettings: (() -> Unit)? = null) {
-    val entries by viewModel.smokingEntries.collectAsState()
-    val resistedEntries by viewModel.resistedEntries.collectAsState()
-    val dailyLimit by viewModel.dailyLimit.collectAsState()
-    val packPrice by viewModel.packPrice.collectAsState()
-    val packSize by viewModel.packSize.collectAsState()
-    val currency by viewModel.currency.collectAsState()
-    val hasHistoricalBaseline by viewModel.hasHistoricalBaseline.collectAsState()
-    val historicalStartDate by viewModel.historicalStartDate.collectAsState()
-    val historicalDailyAvg by viewModel.historicalDailyAvg.collectAsState()
-    val historicalPackPrice by viewModel.historicalPackPrice.collectAsState()
-    val historicalPackSize by viewModel.historicalPackSize.collectAsState()
-    val historicalTriggerPriorities by viewModel.historicalTriggerPriorities.collectAsState()
+    val entries by viewModel.smokingEntries.collectAsStateWithLifecycle()
+    val resistedEntries by viewModel.resistedEntries.collectAsStateWithLifecycle()
+    val dailyLimit by viewModel.dailyLimit.collectAsStateWithLifecycle()
+    val packPrice by viewModel.packPrice.collectAsStateWithLifecycle()
+    val packSize by viewModel.packSize.collectAsStateWithLifecycle()
+    val currency by viewModel.currency.collectAsStateWithLifecycle()
+    val hasHistoricalBaseline by viewModel.hasHistoricalBaseline.collectAsStateWithLifecycle()
+    val historicalStartDate by viewModel.historicalStartDate.collectAsStateWithLifecycle()
+    val historicalDailyAvg by viewModel.historicalDailyAvg.collectAsStateWithLifecycle()
+    val historicalPackPrice by viewModel.historicalPackPrice.collectAsStateWithLifecycle()
+    val historicalPackSize by viewModel.historicalPackSize.collectAsStateWithLifecycle()
+    val historicalTriggerPriorities by viewModel.historicalTriggerPriorities.collectAsStateWithLifecycle()
 
-    val stats = remember(entries) { StatisticsManager.calculateStats(entries) }
+    val stats = remember(entries) { StatisticsManager().calculateStats(entries) }
 
     val baselineStats = remember(hasHistoricalBaseline, historicalStartDate, historicalDailyAvg, historicalPackPrice, historicalPackSize, historicalTriggerPriorities) {
         if (hasHistoricalBaseline) {
-            StatisticsManager.calculateHistoricalBaseline(
+            StatisticsManager().calculateHistoricalBaseline(
                 startDate = historicalStartDate,
                 dailyAvg = historicalDailyAvg,
                 packPrice = historicalPackPrice,
@@ -88,7 +91,7 @@ fun StatisticsScreen(viewModel: MainViewModel, onBack: () -> Unit, onNavigateToS
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             )
         }
     ) { paddingValues ->
@@ -139,7 +142,7 @@ fun StatisticsList(
     val timeElapsedMs = if (lastCigaretteTime > 0L) System.currentTimeMillis() - lastCigaretteTime else 0L
     val timeElapsedMinutes = (timeElapsedMs / (1000 * 60)).toFloat()
 
-    val currentStreakDays = remember(entries) { StatisticsManager.currentSmokeFreeStreakDays(entries) }
+    val currentStreakDays = remember(entries) { StatisticsManager().currentSmokeFreeStreakDays(entries) }
     val streakCigarettesSaved = (currentStreakDays * dailyLimit).coerceAtLeast(0)
     val streakMoneySaved = if (packSize > 0) streakCigarettesSaved.toFloat() * (packPrice / packSize.toFloat()) else 0f
     val streakLifeMinutesSaved = streakCigarettesSaved * 11
@@ -170,7 +173,7 @@ fun StatisticsList(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.tertiaryContainer
                     ),
-                    shape = RoundedCornerShape(24.dp),
+                    shape = containerShape(RoundedCornerShape(24.dp)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
@@ -295,7 +298,7 @@ fun StatisticsList(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
+                    shape = containerShape(RoundedCornerShape(24.dp)),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
                     ),
@@ -403,7 +406,7 @@ fun StatisticsList(
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
+                shape = containerShape(RoundedCornerShape(24.dp)),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                 border = containerBorder()
             ) {
@@ -448,21 +451,17 @@ fun StatCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = containerShape(RoundedCornerShape(24.dp)),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         border = containerBorder()
     ) {
-        Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-            Surface(
-                shape = CircleShape,
-                color = color.copy(alpha = 0.2f),
-                contentColor = color,
-                modifier = Modifier.size(44.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp))
-                }
-            }
+        Row(modifier = Modifier.padding(containerPadding(20.dp, 20.dp)), verticalAlignment = Alignment.CenterVertically) {
+            ContainerIcon(
+                icon = icon,
+                tint = color,
+                backdropColor = color.copy(alpha = 0.2f),
+                size = 44.dp
+            )
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(
