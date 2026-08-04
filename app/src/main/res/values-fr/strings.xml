@@ -39,6 +39,10 @@
         conteneurs</string>
     <string name="settings_vibration">Retour haptique</string>
     <string name="settings_vibration_desc">Vibration lors des appuis et actions</string>
+    <string name="settings_container_style">Style visuel</string>
+    <string name="settings_container_style_desc">Choisissez le style visuel des cartes, conteneurs et de la navigation</string>
+    <string name="container_style_expressive">Expressif</string>
+    <string name="container_style_standard">Standard</string>
     <string name="limit_dialog_helper">Régler sur 0 pour un nombre illimité de cigarettes
         quotidiennes</string>
     <string name="theme_system">Système</string>
@@ -145,6 +149,18 @@
     <string name="backup_error">Erreur lors de l\'enregistrement de la sauvegarde</string>
     <string name="restore_success">Données restaurées avec succès !</string>
     <string name="restore_error">Erreur lors de la restauration des données</string>
+    <string name="backup_dialog_title">Sauvegarde des données</string>
+    <string name="backup_dialog_desc">Vos statistiques, votre historique et vos paramètres seront enregistrés dans un fichier dans l\'emplacement choisi. Vous pourrez restaurer ces données à tout moment.</string>
+    <string name="backup_choose_file_location">Choisir l\'emplacement</string>
+    <string name="backup_start_action">Créer une sauvegarde</string>
+    <string name="backup_done_title">Sauvegarde créée</string>
+    <string name="restore_dialog_title">Restauration des données</string>
+    <string name="restore_dialog_desc">Vos statistiques, votre historique et vos paramètres actuels seront remplacés par les données du fichier de sauvegarde.</string>
+    <string name="restore_choose_file">Choisir le fichier</string>
+    <string name="restore_start_action">Restaurer</string>
+    <string name="restore_done_title">Données restaurées</string>
+    <string name="backup_restore_cancel">Annuler</string>
+    <string name="backup_restore_close">Fermer</string>
     <string name="language_dialog_title">Choisir la langue</string>
     <string name="settings_daily_limit">Limite quotidienne de cigarettes</string>
 
