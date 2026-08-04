@@ -39,6 +39,10 @@
         contenitori</string>
     <string name="settings_vibration">Feedback aptico</string>
     <string name="settings_vibration_desc">Vibrazione al tocco e durante le azioni</string>
+    <string name="settings_container_style">Stile visivo</string>
+    <string name="settings_container_style_desc">Scegli lo stile visivo di schede, contenitori e navigazione</string>
+    <string name="container_style_expressive">Expressive</string>
+    <string name="container_style_standard">Standard</string>
     <string name="limit_dialog_helper">Imposta a 0 per sigarette giornaliere illimitate</string>
     <string name="theme_system">Sistema</string>
     <string name="theme_light">Chiaro</string>
@@ -143,6 +147,18 @@
     <string name="backup_error">Errore durante il salvataggio del backup</string>
     <string name="restore_success">Dati ripristinati con successo!</string>
     <string name="restore_error">Errore durante il ripristino dei dati</string>
+    <string name="backup_dialog_title">Backup dei dati</string>
+    <string name="backup_dialog_desc">Le tue statistiche, la cronologia e le impostazioni verranno salvate in un file nella posizione selezionata. Potrai ripristinare questi dati in qualsiasi momento.</string>
+    <string name="backup_choose_file_location">Seleziona posizione</string>
+    <string name="backup_start_action">Crea backup</string>
+    <string name="backup_done_title">Backup creato</string>
+    <string name="restore_dialog_title">Ripristino dati</string>
+    <string name="restore_dialog_desc">Le tue statistiche, la cronologia e le impostazioni attuali verranno sostituite con i dati del file di backup.</string>
+    <string name="restore_choose_file">Seleziona file</string>
+    <string name="restore_start_action">Ripristina</string>
+    <string name="restore_done_title">Dati ripristinati</string>
+    <string name="backup_restore_cancel">Annulla</string>
+    <string name="backup_restore_close">Chiudi</string>
     <string name="language_dialog_title">Seleziona lingua</string>
     <string name="settings_daily_limit">Limite giornaliero di sigarette</string>
 
