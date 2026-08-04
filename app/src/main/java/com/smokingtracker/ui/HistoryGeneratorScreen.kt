@@ -3,6 +3,7 @@ package com.smokingtracker.ui
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import com.smokingtracker.ui.theme.containerBorder
+import com.smokingtracker.ui.theme.containerShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -36,17 +37,19 @@ import com.smokingtracker.StatisticsManager
 import java.text.SimpleDateFormat
 import java.util.*
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HistoryGeneratorScreen(viewModel: MainViewModel, navController: NavHostController) {
-    val currentPackPrice by viewModel.packPrice.collectAsState()
-    val currentPackSize by viewModel.packSize.collectAsState()
-    val currency by viewModel.currency.collectAsState()
-    val existingStartDate by viewModel.historicalStartDate.collectAsState()
-    val existingDailyAvg by viewModel.historicalDailyAvg.collectAsState()
-    val existingPackPrice by viewModel.historicalPackPrice.collectAsState()
-    val existingPackSize by viewModel.historicalPackSize.collectAsState()
-    val existingTriggerPriorities by viewModel.historicalTriggerPriorities.collectAsState()
+    val currentPackPrice by viewModel.packPrice.collectAsStateWithLifecycle()
+    val currentPackSize by viewModel.packSize.collectAsStateWithLifecycle()
+    val currency by viewModel.currency.collectAsStateWithLifecycle()
+    val existingStartDate by viewModel.historicalStartDate.collectAsStateWithLifecycle()
+    val existingDailyAvg by viewModel.historicalDailyAvg.collectAsStateWithLifecycle()
+    val existingPackPrice by viewModel.historicalPackPrice.collectAsStateWithLifecycle()
+    val existingPackSize by viewModel.historicalPackSize.collectAsStateWithLifecycle()
+    val existingTriggerPriorities by viewModel.historicalTriggerPriorities.collectAsStateWithLifecycle()
 
     val currencySymbol = remember(currency) {
         when (currency) {
@@ -107,7 +110,7 @@ fun HistoryGeneratorScreen(viewModel: MainViewModel, navController: NavHostContr
     val packSizeVal = packSizeStr.toIntOrNull() ?: 20
 
     val baselineStats = remember(selectedStartDate, dailyAvg, packPriceVal, packSizeVal, triggerList) {
-        StatisticsManager.calculateHistoricalBaseline(
+        StatisticsManager().calculateHistoricalBaseline(
             startDate = selectedStartDate,
             dailyAvg = dailyAvg,
             packPrice = packPriceVal,
@@ -164,7 +167,7 @@ fun HistoryGeneratorScreen(viewModel: MainViewModel, navController: NavHostContr
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
                 ),
-                shape = RoundedCornerShape(24.dp),
+                shape = containerShape(RoundedCornerShape(24.dp)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -191,7 +194,7 @@ fun HistoryGeneratorScreen(viewModel: MainViewModel, navController: NavHostContr
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 ),
-                shape = RoundedCornerShape(20.dp),
+                shape = containerShape(RoundedCornerShape(20.dp)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -267,7 +270,7 @@ fun HistoryGeneratorScreen(viewModel: MainViewModel, navController: NavHostContr
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 ),
-                shape = RoundedCornerShape(20.dp),
+                shape = containerShape(RoundedCornerShape(20.dp)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -305,7 +308,7 @@ fun HistoryGeneratorScreen(viewModel: MainViewModel, navController: NavHostContr
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 ),
-                shape = RoundedCornerShape(20.dp),
+                shape = containerShape(RoundedCornerShape(20.dp)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -373,7 +376,7 @@ fun HistoryGeneratorScreen(viewModel: MainViewModel, navController: NavHostContr
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 ),
-                shape = RoundedCornerShape(20.dp),
+                shape = containerShape(RoundedCornerShape(20.dp)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -410,7 +413,7 @@ fun HistoryGeneratorScreen(viewModel: MainViewModel, navController: NavHostContr
 
                             Card(
                                 colors = CardDefaults.cardColors(containerColor = containerColor),
-                                shape = RoundedCornerShape(14.dp),
+                                shape = containerShape(RoundedCornerShape(14.dp)),
                                 border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -426,7 +429,7 @@ fun HistoryGeneratorScreen(viewModel: MainViewModel, navController: NavHostContr
                                         modifier = Modifier.weight(1f)
                                     ) {
                                         Surface(
-                                            shape = CircleShape,
+                                            shape = containerShape(CircleShape),
                                             color = if (isTop) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
                                         ) {
                                             Text(
@@ -492,7 +495,7 @@ fun HistoryGeneratorScreen(viewModel: MainViewModel, navController: NavHostContr
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer
                 ),
-                shape = RoundedCornerShape(24.dp),
+                shape = containerShape(RoundedCornerShape(24.dp)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
