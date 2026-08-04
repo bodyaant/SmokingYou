@@ -2,9 +2,10 @@ package com.smokingtracker.ui
 
 import androidx.compose.foundation.BorderStroke
 import com.smokingtracker.ui.theme.containerBorder
+import com.smokingtracker.ui.theme.containerShape
+import com.smokingtracker.ui.theme.ContainerIcon
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -28,13 +29,14 @@ import kotlinx.coroutines.launch
 import com.smokingtracker.AchievementsManager
 import com.smokingtracker.MainViewModel
 import com.smokingtracker.R
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AchievementsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
-    val entries by viewModel.smokingEntries.collectAsState()
-    val launches by viewModel.appLaunchDates.collectAsState()
-    val unlockedAchievements by viewModel.unlockedAchievements.collectAsState()
+    val entries by viewModel.smokingEntries.collectAsStateWithLifecycle()
+    val launches by viewModel.appLaunchDates.collectAsStateWithLifecycle()
+    val unlockedAchievements by viewModel.unlockedAchievements.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -82,7 +84,7 @@ fun AchievementsTab(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        val groupedAchievements = AchievementsManager.achievementsList.groupBy { it.category }
+        val groupedAchievements = AchievementsManager().achievementsList.groupBy { it.category }
 
         groupedAchievements.forEach { (category, achievements) ->
             item {
@@ -95,7 +97,7 @@ fun AchievementsTab(
 
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(28.dp),
+                    shape = containerShape(RoundedCornerShape(28.dp)),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                     border = containerBorder()
                 ) {
@@ -108,7 +110,7 @@ fun AchievementsTab(
                             val isSecretHidden = achievement.isSecret && !isUnlocked
 
                             Surface(
-                                shape = RoundedCornerShape(20.dp),
+                                shape = containerShape(RoundedCornerShape(20.dp)),
                                 color = if (isUnlocked) {
                                     MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
                                 } else {
@@ -124,28 +126,20 @@ fun AchievementsTab(
                                     modifier = Modifier.padding(16.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Surface(
-                                        shape = CircleShape,
-                                        color = if (isUnlocked) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else {
-                                            MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                                        },
-                                        contentColor = if (isUnlocked) {
+                                    ContainerIcon(
+                                        icon = if (isUnlocked) Icons.Filled.CheckCircle else Icons.Filled.Lock,
+                                        tint = if (isUnlocked) {
                                             MaterialTheme.colorScheme.onPrimary
                                         } else {
                                             MaterialTheme.colorScheme.outline
                                         },
-                                        modifier = Modifier.size(36.dp)
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Icon(
-                                                imageVector = if (isUnlocked) Icons.Filled.CheckCircle else Icons.Filled.Lock,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                        }
-                                    }
+                                        backdropColor = if (isUnlocked) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                                        },
+                                        size = 36.dp
+                                    )
 
                                     Spacer(modifier = Modifier.width(16.dp))
 
@@ -175,7 +169,7 @@ fun AchievementsTab(
                                         )
                                         if (!isUnlocked && !achievement.isSecret) {
                                             val progress = remember(entries, launches) {
-                                                AchievementsManager.progressFraction(achievement.id, entries, launches)
+                                                AchievementsManager().progressFraction(achievement.id, entries, launches)
                                             }
                                             Spacer(modifier = Modifier.height(8.dp))
                                             AnimatedAchievementProgressBar(
