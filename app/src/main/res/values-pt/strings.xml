@@ -39,6 +39,10 @@
         recipientes</string>
     <string name="settings_vibration">Feedback tátil</string>
     <string name="settings_vibration_desc">Vibração ao tocar e realizar ações</string>
+    <string name="settings_container_style">Estilo visual</string>
+    <string name="settings_container_style_desc">Escolha o estilo visual de cartões, recipientes e navegação</string>
+    <string name="container_style_expressive">Expressivo</string>
+    <string name="container_style_standard">Padrão</string>
     <string name="limit_dialog_helper">Defina como 0 para cigarros diários ilimitados</string>
     <string name="theme_system">Sistema</string>
     <string name="theme_light">Claro</string>
@@ -140,6 +144,18 @@
     <string name="backup_error">Erro ao salvar backup</string>
     <string name="restore_success">Dados restaurados com sucesso!</string>
     <string name="restore_error">Erro ao restaurar dados</string>
+    <string name="backup_dialog_title">Backup de dados</string>
+    <string name="backup_dialog_desc">Suas estatísticas, histórico e configurações serão salvos em um arquivo no local selecionado. Você poderá restaurar estes dados a qualquer momento.</string>
+    <string name="backup_choose_file_location">Selecionar local</string>
+    <string name="backup_start_action">Criar backup</string>
+    <string name="backup_done_title">Backup criado</string>
+    <string name="restore_dialog_title">Restaurar dados</string>
+    <string name="restore_dialog_desc">Suas estatísticas, histórico e configurações atuais serão substituídos pelos dados do arquivo de backup.</string>
+    <string name="restore_choose_file">Selecionar arquivo</string>
+    <string name="restore_start_action">Restaurar</string>
+    <string name="restore_done_title">Dados restaurados</string>
+    <string name="backup_restore_cancel">Cancelar</string>
+    <string name="backup_restore_close">Fechar</string>
     <string name="language_dialog_title">Selecionar idioma</string>
     <string name="settings_daily_limit">Limite diário de cigarros</string>
 
