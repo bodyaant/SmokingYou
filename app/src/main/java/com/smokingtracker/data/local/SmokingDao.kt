@@ -23,11 +23,17 @@ interface SmokingDao {
     @Query("DELETE FROM smoking_entries WHERE timestamp = :timestamp")
     suspend fun deleteEntryByTimestamp(timestamp: Long)
 
+    @Query("DELETE FROM smoking_entries WHERE id = :id")
+    suspend fun deleteEntryById(id: Long)
+
     @Query("UPDATE smoking_entries SET timestamp = :newTimestamp WHERE timestamp = :oldTimestamp")
     suspend fun updateEntryTimestamp(oldTimestamp: Long, newTimestamp: Long)
 
     @Query("UPDATE smoking_entries SET `trigger` = :trigger WHERE timestamp = :timestamp")
     suspend fun updateEntryTrigger(timestamp: Long, trigger: String?)
+
+    @Query("UPDATE smoking_entries SET `trigger` = :trigger WHERE id = :id")
+    suspend fun updateEntryTriggerById(id: Long, trigger: String?)
 
     @Query("DELETE FROM smoking_entries")
     suspend fun clearAllEntries()
