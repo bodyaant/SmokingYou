@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.koinViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 class MainActivity : ComponentActivity() {
 
@@ -47,16 +48,12 @@ class MainActivity : ComponentActivity() {
 
             val viewModel: MainViewModel = koinViewModel()
 
-            val themePreference by viewModel.themePreference.collectAsState()
-            val fontPreset by viewModel.fontPreset.collectAsState()
-            val amoledTheme by viewModel.amoledTheme.collectAsState()
-            val colorPreset by viewModel.colorPreset.collectAsState()
-            val containerBorderEnabled by viewModel.containerBorderEnabled.collectAsState()
-            val vibrationEnabled by viewModel.vibrationEnabled.collectAsState()
-
-            androidx.compose.runtime.LaunchedEffect(vibrationEnabled) {
-                com.smokingtracker.ui.theme.HapticFeedbackHelper.isVibrationEnabled = vibrationEnabled
-            }
+            val themePreference by viewModel.themePreference.collectAsStateWithLifecycle()
+            val fontPreset by viewModel.fontPreset.collectAsStateWithLifecycle()
+            val amoledTheme by viewModel.amoledTheme.collectAsStateWithLifecycle()
+            val colorPreset by viewModel.colorPreset.collectAsStateWithLifecycle()
+            val containerBorderEnabled by viewModel.containerBorderEnabled.collectAsStateWithLifecycle()
+            val containerStyle by viewModel.containerStyle.collectAsStateWithLifecycle()
 
             val useDarkTheme = when (themePreference) {
                 ThemePreference.LIGHT -> false
@@ -69,7 +66,8 @@ class MainActivity : ComponentActivity() {
                 fontPreset = fontPreset,
                 amoledThemeEnabled = amoledTheme,
                 colorPreset = colorPreset,
-                containerBorderEnabled = containerBorderEnabled
+                containerBorderEnabled = containerBorderEnabled,
+                containerStyle = containerStyle
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
