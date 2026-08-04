@@ -9,18 +9,31 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.compose.ui.tooling.preview.Preview
+import com.smokingtracker.data.ColorPreset
+import com.smokingtracker.data.ContainerStyle
+import com.smokingtracker.data.FontPreset
 
 
 private val LightColors = lightColorScheme(
@@ -390,6 +403,7 @@ private val SlateDarkColors = darkColorScheme(
 )
 
 val LocalContainerBorderEnabled = staticCompositionLocalOf { true }
+val LocalContainerStyle = staticCompositionLocalOf { ContainerStyle.EXPRESSIVE }
 
 @Composable
 fun containerBorder(
@@ -399,26 +413,114 @@ fun containerBorder(
     return if (LocalContainerBorderEnabled.current) BorderStroke(strokeWidth, color) else null
 }
 
+enum class ContainerGroupPosition { SINGLE, FIRST, MIDDLE, LAST }
+
+@Composable
+fun containerShape(expressive: Shape): Shape {
+    return if (LocalContainerStyle.current == ContainerStyle.STANDARD) RoundedCornerShape(16.dp) else expressive
+}
+
+@Composable
+fun containerShape(expressive: Shape, groupPosition: ContainerGroupPosition): Shape {
+    if (LocalContainerStyle.current != ContainerStyle.STANDARD) return expressive
+    val outer = 16.dp
+    val inner = 4.dp
+    return when (groupPosition) {
+        ContainerGroupPosition.SINGLE -> RoundedCornerShape(outer)
+        ContainerGroupPosition.FIRST -> RoundedCornerShape(topStart = outer, topEnd = outer, bottomStart = inner, bottomEnd = inner)
+        ContainerGroupPosition.MIDDLE -> RoundedCornerShape(inner)
+        ContainerGroupPosition.LAST -> RoundedCornerShape(topStart = inner, topEnd = inner, bottomStart = outer, bottomEnd = outer)
+    }
+}
+
+@Composable
+fun containerGroupGap(): Dp {
+    return if (LocalContainerStyle.current == ContainerStyle.STANDARD) 3.dp else 4.dp
+}
+
+@Composable
+fun containerPadding(
+    expressiveHorizontal: Dp,
+    expressiveVertical: Dp,
+    standardHorizontal: Dp = 16.dp,
+    standardVertical: Dp = 12.dp
+): PaddingValues {
+    return if (LocalContainerStyle.current == ContainerStyle.STANDARD) {
+        PaddingValues(horizontal = standardHorizontal, vertical = standardVertical)
+    } else {
+        PaddingValues(horizontal = expressiveHorizontal, vertical = expressiveVertical)
+    }
+}
+
+@Composable
+fun ContainerIcon(
+    icon: ImageVector,
+    tint: Color,
+    backdropColor: Color,
+    size: Dp = 40.dp
+) {
+    if (LocalContainerStyle.current == ContainerStyle.STANDARD) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier.size(size * 0.5f)
+        )
+    } else {
+        Surface(
+            shape = CircleShape,
+            color = backdropColor,
+            modifier = Modifier.size(size)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = tint,
+                    modifier = Modifier.size(size * 0.5f)
+                )
+            }
+        }
+    }
+}
+
+private val NeutralLightBackground = Color(0xFFF2F2F2)
+private val NeutralLightSurfaceVariant = Color(0xFFECECEC)
+private val NeutralLightContainer = Color(0xFFFFFFFF)
+private val NeutralLightContainerLow = Color(0xFFF7F7F7)
+private val NeutralLightContainerHigh = Color(0xFFECECEC)
+private val NeutralLightContainerHighest = Color(0xFFE0E0E0)
+private val NeutralLightOutline = Color(0xFFDDDDDD)
+
+private val NeutralDarkBackground = Color(0xFF1C1C1C)
+private val NeutralDarkSurfaceVariant = Color(0xFF262626)
+private val NeutralDarkContainer = Color(0xFF2A2A2A)
+private val NeutralDarkContainerLow = Color(0xFF212121)
+private val NeutralDarkContainerHigh = Color(0xFF303030)
+private val NeutralDarkContainerHighest = Color(0xFF3A3A3A)
+private val NeutralDarkOutline = Color(0xFF3D3D3D)
+
 @Preview
 @Composable
 fun AppTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
-    fontPreset: String = "WIDE",
+    fontPreset: FontPreset = FontPreset.WIDE,
     amoledThemeEnabled: Boolean = false,
-    colorPreset: String = "SYSTEM",
+    colorPreset: ColorPreset = ColorPreset.SYSTEM,
     containerBorderEnabled: Boolean = true,
+    containerStyle: ContainerStyle = ContainerStyle.EXPRESSIVE,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
     val baseColors = when (colorPreset) {
-        "FOREST_SAGE" -> if (useDarkTheme) SageDarkColors else SageLightColors
-        "SUNSET_ROSE" -> if (useDarkTheme) RoseDarkColors else RoseLightColors
-        "OCEAN_DEEP" -> if (useDarkTheme) OceanDarkColors else OceanLightColors
-        "PURPLE_NEBULA" -> if (useDarkTheme) PurpleDarkColors else PurpleLightColors
-        "AMBER_GOLD" -> if (useDarkTheme) AmberDarkColors else AmberLightColors
-        "CRIMSON_BERRY" -> if (useDarkTheme) CrimsonDarkColors else CrimsonLightColors
-        "SLATE_MONO" -> if (useDarkTheme) SlateDarkColors else SlateLightColors
-        else -> {
+        ColorPreset.FOREST_SAGE -> if (useDarkTheme) SageDarkColors else SageLightColors
+        ColorPreset.SUNSET_ROSE -> if (useDarkTheme) RoseDarkColors else RoseLightColors
+        ColorPreset.OCEAN_DEEP -> if (useDarkTheme) OceanDarkColors else OceanLightColors
+        ColorPreset.PURPLE_NEBULA -> if (useDarkTheme) PurpleDarkColors else PurpleLightColors
+        ColorPreset.AMBER_GOLD -> if (useDarkTheme) AmberDarkColors else AmberLightColors
+        ColorPreset.CRIMSON_BERRY -> if (useDarkTheme) CrimsonDarkColors else CrimsonLightColors
+        ColorPreset.SLATE_MONO -> if (useDarkTheme) SlateDarkColors else SlateLightColors
+        ColorPreset.SYSTEM -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 if (useDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             } else {
@@ -464,26 +566,71 @@ fun AppTheme(
         )
     }
 
+    val finalColors = if (containerStyle == ContainerStyle.STANDARD) {
+        if (useDarkTheme) {
+            if (amoledThemeEnabled) {
+                colors.copy(
+                    background = Color.Black,
+                    surface = Color.Black,
+                    surfaceVariant = Color(0xFF121212),
+                    surfaceContainer = Color(0xFF1C1C1C),
+                    surfaceContainerLow = Color(0xFF0C0C0C),
+                    surfaceContainerHigh = Color(0xFF2C2C2C),
+                    surfaceContainerHighest = Color(0xFF3C3C3C),
+                    surfaceContainerLowest = Color.Black,
+                    outlineVariant = NeutralDarkOutline
+                )
+            } else {
+                colors.copy(
+                    background = NeutralDarkBackground,
+                    surface = NeutralDarkBackground,
+                    surfaceVariant = NeutralDarkSurfaceVariant,
+                    surfaceContainer = NeutralDarkContainer,
+                    surfaceContainerLow = NeutralDarkContainerLow,
+                    surfaceContainerHigh = NeutralDarkContainerHigh,
+                    surfaceContainerHighest = NeutralDarkContainerHighest,
+                    surfaceContainerLowest = colors.surfaceContainerLowest,
+                    outlineVariant = NeutralDarkOutline
+                )
+            }
+        } else {
+            colors.copy(
+                background = NeutralLightBackground,
+                surface = NeutralLightBackground,
+                surfaceVariant = NeutralLightSurfaceVariant,
+                surfaceContainer = NeutralLightContainer,
+                surfaceContainerLow = NeutralLightContainerLow,
+                surfaceContainerHigh = NeutralLightContainerHigh,
+                surfaceContainerHighest = NeutralLightContainerHighest,
+                surfaceContainerLowest = NeutralLightContainer,
+                outlineVariant = NeutralLightOutline
+            )
+        }
+    } else {
+        colors
+    }
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = Color.Transparent.toArgb()
-            window.navigationBarColor = Color.Transparent.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !useDarkTheme
             WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !useDarkTheme
         }
     }
 
     val typography = when (fontPreset) {
-        "OUTFIT" -> AppTypography
-        "SYSTEM" -> androidx.compose.material3.Typography()
-        else -> VariableFontFactory.createTypography(fontPreset)
+        FontPreset.OUTFIT -> AppTypography
+        FontPreset.SYSTEM -> androidx.compose.material3.Typography()
+        FontPreset.WIDE, FontPreset.AIRY -> VariableFontFactory.createTypography(fontPreset.name)
     }
 
-    CompositionLocalProvider(LocalContainerBorderEnabled provides containerBorderEnabled) {
+    CompositionLocalProvider(
+        LocalContainerBorderEnabled provides containerBorderEnabled,
+        LocalContainerStyle provides containerStyle
+    ) {
         MaterialTheme(
-            colorScheme = colors,
+            colorScheme = finalColors,
             typography = typography,
             content = content
         )
