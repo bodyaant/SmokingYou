@@ -16,7 +16,6 @@ import com.smokingtracker.R
 import com.smokingtracker.data.DataStoreManager
 import com.smokingtracker.data.repository.SmokingRepository
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -38,7 +37,7 @@ class TimerWidgetProvider : AppWidgetProvider(), KoinComponent {
         super.onReceive(context, intent)
         if (intent.action == ACTION_QUICK_ADD_TIMER) {
             val pendingResult = goAsync()
-            CoroutineScope(Dispatchers.IO).launch {
+            get<CoroutineScope>().launch {
                 try {
                     val repository: SmokingRepository = get()
                     repository.addEntry(System.currentTimeMillis(), trigger = null)
@@ -69,7 +68,7 @@ class TimerWidgetProvider : AppWidgetProvider(), KoinComponent {
             appWidgetManager: AppWidgetManager,
             appWidgetIds: IntArray
         ) {
-            CoroutineScope(Dispatchers.IO).launch {
+            get<CoroutineScope>().launch {
                 try {
                     val repository: SmokingRepository = get()
                     val dataStoreManager: DataStoreManager = get()
