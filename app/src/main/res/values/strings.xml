@@ -38,6 +38,10 @@
     <string name="settings_container_border_desc">Show subtle outline around cards and containers</string>
     <string name="settings_vibration">Haptic feedback</string>
     <string name="settings_vibration_desc">Vibrate on touches and interactions</string>
+    <string name="settings_container_style">Visual style</string>
+    <string name="settings_container_style_desc">Choose the visual style of cards, containers and navigation</string>
+    <string name="container_style_expressive">Expressive</string>
+    <string name="container_style_standard">Standard</string>
     <string name="limit_dialog_helper">Set to 0 for unlimited daily cigarettes</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
@@ -139,6 +143,18 @@
     <string name="backup_error">Error saving backup</string>
     <string name="restore_success">Data restored successfully!</string>
     <string name="restore_error">Error restoring data</string>
+    <string name="backup_dialog_title">Backup Data</string>
+    <string name="backup_dialog_desc">Your statistics, history, and settings will be saved into a file in your chosen location. You can restore this data anytime.</string>
+    <string name="backup_choose_file_location">Choose folder or location</string>
+    <string name="backup_start_action">Create Backup</string>
+    <string name="backup_done_title">Backup Completed</string>
+    <string name="restore_dialog_title">Restore Data</string>
+    <string name="restore_dialog_desc">Your current statistics, history, and settings will be replaced by the data from your backup file.</string>
+    <string name="restore_choose_file">Choose backup file</string>
+    <string name="restore_start_action">Restore Data</string>
+    <string name="restore_done_title">Data Restored</string>
+    <string name="backup_restore_cancel">Cancel</string>
+    <string name="backup_restore_close">Close</string>
     <string name="language_dialog_title">Select Language</string>
     <string name="settings_daily_limit">Daily Cigarette Limit</string>
 
