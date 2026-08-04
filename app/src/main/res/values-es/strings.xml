@@ -39,6 +39,10 @@
         contenedores</string>
     <string name="settings_vibration">Vibración</string>
     <string name="settings_vibration_desc">Vibración al pulsar y realizar acciones</string>
+    <string name="settings_container_style">Estilo visual</string>
+    <string name="settings_container_style_desc">Elige el estilo visual de tarjetas, contenedores y navegación</string>
+    <string name="container_style_expressive">Expresivo</string>
+    <string name="container_style_standard">Estándar</string>
     <string name="limit_dialog_helper">Establecer en 0 para cigarrillos diarios ilimitados</string>
     <string name="theme_system">Sistema</string>
     <string name="theme_light">Claro</string>
@@ -144,6 +148,18 @@
     <string name="backup_error">Error al guardar la copia de seguridad</string>
     <string name="restore_success">¡Datos restaurados con éxito!</string>
     <string name="restore_error">Error al restaurar los datos</string>
+    <string name="backup_dialog_title">Copia de seguridad</string>
+    <string name="backup_dialog_desc">Tus estadísticas, historial y ajustes se guardarán en un archivo en la ubicación seleccionada. Podrás restaurar estos datos en cualquier momento.</string>
+    <string name="backup_choose_file_location">Seleccionar ubicación</string>
+    <string name="backup_start_action">Crear copia</string>
+    <string name="backup_done_title">Copia creada</string>
+    <string name="restore_dialog_title">Restaurar datos</string>
+    <string name="restore_dialog_desc">Tus estadísticas, historial y ajustes actuales se reemplazarán con los datos del archivo de copia de seguridad.</string>
+    <string name="restore_choose_file">Seleccionar archivo</string>
+    <string name="restore_start_action">Restaurar</string>
+    <string name="restore_done_title">Datos restaurados</string>
+    <string name="backup_restore_cancel">Cancelar</string>
+    <string name="backup_restore_close">Cerrar</string>
     <string name="language_dialog_title">Seleccionar idioma</string>
     <string name="settings_daily_limit">Límite diario de cigarrillos</string>
 
