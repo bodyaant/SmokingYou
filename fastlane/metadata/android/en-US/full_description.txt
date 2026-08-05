@@ -8,4 +8,4 @@ Key Features:
 - Detailed Analytics: Interactive daily/weekly charts, craving triggers, financial savings, and WHO health milestones.
 - Achievements System: Unlock milestone badges for smoke-free streaks.
 - Data Portability: Local JSON backup and restore.
-- Privacy First: 100% offline, no ads, no trackers, open source.
+- Privacy First: 100% offline data storage, no ads, no trackers, open source (checks GitHub API for updates on launch, can be disabled in settings).
