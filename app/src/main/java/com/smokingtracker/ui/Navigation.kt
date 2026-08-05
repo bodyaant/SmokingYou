@@ -446,7 +446,7 @@ fun StandardBottomNavigationBar(navController: NavHostController, vibrationEnabl
                             }
                         )
                         .animateContentSize()
-                        .padding(horizontal = 18.dp, vertical = 12.dp)
+                        .padding(horizontal = 17.dp, vertical = 11.dp)
                 ) {
                     AnimatedVisibility(
                         visible = selected,
@@ -458,9 +458,9 @@ fun StandardBottomNavigationBar(navController: NavHostController, vibrationEnabl
                                 imageVector = screen.icon,
                                 contentDescription = null,
                                 tint = contentColor,
-                                modifier = Modifier.size(21.dp)
+                                modifier = Modifier.size(20.dp)
                             )
-                            Spacer(modifier = Modifier.width(7.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
                         }
                     }
                     Text(
