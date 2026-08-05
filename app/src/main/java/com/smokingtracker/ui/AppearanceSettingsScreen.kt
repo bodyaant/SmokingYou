@@ -180,16 +180,18 @@ fun AppearanceSettingsScreen(
                                 }
                                 Spacer(modifier = Modifier.width(16.dp))
                             }
-                            Text(
-                                stringResource(R.string.settings_container_style),
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    stringResource(R.string.settings_container_style),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                                )
+                                Text(
+                                    stringResource(R.string.settings_container_style_desc),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                )
+                            }
                         }
-                        Text(
-                            stringResource(R.string.settings_container_style_desc),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                        )
                         Spacer(modifier = Modifier.height(16.dp))
                         ContainerStyleSegmentedButton(
                             currentStyle = containerStyle,
