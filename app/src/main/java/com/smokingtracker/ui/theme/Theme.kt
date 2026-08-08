@@ -529,85 +529,41 @@ fun AppTheme(
         }
     }
 
-    val colors = if (useDarkTheme) {
+    val finalColors = if (useDarkTheme) {
         if (amoledThemeEnabled) {
             baseColors.copy(
                 background = Color.Black,
                 surface = Color.Black,
-                surfaceVariant = Color(0xFF121212),
-                surfaceContainer = Color(0xFF1C1C1C),
-                surfaceContainerLow = Color(0xFF0C0C0C),
-                surfaceContainerHigh = Color(0xFF2C2C2C),
-                surfaceContainerHighest = Color(0xFF3C3C3C),
-                surfaceContainerLowest = Color.Black
+                surfaceContainerLowest = Color.Black,
+                surfaceContainerLow = baseColors.surfaceContainerLow.copy(alpha = 0.5f),
+                surfaceContainer = baseColors.surfaceContainer.copy(alpha = 0.65f),
+                surfaceContainerHigh = baseColors.surfaceContainerHigh.copy(alpha = 0.8f),
+                surfaceContainerHighest = baseColors.surfaceContainerHighest,
+                surfaceVariant = baseColors.surfaceVariant
             )
         } else {
             baseColors.copy(
                 background = baseColors.surfaceContainerLow,
+                surface = baseColors.surfaceContainerLow
+            )
+        }
+    } else {
+        if (containerStyle == ContainerStyle.STANDARD) {
+            baseColors.copy(
+                background = baseColors.surfaceContainerLow,
                 surface = baseColors.surfaceContainerLow,
-                surfaceVariant = baseColors.surfaceContainer,
-                surfaceContainer = baseColors.surfaceContainerHigh,
-                surfaceContainerLow = baseColors.surfaceContainerHigh,
-                surfaceContainerHigh = baseColors.surfaceContainerHigh,
-                surfaceContainerHighest = baseColors.surfaceContainerHigh,
-                surfaceContainerLowest = baseColors.surfaceContainerHigh
+                surfaceContainer = Color.White,
+                surfaceContainerLow = Color.White,
+                surfaceContainerHigh = Color.White,
+                surfaceContainerHighest = Color.White,
+                surfaceContainerLowest = baseColors.surfaceContainerLow
             )
-        }
-    } else {
-        baseColors.copy(
-            background = baseColors.surfaceContainerLow,
-            surface = baseColors.surfaceContainerLow,
-            surfaceVariant = baseColors.surfaceContainer,
-            surfaceContainer = Color.White,
-            surfaceContainerLow = Color.White,
-            surfaceContainerHigh = Color.White,
-            surfaceContainerHighest = Color.White,
-            surfaceContainerLowest = Color.White
-        )
-    }
-
-    val finalColors = if (containerStyle == ContainerStyle.STANDARD) {
-        if (useDarkTheme) {
-            if (amoledThemeEnabled) {
-                colors.copy(
-                    background = Color.Black,
-                    surface = Color.Black,
-                    surfaceVariant = Color(0xFF121212),
-                    surfaceContainer = Color(0xFF1C1C1C),
-                    surfaceContainerLow = Color(0xFF0C0C0C),
-                    surfaceContainerHigh = Color(0xFF2C2C2C),
-                    surfaceContainerHighest = Color(0xFF3C3C3C),
-                    surfaceContainerLowest = Color.Black,
-                    outlineVariant = NeutralDarkOutline
-                )
-            } else {
-                colors.copy(
-                    background = NeutralDarkBackground,
-                    surface = NeutralDarkBackground,
-                    surfaceVariant = NeutralDarkSurfaceVariant,
-                    surfaceContainer = NeutralDarkContainer,
-                    surfaceContainerLow = NeutralDarkContainerLow,
-                    surfaceContainerHigh = NeutralDarkContainerHigh,
-                    surfaceContainerHighest = NeutralDarkContainerHighest,
-                    surfaceContainerLowest = colors.surfaceContainerLowest,
-                    outlineVariant = NeutralDarkOutline
-                )
-            }
         } else {
-            colors.copy(
-                background = NeutralLightBackground,
-                surface = NeutralLightBackground,
-                surfaceVariant = NeutralLightSurfaceVariant,
-                surfaceContainer = NeutralLightContainer,
-                surfaceContainerLow = NeutralLightContainerLow,
-                surfaceContainerHigh = NeutralLightContainerHigh,
-                surfaceContainerHighest = NeutralLightContainerHighest,
-                surfaceContainerLowest = NeutralLightContainer,
-                outlineVariant = NeutralLightOutline
+            baseColors.copy(
+                background = baseColors.surfaceContainerLow,
+                surface = baseColors.surfaceContainerLow
             )
         }
-    } else {
-        colors
     }
 
     val view = LocalView.current
