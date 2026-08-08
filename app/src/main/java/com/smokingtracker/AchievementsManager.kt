@@ -177,35 +177,36 @@ class AchievementsManager {
 
     private fun hasMorningRitualStreak(entries: List<Long>, targetDays: Int): Boolean {
         if (entries.isEmpty()) return false
-        val dayEarliest = entries.groupBy { timestamp ->
+        val dayEarliestMinutes = entries.groupBy { timestamp ->
             val cal = Calendar.getInstance().apply { timeInMillis = timestamp }
-            cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0); cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0)
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
             cal.timeInMillis
         }.mapValues { (_, timestamps) ->
             timestamps.minOf { ts ->
-                Calendar.getInstance().apply { timeInMillis = ts }.get(Calendar.HOUR_OF_DAY)
+                val cal = Calendar.getInstance().apply { timeInMillis = ts }
+                cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)
             }
         }
 
-        val sortedDays = dayEarliest.keys.sorted()
-        var streak = 0
-        var maxStreak = 0
-        for (i in sortedDays.indices) {
-            val isBeforeSeven = (dayEarliest[sortedDays[i]] ?: 24) < 7
-            if (i > 0) {
-                val daysDiff = TimeUnit.MILLISECONDS.toDays(sortedDays[i] - sortedDays[i - 1])
-                if (daysDiff == 1L && isBeforeSeven) {
-                    streak++
-                } else if (isBeforeSeven) {
-                    streak = 1
-                } else {
-                    streak = 0
-                }
-            } else if (isBeforeSeven) {
-                streak = 1
+        val validDays = dayEarliestMinutes.filterValues { it <= 7 * 60 }.keys.sorted()
+        if (validDays.isEmpty()) return false
+
+        var currentStreak = 1
+        var maxStreak = 1
+
+        for (i in 1 until validDays.size) {
+            val daysDiff = TimeUnit.MILLISECONDS.toDays(validDays[i] - validDays[i - 1])
+            if (daysDiff == 1L) {
+                currentStreak++
+                if (currentStreak > maxStreak) maxStreak = currentStreak
+            } else {
+                currentStreak = 1
             }
-            if (streak > maxStreak) maxStreak = streak
         }
+
         return maxStreak >= targetDays
     }
 
