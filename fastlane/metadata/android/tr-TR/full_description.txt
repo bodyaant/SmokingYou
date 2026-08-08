@@ -8,4 +8,4 @@ SmokingYou, Material 3 Expressive tabanlı Android için minimalist ve veri odak
 - Detaylı Analiz: İnteraktif grafikler, kriz tetikleyicileri, para tasarrufu ve DSÖ sağlık kilometre taşları.
 - Başarı Sistemi: Sigarasız geçen süreler için rozetler kazanın.
 - Veri Yedekleme: JSON formatında yerel yedekleme ve geri yükleme.
-- Gizlilik Odaklı: %100 çevrimdışı veri depolama, reklamsız, takipçisiz, açık kaynak (başlangıçta GitHub API üzerinden güncelleme kontrolü yapar, ayarlardan kapatılabilir).
+- Gizlilik Odaklı: %100 çevrimdışı veri depolama, reklamsız, takipçisiz, açık kaynak (ağ özelliği: varsayılan olarak kapalı GitHub API üzerinden otomatik güncelleme kontrolü).

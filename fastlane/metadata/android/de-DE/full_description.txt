@@ -8,4 +8,4 @@ Funktionen:
 - Detaillierte Analysen: Interaktive Diagramme, Auslöser-Verteilung, Ersparnisse und WHO-Meilensteine.
 - Erfolge-System: Schalten Sie Meilensteine und Abzeichen frei.
 - Datensicherung: Lokales Sichern und Wiederherstellen (JSON).
-- Datenschutz an erster Stelle: 100% offline Datenspeicherung, keine Werbung, keine Tracker, Open Source (prüft beim Start Updates über die GitHub-API, in den Einstellungen deaktivierbar).
+- Datenschutz an erster Stelle: 100% offline Datenspeicherung, keine Werbung, keine Tracker, Open Source (Netzwerkfunktion: standardmäßig deaktivierte automatische Update-Prüfung über GitHub-API).

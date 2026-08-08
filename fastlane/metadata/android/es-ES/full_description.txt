@@ -8,4 +8,4 @@ Características:
 - Analítica detallada: Gráficos interactivos, disparadores del deseo, ahorro económico y logros de salud de la OMS.
 - Sistema de logros: Desbloquea insignias por tus rachas sin fumar.
 - Portabilidad de datos: Copia de seguridad y restauración local en JSON.
-- Privacidad garantizada: Almacenamiento 100% sin conexión, sin anuncios, sin rastreadores, código abierto (comprueba actualizaciones al iniciar mediante la API de GitHub, desactivable en ajustes).
+- Privacidad garantizada: Almacenamiento 100% sin conexión, sin anuncios, sin rastreadores, código abierto (función de red: comprobación automática de actualizaciones vía API de GitHub, desactivada por defecto).

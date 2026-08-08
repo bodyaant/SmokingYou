@@ -8,4 +8,4 @@ Fonctionnalités :
 - Analyses détaillées : Graphiques interactifs, déclencheurs d'envies, économies et étapes de santé de l'OMS.
 - Système de succès : Débloquez des badges pour vos périodes sans fumer.
 - Portabilité des données : Sauvegarde et restauration locales au format JSON.
-- Confidentialité totale : Stockage des données 100% hors ligne, sans publicité, sans traceurs, open source (vérification des mises à jour au démarrage via l'API GitHub, désactivable dans les paramètres).
+- Confidentialité totale : Stockage des données 100% hors ligne, sans publicité, sans traceurs, open source (fonction réseau : vérification automatique des mises à jour via l'API GitHub, désactivée par défaut).

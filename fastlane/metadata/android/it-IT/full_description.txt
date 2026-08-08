@@ -8,4 +8,4 @@ Caratteristiche:
 - Statistiche dettagliate: Grafici interattivi, fattori scatenanti, risparmio economico e traguardi OMS.
 - Sistema di obiettivi: Sblocca badge per i tuoi traguardi senza fumo.
 - Portabilità dei dati: Backup e ripristino locale JSON.
-- Privacy prima di tutto: Archiviazione 100% offline, senza pubblicità, senza tracciamento, open source (verifica gli aggiornamenti all'avvio tramite l'API di GitHub, disattivabile nelle impostazioni).
+- Privacy prima di tutto: Archiviazione 100% offline, senza pubblicità, senza tracciamento, open source (funzione di rete: controllo automatico aggiornamenti tramite API GitHub, disattivato di default).

@@ -8,4 +8,4 @@ Recursos:
 - Análise detalhada: Gráficos interativos, gatilhos de desejo, poupança financeira e metas de saúde da OMS.
 - Sistema de conquistas: Desbloqueie medalhas pelos seus dias sem fumar.
 - Portabilidade de dados: Cópia de segurança e restauração local em JSON.
-- Privacidade total: Armazenamento de dados 100% offline, sem anúncios, sem rastreadores, código aberto (verifica atualizações ao iniciar via API do GitHub, desativável nas definições).
+- Privacidade total: Armazenamento de dados 100% offline, sem anúncios, sem rastreadores, código aberto (funcionalidade de rede: verificação automática de atualizações via API do GitHub, desativada por predefinição).
