@@ -124,7 +124,7 @@ class DataStoreManager(private val context: Context) {
     }
 
     val checkUpdatesOnStart: Flow<Boolean> = context.dataStore.data.map { preferences ->
-        preferences[CHECK_UPDATES_ON_START] ?: true
+        preferences[CHECK_UPDATES_ON_START] ?: false
     }
 
     val appIcon: Flow<AppIconPreset> = context.dataStore.data.map { preferences ->
