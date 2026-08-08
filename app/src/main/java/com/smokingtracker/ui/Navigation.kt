@@ -408,7 +408,8 @@ fun StandardBottomNavigationBar(navController: NavHostController, vibrationEnabl
 
     Surface(
         shape = RoundedCornerShape(percent = 50),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        shadowElevation = 6.dp
     ) {
         Row(
             modifier = Modifier.padding(7.dp),
@@ -418,11 +419,11 @@ fun StandardBottomNavigationBar(navController: NavHostController, vibrationEnabl
             items.forEach { screen ->
                 val selected = currentRoute == screen.route
                 val contentColor by animateColorAsState(
-                    targetValue = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                    targetValue = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                     label = "standard_nav_content_${screen.route}"
                 )
                 val backgroundColor by animateColorAsState(
-                    targetValue = if (selected) MaterialTheme.colorScheme.surfaceContainerHighest else Color.Transparent,
+                    targetValue = if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
                     label = "standard_nav_bg_${screen.route}"
                 )
 
