@@ -36,6 +36,7 @@ import com.smokingtracker.data.TriggerType
 import com.smokingtracker.StatisticsManager
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.roundToInt
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -71,7 +72,7 @@ fun HistoryGeneratorScreen(viewModel: MainViewModel, navController: NavHostContr
     }
 
     var selectedStartDate by remember { mutableLongStateOf(defaultStartDate) }
-    var dailyAvg by remember { mutableIntStateOf(if (existingDailyAvg > 0) existingDailyAvg else 15) }
+    var dailyAvg by remember { mutableIntStateOf(if (existingDailyAvg > 0) existingDailyAvg.coerceAtMost(30) else 15) }
     var packPriceStr by remember {
         mutableStateOf(
             if (existingPackPrice > 0f) existingPackPrice.toInt().toString()
@@ -296,10 +297,10 @@ fun HistoryGeneratorScreen(viewModel: MainViewModel, navController: NavHostContr
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Slider(
-                        value = dailyAvg.toFloat(),
-                        onValueChange = { dailyAvg = it.toInt() },
-                        valueRange = 1f..60f,
-                        steps = 58
+                        value = dailyAvg.toFloat().coerceIn(1f, 30f),
+                        onValueChange = { dailyAvg = it.roundToInt() },
+                        valueRange = 1f..30f,
+                        steps = 28
                     )
                 }
             }
