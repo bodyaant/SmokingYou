@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import com.smokingtracker.ui.theme.containerBorder
@@ -32,6 +33,8 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.SmokingRooms
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.HourglassEmpty
@@ -42,6 +45,7 @@ import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.TrendingDown
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.smokingtracker.data.TriggerType
 import androidx.compose.material3.*
@@ -53,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -67,6 +72,8 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
 
 @Preview(showBackground = true)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -77,7 +84,12 @@ private fun HomeScreenPreview() {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun HomeScreen(viewModel: HomeViewModel, vibrationEnabled: Boolean = false, onNavigateToAchievements: () -> Unit = {}) {
+fun HomeScreen(
+    viewModel: HomeViewModel,
+    vibrationEnabled: Boolean = false,
+    onNavigateToAchievements: () -> Unit = {},
+    onNavigateToGraphs: (String) -> Unit = {}
+) {
     val entries by viewModel.smokingEntries.collectAsStateWithLifecycle()
     val dailyLimit by viewModel.dailyLimit.collectAsStateWithLifecycle()
     val unlockedAchievements by viewModel.unlockedAchievements.collectAsStateWithLifecycle()
@@ -87,7 +99,8 @@ fun HomeScreen(viewModel: HomeViewModel, vibrationEnabled: Boolean = false, onNa
         unlockedAchievements = unlockedAchievements,
         viewModel = viewModel,
         vibrationEnabled = vibrationEnabled,
-        onNavigateToAchievements = onNavigateToAchievements
+        onNavigateToAchievements = onNavigateToAchievements,
+        onNavigateToGraphs = onNavigateToGraphs
     )
 }
 
@@ -99,7 +112,8 @@ internal fun HomeScreenContent(
     unlockedAchievements: Set<String> = emptySet(),
     viewModel: HomeViewModel? = null,
     vibrationEnabled: Boolean = false,
-    onNavigateToAchievements: () -> Unit = {}
+    onNavigateToAchievements: () -> Unit = {},
+    onNavigateToGraphs: (String) -> Unit = {}
 ) {
     val cookieShape = MaterialShapes.Cookie12Sided.toShape()
 
@@ -127,8 +141,6 @@ internal fun HomeScreenContent(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val scope = rememberCoroutineScope()
-    val rotationAngle = remember { Animatable(0f) }
-    var isAnimating by remember { mutableStateOf(false) }
 
     val context = androidx.compose.ui.platform.LocalContext.current
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
@@ -207,13 +219,45 @@ internal fun HomeScreenContent(
     if (showLimitWarning) {
         AlertDialog(
             onDismissRequest = { showLimitWarning = false },
-            title = { Text(stringResource(R.string.limit_warning_title)) },
-            text = { Text(stringResource(R.string.limit_warning_message)) },
+            shape = containerShape(RoundedCornerShape(28.dp)),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            icon = {
+                Surface(
+                    shape = MaterialShapes.Cookie9Sided.toShape(),
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.size(52.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Filled.Warning,
+                            contentDescription = null,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                }
+            },
+            title = {
+                Text(
+                    text = stringResource(R.string.limit_warning_title),
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    textAlign = TextAlign.Center
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.limit_warning_message),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            },
             confirmButton = {
-                TextButton(
+                Button(
                     enabled = !isProcessingAdd,
                     onClick = {
                         if (!isProcessingAdd) {
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                             isProcessingAdd = true
                             val now = Calendar.getInstance()
                             val entryDate = currentDate.clone() as Calendar
@@ -227,13 +271,24 @@ internal fun HomeScreenContent(
                             }
                             showLimitWarning = false
                         }
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    ),
+                    shape = RoundedCornerShape(14.dp)
                 ) {
-                    Text(stringResource(R.string.add_anyway))
+                    Text(stringResource(R.string.add_anyway), fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showLimitWarning = false }) {
+                OutlinedButton(
+                    onClick = {
+                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                        showLimitWarning = false
+                    },
+                    shape = RoundedCornerShape(14.dp)
+                ) {
                     Text(stringResource(R.string.dialog_cancel))
                 }
             }
@@ -252,9 +307,14 @@ internal fun HomeScreenContent(
 
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
+            shape = containerShape(RoundedCornerShape(28.dp)),
+            colors = DatePickerDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            ),
             confirmButton = {
                 TextButton(
                     onClick = {
+                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                         datePickerState.selectedDateMillis?.let { millis ->
                             val newCal = Calendar.getInstance().apply { timeInMillis = millis }
                             currentDate = newCal
@@ -266,7 +326,10 @@ internal fun HomeScreenContent(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
+                TextButton(onClick = {
+                    com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                    showDatePicker = false
+                }) {
                     Text(stringResource(R.string.dialog_cancel), fontWeight = FontWeight.Bold)
                 }
             }
@@ -276,133 +339,173 @@ internal fun HomeScreenContent(
     }
 
     if (showTriggerDialog) {
-        BasicAlertDialog(onDismissRequest = { showTriggerDialog = false; isProcessingAdd = false }) {
-            Surface(shape = RoundedCornerShape(28.dp), color = MaterialTheme.colorScheme.surface) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = stringResource(R.string.trigger_dialog_title),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(bottom = 16.dp),
-                        color = MaterialTheme.colorScheme.onSurface
+        val triggerSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        var isMindfulPauseActive by remember { mutableStateOf(false) }
+
+        ModalBottomSheet(
+            onDismissRequest = {
+                showTriggerDialog = false
+                isProcessingAdd = false
+                isMindfulPauseActive = false
+            },
+            sheetState = triggerSheetState,
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+            dragHandle = { BottomSheetDefaults.DragHandle() }
+        ) {
+            AnimatedContent(
+                targetState = isMindfulPauseActive,
+                transitionSpec = {
+                    if (targetState) {
+                        (slideInHorizontally { it } + fadeIn()).togetherWith(slideOutHorizontally { -it } + fadeOut())
+                    } else {
+                        (slideInHorizontally { -it } + fadeIn()).togetherWith(slideOutHorizontally { it } + fadeOut())
+                    }
+                },
+                label = "sheet_step_anim"
+            ) { inPauseMode ->
+                if (inPauseMode) {
+                    MindfulPauseContent(
+                        selectedTrigger = mindfulPauseTrigger,
+                        vibrationEnabled = vibrationEnabled,
+                        onDismiss = {
+                            showTriggerDialog = false
+                            isProcessingAdd = false
+                            isMindfulPauseActive = false
+                        },
+                        onSuccess = { trigger ->
+                            viewModel?.addResistedEntry(trigger)
+                            showTriggerDialog = false
+                            isProcessingAdd = false
+                            isMindfulPauseActive = false
+                        },
+                        onFailure = { trigger ->
+                            viewModel?.addSmokingEntryWithTrigger(System.currentTimeMillis(), trigger)
+                            showTriggerDialog = false
+                            isProcessingAdd = false
+                            isMindfulPauseActive = false
+                        }
                     )
-
-                    val triggers = com.smokingtracker.data.TriggerType.allEntries()
-                    val chunkedTriggers = triggers.chunked(2)
-
+                } else {
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .padding(start = 20.dp, end = 20.dp, bottom = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        chunkedTriggers.forEach { rowTriggers ->
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                rowTriggers.forEach { trigger ->
-                                    Surface(
-                                        onClick = {
-                                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
-                                            if (pendingLogTime > 0L) {
-                                                viewModel?.addSmokingEntryWithTrigger(pendingLogTime, trigger.key)
-                                            }
-                                            showTriggerDialog = false
-                                            isProcessingAdd = false
-                                        },
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .height(72.dp),
-                                        shape = RoundedCornerShape(20.dp),
-                                        color = MaterialTheme.colorScheme.surfaceVariant,
-                                        border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-                                    ) {
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.Center,
-                                            modifier = Modifier.padding(8.dp)
+                        Text(
+                            text = stringResource(R.string.trigger_dialog_title),
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
+                            modifier = Modifier.padding(bottom = 16.dp),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        val triggers = com.smokingtracker.data.TriggerType.allEntries()
+                        val chunkedTriggers = triggers.chunked(2)
+
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            chunkedTriggers.forEach { rowTriggers ->
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    rowTriggers.forEach { trigger ->
+                                        Card(
+                                            onClick = {
+                                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
+                                                if (pendingLogTime > 0L) {
+                                                    viewModel?.addSmokingEntryWithTrigger(pendingLogTime, trigger.key)
+                                                }
+                                                showTriggerDialog = false
+                                                isProcessingAdd = false
+                                            },
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(78.dp),
+                                            shape = containerShape(RoundedCornerShape(20.dp)),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                                                contentColor = MaterialTheme.colorScheme.onSurface
+                                            ),
+                                            border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
                                         ) {
-                                            val cookieShape = MaterialShapes.Cookie9Sided.toShape()
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(28.dp)
-                                                    .clip(cookieShape)
-                                                    .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f)),
-                                                contentAlignment = Alignment.Center
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.Center,
+                                                modifier = Modifier.fillMaxSize().padding(8.dp)
                                             ) {
-                                                Icon(
-                                                    imageVector = getTriggerIcon(trigger.key),
-                                                    contentDescription = null,
-                                                    modifier = Modifier.size(16.dp)
+                                                val cShape = MaterialShapes.Cookie9Sided.toShape()
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(34.dp)
+                                                        .clip(cShape)
+                                                        .background(MaterialTheme.colorScheme.primaryContainer),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = getTriggerIcon(trigger.key),
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                }
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                                Text(
+                                                    text = stringResource(trigger.labelResId),
+                                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                                    color = MaterialTheme.colorScheme.onSurface,
+                                                    maxLines = 1
                                                 )
                                             }
-                                            Spacer(modifier = Modifier.height(4.dp))
-                                            Text(
-                                                text = stringResource(trigger.labelResId),
-                                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                maxLines = 1
-                                            )
                                         }
                                     }
-                                }
-                                if (rowTriggers.size == 1) {
-                                    Spacer(modifier = Modifier.weight(1f))
+                                    if (rowTriggers.size == 1) {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
                                 }
                             }
                         }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(
-                        text = stringResource(R.string.mindful_pause_or_resist),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp),
-                        textAlign = TextAlign.Start
-                    )
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                    Button(
-                        onClick = {
-                            showTriggerDialog = false
-                            isProcessingAdd = false
-                            mindfulPauseTrigger = null
-                            showMindfulPauseDialog = true
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Shield,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.mindful_pause_button),
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        TextButton(onClick = { showTriggerDialog = false; isProcessingAdd = false }) {
-                            Text(stringResource(R.string.dialog_cancel), fontWeight = FontWeight.Bold)
+                        // Mindful Pause button
+                        Surface(
+                            onClick = {
+                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                mindfulPauseTrigger = null
+                                isMindfulPauseActive = true
+                            },
+                            shape = RoundedCornerShape(18.dp),
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            border = containerBorder(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Shield,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = stringResource(R.string.mindful_pause_button),
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                                )
+                            }
                         }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Skip / Without trigger Button
                         Button(
                             onClick = {
                                 com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
@@ -412,13 +515,25 @@ internal fun HomeScreenContent(
                                 showTriggerDialog = false
                                 isProcessingAdd = false
                             },
-                            shape = RoundedCornerShape(16.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp),
+                            shape = RoundedCornerShape(18.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Text(stringResource(R.string.trigger_skip), fontWeight = FontWeight.Bold)
+                                Icon(
+                                    imageVector = Icons.Filled.SmokingRooms,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(stringResource(R.string.trigger_skip), style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                     contentDescription = null,
@@ -601,10 +716,17 @@ internal fun HomeScreenContent(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
+                        val heroTextStyle = when {
+                            timePassedText.length > 16 -> MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold)
+                            timePassedText.length > 10 -> MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold)
+                            else -> MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold)
+                        }
                         Text(
                             text = timePassedText,
-                            style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold),
-                            color = MaterialTheme.colorScheme.primary
+                            style = heroTextStyle,
+                            color = MaterialTheme.colorScheme.primary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Row(
@@ -629,6 +751,7 @@ internal fun HomeScreenContent(
 
                 if (dailyLimit > 0) {
                     val progress = (selectedDateEntries.size.toFloat() / dailyLimit.toFloat()).coerceIn(0f, 1f)
+                    val isLimitReached = progress >= 1f
                     
                     Spacer(modifier = Modifier.height(24.dp))
                     
@@ -637,7 +760,9 @@ internal fun HomeScreenContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 8.dp),
-                        color = if (progress >= 1f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                        amplitude = { if (isLimitReached) 0f else 1f },
+                        waveSpeed = if (isLimitReached) 0.dp else 16.dp,
+                        color = if (isLimitReached) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant
                     )
                 }
@@ -651,15 +776,58 @@ internal fun HomeScreenContent(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    StatItem(stringResource(R.string.stat_daily), selectedDateEntries.size.toString(), Modifier.weight(1f))
-                    StatItem(stringResource(R.string.stat_weekly), weeklyCount.toString(), Modifier.weight(1f)) 
-                    StatItem(stringResource(R.string.stat_monthly), monthlyCount.toString(), Modifier.weight(1f)) 
+                    StatItem(
+                        label = stringResource(R.string.stat_daily),
+                        value = selectedDateEntries.size.toString(),
+                        onClick = { onNavigateToGraphs("daily") },
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatItem(
+                        label = stringResource(R.string.stat_weekly),
+                        value = weeklyCount.toString(),
+                        onClick = { onNavigateToGraphs("weekly") },
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatItem(
+                        label = stringResource(R.string.stat_monthly),
+                        value = monthlyCount.toString(),
+                        onClick = { onNavigateToGraphs("monthly") },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                var totalDragX by remember { mutableFloatStateOf(0f) }
+
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .pointerInput(currentDate, isToday) {
+                            detectHorizontalDragGestures(
+                                onDragStart = { totalDragX = 0f },
+                                onDragEnd = {
+                                    if (totalDragX > 80f) {
+                                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                        val newDate = currentDate.clone() as Calendar
+                                        newDate.add(Calendar.DAY_OF_YEAR, -1)
+                                        currentDate = newDate
+                                    } else if (totalDragX < -80f && !isToday) {
+                                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                        val newDate = currentDate.clone() as Calendar
+                                        newDate.add(Calendar.DAY_OF_YEAR, 1)
+                                        currentDate = newDate
+                                    }
+                                    totalDragX = 0f
+                                },
+                                onDragCancel = { totalDragX = 0f },
+                                onHorizontalDrag = { change, dragAmount ->
+                                    change.consume()
+                                    totalDragX += dragAmount
+                                }
+                            )
+                        },
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -671,7 +839,7 @@ internal fun HomeScreenContent(
                             newDate.add(Calendar.DAY_OF_YEAR, -1)
                             currentDate = newDate
                         },
-                        shape = cookieShape,
+                        shape = MaterialShapes.Cookie9Sided.toShape(),
                         color = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier.size(56.dp)
@@ -693,7 +861,7 @@ internal fun HomeScreenContent(
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Icon(
@@ -704,6 +872,11 @@ internal fun HomeScreenContent(
                             Text(
                                 text = selectedDateStr,
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                            )
+                            Icon(
+                                imageVector = Icons.Filled.KeyboardArrowDown,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }
@@ -716,7 +889,7 @@ internal fun HomeScreenContent(
                             currentDate = newDate
                         },
                         enabled = !isToday,
-                        shape = cookieShape,
+                        shape = MaterialShapes.Cookie9Sided.toShape(),
                         color = if (!isToday) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = if (!isToday) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         modifier = Modifier.size(56.dp)
@@ -739,119 +912,268 @@ internal fun HomeScreenContent(
                     }.sortedByDescending { it.timestamp }
                 }
 
+                val entriesListState = androidx.compose.foundation.lazy.rememberLazyListState()
+                val latestEntryId = selectedDateAllEntities.firstOrNull()?.id
+                LaunchedEffect(latestEntryId) {
+                    if (selectedDateAllEntities.isNotEmpty()) {
+                        entriesListState.animateScrollToItem(0)
+                    }
+                }
+
                 LazyColumn(
+                    state = entriesListState,
                     modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(bottom = 190.dp)
                 ) {
-                    itemsIndexed(
-                        items = selectedDateAllEntities,
-                        key = { _, entity -> entity.id }
-                    ) { index, entity ->
-                        val prevTime = if (index < selectedDateAllEntities.size - 1) selectedDateAllEntities[index + 1].timestamp else null
-                        EntryItem(
-                            entryTime = entity.timestamp,
-                            prevEntryTime = prevTime,
-                            isResisted = entity.isResisted,
-                            index = index,
-                            trigger = entity.trigger,
-                            onDelete = {
-                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
-                                scope.launch {
-                                    viewModel?.removeSmokingEntry(entity.id, entity.timestamp)
-                                    val result = snackbarHostState.showSnackbar(
-                                        message = undoDeleteStr,
-                                        actionLabel = undoStr,
-                                        duration = SnackbarDuration.Short
+                    if (selectedDateAllEntities.isEmpty()) {
+                        item {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 24.dp, horizontal = 4.dp),
+                                shape = containerShape(RoundedCornerShape(24.dp)),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.5f)
+                                ),
+                                border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(32.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Surface(
+                                        shape = MaterialShapes.Cookie9Sided.toShape(),
+                                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                                        contentColor = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(56.dp)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = Icons.Filled.History,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(28.dp)
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(14.dp))
+                                    Text(
+                                        text = stringResource(R.string.home_no_entries_title),
+                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        textAlign = TextAlign.Center
                                     )
-                                    if (result == SnackbarResult.ActionPerformed) {
-                                        if (entity.isResisted) {
-                                            viewModel?.addResistedEntry(entity.trigger, entity.timestamp)
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = stringResource(R.string.home_no_entries_desc),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        itemsIndexed(
+                            items = selectedDateAllEntities,
+                            key = { _, entity -> entity.id }
+                        ) { index, entity ->
+                            val prevTime = if (index < selectedDateAllEntities.size - 1) selectedDateAllEntities[index + 1].timestamp else null
+                            val density = LocalDensity.current
+                            val screenWidthPx = remember(density) {
+                                context.resources.displayMetrics.widthPixels.toFloat()
+                            }
+                            var latestDismissOffset by remember { mutableFloatStateOf(0f) }
+                            val dismissState = rememberSwipeToDismissBoxState(
+                                positionalThreshold = { distance -> distance * 0.85f },
+                                confirmValueChange = { dismissValue ->
+                                    if (dismissValue == SwipeToDismissBoxValue.StartToEnd || dismissValue == SwipeToDismissBoxValue.EndToStart) {
+                                        val minThreshold = screenWidthPx * 0.67f
+                                        if (latestDismissOffset < minThreshold) {
+                                            false
                                         } else {
-                                            viewModel?.addSmokingEntryWithTrigger(entity.timestamp, entity.trigger)
+                                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                            scope.launch {
+                                                viewModel?.removeSmokingEntry(entity.id, entity.timestamp)
+                                                val result = snackbarHostState.showSnackbar(
+                                                    message = undoDeleteStr,
+                                                    actionLabel = undoStr,
+                                                    duration = SnackbarDuration.Short
+                                                )
+                                                if (result == SnackbarResult.ActionPerformed) {
+                                                    if (entity.isResisted) {
+                                                        viewModel?.addResistedEntry(entity.trigger, entity.timestamp)
+                                                    } else {
+                                                        viewModel?.addSmokingEntryWithTrigger(entity.timestamp, entity.trigger)
+                                                    }
+                                                }
+                                            }
+                                            true
+                                        }
+                                    } else {
+                                        true
+                                    }
+                                }
+                            )
+
+                            SwipeToDismissBox(
+                                state = dismissState,
+                                enableDismissFromStartToEnd = true,
+                                enableDismissFromEndToStart = true,
+                                backgroundContent = {
+                                    val direction = dismissState.dismissDirection
+                                    val isEndToStart = direction == SwipeToDismissBoxValue.EndToStart
+                                    val alignment = if (isEndToStart) Alignment.CenterEnd else Alignment.CenterStart
+                                    val currentOffset = runCatching { dismissState.requireOffset() }.getOrDefault(0f)
+                                    val absOffset = kotlin.math.abs(currentOffset)
+                                    latestDismissOffset = absOffset
+                                    val absOffsetDp = with(LocalDensity.current) { absOffset.toDp() }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(vertical = 5.dp),
+                                        contentAlignment = alignment
+                                    ) {
+                                        if (absOffsetDp > 6.dp) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxHeight()
+                                                    .width(absOffsetDp)
+                                                    .clip(containerShape(RoundedCornerShape(24.dp)))
+                                                    .background(MaterialTheme.colorScheme.errorContainer),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Delete,
+                                                    contentDescription = stringResource(R.string.delete_entry),
+                                                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                            }
                                         }
                                     }
                                 }
-                            },
-                            onEdit = { newTime ->
-                                viewModel?.editSmokingEntry(entity.id, entity.timestamp, newTime)
-                            },
-                            onUpdateTrigger = { newTrigger ->
-                                viewModel?.updateSmokingEntryTrigger(entity.id, newTrigger)
-                            }
-                        )
+                            ) {
+                            EntryItem(
+                                entryTime = entity.timestamp,
+                                prevEntryTime = prevTime,
+                                isResisted = entity.isResisted,
+                                index = index,
+                                trigger = entity.trigger,
+                                onDelete = {
+                                    com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                    scope.launch {
+                                        viewModel?.removeSmokingEntry(entity.id, entity.timestamp)
+                                        val result = snackbarHostState.showSnackbar(
+                                            message = undoDeleteStr,
+                                            actionLabel = undoStr,
+                                            duration = SnackbarDuration.Short
+                                        )
+                                        if (result == SnackbarResult.ActionPerformed) {
+                                            if (entity.isResisted) {
+                                                viewModel?.addResistedEntry(entity.trigger, entity.timestamp)
+                                            } else {
+                                                viewModel?.addSmokingEntryWithTrigger(entity.timestamp, entity.trigger)
+                                            }
+                                        }
+                                    }
+                                },
+                                onEdit = { newTime ->
+                                    viewModel?.editSmokingEntry(entity.id, entity.timestamp, newTime)
+                                },
+                                onUpdateTrigger = { newTrigger ->
+                                    viewModel?.updateSmokingEntryTrigger(entity.id, newTrigger)
+                                }
+                            )
+                        }
                     }
                 }
             }
+        }
 
-            FloatingActionButton(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(bottom = 110.dp, end = 24.dp)
-                    .graphicsLayer {
-                        rotationZ = rotationAngle.value
-                    },
-                onClick = {
-                    com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
-                    if (isAnimating) return@FloatingActionButton
+        val fabInteractionSource = remember { MutableInteractionSource() }
+        val isFabPressed by fabInteractionSource.collectIsPressedAsState()
+        val fabScale by animateFloatAsState(
+            targetValue = if (isFabPressed) 0.88f else 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow
+            ),
+            label = "fab_scale"
+        )
 
-                    scope.launch {
-                        isAnimating = true
-                        rotationAngle.animateTo(
-                            targetValue = 90f,
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                stiffness = Spring.StiffnessMediumLow
-                            )
-                        )
-                        rotationAngle.animateTo(
-                            targetValue = 0f,
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                stiffness = Spring.StiffnessMediumLow
-                            )
-                        )
-                        isAnimating = false
+        FloatingActionButton(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 110.dp, end = 24.dp)
+                .scale(fabScale),
+            onClick = {
+                com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+
+                if (dailyLimit in 1..selectedDateEntries.size) {
+                    showLimitWarning = true
+                } else {
+                    val now = Calendar.getInstance()
+                    val entryDate = currentDate.clone() as Calendar
+                    entryDate.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY))
+                    entryDate.set(Calendar.MINUTE, now.get(Calendar.MINUTE))
+                    entryDate.set(Calendar.SECOND, now.get(Calendar.SECOND))
+                    entryDate.set(Calendar.MILLISECOND, now.get(Calendar.MILLISECOND))
+
+                    if (entryDate.timeInMillis <= now.timeInMillis) {
+                        pendingLogTime = entryDate.timeInMillis
+                        showTriggerDialog = true
                     }
-
-                    if (dailyLimit in 1..selectedDateEntries.size) {
-                        showLimitWarning = true
-                    } else {
-                        val now = Calendar.getInstance()
-                        val entryDate = currentDate.clone() as Calendar
-                        entryDate.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY))
-                        entryDate.set(Calendar.MINUTE, now.get(Calendar.MINUTE))
-                        entryDate.set(Calendar.SECOND, now.get(Calendar.SECOND))
-                        entryDate.set(Calendar.MILLISECOND, now.get(Calendar.MILLISECOND))
-
-                        if (entryDate.timeInMillis <= now.timeInMillis) {
-                            pendingLogTime = entryDate.timeInMillis
-                            showTriggerDialog = true
-                        }
-                    }
-                },
-                shape = MaterialShapes.Cookie9Sided.toShape(),
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.add_entry),
-                    modifier = Modifier
-                        .size(24.dp)
-                        .graphicsLayer {
-                            rotationZ = -rotationAngle.value
-                        }
-                )
-            }
+                }
+            },
+            interactionSource = fabInteractionSource,
+            shape = containerShape(RoundedCornerShape(18.dp)),
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            elevation = FloatingActionButtonDefaults.elevation(
+                defaultElevation = 4.dp,
+                pressedElevation = 1.dp
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = stringResource(R.string.add_entry),
+                modifier = Modifier.size(28.dp)
+            )
+        }
         }
     }
 }
 
 
 @Composable
-fun StatItem(label: String, value: String, modifier: Modifier = Modifier) {
+fun StatItem(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed && onClick != null) 0.93f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "stat_scale"
+    )
+
     Card(
-        modifier = modifier.aspectRatio(1f),
+        modifier = modifier
+            .aspectRatio(1f)
+            .scale(scale),
+        onClick = { onClick?.invoke() },
+        enabled = onClick != null,
+        interactionSource = interactionSource,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
@@ -909,13 +1231,18 @@ fun EntryItem(
     onEdit: (Long) -> Unit = {},
     onUpdateTrigger: (String?) -> Unit = {}
 ) {
-    val cookieShape = MaterialShapes.Cookie9Sided.toShape()
     val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(entryTime))
+    var isExpanded by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
-    var showEditTriggerDialog by remember { mutableStateOf(false) }
-    var editErrorToast by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     val futureDateError = if (!LocalInspectionMode.current) stringResource(R.string.edit_future_time_error) else ""
+
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow),
+        label = "chevron_rotation"
+    )
 
     val cal = Calendar.getInstance().apply { timeInMillis = entryTime }
     val timePickerState = rememberTimePickerState(
@@ -941,128 +1268,29 @@ fun EntryItem(
                             showTimePicker = false
                         }
                     }
-                ) { Text(stringResource(R.string.dialog_ok)) }
+                ) { Text(stringResource(R.string.dialog_ok), fontWeight = FontWeight.Bold) }
             },
             dismissButton = {
                 TextButton(
                     onClick = { showTimePicker = false }
-                ) { Text(stringResource(R.string.dialog_cancel)) }
+                ) { Text(stringResource(R.string.dialog_cancel), fontWeight = FontWeight.Bold) }
             }
         ) {
-            TimePicker(state = timePickerState)
+            val pastelContainer = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.55f)
+            TimePicker(
+                state = timePickerState,
+                colors = TimePickerDefaults.colors(
+                    clockDialColor = pastelContainer,
+                    timeSelectorUnselectedContainerColor = pastelContainer,
+                    timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    timeSelectorSelectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    timeSelectorUnselectedContentColor = MaterialTheme.colorScheme.onSurface
+                )
+            )
         }
     }
 
     val colorScheme = MaterialTheme.colorScheme
-
-    if (showEditTriggerDialog) {
-        BasicAlertDialog(onDismissRequest = { showEditTriggerDialog = false }) {
-            Surface(shape = RoundedCornerShape(28.dp), color = colorScheme.surface) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = stringResource(R.string.change_trigger_dialog_title),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(bottom = 16.dp),
-                        color = colorScheme.onSurface
-                    )
-                    
-                    val editTriggers = TriggerType.allEntries()
-                    val chunkedEditTriggers = editTriggers.chunked(2)
-
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        chunkedEditTriggers.forEach { rowTriggers ->
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                rowTriggers.forEach { type ->
-                                    val isSelected = trigger == type.key
-                                    Surface(
-                                        onClick = {
-                                            onUpdateTrigger(type.key)
-                                            showEditTriggerDialog = false
-                                        },
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .height(72.dp),
-                                        shape = RoundedCornerShape(20.dp),
-                                        color = if (isSelected) colorScheme.primaryContainer else colorScheme.surfaceVariant,
-                                        border = containerBorder(
-                                            1.dp,
-                                            if (isSelected) colorScheme.primary else colorScheme.outlineVariant.copy(alpha = 0.3f)
-                                        )
-                                    ) {
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.Center,
-                                            modifier = Modifier.padding(8.dp)
-                                        ) {
-                                            val cookieShape = MaterialShapes.Cookie9Sided.toShape()
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(28.dp)
-                                                    .clip(cookieShape)
-                                                    .background(
-                                                        if (isSelected) colorScheme.primary.copy(alpha = 0.2f)
-                                                        else colorScheme.onSurfaceVariant.copy(alpha = 0.15f)
-                                                    ),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(
-                                                    imageVector = getTriggerIcon(type.key),
-                                                    contentDescription = null,
-                                                    tint = if (isSelected) colorScheme.primary else colorScheme.onSurfaceVariant,
-                                                    modifier = Modifier.size(16.dp)
-                                                )
-                                            }
-                                            Spacer(modifier = Modifier.height(4.dp))
-                                            Text(
-                                                text = stringResource(type.labelResId),
-                                                style = MaterialTheme.typography.labelMedium.copy(
-                                                    fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold
-                                                ),
-                                                color = if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurfaceVariant,
-                                                maxLines = 1
-                                            )
-                                        }
-                                    }
-                                }
-                                if (rowTriggers.size == 1) {
-                                    Spacer(modifier = Modifier.weight(1f))
-                                }
-                            }
-                        }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        TextButton(onClick = { showEditTriggerDialog = false }) {
-                            Text(stringResource(R.string.dialog_cancel), fontWeight = FontWeight.Bold)
-                        }
-                        Button(
-                            onClick = {
-                                onUpdateTrigger(null)
-                                showEditTriggerDialog = false
-                            },
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Text(stringResource(R.string.trigger_skip), fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     val (accentColor, accentContainer, onAccentContainer) = when (index % 3) {
         0 -> Triple(colorScheme.tertiary, colorScheme.tertiaryContainer, colorScheme.onTertiaryContainer)
@@ -1071,9 +1299,13 @@ fun EntryItem(
     }
 
     Card(
+        onClick = {
+            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(true, haptic, context)
+            isExpanded = !isExpanded
+        },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
+            .padding(vertical = 5.dp),
         colors = CardDefaults.cardColors(
             containerColor = colorScheme.surfaceContainer
         ),
@@ -1083,144 +1315,320 @@ fun EntryItem(
             if (isResisted) colorScheme.primary else colorScheme.outlineVariant.copy(alpha = 0.25f)
         )
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(12.dp)
         ) {
-            Surface(
-                onClick = { if (!isResisted) showTimePicker = true },
-                shape = CircleShape,
-                color = if (isResisted) colorScheme.primaryContainer else accentContainer,
-                contentColor = if (isResisted) colorScheme.onPrimaryContainer else onAccentContainer
+            // --- COLLAPSED HEADER ROW ---
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                // 1. Time pill
+                Surface(
+                    onClick = {
+                        if (!isResisted) {
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(true, haptic, context)
+                            showTimePicker = true
+                        }
+                    },
+                    shape = CircleShape,
+                    color = if (isResisted) colorScheme.primaryContainer else accentContainer,
+                    contentColor = if (isResisted) colorScheme.onPrimaryContainer else onAccentContainer
                 ) {
-                    Text(
-                        text = timeStr,
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
-                        textAlign = TextAlign.Center,
-                        maxLines = 1
-                    )
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                    ) {
+                        Text(
+                            text = timeStr,
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
+                            textAlign = TextAlign.Center,
+                            maxLines = 1
+                        )
+                    }
+                }
+
+                // 2. Reason / Trigger info chip (Icon + Text)
+                val triggerType = trigger?.let { TriggerType.fromKey(it) }
+                val triggerLabel = when {
+                    isResisted -> stringResource(R.string.mindful_pause_resisted)
+                    triggerType != null -> stringResource(triggerType.labelResId)
+                    else -> stringResource(R.string.trigger_none)
+                }
+                val triggerIcon = when {
+                    isResisted -> Icons.Default.Shield
+                    else -> getTriggerIcon(trigger)
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = if (isResisted) colorScheme.primaryContainer.copy(alpha = 0.25f)
+                            else if (triggerType != null) accentContainer.copy(alpha = 0.35f)
+                            else colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                    contentColor = if (isResisted) colorScheme.primary
+                                   else if (triggerType != null) accentColor
+                                   else colorScheme.onSurfaceVariant
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Icon(
+                            imageVector = triggerIcon,
+                            contentDescription = null,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Text(
+                            text = triggerLabel,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // 3. Interval / First of the day info
+                if (!isResisted) {
+                    if (prevEntryTime != null) {
+                        val intervalStr = remember(entryTime, prevEntryTime) {
+                            val diffMs = entryTime - prevEntryTime
+                            val hours = TimeUnit.MILLISECONDS.toHours(diffMs)
+                            val minutes = (TimeUnit.MILLISECONDS.toMinutes(diffMs) % 60)
+                            if (hours > 0) {
+                                context.getString(R.string.time_over_limit_hm, hours, minutes)
+                            } else {
+                                context.getString(R.string.time_over_limit_m, minutes)
+                            }
+                        }
+                        Text(
+                            text = intervalStr,
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            maxLines = 1
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.first_of_the_day),
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                            color = accentColor.copy(alpha = 0.85f),
+                            maxLines = 1
+                        )
+                    }
+                }
+
+                // 4. Android notification-style expand chevron button
+                Surface(
+                    onClick = {
+                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(true, haptic, context)
+                        isExpanded = !isExpanded
+                    },
+                    shape = CircleShape,
+                    color = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    contentColor = colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(34.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Filled.KeyboardArrowDown,
+                            contentDescription = if (isExpanded) "Collapse" else "Expand",
+                            modifier = Modifier
+                                .size(20.dp)
+                                .graphicsLayer { rotationZ = chevronRotation }
+                        )
+                    }
                 }
             }
 
-            val isStandardStyle = LocalContainerStyle.current == ContainerStyle.STANDARD
-            Surface(
-                onClick = { if (!isResisted) showEditTriggerDialog = true },
-                shape = if (isStandardStyle) CircleShape else cookieShape,
-                color = if (isStandardStyle) Color.Transparent else if (isResisted) colorScheme.primaryContainer else accentContainer.copy(alpha = 0.25f),
-                contentColor = if (isResisted) colorScheme.onPrimaryContainer else accentColor,
-                modifier = Modifier.size(44.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = if (isResisted) Icons.Default.Shield else getTriggerIcon(trigger),
-                        contentDescription = stringResource(R.string.trigger_dialog_title),
-                        modifier = Modifier.size(20.dp)
+            // --- EXPANDABLE EDIT PANEL ---
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow
                     )
-                }
-            }
-
-            Surface(
-                onClick = onDelete,
-                shape = if (isStandardStyle) CircleShape else cookieShape,
-                color = if (isStandardStyle) Color.Transparent else colorScheme.errorContainer.copy(alpha = 0.25f),
-                contentColor = colorScheme.error,
-                modifier = Modifier.size(44.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        Icons.Filled.Delete,
-                        contentDescription = stringResource(R.string.delete_entry),
-                        modifier = Modifier.size(20.dp)
+                ) + fadeIn(),
+                exit = shrinkVertically(
+                    animationSpec = spring(
+                        stiffness = Spring.StiffnessMediumLow
                     )
-                }
-            }
-
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.Center
+                ) + fadeOut()
             ) {
-                if (isResisted) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 2.dp),
+                        color = colorScheme.outlineVariant.copy(alpha = 0.25f)
+                    )
+
+                    if (!isResisted) {
+                        // Time Editor Button
+                        Surface(
+                            onClick = {
+                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(true, haptic, context)
+                                showTimePicker = true
+                            },
+                            shape = RoundedCornerShape(16.dp),
+                            color = colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                            contentColor = colorScheme.onSurfaceVariant,
+                            border = containerBorder(1.dp, colorScheme.outlineVariant.copy(alpha = 0.25f)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.AccessTime,
+                                        contentDescription = null,
+                                        tint = colorScheme.primary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.edit_time_label),
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = colorScheme.onSurface
+                                    )
+                                }
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Text(
+                                        text = timeStr,
+                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                        color = colorScheme.primary
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Filled.Edit,
+                                        contentDescription = null,
+                                        tint = colorScheme.primary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        // Reason / Trigger selector section
+                        Text(
+                            text = stringResource(R.string.edit_reason_label),
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 2.dp)
+                        )
+
+                        val allTriggers = remember { TriggerType.allEntries() }
+                        val chunkedTriggers = remember { allTriggers.chunked(2) }
+
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            chunkedTriggers.forEach { rowTriggers ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    rowTriggers.forEach { type ->
+                                        val isSelected = trigger == type.key
+                                        Surface(
+                                            onClick = {
+                                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(true, haptic, context)
+                                                if (isSelected) {
+                                                    onUpdateTrigger(null)
+                                                } else {
+                                                    onUpdateTrigger(type.key)
+                                                }
+                                            },
+                                            shape = RoundedCornerShape(16.dp),
+                                            color = if (isSelected) colorScheme.primaryContainer else colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                            contentColor = if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurfaceVariant,
+                                            border = containerBorder(
+                                                1.dp,
+                                                if (isSelected) colorScheme.primary else colorScheme.outlineVariant.copy(alpha = 0.25f)
+                                            ),
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(46.dp)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .padding(horizontal = 10.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = getTriggerIcon(type.key),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(18.dp),
+                                                    tint = if (isSelected) colorScheme.primary else colorScheme.onSurfaceVariant
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Text(
+                                                    text = stringResource(type.labelResId),
+                                                    style = MaterialTheme.typography.labelMedium.copy(
+                                                        fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold
+                                                    ),
+                                                    maxLines = 1,
+                                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                                )
+                                            }
+                                        }
+                                    }
+                                    if (rowTriggers.size < 2) {
+                                        repeat(2 - rowTriggers.size) {
+                                            Spacer(modifier = Modifier.weight(1f))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Delete Button
                     Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = colorScheme.primaryContainer,
-                        contentColor = colorScheme.onPrimaryContainer,
-                        border = containerBorder(1.dp, colorScheme.primary.copy(alpha = 0.5f))
+                        onClick = onDelete,
+                        shape = RoundedCornerShape(16.dp),
+                        color = colorScheme.errorContainer.copy(alpha = 0.4f),
+                        contentColor = colorScheme.error,
+                        border = containerBorder(1.dp, colorScheme.error.copy(alpha = 0.3f)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
                     ) {
                         Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            horizontalArrangement = Arrangement.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Shield,
+                                imageVector = Icons.Filled.Delete,
                                 contentDescription = null,
-                                modifier = Modifier.size(14.dp)
+                                modifier = Modifier.size(18.dp)
                             )
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = stringResource(R.string.mindful_pause_resisted),
-                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                                maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                } else if (prevEntryTime != null) {
-                    val intervalStr = remember(entryTime, prevEntryTime) {
-                        val diffMs = entryTime - prevEntryTime
-                        val hours = java.util.concurrent.TimeUnit.MILLISECONDS.toHours(diffMs)
-                        val minutes = (java.util.concurrent.TimeUnit.MILLISECONDS.toMinutes(diffMs) % 60)
-                        if (hours > 0) {
-                            context.getString(R.string.time_over_limit_hm, hours, minutes)
-                        } else {
-                            context.getString(R.string.time_over_limit_m, minutes)
-                        }
-                    }
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.History,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Text(
-                                text = intervalStr,
-                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                                maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                } else {
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = accentContainer.copy(alpha = 0.15f),
-                        contentColor = accentColor.copy(alpha = 0.8f)
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.first_of_the_day),
-                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                                textAlign = TextAlign.Center,
-                                maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                text = stringResource(R.string.delete_entry),
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                             )
                         }
                     }

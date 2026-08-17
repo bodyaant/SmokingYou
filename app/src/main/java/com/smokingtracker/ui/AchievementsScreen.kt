@@ -181,7 +181,7 @@ fun AchievementsTab(
                                             Text(
                                                 text = "${(progress * 100).toInt()}%",
                                                 style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f)
                                             )
                                         }
                                     }
@@ -200,8 +200,8 @@ fun AchievementsTab(
 fun AnimatedAchievementProgressBar(
     targetProgress: Float,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-    trackColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+    color: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+    trackColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
 ) {
     val animProgress = remember { Animatable(0f) }
     val animWaveScale = remember { Animatable(1f) }
@@ -212,13 +212,13 @@ fun AnimatedAchievementProgressBar(
             launch {
                 animProgress.animateTo(
                     targetValue = targetProgress,
-                    animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing)
+                    animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
                 )
             }
             launch {
                 animWaveScale.animateTo(
                     targetValue = 0f,
-                    animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing)
+                    animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
                 )
             }
         } else {
@@ -236,8 +236,8 @@ fun AnimatedAchievementProgressBar(
             modifier = modifier,
             color = color,
             trackColor = trackColor,
-            amplitude = { progressFraction ->
-                WavyProgressIndicatorDefaults.indicatorAmplitude(progressFraction) * waveScale
+            amplitude = {
+                1f * waveScale
             }
         )
     } else {
