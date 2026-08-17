@@ -13,12 +13,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.SmokingRooms
 import androidx.compose.material.icons.filled.Bolt
@@ -61,6 +66,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.smokingtracker.MainViewModel
 import com.smokingtracker.R
@@ -69,10 +75,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.foundation.lazy.rememberLazyListState
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun GraphScreen(viewModel: MainViewModel) {
+fun GraphScreen(viewModel: MainViewModel, initialTarget: String? = null) {
     val entries by viewModel.smokingEntries.collectAsStateWithLifecycle()
     val entryTriggers by viewModel.entryTriggers.collectAsStateWithLifecycle()
     val dailyLimit by viewModel.dailyLimit.collectAsStateWithLifecycle()
@@ -80,6 +87,7 @@ fun GraphScreen(viewModel: MainViewModel) {
     val packSize by viewModel.packSize.collectAsStateWithLifecycle()
     val currency by viewModel.currency.collectAsStateWithLifecycle()
     val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
+    val scrollTarget by viewModel.graphScrollTarget.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.onAnalyticsTabVisited()
@@ -92,11 +100,13 @@ fun GraphScreen(viewModel: MainViewModel) {
         packPrice = packPrice,
         packSize = packSize,
         currency = currency,
-        vibrationEnabled = vibrationEnabled
+        vibrationEnabled = vibrationEnabled,
+        scrollTarget = scrollTarget,
+        onClearScrollTarget = { viewModel.clearGraphScrollTarget() }
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GraphScreenContent(
     entries: List<Long>,
@@ -105,9 +115,26 @@ fun GraphScreenContent(
     packPrice: Float = 0f,
     packSize: Int = 20,
     currency: String = "",
-    vibrationEnabled: Boolean = false
+    vibrationEnabled: Boolean = false,
+    scrollTarget: String? = null,
+    onClearScrollTarget: () -> Unit = {}
 ) {
-    var selectedTab by remember { mutableStateOf(0) }
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = { 3 })
+    val coroutineScope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(scrollTarget) {
+        if (scrollTarget != null) {
+            pagerState.animateScrollToPage(0)
+            kotlinx.coroutines.delay(100L)
+            when (scrollTarget) {
+                "daily" -> listState.animateScrollToItem(2)
+                "weekly" -> listState.animateScrollToItem(3)
+                "monthly" -> listState.animateScrollToItem(4)
+            }
+            onClearScrollTarget()
+        }
+    }
 
     var dailyDate by remember { mutableStateOf(Calendar.getInstance()) }
     var weeklyDate by remember { mutableStateOf(Calendar.getInstance()) }
@@ -142,6 +169,10 @@ fun GraphScreenContent(
 
         DatePickerDialog(
             onDismissRequest = { activeDatePickerTarget = null },
+            shape = containerShape(RoundedCornerShape(28.dp)),
+            colors = DatePickerDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            ),
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -162,7 +193,10 @@ fun GraphScreenContent(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { activeDatePickerTarget = null }) {
+                TextButton(onClick = {
+                    com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                    activeDatePickerTarget = null
+                }) {
                     Text(stringResource(R.string.dialog_cancel), fontWeight = FontWeight.Bold)
                 }
             }
@@ -187,10 +221,12 @@ fun GraphScreenContent(
                     ),
                 )
                 ExpressiveTabSelector(
-                    selectedTab = selectedTab,
+                    selectedTab = pagerState.currentPage,
                     onTabSelected = {
                         com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
-                        selectedTab = it
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(it)
+                        }
                     },
                     tabs = listOf(
                         stringResource(R.string.tab_graphs),
@@ -204,162 +240,205 @@ fun GraphScreenContent(
             }
         }
     ) { paddingValues ->
-        if (selectedTab == 0) {
-            val weeklyComparison = remember(entries) { StatisticsManager().calculateWeeklyComparison(entries) }
-            val hourlyDistribution = remember(entries) { StatisticsManager().calculateHourlyDistribution(entries) }
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) { page ->
+            when (page) {
+                0 -> {
+                    val weeklyComparison = remember(entries) { StatisticsManager().calculateWeeklyComparison(entries) }
+                    val hourlyDistribution = remember(entries) { StatisticsManager().calculateHourlyDistribution(entries) }
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                val dateFormat = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
+                        verticalArrangement = Arrangement.spacedBy(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        val dateFormat = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
 
-                item {
-                    WeeklyComparisonCard(comparison = weeklyComparison)
-                }
+                        item {
+                            WeeklyComparisonCard(comparison = weeklyComparison)
+                        }
 
-                item {
-                    PeakSmokingHoursSection(distribution = hourlyDistribution, vibrationEnabled = vibrationEnabled)
-                }
+                        item {
+                            PeakSmokingHoursSection(distribution = hourlyDistribution, vibrationEnabled = vibrationEnabled)
+                        }
 
-                item {
-                    val dailyStr = remember(dailyDate) { dateFormat.format(dailyDate.time) }
-                    val today = Calendar.getInstance()
-                    val canGoNextDaily = remember(dailyDate) {
-                        dailyDate.get(Calendar.YEAR) < today.get(Calendar.YEAR) ||
-                        (dailyDate.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
-                         dailyDate.get(Calendar.DAY_OF_YEAR) < today.get(Calendar.DAY_OF_YEAR))
-                    }
-                    GraphSection(
-                        title = stringResource(R.string.daily_overview),
-                        totalCount = dailyData.sum(),
-                        dateLabel = dailyStr,
-                        dataPoints = dailyData,
-                        canGoNext = canGoNextDaily,
-                        onPrevious = { dailyDate = dailyDate.clone().apply { (this as Calendar).add(Calendar.DAY_OF_YEAR, -1) } as Calendar },
-                        onNext = { dailyDate = dailyDate.clone().apply { (this as Calendar).add(Calendar.DAY_OF_YEAR, 1) } as Calendar },
-                        onDateClick = { activeDatePickerTarget = "daily" },
-                        vibrationEnabled = vibrationEnabled
-                    )
-                }
+                        item {
+                            val dailyStr = remember(dailyDate) { dateFormat.format(dailyDate.time) }
+                            val today = Calendar.getInstance()
+                            val canGoNextDaily = remember(dailyDate) {
+                                dailyDate.get(Calendar.YEAR) < today.get(Calendar.YEAR) ||
+                                (dailyDate.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
+                                 dailyDate.get(Calendar.DAY_OF_YEAR) < today.get(Calendar.DAY_OF_YEAR))
+                            }
+                            GraphSection(
+                                title = stringResource(R.string.daily_overview),
+                                totalCount = dailyData.sum(),
+                                dateLabel = dailyStr,
+                                dataPoints = dailyData,
+                                canGoNext = canGoNextDaily,
+                                onPrevious = { dailyDate = dailyDate.clone().apply { (this as Calendar).add(Calendar.DAY_OF_YEAR, -1) } as Calendar },
+                                onNext = { dailyDate = dailyDate.clone().apply { (this as Calendar).add(Calendar.DAY_OF_YEAR, 1) } as Calendar },
+                                onDateClick = { activeDatePickerTarget = "daily" },
+                                vibrationEnabled = vibrationEnabled
+                            )
+                        }
 
-                item {
-                    val weeklyStr = remember(weeklyDate) {
-                        val weekStart = weeklyDate.clone() as Calendar
-                        weekStart.set(Calendar.DAY_OF_WEEK, weekStart.firstDayOfWeek)
-                        val weekEnd = weekStart.clone() as Calendar
-                        weekEnd.add(Calendar.DAY_OF_YEAR, 6)
-                        
-                        val shortFormat = SimpleDateFormat("d MMM", Locale.getDefault())
-                        "${shortFormat.format(weekStart.time)} - ${shortFormat.format(weekEnd.time)}"
-                    }
-                    val today = Calendar.getInstance()
-                    val canGoNextWeekly = remember(weeklyDate) {
-                        val todayWeekStart = today.clone() as Calendar
-                        todayWeekStart.set(Calendar.DAY_OF_WEEK, todayWeekStart.firstDayOfWeek)
-                        val selectedWeekStart = weeklyDate.clone() as Calendar
-                        selectedWeekStart.set(Calendar.DAY_OF_WEEK, selectedWeekStart.firstDayOfWeek)
-                        selectedWeekStart.before(todayWeekStart)
-                    }
-                    GraphSection(
-                        title = stringResource(R.string.weekly_overview),
-                        totalCount = weeklyData.sum(),
-                        dateLabel = weeklyStr,
-                        dataPoints = weeklyData,
-                        canGoNext = canGoNextWeekly,
-                        onPrevious = { weeklyDate = weeklyDate.clone().apply { (this as Calendar).add(Calendar.WEEK_OF_YEAR, -1) } as Calendar },
-                        onNext = { weeklyDate = weeklyDate.clone().apply { (this as Calendar).add(Calendar.WEEK_OF_YEAR, 1) } as Calendar },
-                        onDateClick = { activeDatePickerTarget = "weekly" },
-                        vibrationEnabled = vibrationEnabled
-                    )
-                }
+                        item {
+                            val weeklyStr = remember(weeklyDate) {
+                                val weekStart = weeklyDate.clone() as Calendar
+                                weekStart.set(Calendar.DAY_OF_WEEK, weekStart.firstDayOfWeek)
+                                val weekEnd = weekStart.clone() as Calendar
+                                weekEnd.add(Calendar.DAY_OF_YEAR, 6)
+                                
+                                val shortFormat = SimpleDateFormat("d MMM", Locale.getDefault())
+                                "${shortFormat.format(weekStart.time)} - ${shortFormat.format(weekEnd.time)}"
+                            }
+                            val today = Calendar.getInstance()
+                            val canGoNextWeekly = remember(weeklyDate) {
+                                val todayWeekStart = today.clone() as Calendar
+                                todayWeekStart.set(Calendar.DAY_OF_WEEK, todayWeekStart.firstDayOfWeek)
+                                val selectedWeekStart = weeklyDate.clone() as Calendar
+                                selectedWeekStart.set(Calendar.DAY_OF_WEEK, selectedWeekStart.firstDayOfWeek)
+                                selectedWeekStart.before(todayWeekStart)
+                            }
+                            GraphSection(
+                                title = stringResource(R.string.weekly_overview),
+                                totalCount = weeklyData.sum(),
+                                dateLabel = weeklyStr,
+                                dataPoints = weeklyData,
+                                canGoNext = canGoNextWeekly,
+                                onPrevious = { weeklyDate = weeklyDate.clone().apply { (this as Calendar).add(Calendar.WEEK_OF_YEAR, -1) } as Calendar },
+                                onNext = { weeklyDate = weeklyDate.clone().apply { (this as Calendar).add(Calendar.WEEK_OF_YEAR, 1) } as Calendar },
+                                onDateClick = { activeDatePickerTarget = "weekly" },
+                                vibrationEnabled = vibrationEnabled
+                            )
+                        }
 
-                item {
-                    val monthlyStr = remember(monthlyDate) {
-                        SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(monthlyDate.time)
-                    }
-                    val today = Calendar.getInstance()
-                    val canGoNextMonthly = remember(monthlyDate) {
-                        monthlyDate.get(Calendar.YEAR) < today.get(Calendar.YEAR) ||
-                        (monthlyDate.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
-                         monthlyDate.get(Calendar.MONTH) < today.get(Calendar.MONTH))
-                    }
-                    GraphSection(
-                        title = stringResource(R.string.monthly_overview),
-                        totalCount = monthlyData.sum(),
-                        dateLabel = monthlyStr,
-                        dataPoints = monthlyData,
-                        canGoNext = canGoNextMonthly,
-                        onPrevious = { monthlyDate = monthlyDate.clone().apply { (this as Calendar).add(Calendar.MONTH, -1) } as Calendar },
-                        onNext = { monthlyDate = monthlyDate.clone().apply { (this as Calendar).add(Calendar.MONTH, 1) } as Calendar },
-                        onDateClick = { activeDatePickerTarget = "monthly" },
-                        vibrationEnabled = vibrationEnabled
-                    )
-                }
+                        item {
+                            val monthlyStr = remember(monthlyDate) {
+                                SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(monthlyDate.time)
+                            }
+                            val today = Calendar.getInstance()
+                            val canGoNextMonthly = remember(monthlyDate) {
+                                monthlyDate.get(Calendar.YEAR) < today.get(Calendar.YEAR) ||
+                                (monthlyDate.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
+                                 monthlyDate.get(Calendar.MONTH) < today.get(Calendar.MONTH))
+                            }
+                            GraphSection(
+                                title = stringResource(R.string.monthly_overview),
+                                totalCount = monthlyData.sum(),
+                                dateLabel = monthlyStr,
+                                dataPoints = monthlyData,
+                                canGoNext = canGoNextMonthly,
+                                onPrevious = { monthlyDate = monthlyDate.clone().apply { (this as Calendar).add(Calendar.MONTH, -1) } as Calendar },
+                                onNext = { monthlyDate = monthlyDate.clone().apply { (this as Calendar).add(Calendar.MONTH, 1) } as Calendar },
+                                onDateClick = { activeDatePickerTarget = "monthly" },
+                                vibrationEnabled = vibrationEnabled
+                            )
+                        }
 
-                item {
-                    val yearlyStr = remember(yearlyDate) {
-                        SimpleDateFormat("yyyy", Locale.getDefault()).format(yearlyDate.time)
-                    }
-                    val today = Calendar.getInstance()
-                    val canGoNextYearly = remember(yearlyDate) {
-                        yearlyDate.get(Calendar.YEAR) < today.get(Calendar.YEAR)
-                    }
-                    GraphSection(
-                        title = stringResource(R.string.yearly_overview),
-                        totalCount = yearlyData.sum(),
-                        dateLabel = yearlyStr,
-                        dataPoints = yearlyData,
-                        canGoNext = canGoNextYearly,
-                        onPrevious = { yearlyDate = yearlyDate.clone().apply { (this as Calendar).add(Calendar.YEAR, -1) } as Calendar },
-                        onNext = { yearlyDate = yearlyDate.clone().apply { (this as Calendar).add(Calendar.YEAR, 1) } as Calendar },
-                        onDateClick = { activeDatePickerTarget = "yearly" },
-                        vibrationEnabled = vibrationEnabled
-                    )
-                }
-            }
-        } else if (selectedTab == 1) {
-            val stats = remember(entries) { StatisticsManager().calculateStats(entries) }
-            if (entries.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize().padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(stringResource(R.string.stats_no_data), style = MaterialTheme.typography.titleMedium)
-                }
-            } else {
-                StatisticsList(
-                    modifier = Modifier.padding(paddingValues),
-                    stats = stats,
-                    entries = entries,
-                    dailyLimit = dailyLimit,
-                    packPrice = packPrice,
-                    packSize = packSize,
-                    currency = currency,
-                    onNavigateToSettings = null
-                )
-            }
-        } else {
-            val triggerCounts = remember(entries, entryTriggers) {
-                val counts = com.smokingtracker.data.TriggerType.allKeys()
-                    .associateWith { 0 }.toMutableMap()
-                val entrySet = entries.toSet()
-                entryTriggers.forEach { (timestamp, trigger) ->
-                    if (entrySet.contains(timestamp)) {
-                        counts[trigger] = (counts[trigger] ?: 0) + 1
+                        item {
+                            val yearlyStr = remember(yearlyDate) {
+                                SimpleDateFormat("yyyy", Locale.getDefault()).format(yearlyDate.time)
+                            }
+                            val today = Calendar.getInstance()
+                            val canGoNextYearly = remember(yearlyDate) {
+                                yearlyDate.get(Calendar.YEAR) < today.get(Calendar.YEAR)
+                            }
+                            GraphSection(
+                                title = stringResource(R.string.yearly_overview),
+                                totalCount = yearlyData.sum(),
+                                dateLabel = yearlyStr,
+                                dataPoints = yearlyData,
+                                canGoNext = canGoNextYearly,
+                                onPrevious = { yearlyDate = yearlyDate.clone().apply { (this as Calendar).add(Calendar.YEAR, -1) } as Calendar },
+                                onNext = { yearlyDate = yearlyDate.clone().apply { (this as Calendar).add(Calendar.YEAR, 1) } as Calendar },
+                                onDateClick = { activeDatePickerTarget = "yearly" },
+                                vibrationEnabled = vibrationEnabled
+                            )
+                        }
                     }
                 }
-                counts
-            }
-            
-            val totalTriggersLogged = triggerCounts.values.sum()
-            
-            Box(modifier = Modifier.padding(paddingValues)) {
-                TriggersTab(triggerCounts = triggerCounts, totalCount = totalTriggersLogged)
+                1 -> {
+                    val stats = remember(entries) { StatisticsManager().calculateStats(entries) }
+                    if (entries.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Surface(
+                                    shape = MaterialShapes.Cookie9Sided.toShape(),
+                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                                    contentColor = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(56.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Analytics,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(28.dp)
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(14.dp))
+                                Text(
+                                    text = stringResource(R.string.stats_no_data),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = stringResource(R.string.stats_no_data_desc),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    } else {
+                        StatisticsList(
+                            stats = stats,
+                            entries = entries,
+                            dailyLimit = dailyLimit,
+                            packPrice = packPrice,
+                            packSize = packSize,
+                            currency = currency,
+                            onNavigateToSettings = null
+                        )
+                    }
+                }
+                2 -> {
+                    val triggerCounts = remember(entries, entryTriggers) {
+                        val counts = com.smokingtracker.data.TriggerType.allKeys()
+                            .associateWith { 0 }.toMutableMap()
+                        val entrySet = entries.toSet()
+                        entryTriggers.forEach { (timestamp, trigger) ->
+                            if (entrySet.contains(timestamp)) {
+                                counts[trigger] = (counts[trigger] ?: 0) + 1
+                            }
+                        }
+                        counts
+                    }
+                    
+                    val totalTriggersLogged = triggerCounts.values.sum()
+                    
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        TriggersTab(triggerCounts = triggerCounts, totalCount = totalTriggersLogged)
+                    }
+                }
             }
         }
     }
@@ -380,7 +459,7 @@ fun GraphSection(
 ) {
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     val context = androidx.compose.ui.platform.LocalContext.current
-    val cookieShape = MaterialShapes.Cookie12Sided.toShape()
+    val cookieShape = MaterialShapes.Cookie9Sided.toShape()
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -426,11 +505,39 @@ fun GraphSection(
                         .height(160.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = stringResource(R.string.graph_no_data),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Surface(
+                            shape = MaterialShapes.Cookie9Sided.toShape(),
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                            contentColor = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(52.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Filled.BarChart,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(26.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = stringResource(R.string.graph_no_data),
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = stringResource(R.string.graph_no_data_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             } else {
                 LineGraph(dataPoints = dataPoints, modifier = Modifier.fillMaxWidth().height(160.dp))
@@ -471,7 +578,7 @@ fun GraphSection(
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         if (onDateClick != null) {
@@ -485,6 +592,13 @@ fun GraphSection(
                             text = dateLabel,
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                         )
+                        if (onDateClick != null) {
+                            Icon(
+                                imageVector = Icons.Filled.KeyboardArrowDown,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
                 }
 
@@ -653,13 +767,45 @@ private fun LineGraphPreview() {
 @Composable
 fun TriggersTab(triggerCounts: Map<String, Int>, totalCount: Int) {
     if (totalCount == 0) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(
-                text = stringResource(R.string.triggers_no_data),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(24.dp)
-            )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Surface(
+                    shape = MaterialShapes.Cookie9Sided.toShape(),
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                    contentColor = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(56.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Filled.Psychology,
+                            contentDescription = null,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(14.dp))
+                Text(
+                    text = stringResource(R.string.triggers_no_data_title),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = stringResource(R.string.triggers_no_data_desc),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
         return
     }
@@ -915,8 +1061,8 @@ fun AnimatedTriggerProgressBar(
             modifier = modifier,
             color = color,
             trackColor = trackColor,
-            amplitude = { progressFraction ->
-                WavyProgressIndicatorDefaults.indicatorAmplitude(progressFraction) * waveScale
+            amplitude = {
+                1f * waveScale
             }
         )
     } else {
@@ -1102,7 +1248,8 @@ private fun PeakSmokingHoursSection(distribution: StatisticsManager.HourlyDistri
                     val startH = selectedHour!!
                     val endH = (selectedHour!! + 1) % 24
                     val formatTime = String.format(Locale.getDefault(), "%02d:00 - %02d:00", startH, endH)
-                    "$formatTime • $selCount шт."
+                    val countStr = stringResource(R.string.history_cigs_count_format, selCount.toString())
+                    stringResource(R.string.peak_hours_selected_format, formatTime, countStr)
                 } else {
                     stringResource(R.string.peak_hours_summary, periodText, distribution.peakPeriodPercent)
                 }

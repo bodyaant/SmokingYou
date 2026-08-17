@@ -207,21 +207,125 @@ fun MainApp(viewModel: MainViewModel) {
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             modifier = Modifier.fillMaxSize()
         ) { innerPadding ->
+            val subScreens = setOf(
+                Screen.About.route,
+                Screen.Achievements.route,
+                Screen.Statistics.route,
+                Screen.AppearanceSettings.route,
+                Screen.HistoryGenerator.route
+            )
+            val mainTabs = listOf(Screen.Home.route, Screen.Graph.route, Screen.Personal.route)
+
+            fun getTabIndex(route: String?): Int {
+                val cleanRoute = route?.substringBefore("?")
+                return mainTabs.indexOf(cleanRoute)
+            }
+
+            val springSpec = spring<IntOffset>(dampingRatio = 0.85f, stiffness = 400f)
+
             NavHost(
                 navController = navController,
                 startDestination = startDest,
                 modifier = Modifier.padding(innerPadding),
                 enterTransition = {
-                    fadeIn(animationSpec = tween(300)) + scaleIn(initialScale = 0.95f, animationSpec = tween(300))
+                    val fromRoute = initialState.destination.route
+                    val toRoute = targetState.destination.route
+                    val fromIndex = getTabIndex(fromRoute)
+                    val toIndex = getTabIndex(toRoute)
+
+                    if (toRoute in subScreens) {
+                        slideIntoContainer(
+                            towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                            animationSpec = springSpec
+                        ) + fadeIn(animationSpec = tween(250))
+                    } else if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
+                        val direction = if (toIndex > fromIndex) {
+                            AnimatedContentTransitionScope.SlideDirection.Start
+                        } else {
+                            AnimatedContentTransitionScope.SlideDirection.End
+                        }
+                        slideIntoContainer(
+                            towards = direction,
+                            animationSpec = springSpec
+                        ) + fadeIn(animationSpec = tween(250))
+                    } else {
+                        fadeIn(animationSpec = tween(250)) + scaleIn(initialScale = 0.96f, animationSpec = tween(250))
+                    }
                 },
                 exitTransition = {
-                    fadeOut(animationSpec = tween(300))
+                    val fromRoute = initialState.destination.route
+                    val toRoute = targetState.destination.route
+                    val fromIndex = getTabIndex(fromRoute)
+                    val toIndex = getTabIndex(toRoute)
+
+                    if (toRoute in subScreens) {
+                        slideOutOfContainer(
+                            towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                            animationSpec = springSpec
+                        ) + fadeOut(animationSpec = tween(200))
+                    } else if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
+                        val direction = if (toIndex > fromIndex) {
+                            AnimatedContentTransitionScope.SlideDirection.Start
+                        } else {
+                            AnimatedContentTransitionScope.SlideDirection.End
+                        }
+                        slideOutOfContainer(
+                            towards = direction,
+                            animationSpec = springSpec
+                        ) + fadeOut(animationSpec = tween(200))
+                    } else {
+                        fadeOut(animationSpec = tween(200))
+                    }
                 },
                 popEnterTransition = {
-                    fadeIn(animationSpec = tween(300)) + scaleIn(initialScale = 0.95f, animationSpec = tween(300))
+                    val fromRoute = initialState.destination.route
+                    val toRoute = targetState.destination.route
+                    val fromIndex = getTabIndex(fromRoute)
+                    val toIndex = getTabIndex(toRoute)
+
+                    if (fromRoute in subScreens) {
+                        slideIntoContainer(
+                            towards = AnimatedContentTransitionScope.SlideDirection.End,
+                            animationSpec = springSpec
+                        ) + fadeIn(animationSpec = tween(250))
+                    } else if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
+                        val direction = if (toIndex > fromIndex) {
+                            AnimatedContentTransitionScope.SlideDirection.Start
+                        } else {
+                            AnimatedContentTransitionScope.SlideDirection.End
+                        }
+                        slideIntoContainer(
+                            towards = direction,
+                            animationSpec = springSpec
+                        ) + fadeIn(animationSpec = tween(250))
+                    } else {
+                        fadeIn(animationSpec = tween(250)) + scaleIn(initialScale = 0.96f, animationSpec = tween(250))
+                    }
                 },
                 popExitTransition = {
-                    fadeOut(animationSpec = tween(300))
+                    val fromRoute = initialState.destination.route
+                    val toRoute = targetState.destination.route
+                    val fromIndex = getTabIndex(fromRoute)
+                    val toIndex = getTabIndex(toRoute)
+
+                    if (fromRoute in subScreens) {
+                        slideOutOfContainer(
+                            towards = AnimatedContentTransitionScope.SlideDirection.End,
+                            animationSpec = springSpec
+                        ) + fadeOut(animationSpec = tween(200))
+                    } else if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
+                        val direction = if (toIndex > fromIndex) {
+                            AnimatedContentTransitionScope.SlideDirection.Start
+                        } else {
+                            AnimatedContentTransitionScope.SlideDirection.End
+                        }
+                        slideOutOfContainer(
+                            towards = direction,
+                            animationSpec = springSpec
+                        ) + fadeOut(animationSpec = tween(200))
+                    } else {
+                        fadeOut(animationSpec = tween(200))
+                    }
                 }
             ) {
                 composable(Screen.Registration.route) {
@@ -231,7 +335,15 @@ fun MainApp(viewModel: MainViewModel) {
                     HomeScreen(
                         viewModel = homeViewModel,
                         vibrationEnabled = vibrationEnabled,
-                        onNavigateToAchievements = { navController.navigate(Screen.Achievements.route) }
+                        onNavigateToAchievements = { navController.navigate(Screen.Achievements.route) },
+                        onNavigateToGraphs = { target ->
+                            viewModel.setGraphScrollTarget(target)
+                            navController.navigate(Screen.Graph.route) {
+                                popUpTo(Screen.Home.route) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
                     )
                 }
                 composable(Screen.Graph.route) {
@@ -326,12 +438,12 @@ fun BottomNavigationBar(navController: NavHostController, vibrationEnabled: Bool
         )
     ) {
         items.forEach { screen ->
-            val selected = currentRoute == screen.route
+            val selected = currentRoute?.substringBefore("?") == screen.route
             ShortNavigationBarItem(
                 selected = selected,
                 onClick = {
                     com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
-                    if (currentRoute != screen.route) {
+                    if (currentRoute?.substringBefore("?") != screen.route) {
                         navController.navigate(screen.route) {
                             popUpTo(Screen.Home.route) { saveState = true }
                             launchSingleTop = true
@@ -385,7 +497,8 @@ fun BottomNavigationBar(navController: NavHostController, vibrationEnabled: Bool
                 iconPosition = NavigationItemIconPosition.Start,
                 colors = ShortNavigationBarItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.onPrimary,
-                    selectedTextColor = MaterialTheme.colorScheme.onPrimary,
+                    selectedTextColorStartIconPosition = MaterialTheme.colorScheme.onPrimary,
+                    selectedTextColorTopIconPosition = MaterialTheme.colorScheme.onPrimary,
                     selectedIndicatorColor = MaterialTheme.colorScheme.primary,
                     unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     unselectedTextColor = Color.Transparent
