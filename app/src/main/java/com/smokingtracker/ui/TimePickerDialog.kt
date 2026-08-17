@@ -32,15 +32,13 @@ fun TimePickerDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Surface(
-            shape = MaterialTheme.shapes.extraLarge,
+            shape = com.smokingtracker.ui.theme.containerShape(androidx.compose.foundation.shape.RoundedCornerShape(28.dp)),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            border = com.smokingtracker.ui.theme.containerBorder(),
             tonalElevation = 6.dp,
             modifier = Modifier
                 .width(IntrinsicSize.Min)
                 .height(IntrinsicSize.Min)
-                .background(
-                    shape = MaterialTheme.shapes.extraLarge,
-                    color = MaterialTheme.colorScheme.surface
-                ),
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),

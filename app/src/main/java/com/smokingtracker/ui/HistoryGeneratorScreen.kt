@@ -586,6 +586,10 @@ fun HistoryGeneratorScreen(viewModel: MainViewModel, navController: NavHostContr
         )
         DatePickerDialog(
             onDismissRequest = { showDatePickerDialog = false },
+            shape = com.smokingtracker.ui.theme.containerShape(RoundedCornerShape(28.dp)),
+            colors = DatePickerDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            ),
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -593,12 +597,12 @@ fun HistoryGeneratorScreen(viewModel: MainViewModel, navController: NavHostContr
                         showDatePickerDialog = false
                     }
                 ) {
-                    Text(stringResource(R.string.dialog_ok))
+                    Text(stringResource(R.string.dialog_ok), fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePickerDialog = false }) {
-                    Text(stringResource(R.string.dialog_cancel))
+                    Text(stringResource(R.string.dialog_cancel), fontWeight = FontWeight.Bold)
                 }
             }
         ) {
