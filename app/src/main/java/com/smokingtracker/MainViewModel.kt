@@ -41,6 +41,17 @@ class MainViewModel(
         initialValue = null
     )
 
+    private val _graphScrollTarget = MutableStateFlow<String?>(null)
+    val graphScrollTarget: StateFlow<String?> = _graphScrollTarget
+
+    fun setGraphScrollTarget(target: String?) {
+        _graphScrollTarget.value = target
+    }
+
+    fun clearGraphScrollTarget() {
+        _graphScrollTarget.value = null
+    }
+
     val smokingEntries: StateFlow<List<Long>> = repository.smokingEntries
         .map { entities -> entities.filter { !it.isResisted }.map { it.timestamp } }
         .stateIn(
@@ -78,7 +89,7 @@ class MainViewModel(
     val fontPreset: StateFlow<FontPreset> = dataStoreManager.fontPreset.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = FontPreset.WIDE
+        initialValue = FontPreset.ZENITH
     )
 
     val amoledTheme: StateFlow<Boolean> = dataStoreManager.amoledTheme.stateIn(
@@ -145,6 +156,30 @@ class MainViewModel(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = ContainerStyle.EXPRESSIVE
+    )
+
+    val useCustomVariableFont: StateFlow<Boolean> = dataStoreManager.useCustomVariableFont.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
+
+    val customFontWeight: StateFlow<Int> = dataStoreManager.customFontWeight.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = 500
+    )
+
+    val customFontWidth: StateFlow<Float> = dataStoreManager.customFontWidth.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = 100f
+    )
+
+    val customFontRoundness: StateFlow<Float> = dataStoreManager.customFontRoundness.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = 0f
     )
 
     val hasHistoricalBaseline: StateFlow<Boolean> = dataStoreManager.hasHistoricalBaseline.stateIn(
@@ -338,6 +373,30 @@ class MainViewModel(
     fun updateFontPreset(preset: FontPreset) {
         viewModelScope.launch {
             dataStoreManager.saveFontPreset(preset)
+        }
+    }
+
+    fun updateUseCustomVariableFont(enabled: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.saveUseCustomVariableFont(enabled)
+        }
+    }
+
+    fun updateCustomFontWeight(weight: Int) {
+        viewModelScope.launch {
+            dataStoreManager.saveCustomFontWeight(weight)
+        }
+    }
+
+    fun updateCustomFontWidth(width: Float) {
+        viewModelScope.launch {
+            dataStoreManager.saveCustomFontWidth(width)
+        }
+    }
+
+    fun updateCustomFontRoundness(roundness: Float) {
+        viewModelScope.launch {
+            dataStoreManager.saveCustomFontRoundness(roundness)
         }
     }
 

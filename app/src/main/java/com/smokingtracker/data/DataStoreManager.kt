@@ -15,7 +15,7 @@ enum class ThemePreference {
     SYSTEM, LIGHT, DARK
 }
 
-enum class FontPreset { WIDE, AIRY, SYSTEM, OUTFIT }
+enum class FontPreset { ZENITH, NEO, COMPACT, AIRY, SYSTEM, WIDE, OUTFIT }
 enum class ColorPreset { SYSTEM, FOREST_SAGE, SUNSET_ROSE, OCEAN_DEEP, PURPLE_NEBULA, AMBER_GOLD, CRIMSON_BERRY, SLATE_MONO }
 enum class AppIconPreset { DEFAULT, DARK, SUNSET, CREAM, NEON, GREEN, NIGHT, MONOCHROME }
 enum class ContainerStyle { EXPRESSIVE, STANDARD }
@@ -59,6 +59,10 @@ class DataStoreManager(private val context: Context) {
         val CONTAINER_BORDER_ENABLED = booleanPreferencesKey("container_border_enabled")
         val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
         val CONTAINER_STYLE = stringPreferencesKey("container_style")
+        val USE_CUSTOM_VARIABLE_FONT = booleanPreferencesKey("use_custom_variable_font")
+        val CUSTOM_FONT_WEIGHT = intPreferencesKey("custom_font_weight")
+        val CUSTOM_FONT_WIDTH = floatPreferencesKey("custom_font_width")
+        val CUSTOM_FONT_ROUNDNESS = floatPreferencesKey("custom_font_roundness")
     }
 
     val isRegistered: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -98,8 +102,13 @@ class DataStoreManager(private val context: Context) {
     }
 
     val fontPreset: Flow<FontPreset> = context.dataStore.data.map { preferences ->
-        val name = preferences[FONT_PRESET] ?: FontPreset.WIDE.name
-        try { FontPreset.valueOf(name) } catch (_: Exception) { FontPreset.WIDE }
+        val name = preferences[FONT_PRESET] ?: FontPreset.ZENITH.name
+        try {
+            val preset = FontPreset.valueOf(name)
+            if (preset == FontPreset.WIDE) FontPreset.ZENITH else preset
+        } catch (_: Exception) {
+            FontPreset.ZENITH
+        }
     }
 
     val amoledTheme: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -426,6 +435,46 @@ class DataStoreManager(private val context: Context) {
     suspend fun saveContainerStyle(style: ContainerStyle) {
         context.dataStore.edit { preferences ->
             preferences[CONTAINER_STYLE] = style.name
+        }
+    }
+
+    val useCustomVariableFont: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[USE_CUSTOM_VARIABLE_FONT] ?: false
+    }
+
+    suspend fun saveUseCustomVariableFont(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[USE_CUSTOM_VARIABLE_FONT] = enabled
+        }
+    }
+
+    val customFontWeight: Flow<Int> = context.dataStore.data.map { preferences ->
+        preferences[CUSTOM_FONT_WEIGHT] ?: 500
+    }
+
+    suspend fun saveCustomFontWeight(weight: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[CUSTOM_FONT_WEIGHT] = weight
+        }
+    }
+
+    val customFontWidth: Flow<Float> = context.dataStore.data.map { preferences ->
+        preferences[CUSTOM_FONT_WIDTH] ?: 100f
+    }
+
+    suspend fun saveCustomFontWidth(width: Float) {
+        context.dataStore.edit { preferences ->
+            preferences[CUSTOM_FONT_WIDTH] = width
+        }
+    }
+
+    val customFontRoundness: Flow<Float> = context.dataStore.data.map { preferences ->
+        preferences[CUSTOM_FONT_ROUNDNESS] ?: 0f
+    }
+
+    suspend fun saveCustomFontRoundness(roundness: Float) {
+        context.dataStore.edit { preferences ->
+            preferences[CUSTOM_FONT_ROUNDNESS] = roundness
         }
     }
 

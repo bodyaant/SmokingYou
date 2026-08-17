@@ -30,7 +30,7 @@ data class FontAxes(
 }
 
 enum class GSFlexPreset {
-    WIDE, NEO, COMPACT, AIRY
+    ZENITH, NEO, COMPACT, AIRY, WIDE
 }
 
 object VariableFontFactory {
@@ -39,15 +39,35 @@ object VariableFontFactory {
         val preset = try {
             GSFlexPreset.valueOf(presetName)
         } catch (e: Exception) {
-            GSFlexPreset.WIDE
+            GSFlexPreset.ZENITH
         }
         val p = getPresetAxes(preset)
         return createExpressiveTypography(p.first, p.second, p.third)
     }
 
+    fun createCustomTypography(
+        weight: Int = 500,
+        width: Float = 100f,
+        roundness: Float = 0f
+    ): Typography {
+        val displayWeight = (weight * 1.5f).coerceIn(100f, 1000f)
+        val headlineWeight = (weight * 1.25f).coerceIn(100f, 1000f)
+        val bodyWeight = weight.toFloat().coerceIn(100f, 1000f)
+
+        val displayAxes = FontAxes(displayWeight, width, 30f, 0f, 0f, roundness)
+        val headlineAxes = FontAxes(headlineWeight, width, 28f, 0f, 0f, roundness)
+        val bodyAxes = FontAxes(bodyWeight, width, 16f, 0f, 0f, roundness)
+
+        return createExpressiveTypography(
+            displayAxes.toVariationSettings(),
+            headlineAxes.toVariationSettings(),
+            bodyAxes.toVariationSettings()
+        )
+    }
+
     fun getPresetFontAxes(preset: GSFlexPreset): Triple<FontAxes, FontAxes, FontAxes> {
         return when (preset) {
-            GSFlexPreset.WIDE -> Triple(
+            GSFlexPreset.ZENITH, GSFlexPreset.WIDE -> Triple(
                 FontAxes(950f, 85f, 30f, 0f, 0f, 100f),
                 FontAxes(700f, 115f, 32f, 0f, 0f, 60f),
                 FontAxes(450f, 100f, 16f, 20f, 0f, 0f)

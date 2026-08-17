@@ -1,9 +1,11 @@
 package com.smokingtracker.ui
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,10 +14,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Brightness4
+import androidx.compose.material.icons.filled.BrightnessAuto
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.CropSquare
 import androidx.compose.material.icons.filled.ViewAgenda
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.TouchApp
 import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
@@ -70,6 +82,10 @@ fun AppearanceSettingsScreen(
     val containerBorderEnabled by viewModel.containerBorderEnabled.collectAsStateWithLifecycle()
     val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
     val containerStyle by viewModel.containerStyle.collectAsStateWithLifecycle()
+    val useCustomVariableFont by viewModel.useCustomVariableFont.collectAsStateWithLifecycle()
+    val customFontWeight by viewModel.customFontWeight.collectAsStateWithLifecycle()
+    val customFontWidth by viewModel.customFontWidth.collectAsStateWithLifecycle()
+    val customFontRoundness by viewModel.customFontRoundness.collectAsStateWithLifecycle()
     val isStandardStyle = containerStyle == ContainerStyle.STANDARD
     val context = LocalContext.current
 
@@ -139,15 +155,22 @@ fun AppearanceSettingsScreen(
                                     modifier = Modifier.size(48.dp)
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
-                                        Icon(Icons.Filled.Brightness4, contentDescription = null)
+                                        Icon(Icons.Filled.Palette, contentDescription = null)
                                     }
                                 }
                                 Spacer(modifier = Modifier.width(16.dp))
                             }
-                            Text(
-                                stringResource(R.string.settings_theme),
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    stringResource(R.string.settings_theme),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                                )
+                                Text(
+                                    stringResource(R.string.settings_theme_desc),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                )
+                            }
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                         ThemeSegmentedButton(
@@ -245,13 +268,7 @@ fun AppearanceSettingsScreen(
                             enabled = isAmoledSwitchEnabled,
                             onCheckedChange = viewModel::updateAmoledTheme,
                             thumbContent = {
-                                if (amoledTheme && isAmoledSwitchEnabled) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Check,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(SwitchDefaults.IconSize),
-                                    )
-                                }
+                                SwitchThumb(amoledTheme && isAmoledSwitchEnabled)
                             }
                         )
                     }
@@ -300,13 +317,7 @@ fun AppearanceSettingsScreen(
                             checked = containerBorderEnabled,
                             onCheckedChange = viewModel::updateContainerBorderEnabled,
                             thumbContent = {
-                                if (containerBorderEnabled) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Check,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(SwitchDefaults.IconSize),
-                                    )
-                                }
+                                SwitchThumb(containerBorderEnabled)
                             }
                         )
                     }
@@ -360,13 +371,7 @@ fun AppearanceSettingsScreen(
                                 }
                             },
                             thumbContent = {
-                                if (vibrationEnabled) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Check,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(SwitchDefaults.IconSize),
-                                    )
-                                }
+                                SwitchThumb(vibrationEnabled)
                             }
                         )
                     }
@@ -405,10 +410,17 @@ fun AppearanceSettingsScreen(
                                 }
                                 Spacer(modifier = Modifier.width(16.dp))
                             }
-                            Text(
-                                stringResource(R.string.settings_color_preset),
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    stringResource(R.string.settings_color_preset),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                                )
+                                Text(
+                                    stringResource(R.string.settings_color_preset_desc),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                )
+                            }
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                         ColorPresetSelector(
@@ -508,15 +520,31 @@ fun AppearanceSettingsScreen(
                                 }
                                 Spacer(modifier = Modifier.width(16.dp))
                             }
-                            Text(
-                                stringResource(R.string.settings_font),
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    stringResource(R.string.settings_font),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                                )
+                                Text(
+                                    stringResource(R.string.settings_font_desc),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                )
+                            }
                         }
                         Spacer(modifier = Modifier.height(16.dp))
-                        FontSegmentedButton(
+                        FontSelectionSection(
                             currentPreset = fontPreset,
-                            onPresetChange = viewModel::updateFontPreset
+                            onPresetChange = viewModel::updateFontPreset,
+                            useCustomVariableFont = useCustomVariableFont,
+                            onUseCustomVariableFontChange = viewModel::updateUseCustomVariableFont,
+                            customFontWeight = customFontWeight,
+                            onCustomFontWeightChange = viewModel::updateCustomFontWeight,
+                            customFontWidth = customFontWidth,
+                            onCustomFontWidthChange = viewModel::updateCustomFontWidth,
+                            customFontRoundness = customFontRoundness,
+                            onCustomFontRoundnessChange = viewModel::updateCustomFontRoundness,
+                            vibrationEnabled = vibrationEnabled
                         )
                     }
                 }
@@ -530,10 +558,12 @@ fun ThemeSegmentedButton(
     currentTheme: ThemePreference,
     onThemeChange: (ThemePreference) -> Unit
 ) {
+    val isStandardStyle = LocalContainerStyle.current == ContainerStyle.STANDARD
+
     val options = listOf(
-        ThemePreference.LIGHT to stringResource(R.string.theme_light),
-        ThemePreference.SYSTEM to stringResource(R.string.theme_system),
-        ThemePreference.DARK to stringResource(R.string.theme_dark)
+        Triple(ThemePreference.SYSTEM, stringResource(R.string.theme_system), Icons.Filled.BrightnessAuto),
+        Triple(ThemePreference.LIGHT, stringResource(R.string.theme_light), Icons.Filled.LightMode),
+        Triple(ThemePreference.DARK, stringResource(R.string.theme_dark), Icons.Filled.DarkMode)
     )
 
     Row(
@@ -542,7 +572,7 @@ fun ThemeSegmentedButton(
             .padding(horizontal = 20.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        options.forEachIndexed { index, (theme, title) ->
+        options.forEachIndexed { index, (theme, title, icon) ->
             val isSelected = currentTheme == theme
             
             val animatedWeight by androidx.compose.animation.core.animateFloatAsState(
@@ -581,10 +611,26 @@ fun ThemeSegmentedButton(
                 contentColor = contentColor
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    ) {
+                        if (!isStandardStyle) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                        }
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
         }
@@ -596,9 +642,10 @@ fun ContainerStyleSegmentedButton(
     currentStyle: ContainerStyle,
     onStyleChange: (ContainerStyle) -> Unit
 ) {
+    val isStandardStyle = LocalContainerStyle.current == ContainerStyle.STANDARD
     val options = listOf(
-        ContainerStyle.EXPRESSIVE to stringResource(R.string.container_style_expressive),
-        ContainerStyle.STANDARD to stringResource(R.string.container_style_standard)
+        Triple(ContainerStyle.EXPRESSIVE, stringResource(R.string.container_style_expressive), Icons.Filled.AutoAwesome),
+        Triple(ContainerStyle.STANDARD, stringResource(R.string.container_style_standard), Icons.Filled.CropSquare)
     )
 
     Row(
@@ -607,7 +654,7 @@ fun ContainerStyleSegmentedButton(
             .padding(horizontal = 20.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        options.forEachIndexed { index, (style, title) ->
+        options.forEachIndexed { index, (style, title, icon) ->
             val isSelected = currentStyle == style
 
             val animatedWeight by androidx.compose.animation.core.animateFloatAsState(
@@ -646,10 +693,26 @@ fun ContainerStyleSegmentedButton(
                 contentColor = contentColor
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    ) {
+                        if (!isStandardStyle) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                        }
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
         }
@@ -657,65 +720,361 @@ fun ContainerStyleSegmentedButton(
 }
 
 @Composable
-fun FontSegmentedButton(
+fun FontSelectionSection(
     currentPreset: FontPreset,
-    onPresetChange: (FontPreset) -> Unit
+    onPresetChange: (FontPreset) -> Unit,
+    useCustomVariableFont: Boolean,
+    onUseCustomVariableFontChange: (Boolean) -> Unit,
+    customFontWeight: Int,
+    onCustomFontWeightChange: (Int) -> Unit,
+    customFontWidth: Float,
+    onCustomFontWidthChange: (Float) -> Unit,
+    customFontRoundness: Float,
+    onCustomFontRoundnessChange: (Float) -> Unit,
+    vibrationEnabled: Boolean = false
 ) {
-    val options = listOf(
-        FontPreset.WIDE to stringResource(R.string.font_preset_wide),
-        FontPreset.AIRY to stringResource(R.string.font_preset_thin),
-        FontPreset.SYSTEM to stringResource(R.string.font_preset_system)
+    val isStandardStyle = LocalContainerStyle.current == ContainerStyle.STANDARD
+    val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
+
+    var lastGsFlexPreset by remember {
+        mutableStateOf(
+            if (currentPreset != FontPreset.SYSTEM && currentPreset != FontPreset.OUTFIT) {
+                if (currentPreset == FontPreset.WIDE) FontPreset.ZENITH else currentPreset
+            } else {
+                FontPreset.ZENITH
+            }
+        )
+    }
+
+    LaunchedEffect(currentPreset) {
+        if (currentPreset != FontPreset.SYSTEM && currentPreset != FontPreset.OUTFIT) {
+            lastGsFlexPreset = if (currentPreset == FontPreset.WIDE) FontPreset.ZENITH else currentPreset
+        }
+    }
+
+    val isGsFlexSelected = currentPreset != FontPreset.SYSTEM
+
+    val fontTypeOptions = listOf(
+        Triple(true, stringResource(R.string.font_family_gs_flex), Icons.Filled.TextFields),
+        Triple(false, stringResource(R.string.font_preset_system), Icons.Filled.Smartphone)
     )
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+            .padding(vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        options.forEachIndexed { index, (preset, title) ->
-            val isSelected = currentPreset == preset
-            
-            val animatedWeight by androidx.compose.animation.core.animateFloatAsState(
-                targetValue = if (isSelected) 1.2f else 1.0f,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
-                label = "font_weight_$index"
-            )
-            
-            val startR by animateDpAsState(
-                targetValue = if (isSelected || index == 0) 24.dp else 8.dp,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
-                label = "font_startR_$index"
-            )
-            val endR by animateDpAsState(
-                targetValue = if (isSelected || index == options.size - 1) 24.dp else 8.dp,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
-                label = "font_endR_$index"
-            )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            fontTypeOptions.forEachIndexed { index, (isGsFlex, title, icon) ->
+                val isSelected = isGsFlex == isGsFlexSelected
 
-            val containerColor by animateColorAsState(
-                targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
-                label = "font_container_$index"
-            )
-            val contentColor by animateColorAsState(
-                targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer,
-                label = "font_content_$index"
-            )
+                val animatedWeight by androidx.compose.animation.core.animateFloatAsState(
+                    targetValue = if (isSelected) 1.2f else 1.0f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
+                    label = "font_type_weight_$index"
+                )
 
-            Surface(
-                onClick = { onPresetChange(preset) },
-                modifier = Modifier
-                    .weight(animatedWeight)
-                    .height(48.dp),
-                shape = RoundedCornerShape(topStart = startR, bottomStart = startR, topEnd = endR, bottomEnd = endR),
-                color = containerColor,
-                contentColor = contentColor
+                val startR by animateDpAsState(
+                    targetValue = if (isSelected || index == 0) 24.dp else 8.dp,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
+                    label = "font_type_startR_$index"
+                )
+                val endR by animateDpAsState(
+                    targetValue = if (isSelected || index == fontTypeOptions.size - 1) 24.dp else 8.dp,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
+                    label = "font_type_endR_$index"
+                )
+
+                val containerColor by animateColorAsState(
+                    targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
+                    label = "font_type_container_$index"
+                )
+                val contentColor by animateColorAsState(
+                    targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer,
+                    label = "font_type_content_$index"
+                )
+
+                Surface(
+                    onClick = {
+                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                        if (isGsFlex) {
+                            onPresetChange(lastGsFlexPreset)
+                        } else {
+                            onPresetChange(FontPreset.SYSTEM)
+                        }
+                    },
+                    modifier = Modifier
+                        .weight(animatedWeight)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(topStart = startR, bottomStart = startR, topEnd = endR, bottomEnd = endR),
+                    color = containerColor,
+                    contentColor = contentColor
+                ) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(horizontal = 4.dp)
+                        ) {
+                            if (!isStandardStyle) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                            }
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        AnimatedVisibility(
+            visible = isGsFlexSelected,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
-                    )
+                // Switch: Custom Variable Font
+                Surface(
+                    shape = containerShape(RoundedCornerShape(20.dp)),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
+                    border = containerBorder(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
+                            Text(
+                                text = stringResource(R.string.settings_custom_variable_font),
+                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_custom_variable_font_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                            )
+                        }
+                        Switch(
+                            checked = useCustomVariableFont,
+                            onCheckedChange = {
+                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                onUseCustomVariableFontChange(it)
+                            },
+                            thumbContent = { SwitchThumb(useCustomVariableFont) }
+                        )
+                    }
+                }
+
+                // Either 4 Presets OR Custom Sliders + Live Preview
+                AnimatedContent(
+                    targetState = useCustomVariableFont,
+                    transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(200)) },
+                    label = "customFontContent"
+                ) { isCustom ->
+                    if (!isCustom) {
+                        val presetOptions = listOf(
+                            FontPreset.ZENITH to stringResource(R.string.font_preset_zenith),
+                            FontPreset.NEO to stringResource(R.string.font_preset_neo),
+                            FontPreset.COMPACT to stringResource(R.string.font_preset_impact),
+                            FontPreset.AIRY to stringResource(R.string.font_preset_airy)
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            presetOptions.forEachIndexed { index, (preset, title) ->
+                                val isSelected = isGsFlexSelected && (currentPreset == preset || (currentPreset == FontPreset.WIDE && preset == FontPreset.ZENITH))
+
+                                val animatedWeight by androidx.compose.animation.core.animateFloatAsState(
+                                    targetValue = if (isSelected) 1.25f else 1.0f,
+                                    animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
+                                    label = "gsflex_preset_weight_$index"
+                                )
+
+                                val startR by animateDpAsState(
+                                    targetValue = if (isSelected || index == 0) 24.dp else 8.dp,
+                                    animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
+                                    label = "gsflex_preset_startR_$index"
+                                )
+                                val endR by animateDpAsState(
+                                    targetValue = if (isSelected || index == presetOptions.size - 1) 24.dp else 8.dp,
+                                    animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
+                                    label = "gsflex_preset_endR_$index"
+                                )
+
+                                val containerColor by animateColorAsState(
+                                    targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
+                                    label = "gsflex_preset_container_$index"
+                                )
+                                val contentColor by animateColorAsState(
+                                    targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer,
+                                    label = "gsflex_preset_content_$index"
+                                )
+
+                                Surface(
+                                    onClick = {
+                                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                        lastGsFlexPreset = preset
+                                        onPresetChange(preset)
+                                    },
+                                    modifier = Modifier
+                                        .weight(animatedWeight)
+                                        .height(44.dp),
+                                    shape = RoundedCornerShape(topStart = startR, bottomStart = startR, topEnd = endR, bottomEnd = endR),
+                                    color = containerColor,
+                                    contentColor = contentColor
+                                ) {
+                                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                                        Text(
+                                            text = title,
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
+                            Card(
+                                shape = containerShape(RoundedCornerShape(20.dp)),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                                ),
+                                border = containerBorder(),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.font_preview_sample),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = "12:45 • 20 pcs • $5.50 • 98%",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+
+                            // 1. Weight Slider
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.font_weight_label),
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = "$customFontWeight",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                Slider(
+                                    value = customFontWeight.toFloat(),
+                                    onValueChange = { onCustomFontWeightChange(it.toInt()) },
+                                    valueRange = 100f..1000f,
+                                    steps = 17
+                                )
+                            }
+
+                            // 2. Width Slider
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.font_width_label),
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = "${customFontWidth.toInt()}%",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                Slider(
+                                    value = customFontWidth,
+                                    onValueChange = { onCustomFontWidthChange(it) },
+                                    valueRange = 25f..150f,
+                                    steps = 24
+                                )
+                            }
+
+                            // 3. Roundness Slider
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.font_roundness_label),
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = "${customFontRoundness.toInt()}%",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                Slider(
+                                    value = customFontRoundness,
+                                    onValueChange = { onCustomFontRoundnessChange(it) },
+                                    valueRange = 0f..100f,
+                                    steps = 19
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

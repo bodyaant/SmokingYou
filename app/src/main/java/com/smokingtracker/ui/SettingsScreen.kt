@@ -38,6 +38,18 @@ import com.smokingtracker.ui.theme.LocalContainerStyle
 import com.smokingtracker.ui.theme.ContainerGroupPosition
 import com.smokingtracker.data.ContainerStyle
 import androidx.compose.material.icons.filled.Widgets
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.spring
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import com.smokingtracker.widget.QuickAddWidgetProvider
@@ -708,23 +720,30 @@ fun SettingsTab(
                             )
                             Switch(
                                 checked = enabled,
-                                onCheckedChange = { enabled = it }
+                                onCheckedChange = { enabled = it },
+                                thumbContent = { SwitchThumb(enabled) }
                             )
                         }
 
-                        if (enabled) {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                stringResource(R.string.tapering_plan_slider_label, interval),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Slider(
-                                value = interval.toFloat(),
-                                onValueChange = { interval = it.toInt() },
-                                valueRange = 3f..14f,
-                                steps = 10
-                            )
+                        AnimatedVisibility(
+                            visible = enabled,
+                            enter = expandVertically(animationSpec = spring(dampingRatio = 0.8f, stiffness = 400f)) + fadeIn(),
+                            exit = shrinkVertically(animationSpec = spring(dampingRatio = 0.8f, stiffness = 400f)) + fadeOut()
+                        ) {
+                            Column {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    stringResource(R.string.tapering_plan_slider_label, interval),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Slider(
+                                    value = interval.toFloat(),
+                                    onValueChange = { interval = it.toInt() },
+                                    valueRange = 3f..14f,
+                                    steps = 10
+                                )
+                            }
                         }
 
                         Spacer(modifier = Modifier.height(24.dp))
@@ -943,12 +962,31 @@ fun SettingItemWithSwitch(
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
+                thumbContent = { SwitchThumb(checked) },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
                     checkedTrackColor = MaterialTheme.colorScheme.primary
                 )
             )
         }
+    }
+}
+
+@Composable
+fun SwitchThumb(checked: Boolean) {
+    AnimatedContent(
+        targetState = checked,
+        transitionSpec = {
+            scaleIn(animationSpec = spring(dampingRatio = 0.8f, stiffness = 400f)) togetherWith
+                    scaleOut(animationSpec = spring(dampingRatio = 0.8f, stiffness = 400f))
+        },
+        label = "switch_thumb_icon"
+    ) { isChecked ->
+        Icon(
+            imageVector = if (isChecked) Icons.Filled.Check else Icons.Filled.Close,
+            contentDescription = null,
+            modifier = Modifier.size(SwitchDefaults.IconSize)
+        )
     }
 }
 

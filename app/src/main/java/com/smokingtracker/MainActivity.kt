@@ -54,6 +54,10 @@ class MainActivity : ComponentActivity() {
             val colorPreset by viewModel.colorPreset.collectAsStateWithLifecycle()
             val containerBorderEnabled by viewModel.containerBorderEnabled.collectAsStateWithLifecycle()
             val containerStyle by viewModel.containerStyle.collectAsStateWithLifecycle()
+            val useCustomVariableFont by viewModel.useCustomVariableFont.collectAsStateWithLifecycle()
+            val customFontWeight by viewModel.customFontWeight.collectAsStateWithLifecycle()
+            val customFontWidth by viewModel.customFontWidth.collectAsStateWithLifecycle()
+            val customFontRoundness by viewModel.customFontRoundness.collectAsStateWithLifecycle()
 
             val useDarkTheme = when (themePreference) {
                 ThemePreference.LIGHT -> false
@@ -67,7 +71,11 @@ class MainActivity : ComponentActivity() {
                 amoledThemeEnabled = amoledTheme,
                 colorPreset = colorPreset,
                 containerBorderEnabled = containerBorderEnabled,
-                containerStyle = containerStyle
+                containerStyle = containerStyle,
+                useCustomVariableFont = useCustomVariableFont,
+                customFontWeight = customFontWeight,
+                customFontWidth = customFontWidth,
+                customFontRoundness = customFontRoundness
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),

@@ -616,11 +616,15 @@ fun ContainerIcon(
 @Composable
 fun AppTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
-    fontPreset: FontPreset = FontPreset.WIDE,
+    fontPreset: FontPreset = FontPreset.ZENITH,
     amoledThemeEnabled: Boolean = false,
     colorPreset: ColorPreset = ColorPreset.SYSTEM,
     containerBorderEnabled: Boolean = true,
     containerStyle: ContainerStyle = ContainerStyle.EXPRESSIVE,
+    useCustomVariableFont: Boolean = false,
+    customFontWeight: Int = 500,
+    customFontWidth: Float = 100f,
+    customFontRoundness: Float = 0f,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -678,10 +682,17 @@ fun AppTheme(
         }
     }
 
-    val typography = when (fontPreset) {
-        FontPreset.OUTFIT -> AppTypography
-        FontPreset.SYSTEM -> androidx.compose.material3.Typography()
-        FontPreset.WIDE, FontPreset.AIRY -> VariableFontFactory.createTypography(fontPreset.name)
+    val typography = if (useCustomVariableFont && fontPreset != FontPreset.SYSTEM) {
+        VariableFontFactory.createCustomTypography(customFontWeight, customFontWidth, customFontRoundness)
+    } else {
+        when (fontPreset) {
+            FontPreset.SYSTEM -> androidx.compose.material3.Typography()
+            FontPreset.ZENITH, FontPreset.WIDE -> VariableFontFactory.createTypography("ZENITH")
+            FontPreset.NEO -> VariableFontFactory.createTypography("NEO")
+            FontPreset.COMPACT -> VariableFontFactory.createTypography("COMPACT")
+            FontPreset.AIRY -> VariableFontFactory.createTypography("AIRY")
+            FontPreset.OUTFIT -> AppTypography
+        }
     }
 
     CompositionLocalProvider(
