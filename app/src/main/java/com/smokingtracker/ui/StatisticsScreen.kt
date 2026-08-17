@@ -38,6 +38,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -277,20 +278,25 @@ fun StatisticsList(
                 )
             }
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
                     StatCard(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
                         title = stringResource(R.string.stats_money_saved),
-                        value = "${String.format(Locale.getDefault(), "%.2f", streakMoneySaved)} $currency",
+                        value = "${String.format(Locale.getDefault(), "%.2f", streakMoneySaved)} $currencySymbol",
                         icon = Icons.Filled.AttachMoney,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.secondary,
+                        isCompact = true
                     )
                     StatCard(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
                         title = stringResource(R.string.stats_life_saved),
                         value = formatMinutes(streakLifeMinutesSaved, context),
                         icon = Icons.Filled.Favorite,
-                        color = MaterialTheme.colorScheme.tertiary
+                        color = MaterialTheme.colorScheme.tertiary,
+                        isCompact = true
                     )
                 }
             }
@@ -345,45 +351,57 @@ fun StatisticsList(
         }
 
         item {
-            StatCard(
-                title = stringResource(R.string.stats_total_count),
-                value = stats.totalCount.toString(),
-                icon = Icons.Filled.BarChart,
-                color = MaterialTheme.colorScheme.primaryContainer
-            )
-        }
-        item {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 StatCard(
-                    modifier = Modifier.weight(1f),
-                    title = stringResource(R.string.stats_max_per_day),
-                    value = stats.maxPerDay.toString(),
-                    icon = Icons.Filled.Warning,
-                    color = MaterialTheme.colorScheme.errorContainer
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    title = stringResource(R.string.stats_total_count),
+                    value = stats.totalCount.toString(),
+                    icon = Icons.Filled.BarChart,
+                    color = MaterialTheme.colorScheme.primary,
+                    isCompact = true
                 )
                 StatCard(
-                    modifier = Modifier.weight(1f),
-                    title = stringResource(R.string.stats_min_per_day),
-                    value = stats.minPerDay.toString(),
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    title = stringResource(R.string.stats_avg_per_day),
+                    value = stats.avgPerDay.toString(),
                     icon = Icons.Filled.BarChart,
-                    color = MaterialTheme.colorScheme.secondaryContainer
+                    color = MaterialTheme.colorScheme.tertiary,
+                    isCompact = true
                 )
             }
         }
         item {
-            StatCard(
-                title = stringResource(R.string.stats_avg_per_day),
-                value = stats.avgPerDay.toString(),
-                icon = Icons.Filled.BarChart,
-                color = MaterialTheme.colorScheme.tertiaryContainer
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatCard(
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    title = stringResource(R.string.stats_max_per_day),
+                    value = stats.maxPerDay.toString(),
+                    icon = Icons.Filled.Warning,
+                    color = MaterialTheme.colorScheme.error,
+                    isCompact = true
+                )
+                StatCard(
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    title = stringResource(R.string.stats_min_per_day),
+                    value = stats.minPerDay.toString(),
+                    icon = Icons.Filled.BarChart,
+                    color = MaterialTheme.colorScheme.secondary,
+                    isCompact = true
+                )
+            }
         }
         item {
             StatCard(
                 title = stringResource(R.string.stats_max_smoke_free_streak),
                 value = pluralStringResource(R.plurals.stats_days_plural, stats.longestStreakDays, stats.longestStreakDays),
                 icon = Icons.Filled.EmojiEvents,
-                color = MaterialTheme.colorScheme.primaryContainer
+                color = MaterialTheme.colorScheme.primary
             )
         }
         item {
@@ -391,7 +409,7 @@ fun StatisticsList(
                 title = stringResource(R.string.stats_tracking_since),
                 value = trackingSinceStr,
                 icon = Icons.Filled.Info,
-                color = MaterialTheme.colorScheme.surfaceVariant
+                color = MaterialTheme.colorScheme.secondary
             )
         }
 
@@ -447,7 +465,8 @@ fun StatCard(
     title: String,
     value: String,
     icon: ImageVector,
-    color: Color
+    color: Color,
+    isCompact: Boolean = false
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -455,25 +474,69 @@ fun StatCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         border = containerBorder()
     ) {
-        Row(modifier = Modifier.padding(containerPadding(20.dp, 20.dp)), verticalAlignment = Alignment.CenterVertically) {
-            ContainerIcon(
-                icon = icon,
-                tint = color,
-                backdropColor = color.copy(alpha = 0.2f),
-                size = 44.dp
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+        if (isCompact) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                ContainerIcon(
+                    icon = icon,
+                    tint = color,
+                    backdropColor = color.copy(alpha = 0.2f),
+                    size = 36.dp
                 )
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.onSurface
+                Spacer(modifier = Modifier.height(12.dp))
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = value,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(containerPadding(16.dp, 16.dp)),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ContainerIcon(
+                    icon = icon,
+                    tint = color,
+                    backdropColor = color.copy(alpha = 0.2f),
+                    size = 40.dp
                 )
+                Spacer(modifier = Modifier.width(14.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = value,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
         }
     }
@@ -527,8 +590,14 @@ fun formatMinutes(totalMinutes: Int, context: android.content.Context): String {
     val hours = (totalMinutes % (24 * 60)) / 60
     val mins = totalMinutes % 60
     return buildString {
-        if (days > 0) append(context.getString(R.string.minutes_format_day, days))
-        if (hours > 0) append(context.getString(R.string.minutes_format_hour, hours))
-        if (mins > 0 || isEmpty()) append(context.getString(R.string.minutes_format_min, mins))
+        if (days > 0) {
+            append(context.getString(R.string.minutes_format_day, days).trim())
+            if (hours > 0) append(" ").append(context.getString(R.string.minutes_format_hour, hours).trim())
+        } else if (hours > 0) {
+            append(context.getString(R.string.minutes_format_hour, hours).trim())
+            if (mins > 0) append(" ").append(context.getString(R.string.minutes_format_min, mins).trim())
+        } else {
+            append(context.getString(R.string.minutes_format_min, mins).trim())
+        }
     }.trim()
 }
