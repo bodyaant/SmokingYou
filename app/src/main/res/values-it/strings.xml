@@ -34,6 +34,7 @@
     <string name="tab_achievements">Obiettivi</string>
     <string name="settings_appearance">Tema</string>
     <string name="settings_theme">Tema</string>
+    <string name="settings_theme_desc">Personalizza l\'aspetto dell\'applicazione</string>
     <string name="settings_container_border">Bordi dei contenitori</string>
     <string name="settings_container_border_desc">Mostra un bordo sottile attorno a schede e
         contenitori</string>
@@ -71,6 +72,9 @@
     <string name="stats_max_smoke_free_streak">Serie più lunga senza fumo</string>
     <string name="stats_days_unit">%d giorni</string>
     <string name="stats_no_data">Nessun dato disponibile</string>
+    <string name="stats_no_data_desc">Aggiungi voci per calcolare statistiche e risparmi</string>
+    <string name="triggers_no_data_title">Nessun dato sui fattori scatenanti</string>
+    <string name="triggers_no_data_desc">Seleziona i fattori scatenanti durante la registrazione per vedere le analisi qui</string>
 
     <string name="my_achievements">I miei obiettivi</string>
 
@@ -178,12 +182,25 @@
     <string name="link_github">GitHub</string>
     <string name="link_telegram">Telegram</string>
     <string name="settings_font">Carattere interfaccia</string>
+    <string name="settings_font_desc">Personalizza il carattere e lo stile dell\'interfaccia</string>
+    <string name="font_family_gs_flex">GS Flex</string>
+    <string name="font_preset_zenith">Zenith</string>
+    <string name="font_preset_neo">Neo</string>
+    <string name="font_preset_impact">Impact</string>
+    <string name="font_preset_airy">Airy</string>
     <string name="font_preset_wide">Largo</string>
     <string name="font_preset_thin">Sottile</string>
     <string name="font_preset_system">Sistema</string>
+    <string name="settings_custom_variable_font">Carattere variabile personalizzato</string>
+    <string name="settings_custom_variable_font_desc">Regola manualmente spessore, larghezza e rotondità</string>
+    <string name="font_weight_label">Spessore</string>
+    <string name="font_width_label">Larghezza</string>
+    <string name="font_roundness_label">Rotondità</string>
+    <string name="font_preview_sample">Quel viandante ubriaco ha visto quindici gnomi</string>
     <string name="settings_amoled_theme">Tema AMOLED</string>
     <string name="settings_amoled_theme_desc">Sfondo completamente nero in modalità scura</string>
     <string name="settings_color_preset">Schema di colori</string>
+    <string name="settings_color_preset_desc">Scegli la tavolozza dei colori per l\'interfaccia</string>
     <string name="color_preset_system">Sistema</string>
     <string name="color_preset_sage">Salvia forestale</string>
     <string name="color_preset_rose">Rosa tramonto</string>
@@ -195,6 +212,8 @@
     <string name="time_over_limit_hm">+%1$02do %2$02dm</string>
     <string name="time_over_limit_m">+%1$02dm</string>
     <string name="first_of_the_day">Prima del giorno</string>
+    <string name="home_no_entries_title">Nessun dato per questo giorno</string>
+    <string name="home_no_entries_desc">Tocca il pulsante + per aggiungere una voce</string>
     <string name="settings_appearance_desc">Impostazioni tema, modalità AMOLED e caratteri</string>
 
     <string name="trigger_dialog_title">Cosa ha causato il desiderio?</string>
@@ -206,6 +225,9 @@
     <string name="trigger_routine">Routine / Abitudine</string>
     <string name="trigger_food_coffee">Cibo / Caffè</string>
     <string name="trigger_alcohol">Alcol</string>
+    <string name="trigger_none">Nessun motivo</string>
+    <string name="edit_time_label">Modifica ora</string>
+    <string name="edit_reason_label">Motivo</string>
 
     <string name="tab_graphs">Grafici</string>
     <string name="tab_triggers">Fattori scatenanti</string>
@@ -261,6 +283,7 @@
     <string name="error_invalid_price">Inserisci un prezzo valido</string>
     <string name="settings_saved">Salvato</string>
     <string name="graph_no_data">Nessun dato per questo periodo</string>
+    <string name="graph_no_data_desc">Aggiungi voci per visualizzare i dati del grafico</string>
 
     <string name="settings_check_updates_on_start">Controlla aggiornamenti all\'avvio</string>
     <string name="settings_check_updates_on_start_desc">Cerca automaticamente nuove versioni di
@@ -336,8 +359,7 @@
     <string name="stats_resisted_cravings_desc">Hai resistito %1$d volte e risparmiato %2$s</string>
 
     <string name="history_generator_title">Esperienza passata da fumatore</string>
-    <string name="history_generator_description">Valuta la tua storia passata da fumatore prima di
-        usare l\'app per completare le tue statistiche.</string>
+    <string name="history_generator_description">Calcola la tua storia passata prima di usare l\'app per stimare il totale di sigarette e spese precedenti.</string>
     <string name="history_start_date_label">Data di inizio del fumo</string>
     <string name="history_daily_avg_label">Media sigarette al giorno</string>
     <string name="history_daily_avg_unit">%1$d sig/giorno</string>
@@ -353,13 +375,17 @@
     <string name="history_save_button">Salva esperienza passata</string>
     <string name="history_reset_button">Ripristina esperienza passata</string>
     <string name="history_reset_dialog_title">Ripristinare l\'esperienza passata?</string>
-    <string name="history_reset_dialog_desc">Questo rimuoverà le tue statistiche passate stimate
-        dalle analisi.</string>
+    <string name="history_reset_dialog_desc">Questo ripristinerà il calcolo stimato della tua esperienza passata.</string>
     <string name="history_banner_title">Hai una storia da fumatore?</string>
-    <string name="history_banner_desc">Compila la tua esperienza passata per vedere spese e
-        statistiche totali.</string>
+    <string name="history_banner_desc">Stima delle sigarette e spese passate prima di usare l\'app.</string>
     <string name="registration_history_note">Puoi anche impostare la tua storia passata in qualsiasi
         momento nelle Impostazioni!</string>
+    <string name="onboarding_feat_timer_title">Timer intelligente</string>
+    <string name="onboarding_feat_timer_desc">Traccia gli intervalli e il tempo tra le sigarette</string>
+    <string name="onboarding_feat_analytics_title">Analisi dei fattori</string>
+    <string name="onboarding_feat_analytics_desc">Comprendi abitudini, tendenze e risparmi</string>
+    <string name="onboarding_feat_mindful_title">Controllo consapevole</string>
+    <string name="onboarding_feat_mindful_desc">Fai una pausa e supera il desiderio passo dopo passo</string>
     <string name="history_cigs_count_format">%1$s sig.</string>
     <string name="history_duration_days_y_m">%1$d giorni (%2$da %3$dm)</string>
 
@@ -406,6 +432,7 @@
     <string name="peak_period_evening">Sera (18:00 - 00:00)</string>
     <string name="peak_period_night">Notte (00:00 - 06:00)</string>
     <string name="peak_hours_no_data">Dati insufficienti per calcolare le ore di picco</string>
+    <string name="peak_hours_selected_format">%1$s • %2$s</string>
 
     <string name="achievement_unlocked_dialog_title">Obiettivo sbloccato!</string>
     <string name="achievement_view_all">Tutti gli obiettivi</string>

@@ -34,6 +34,7 @@
     <string name="tab_achievements">Başarılar</string>
     <string name="settings_appearance">Görünüm</string>
     <string name="settings_theme">Tema</string>
+    <string name="settings_theme_desc">Uygulama görünümünü özelleştirin</string>
     <string name="settings_container_border">Kapsayıcı kenarlıkları</string>
     <string name="settings_container_border_desc">Kartların ve kapsayıcıların etrafında ince
         kenarlık göster</string>
@@ -71,6 +72,9 @@
     <string name="stats_max_smoke_free_streak">En uzun sigarasız süre</string>
     <string name="stats_days_unit">%d gün</string>
     <string name="stats_no_data">Veri yok</string>
+    <string name="stats_no_data_desc">İstatistikleri ve tasarrufları hesaplamak için kayıt ekleyin</string>
+    <string name="triggers_no_data_title">Tetikleyici verisi yok</string>
+    <string name="triggers_no_data_desc">Burada analizleri görmek için sigara içerken tetikleyiciler ekleyin</string>
 
     <string name="my_achievements">Başarımlarım</string>
 
@@ -173,12 +177,25 @@
     <string name="link_github">GitHub</string>
     <string name="link_telegram">Telegram</string>
     <string name="settings_font">Arayüz Yazı Tipi</string>
+    <string name="settings_font_desc">Arayüz yazı tipini ve stilini özelleştirin</string>
+    <string name="font_family_gs_flex">GS Flex</string>
+    <string name="font_preset_zenith">Zenith</string>
+    <string name="font_preset_neo">Neo</string>
+    <string name="font_preset_impact">Impact</string>
+    <string name="font_preset_airy">Airy</string>
     <string name="font_preset_wide">Geniş</string>
     <string name="font_preset_thin">İnce</string>
     <string name="font_preset_system">Sistem</string>
+    <string name="settings_custom_variable_font">Özel Değişken Yazı Tipi</string>
+    <string name="settings_custom_variable_font_desc">Kalınlık, genişlik ve yuvarlaklığı manuel olarak ayarlayın</string>
+    <string name="font_weight_label">Kalınlık</string>
+    <string name="font_width_label">Genişlik</string>
+    <string name="font_roundness_label">Yuvarlaklık</string>
+    <string name="font_preview_sample">Pijamalı hasta yağız şoföre çabucak güvendi</string>
     <string name="settings_amoled_theme">AMOLED Teması</string>
     <string name="settings_amoled_theme_desc">Karanlık modda tamamen siyah arka plan</string>
     <string name="settings_color_preset">Renk Düzeni</string>
+    <string name="settings_color_preset_desc">Arayüz renk düzenini seçin</string>
     <string name="color_preset_system">Sistem</string>
     <string name="color_preset_sage">Orman Adaçayı</string>
     <string name="color_preset_rose">Gün Batımı Gülü</string>
@@ -190,6 +207,8 @@
     <string name="time_over_limit_hm">+%1$02dsa %2$02ddk</string>
     <string name="time_over_limit_m">+%1$02ddk</string>
     <string name="first_of_the_day">Günün ilki</string>
+    <string name="home_no_entries_title">Bu gün için kayıt yok</string>
+    <string name="home_no_entries_desc">Kayıt eklemek için + düğmesine dokunun</string>
     <string name="settings_appearance_desc">Tema, AMOLED modu ve yazı tipi ayarları</string>
 
     <string name="trigger_dialog_title">Canınız neden sigara çekiyor?</string>
@@ -201,6 +220,9 @@
     <string name="trigger_routine">Rutin / Alışkanlık</string>
     <string name="trigger_food_coffee">Yemek / Kahve</string>
     <string name="trigger_alcohol">Alkol</string>
+    <string name="trigger_none">Neden yok</string>
+    <string name="edit_time_label">Saati değiştir</string>
+    <string name="edit_reason_label">Neden</string>
 
     <string name="tab_graphs">Grafikler</string>
     <string name="tab_triggers">Tetikleyiciler</string>
@@ -256,6 +278,7 @@
     <string name="error_invalid_price">Geçerli bir fiyat girin</string>
     <string name="settings_saved">Kaydedildi</string>
     <string name="graph_no_data">Bu dönem için veri yok</string>
+    <string name="graph_no_data_desc">Grafik verilerini görmek için kayıt ekleyin</string>
 
     <string name="settings_check_updates_on_start">Başlangıçta güncellemeleri denetle</string>
     <string name="settings_check_updates_on_start_desc">Yeni SmokingYou sürümlerini otomatik olarak
@@ -330,8 +353,7 @@
     <string name="stats_resisted_cravings_desc">%1$d kez direndiniz ve %2$s tasarruf ettiniz</string>
 
     <string name="history_generator_title">Geçmiş Sigara Deneyimi</string>
-    <string name="history_generator_description">Uygulamayı kullanmadan önceki sigara geçmişinizi
-        tahmin ederek analitiklerinizi temel verilerle doldurun.</string>
+    <string name="history_generator_description">Uygulamadan önceki sigara geçmişinizi tahmin ederek geçmiş sigara ve harcama toplamınızı hesaplayın.</string>
     <string name="history_start_date_label">Sigaraya Başlama Tarihi</string>
     <string name="history_daily_avg_label">Günlük Ortalama Sigara</string>
     <string name="history_daily_avg_unit">%1$d adet/gün</string>
@@ -347,13 +369,17 @@
     <string name="history_save_button">Geçmiş Deneyimi Kaydet</string>
     <string name="history_reset_button">Geçmiş Deneyimi Sıfırla</string>
     <string name="history_reset_dialog_title">Geçmiş Deneyim Sıfırlansın mı?</string>
-    <string name="history_reset_dialog_desc">Bu işlem tahmini geçmiş istatistiklerinizi analitikten
-        kaldıracaktır.</string>
+    <string name="history_reset_dialog_desc">Bu işlem tahmini geçmiş hesaplamanızı sıfırlayacaktır.</string>
     <string name="history_banner_title">Sigara geçmişiniz var mı?</string>
-    <string name="history_banner_desc">Toplam harcamanızı ve istatistiklerinizi görmek için geçmiş
-        deneyiminizi girin.</string>
+    <string name="history_banner_desc">Uygulamadan önceki sigara ve harcamalarınızın tahmini.</string>
     <string name="registration_history_note">Geçmiş sigara deneyiminizi istediğiniz zaman
         Ayarlar\'dan ayarlayabilirsiniz!</string>
+    <string name="onboarding_feat_timer_title">Akıllı Zamanlayıcı</string>
+    <string name="onboarding_feat_timer_desc">Sigaralar arasındaki aralıkları ve zamanı takip edin</string>
+    <string name="onboarding_feat_analytics_title">Tetikleyici Analizi</string>
+    <string name="onboarding_feat_analytics_desc">Alışkanlıkları, eğilimleri ve tasarrufları anlayın</string>
+    <string name="onboarding_feat_mindful_title">Bilinçli Kontrol</string>
+    <string name="onboarding_feat_mindful_desc">Mola verin ve istekleri adım adım azaltın</string>
     <string name="history_cigs_count_format">%1$s adet</string>
     <string name="history_duration_days_y_m">%1$d gün (%2$dy %3$da)</string>
 
@@ -397,6 +423,7 @@
     <string name="peak_period_evening">Akşam (18:00 - 00:00)</string>
     <string name="peak_period_night">Gece (00:00 - 06:00)</string>
     <string name="peak_hours_no_data">Yoğun saatleri hesaplamak için yeterli veri yok</string>
+    <string name="peak_hours_selected_format">%1$s • %2$s</string>
 
     <string name="achievement_unlocked_dialog_title">Başarım Açıldı!</string>
     <string name="achievement_view_all">Tüm Başarımlar</string>

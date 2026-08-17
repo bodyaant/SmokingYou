@@ -34,6 +34,7 @@
     <string name="tab_achievements">Erfolge</string>
     <string name="settings_appearance">Design</string>
     <string name="settings_theme">Design</string>
+    <string name="settings_theme_desc">Erscheinungsbild der App anpassen</string>
     <string name="settings_container_border">Container-Rahmen</string>
     <string name="settings_container_border_desc">Feinen Rahmen um Karten und Container anzeigen</string>
     <string name="settings_vibration">Vibrationsfeedback</string>
@@ -70,6 +71,9 @@
     <string name="stats_max_smoke_free_streak">Längste rauchfreie Phase</string>
     <string name="stats_days_unit">%d Tage</string>
     <string name="stats_no_data">Keine Daten verfügbar</string>
+    <string name="stats_no_data_desc">Einträge hinzufügen, um Statistiken und Ersparnisse zu berechnen</string>
+    <string name="triggers_no_data_title">Keine Auslöser-Daten</string>
+    <string name="triggers_no_data_desc">Wählen Sie beim Eintragen Auslöser aus, um hier Analysen zu sehen</string>
 
     <string name="my_achievements">Meine Erfolge</string>
 
@@ -175,12 +179,25 @@
     <string name="link_github">GitHub</string>
     <string name="link_telegram">Telegram</string>
     <string name="settings_font">Schriftart der App</string>
+    <string name="settings_font_desc">Schriftart und Stil der Benutzeroberfläche anpassen</string>
+    <string name="font_family_gs_flex">GS Flex</string>
+    <string name="font_preset_zenith">Zenith</string>
+    <string name="font_preset_neo">Neo</string>
+    <string name="font_preset_impact">Impact</string>
+    <string name="font_preset_airy">Airy</string>
     <string name="font_preset_wide">Breit</string>
     <string name="font_preset_thin">Dünn</string>
     <string name="font_preset_system">System</string>
+    <string name="settings_custom_variable_font">Benutzerdefinierte variable Schrift</string>
+    <string name="settings_custom_variable_font_desc">Stärke, Breite und Rundung manuell anpassen</string>
+    <string name="font_weight_label">Stärke</string>
+    <string name="font_width_label">Breite</string>
+    <string name="font_roundness_label">Rundung</string>
+    <string name="font_preview_sample">Franz jagt im komplett verwahrlosten Taxi quer durch Bayern</string>
     <string name="settings_amoled_theme">AMOLED-Design</string>
     <string name="settings_amoled_theme_desc">Vollständig schwarzer Hintergrund im dunklen Modus</string>
     <string name="settings_color_preset">Farbschema</string>
+    <string name="settings_color_preset_desc">Farbpalette für die Benutzeroberfläche auswählen</string>
     <string name="color_preset_system">System</string>
     <string name="color_preset_sage">Wald-Salbei</string>
     <string name="color_preset_rose">Sonnenuntergang-Rose</string>
@@ -192,6 +209,8 @@
     <string name="time_over_limit_hm">+%1$02d Std. %2$02d Min.</string>
     <string name="time_over_limit_m">+%1$02d Min.</string>
     <string name="first_of_the_day">Erste des Tages</string>
+    <string name="home_no_entries_title">Keine Einträge für diesen Tag</string>
+    <string name="home_no_entries_desc">Tippen Sie auf +, um einen Eintrag hinzuzufügen</string>
     <string name="settings_appearance_desc">Einstellungen für Design, AMOLED-Modus und Schriftarten</string>
 
     <string name="trigger_dialog_title">Was hat das Verlangen ausgelöst?</string>
@@ -201,8 +220,11 @@
     <string name="trigger_boredom">Langeweile</string>
     <string name="trigger_social">Gesellschaft</string>
     <string name="trigger_routine">Gewohnheit</string>
-    <string name="trigger_food_coffee">Esen / Kaffee</string>
+    <string name="trigger_food_coffee">Essen / Kaffee</string>
     <string name="trigger_alcohol">Alkohol</string>
+    <string name="trigger_none">Ohne Auslöser</string>
+    <string name="edit_time_label">Zeit ändern</string>
+    <string name="edit_reason_label">Grund</string>
 
     <string name="tab_graphs">Diagramme</string>
     <string name="tab_triggers">Auslöser</string>
@@ -258,6 +280,7 @@
     <string name="error_invalid_price">Gib einen gültigen Preis ein</string>
     <string name="settings_saved">Gespeichert</string>
     <string name="graph_no_data">Keine Daten für diesen Zeitraum</string>
+    <string name="graph_no_data_desc">Einträge hinzufügen, um Diagrammdaten zu sehen</string>
 
     <string name="settings_check_updates_on_start">Beim Start nach Updates suchen</string>
     <string name="settings_check_updates_on_start_desc">Automatisch nach neuen Versionen von
@@ -333,8 +356,7 @@
     <string name="stats_resisted_cravings_desc">Sie haben %1$d Mal widerstanden und %2$s gespart</string>
 
     <string name="history_generator_title">Bisheriges Raucherlebnis</string>
-    <string name="history_generator_description">Schätze deine bisherige Rauchervergangenheit vor
-        der Nutzung der App, um deine Analysen mit Basisdaten zu füllen.</string>
+    <string name="history_generator_description">Schätze deine bisherige Rauchervergangenheit vor der Nutzung der App, um deine gesamten bisherigen Zigaretten und Ausgaben zu berechnen.</string>
     <string name="history_start_date_label">Rauchbeginn-Datum</string>
     <string name="history_daily_avg_label">Durchschnittliche Zigaretten pro Tag</string>
     <string name="history_daily_avg_unit">%1$d Stk./Tag</string>
@@ -350,13 +372,17 @@
     <string name="history_save_button">Erfahrungen speichern</string>
     <string name="history_reset_button">Bisherige Daten zurücksetzen</string>
     <string name="history_reset_dialog_title">Bisherige Daten zurücksetzen?</string>
-    <string name="history_reset_dialog_desc">Dadurch werden deine geschätzten vergangenen
-        Statistiken entfernt.</string>
+    <string name="history_reset_dialog_desc">Dadurch wird deine geschätzte bisherige Berechnung zurückgesetzt.</string>
     <string name="history_banner_title">Hast du bereits Rauchererfahrung?</string>
-    <string name="history_banner_desc">Trage deine bisherige Erfahrung ein, um deine gesamten
-        Ausgaben und Zahlen zu sehen.</string>
+    <string name="history_banner_desc">Schätzung der vergangenen Zigaretten und Ausgaben vor der Nutzung der App.</string>
     <string name="registration_history_note">Du kannst deine Rauchervergangenheit auch jederzeit in
         den Einstellungen eintragen!</string>
+    <string name="onboarding_feat_timer_title">Smarter Timer</string>
+    <string name="onboarding_feat_timer_desc">Verfolge Intervalle und Zeit zwischen Zigaretten</string>
+    <string name="onboarding_feat_analytics_title">Auslöser-Analyse</string>
+    <string name="onboarding_feat_analytics_desc">Verstehe Gewohnheiten, Trends und Ersparnisse</string>
+    <string name="onboarding_feat_mindful_title">Achtsamkeit</string>
+    <string name="onboarding_feat_mindful_desc">Pausieren und Verlangen Schritt für Schritt meistern</string>
     <string name="history_cigs_count_format">%1$s Stk.</string>
     <string name="history_duration_days_y_m">%1$d Tage (%2$dJ %3$dM)</string>
 
@@ -402,6 +428,7 @@
     <string name="peak_period_evening">Abends (18:00 - 00:00)</string>
     <string name="peak_period_night">Nachts (00:00 - 06:00)</string>
     <string name="peak_hours_no_data">Nicht genügend Daten für Spitzenzeiten</string>
+    <string name="peak_hours_selected_format">%1$s • %2$s</string>
 
     <string name="achievement_unlocked_dialog_title">Erfolg freigeschaltet!</string>
     <string name="achievement_view_all">Alle Erfolge</string>

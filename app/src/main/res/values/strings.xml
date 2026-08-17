@@ -34,6 +34,7 @@
     <string name="tab_achievements">Achievements</string>
     <string name="settings_appearance">Appearance</string>
     <string name="settings_theme">Theme</string>
+    <string name="settings_theme_desc">Customize application appearance</string>
     <string name="settings_container_border">Container borders</string>
     <string name="settings_container_border_desc">Show subtle outline around cards and containers</string>
     <string name="settings_vibration">Haptic feedback</string>
@@ -70,6 +71,9 @@
     <string name="stats_max_smoke_free_streak">Longest smoke-free streak</string>
     <string name="stats_days_unit">%d days</string>
     <string name="stats_no_data">No data available</string>
+    <string name="stats_no_data_desc">Log entries to calculate statistics &amp; savings</string>
+    <string name="triggers_no_data_title">No trigger data</string>
+    <string name="triggers_no_data_desc">Select triggers when logging to see analytics here</string>
 
     <string name="my_achievements">My Achievements</string>
 
@@ -174,12 +178,25 @@
     <string name="link_github">GitHub</string>
     <string name="link_telegram">Telegram</string>
     <string name="settings_font">Interface Font</string>
+    <string name="settings_font_desc">Customize interface font and style</string>
+    <string name="font_family_gs_flex">GS Flex</string>
+    <string name="font_preset_zenith">Zenith</string>
+    <string name="font_preset_neo">Neo</string>
+    <string name="font_preset_impact">Impact</string>
+    <string name="font_preset_airy">Airy</string>
     <string name="font_preset_wide">Wide</string>
     <string name="font_preset_thin">Thin</string>
     <string name="font_preset_system">System</string>
+    <string name="settings_custom_variable_font">Custom Variable Font</string>
+    <string name="settings_custom_variable_font_desc">Manually adjust weight, width and roundness</string>
+    <string name="font_weight_label">Weight</string>
+    <string name="font_width_label">Width</string>
+    <string name="font_roundness_label">Roundness</string>
+    <string name="font_preview_sample">The quick brown fox jumps over the lazy dog</string>
     <string name="settings_amoled_theme">AMOLED Theme</string>
     <string name="settings_amoled_theme_desc">Fully black background in dark mode</string>
     <string name="settings_color_preset">Color Scheme</string>
+    <string name="settings_color_preset_desc">Choose accent color palette for the interface</string>
     <string name="color_preset_system">System</string>
     <string name="color_preset_sage">Forest Sage</string>
     <string name="color_preset_rose">Sunset Rose</string>
@@ -191,6 +208,8 @@
     <string name="time_over_limit_hm">+%1$02dh %2$02dm</string>
     <string name="time_over_limit_m">+%1$02dm</string>
     <string name="first_of_the_day">First of the day</string>
+    <string name="home_no_entries_title">No entries for this day</string>
+    <string name="home_no_entries_desc">Tap the + button to add a record</string>
     <string name="settings_appearance_desc">Theme, AMOLED mode, and font settings</string>
 
     <string name="trigger_dialog_title">What caused the craving?</string>
@@ -202,6 +221,9 @@
     <string name="trigger_routine">Routine</string>
     <string name="trigger_food_coffee">Food / Coffee</string>
     <string name="trigger_alcohol">Alcohol</string>
+    <string name="trigger_none">No reason</string>
+    <string name="edit_time_label">Change time</string>
+    <string name="edit_reason_label">Reason</string>
 
     <string name="tab_graphs">Charts</string>
     <string name="tab_triggers">Triggers</string>
@@ -254,6 +276,7 @@
     <string name="error_invalid_price">Enter a valid price</string>
     <string name="settings_saved">Saved</string>
     <string name="graph_no_data">No data for this period</string>
+    <string name="graph_no_data_desc">Log entries to see chart data</string>
 
     <string name="settings_check_updates_on_start">Check for updates on launch</string>
     <string name="settings_check_updates_on_start_desc">Automatically look for new versions of
@@ -329,8 +352,8 @@
     <string name="stats_resisted_cravings_desc">You resisted %1$d times and saved %2$s</string>
 
     <string name="history_generator_title">Past Smoking Experience</string>
-    <string name="history_generator_description">Estimate your past smoking history prior to using
-        the app to fill your analytics with baseline data.</string>
+    <string name="history_generator_description">Estimate your past smoking experience prior to using
+        the app to calculate your approximate total cigarettes and money spent in the past.</string>
     <string name="history_start_date_label">Smoking Start Date</string>
     <string name="history_daily_avg_label">Average Cigarettes per Day</string>
     <string name="history_daily_avg_unit">%1$d pcs/day</string>
@@ -345,13 +368,19 @@
     <string name="history_save_button">Save Baseline</string>
     <string name="history_reset_button">Reset Past Experience</string>
     <string name="history_reset_dialog_title">Reset Past Experience?</string>
-    <string name="history_reset_dialog_desc">This will remove your estimated past baseline
-        statistics from analytics.</string>
+    <string name="history_reset_dialog_desc">This will reset your estimated past smoking experience
+        calculation.</string>
     <string name="history_banner_title">Have a history of smoking?</string>
-    <string name="history_banner_desc">Fill in your past experience to see your total lifetime cost
-        and stats.</string>
+    <string name="history_banner_desc">Estimation of past cigarettes and expenses prior to using the
+        app.</string>
     <string name="registration_history_note">You can also set up your past smoking history anytime
         in Settings!</string>
+    <string name="onboarding_feat_timer_title">Smart Timer</string>
+    <string name="onboarding_feat_timer_desc">Track intervals and time between cigarettes</string>
+    <string name="onboarding_feat_analytics_title">Trigger Analytics</string>
+    <string name="onboarding_feat_analytics_desc">Understand your habits, trends &amp; money saved</string>
+    <string name="onboarding_feat_mindful_title">Mindful Control</string>
+    <string name="onboarding_feat_mindful_desc">Take a pause and overcome cravings step by step</string>
     <string name="history_cigs_count_format">%1$s pcs.</string>
     <string name="history_duration_days_y_m">%1$d days (%2$dy %3$dm)</string>
 
@@ -394,6 +423,7 @@
     <string name="peak_period_evening">Evening (18:00 - 00:00)</string>
     <string name="peak_period_night">Night (00:00 - 06:00)</string>
     <string name="peak_hours_no_data">Not enough data to calculate peak hours</string>
+    <string name="peak_hours_selected_format">%1$s • %2$s</string>
 
     <string name="achievement_unlocked_dialog_title">Achievement Unlocked!</string>
     <string name="achievement_view_all">View All</string>

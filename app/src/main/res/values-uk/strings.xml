@@ -34,6 +34,7 @@
     <string name="tab_achievements">Досягнення</string>
     <string name="settings_appearance">Зовнішній вигляд</string>
     <string name="settings_theme">Тема</string>
+    <string name="settings_theme_desc">Налаштування зовнішнього вигляду додатку</string>
     <string name="settings_container_border">Обводка контейнерів</string>
     <string name="settings_container_border_desc">Показувати тонку обводку у карток та контейнерів</string>
     <string name="settings_vibration">Вібровідгук</string>
@@ -70,6 +71,9 @@
     <string name="stats_max_smoke_free_streak">Найдовша серія без куріння</string>
     <string name="stats_days_unit">%d дн.</string>
     <string name="stats_no_data">Немає даних</string>
+    <string name="stats_no_data_desc">Додавайте записи, щоб розрахувати показники та економію</string>
+    <string name="triggers_no_data_title">Немає даних про причини</string>
+    <string name="triggers_no_data_desc">Вказуйте причини при додаванні записів, щоб побачити аналітику</string>
 
     <string name="my_achievements">Мої досягнення</string>
 
@@ -176,12 +180,25 @@
     <string name="link_github">GitHub</string>
     <string name="link_telegram">Telegram</string>
     <string name="settings_font">Шрифт інтерфейсу</string>
+    <string name="settings_font_desc">Налаштування шрифту та стилю інтерфейсу</string>
+    <string name="font_family_gs_flex">GS Flex</string>
+    <string name="font_preset_zenith">Zenith</string>
+    <string name="font_preset_neo">Neo</string>
+    <string name="font_preset_impact">Impact</string>
+    <string name="font_preset_airy">Airy</string>
     <string name="font_preset_wide">Широкий</string>
     <string name="font_preset_thin">Тонкий</string>
     <string name="font_preset_system">Системний</string>
+    <string name="settings_custom_variable_font">Власний варіативний шрифт</string>
+    <string name="settings_custom_variable_font_desc">Ручне налаштування товщини, ширини та скруглення</string>
+    <string name="font_weight_label">Товщина</string>
+    <string name="font_width_label">Ширина</string>
+    <string name="font_roundness_label">Скруглення</string>
+    <string name="font_preview_sample">Жебракують філософи при ґанку церкви в Гадячі</string>
     <string name="settings_amoled_theme">AMOLED тема</string>
     <string name="settings_amoled_theme_desc">Повністю чорний фон у темній темі</string>
     <string name="settings_color_preset">Кольорова схема</string>
+    <string name="settings_color_preset_desc">Вибір кольорової палітри інтерфейсу</string>
     <string name="color_preset_system">Системна</string>
     <string name="color_preset_sage">Лісовий шавлія</string>
     <string name="color_preset_rose">Західна троянда</string>
@@ -193,6 +210,8 @@
     <string name="time_over_limit_hm">+%1$02dг %2$02dхв</string>
     <string name="time_over_limit_m">+%1$02dхв</string>
     <string name="first_of_the_day">Перша за день</string>
+    <string name="home_no_entries_title">За цей день записів немає</string>
+    <string name="home_no_entries_desc">Натисніть кнопку +, щоб додати запис</string>
     <string name="settings_appearance_desc">Налаштування теми, AMOLED режиму та шрифтів</string>
 
     <string name="trigger_dialog_title">Що викликало потяг?</string>
@@ -204,6 +223,9 @@
     <string name="trigger_routine">Звичка</string>
     <string name="trigger_food_coffee">Їжа / Кава</string>
     <string name="trigger_alcohol">Алкоголь</string>
+    <string name="trigger_none">Без причини</string>
+    <string name="edit_time_label">Змінити час</string>
+    <string name="edit_reason_label">Причина</string>
 
     <string name="tab_graphs">Графіки</string>
     <string name="tab_triggers">Причини</string>
@@ -259,6 +281,7 @@
     <string name="error_invalid_price">Введіть коректну ціну</string>
     <string name="settings_saved">Збережено</string>
     <string name="graph_no_data">Немає даних за цей період</string>
+    <string name="graph_no_data_desc">Додавайте записи, щоб побачити графік</string>
 
     <string name="settings_check_updates_on_start">Перевіряти оновлення при запуске</string>
     <string name="settings_check_updates_on_start_desc">Автоматично шукати нові версії SmokingYou</string>
@@ -330,8 +353,7 @@
     <string name="stats_resisted_cravings_desc">Ви встояли %1$d разів і заощадили %2$s</string>
 
     <string name="history_generator_title">Минулий стаж куріння</string>
-    <string name="history_generator_description">Оцініть ваш досвід куріння до початку використання
-        додатка, щоб заповнити аналітику початковими даними.</string>
+    <string name="history_generator_description">Приблизний розрахунок вашого стажу куріння до встановлення додатку, щоб дізнатися загальну кількість викурених цигарок та витрат за минулі роки.</string>
     <string name="history_start_date_label">Дата початку куріння</string>
     <string name="history_daily_avg_label">Середня кількість цигарок на день</string>
     <string name="history_daily_avg_unit">%1$d шт./день</string>
@@ -346,13 +368,17 @@
     <string name="history_save_button">Зберегти минулий досвід</string>
     <string name="history_reset_button">Скинути минулий досвід</string>
     <string name="history_reset_dialog_title">Скинути минулий досвід?</string>
-    <string name="history_reset_dialog_desc">Це видалить розрахункову оцінку минулих років з
-        аналітики.</string>
+    <string name="history_reset_dialog_desc">Це скине збережений розрахунок минулого стажу куріння.</string>
     <string name="history_banner_title">У вас вже є стаж куріння?</string>
-    <string name="history_banner_desc">Заповніть минулий досвід, щоб побачити загальні витрати та
-        викурені цигарки.</string>
+    <string name="history_banner_desc">Оцінка приблизної кількості цигарок та витрат за минулий період куріння.</string>
     <string name="registration_history_note">Ви також зможете заповнити минулий досвід куріння в
         будь-який момент у Налаштуваннях!</string>
+    <string name="onboarding_feat_timer_title">Розумний таймер</string>
+    <string name="onboarding_feat_timer_desc">Точний інтервал і час між перекурами</string>
+    <string name="onboarding_feat_analytics_title">Аналітика причин</string>
+    <string name="onboarding_feat_analytics_desc">Контроль тригерів, динаміки та економії</string>
+    <string name="onboarding_feat_mindful_title">Усвідомленість</string>
+    <string name="onboarding_feat_mindful_desc">Паузи для зниження потягу крок за кроком</string>
     <string name="history_cigs_count_format">%1$s шт.</string>
     <string name="history_duration_days_y_m">%1$d дн. (%2$dр %3$dм)</string>
 
@@ -397,6 +423,7 @@
     <string name="peak_period_evening">Увечері (18:00 - 00:00)</string>
     <string name="peak_period_night">Уночі (00:00 - 06:00)</string>
     <string name="peak_hours_no_data">Недостатньо даних для пікових годин</string>
+    <string name="peak_hours_selected_format">%1$s • %2$s</string>
 
     <string name="achievement_unlocked_dialog_title">Досягнення розблоковано!</string>
     <string name="achievement_view_all">Усі досягнення</string>

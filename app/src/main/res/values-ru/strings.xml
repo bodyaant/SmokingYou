@@ -34,6 +34,7 @@
     <string name="tab_achievements">Достижения</string>
     <string name="settings_appearance">Внешний вид</string>
     <string name="settings_theme">Тема</string>
+    <string name="settings_theme_desc">Настройка внешнего вида приложения</string>
     <string name="settings_container_border">Обводка контейнеров</string>
     <string name="settings_container_border_desc">Показывать тонкую обводку у карточек и контейнеров</string>
     <string name="settings_vibration">Виброотклик</string>
@@ -70,6 +71,9 @@
     <string name="stats_max_smoke_free_streak">Макс. дней без курения</string>
     <string name="stats_days_unit">%d дн.</string>
     <string name="stats_no_data">Нет данных</string>
+    <string name="stats_no_data_desc">Добавляйте записи, чтобы рассчитать показатели и экономию</string>
+    <string name="triggers_no_data_title">Нет данных о причинах</string>
+    <string name="triggers_no_data_desc">Указывайте причины при добавлении записей, чтобы увидеть аналитику</string>
 
     <string name="my_achievements">Мои Достижения</string>
 
@@ -176,12 +180,25 @@
     <string name="link_github">GitHub</string>
     <string name="link_telegram">Telegram</string>
     <string name="settings_font">Шрифт интерфейса</string>
+    <string name="settings_font_desc">Настройка шрифта и стиля интерфейса</string>
+    <string name="font_family_gs_flex">GS Flex</string>
+    <string name="font_preset_zenith">Zenith</string>
+    <string name="font_preset_neo">Neo</string>
+    <string name="font_preset_impact">Impact</string>
+    <string name="font_preset_airy">Airy</string>
     <string name="font_preset_wide">Широкий</string>
     <string name="font_preset_thin">Тонкий</string>
     <string name="font_preset_system">Система</string>
+    <string name="settings_custom_variable_font">Кастомный вариативный шрифт</string>
+    <string name="settings_custom_variable_font_desc">Ручная настройка толщины, ширины и скругления</string>
+    <string name="font_weight_label">Толщина</string>
+    <string name="font_width_label">Ширина</string>
+    <string name="font_roundness_label">Скругление</string>
+    <string name="font_preview_sample">Съешь же ещё этих мягких французских булок</string>
     <string name="settings_amoled_theme">AMOLED тема</string>
     <string name="settings_amoled_theme_desc">Полностью чёрный фон в тёмной теме</string>
     <string name="settings_color_preset">Цветовая схема</string>
+    <string name="settings_color_preset_desc">Выбор цветовой палитры интерфейса</string>
     <string name="color_preset_system">Системная</string>
     <string name="color_preset_sage">Лесной шалфей</string>
     <string name="color_preset_rose">Закатная роза</string>
@@ -193,6 +210,8 @@
     <string name="time_over_limit_hm">+%1$02dч %2$02dм</string>
     <string name="time_over_limit_m">+%1$02dм</string>
     <string name="first_of_the_day">Первая за день</string>
+    <string name="home_no_entries_title">За этот день записей нет</string>
+    <string name="home_no_entries_desc">Нажмите кнопку +, чтобы добавить запись</string>
     <string name="settings_appearance_desc">Настройки темы, AMOLED режима и шрифтов</string>
 
     <string name="trigger_dialog_title">Что вызвало тягу?</string>
@@ -204,6 +223,9 @@
     <string name="trigger_routine">Привычка</string>
     <string name="trigger_food_coffee">Еда / Кофе</string>
     <string name="trigger_alcohol">Алкоголь</string>
+    <string name="trigger_none">Без причины</string>
+    <string name="edit_time_label">Изменить время</string>
+    <string name="edit_reason_label">Причина</string>
 
     <string name="tab_graphs">Графики</string>
     <string name="tab_triggers">Причины</string>
@@ -254,6 +276,7 @@
     <string name="error_invalid_price">Введите корректную цену</string>
     <string name="settings_saved">Сохранено</string>
     <string name="graph_no_data">Нет данных за этот период</string>
+    <string name="graph_no_data_desc">Добавляйте записи, чтобы увидеть график</string>
     <string name="stats_go_to_settings">Перейти в настройки</string>
     <string name="stats_days_saved">Дней жизни сэкономлено</string>
     <string name="stats_current_streak_days">Текущая серия без курения</string>
@@ -331,8 +354,7 @@
     <string name="copy_address">Скопировать адрес</string>
 
     <string name="history_generator_title">Прошлый стаж курения</string>
-    <string name="history_generator_description">Оцените ваш опыт курения до начала использования
-        приложения, чтобы сразу заполнить аналитику стартовыми данными.</string>
+    <string name="history_generator_description">Примерный расчет вашего стажа курения до установки приложения, чтобы узнать общее количество выкуренных сигарет и расходов за прошлые годы.</string>
     <string name="history_start_date_label">Дата начала курения</string>
     <string name="history_daily_avg_label">Среднее количество сигарет в день</string>
     <string name="history_daily_avg_unit">%1$d шт./день</string>
@@ -348,12 +370,17 @@
     <string name="history_save_button">Сохранить прошлый опыт</string>
     <string name="history_reset_button">Сбросить прошлый опыт</string>
     <string name="history_reset_dialog_title">Сбросить прошлый опыт?</string>
-    <string name="history_reset_dialog_desc">Это удалит расчетную оценку прошлых лет из аналитики.</string>
+    <string name="history_reset_dialog_desc">Это сбросит сохраненный расчет прошлого стажа курения.</string>
     <string name="history_banner_title">У вас уже есть стаж курения?</string>
-    <string name="history_banner_desc">Заполните прошлый опыт, чтобы увидеть общие расходы и
-        выкуренные сигареты.</string>
+    <string name="history_banner_desc">Оценка примерного количества сигарет и расходов за прошлый период курения.</string>
     <string name="registration_history_note">Вы также сможете заполнить прошлый опыт курения в любой
         момент в Настройках!</string>
+    <string name="onboarding_feat_timer_title">Умный таймер</string>
+    <string name="onboarding_feat_timer_desc">Точный интервал и время между перекурами</string>
+    <string name="onboarding_feat_analytics_title">Аналитика причин</string>
+    <string name="onboarding_feat_analytics_desc">Контроль триггеров, динамики и экономии</string>
+    <string name="onboarding_feat_mindful_title">Осознанность</string>
+    <string name="onboarding_feat_mindful_desc">Паузы для снижения тяги шаг за шагом</string>
     <string name="history_cigs_count_format">%1$s шт.</string>
     <string name="history_duration_days_y_m">%1$d дн. (%2$dг %3$dм)</string>
 
@@ -398,6 +425,7 @@
     <string name="peak_period_evening">Вечером (18:00 - 00:00)</string>
     <string name="peak_period_night">Ночью (00:00 - 06:00)</string>
     <string name="peak_hours_no_data">Недостаточно данных для пиковых часов</string>
+    <string name="peak_hours_selected_format">%1$s • %2$s</string>
 
     <string name="achievement_unlocked_dialog_title">Достижение разблокировано!</string>
     <string name="achievement_view_all">Все достижения</string>
