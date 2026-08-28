@@ -41,20 +41,12 @@ class SmokingRepository(
         smokingDao.insertEntry(SmokingEntryEntity(timestamp = timestamp, trigger = trigger, isResisted = true))
     }
 
-    suspend fun removeEntry(timestamp: Long) {
-        smokingDao.deleteEntryByTimestamp(timestamp)
-    }
-
     suspend fun removeEntryById(id: Long) {
         smokingDao.deleteEntryById(id)
     }
 
-    suspend fun editEntry(oldTimestamp: Long, newTimestamp: Long) {
-        smokingDao.updateEntryTimestamp(oldTimestamp, newTimestamp)
-    }
-
-    suspend fun updateEntryTrigger(timestamp: Long, trigger: String?) {
-        smokingDao.updateEntryTrigger(timestamp, trigger)
+    suspend fun updateEntryTimestampById(id: Long, newTimestamp: Long) {
+        smokingDao.updateEntryTimestampById(id, newTimestamp)
     }
 
     suspend fun updateEntryTriggerById(id: Long, trigger: String?) {

@@ -34,12 +34,6 @@ class HomeViewModel(
         .map { entities -> entities.filter { it.isResisted } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val entryTriggers: StateFlow<Map<Long, String>> = repository.smokingEntries
-        .map { entities ->
-            entities.filter { it.trigger != null }.associate { it.timestamp to it.trigger!! }
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
-
     val dailyLimit: StateFlow<Int> = dataStoreManager.dailyLimit
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
@@ -94,9 +88,7 @@ class HomeViewModel(
 
     fun editSmokingEntry(id: Long, oldTimestamp: Long, newTimestamp: Long) {
         viewModelScope.launch {
-            val trigger = entryTriggers.value[oldTimestamp]
-            repository.removeEntryById(id) 
-            repository.addEntry(newTimestamp, trigger)
+            repository.updateEntryTimestampById(id, newTimestamp)
             val updated = smokingEntries.value.toMutableList().apply {
                 remove(oldTimestamp)
                 add(newTimestamp)
