@@ -366,7 +366,7 @@ fun StatisticsList(
                 StatCard(
                     modifier = Modifier.weight(1f).fillMaxHeight(),
                     title = stringResource(R.string.stats_avg_per_day),
-                    value = stats.avgPerDay.toString(),
+                    value = formatAvgPerDay(stats.avgPerDay),
                     icon = Icons.Filled.BarChart,
                     color = MaterialTheme.colorScheme.tertiary,
                     isCompact = true
@@ -600,4 +600,13 @@ fun formatMinutes(totalMinutes: Int, context: android.content.Context): String {
             append(context.getString(R.string.minutes_format_min, mins).trim())
         }
     }.trim()
+}
+
+fun formatAvgPerDay(avg: Float): String {
+    val rounded = Math.round(avg * 10f) / 10f
+    return if (rounded % 1.0f == 0f) {
+        rounded.toInt().toString()
+    } else {
+        String.format(java.util.Locale.getDefault(), "%.1f", rounded)
+    }
 }

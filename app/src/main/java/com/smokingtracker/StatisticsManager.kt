@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit
 data class StatisticsData(
     val maxPerDay: Int,
     val minPerDay: Int,
-    val avgPerDay: Int,
+    val avgPerDay: Float,
     val totalCount: Int,
     val trackingSince: Long?,
     val longestStreakDays: Int,
@@ -17,7 +17,7 @@ class StatisticsManager {
 
     fun calculateStats(entries: List<Long>): StatisticsData {
         if (entries.isEmpty()) {
-            return StatisticsData(0, 0, 0, 0, null, 0, 0)
+            return StatisticsData(0, 0, 0f, 0, null, 0, 0)
         }
 
         val sortedEntries = entries.sorted()
@@ -51,16 +51,17 @@ class StatisticsManager {
             set(Calendar.MILLISECOND, 0)
         }
 
-        val diffMillis = today.timeInMillis - firstDay.timeInMillis
-        val totalTrackingDays = (TimeUnit.MILLISECONDS.toDays(diffMillis) + 1).toInt()
+        val totalTrackingDays = (daysBetween(firstDay.timeInMillis, today.timeInMillis) + 1).toInt()
 
-        val avgPerDay = Math.round(totalCount.toDouble() / totalTrackingDays.coerceAtLeast(1)).toInt()
+        val avgPerDay = totalCount.toFloat() / totalTrackingDays.coerceAtLeast(1)
 
         val longestStreak = calculateLongestStreak(sortedEntries)
 
+        val effectiveMinPerDay = if (totalTrackingDays > dailyCounts.size) 0 else minPerDay
+
         return StatisticsData(
             maxPerDay = maxPerDay,
-            minPerDay = minPerDay,
+            minPerDay = effectiveMinPerDay,
             avgPerDay = avgPerDay,
             totalCount = totalCount,
             trackingSince = trackingSince,
@@ -85,7 +86,7 @@ class StatisticsManager {
         var maxStreak = 0
 
         for (i in 0 until entryDays.size - 1) {
-            val gapDays = TimeUnit.MILLISECONDS.toDays(entryDays[i + 1] - entryDays[i]).toInt() - 1
+            val gapDays = daysBetween(entryDays[i], entryDays[i + 1]).toInt() - 1
             if (gapDays > maxStreak) {
                 maxStreak = gapDays
             }
@@ -99,7 +100,7 @@ class StatisticsManager {
             set(Calendar.MILLISECOND, 0)
         }.timeInMillis
 
-        val currentGap = TimeUnit.MILLISECONDS.toDays(today - lastEntry).toInt()
+        val currentGap = daysBetween(lastEntry, today).toInt()
         if (currentGap > maxStreak) {
             maxStreak = currentGap
         }
@@ -126,7 +127,7 @@ class StatisticsManager {
             set(Calendar.MILLISECOND, 0)
         }.timeInMillis
 
-        return TimeUnit.MILLISECONDS.toDays(today - lastDay).toInt()
+        return daysBetween(lastDay, today).toInt()
     }
 
     fun getWeeklyCount(entries: List<Long>, date: Calendar): Int {

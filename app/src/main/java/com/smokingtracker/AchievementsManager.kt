@@ -8,6 +8,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 enum class AchievementCategory(val titleResId: Int) {
     LOGIN(R.string.ach_category_login),
@@ -162,8 +163,7 @@ class AchievementsManager {
         var maxStreak = 1
 
         for (i in 1 until sortedDays.size) {
-            val diff = sortedDays[i] - sortedDays[i - 1]
-            val daysDiff = TimeUnit.MILLISECONDS.toDays(diff)
+            val daysDiff = daysBetween(sortedDays[i - 1], sortedDays[i])
             if (daysDiff == 1L) {
                 currentStreak++
                 if (currentStreak > maxStreak) maxStreak = currentStreak
@@ -198,7 +198,7 @@ class AchievementsManager {
         var maxStreak = 1
 
         for (i in 1 until validDays.size) {
-            val daysDiff = TimeUnit.MILLISECONDS.toDays(validDays[i] - validDays[i - 1])
+            val daysDiff = daysBetween(validDays[i - 1], validDays[i])
             if (daysDiff == 1L) {
                 currentStreak++
                 if (currentStreak > maxStreak) maxStreak = currentStreak
@@ -216,7 +216,7 @@ class AchievementsManager {
         for (i in 0 until sorted.size - 2) {
             val diff1 = sorted[i + 1] - sorted[i]
             val diff2 = sorted[i + 2] - sorted[i + 1]
-            if (diff1 >= 5 * 60 * 1000L && Math.abs(diff1 - diff2) <= 2 * 60 * 1000L) {
+            if (diff1 >= 5 * 60 * 1000L && abs(diff1 - diff2) <= 2 * 60 * 1000L) {
                 return true
             }
         }
@@ -279,7 +279,7 @@ class AchievementsManager {
         var currentStreak = 1
         var maxStreak = 1
         for (i in 1 until sortedDays.size) {
-            val daysDiff = TimeUnit.MILLISECONDS.toDays(sortedDays[i] - sortedDays[i - 1])
+            val daysDiff = daysBetween(sortedDays[i - 1], sortedDays[i])
             if (daysDiff == 1L) { currentStreak++; if (currentStreak > maxStreak) maxStreak = currentStreak }
             else if (daysDiff > 1L) currentStreak = 1
         }

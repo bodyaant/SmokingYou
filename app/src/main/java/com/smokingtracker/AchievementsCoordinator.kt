@@ -25,7 +25,7 @@ class AchievementsCoordinator(
     fun checkAndUpdate(updatedEntries: List<Long>? = null, wasEntryRemoved: Boolean = false) {
         applicationScope.launch(Dispatchers.Default) {
             val isReg = dataStoreManager.isRegistered.first()
-            if (isReg != true) return@launch
+            if (!isReg) return@launch
 
             val entries = updatedEntries
                 ?: repository.smokingEntries.first().filter { !it.isResisted }.map { it.timestamp }
