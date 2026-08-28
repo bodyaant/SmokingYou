@@ -39,7 +39,7 @@ val appModule = module {
     single { SmokingRepository(get(), get(), get()) }
     single { AchievementsCoordinator(get(), get(), get(), androidApplication(), get()) }
     single { AppIconManager(androidApplication()) }
-    single { BackupManager(androidApplication(), get(), get(), get()) }
+    single { BackupManager(androidApplication(), get(), get(), get(), get()) }
     viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), androidApplication()) }
     viewModel { HomeViewModel(get(), get(), get(), androidApplication()) }
 }
