@@ -60,6 +60,14 @@ class MainViewModel(
             initialValue = emptyList()
         )
 
+    val nonResistedEntities: StateFlow<List<SmokingEntryEntity>> = repository.smokingEntries
+        .map { entities -> entities.filter { !it.isResisted } }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     val resistedEntries: StateFlow<List<SmokingEntryEntity>> = repository.smokingEntries
         .map { entities -> entities.filter { it.isResisted } }
         .stateIn(
@@ -220,16 +228,6 @@ class MainViewModel(
 
     val updateCheckState: StateFlow<UpdateCheckState> = updateManager.updateCheckState
 
-    val entryTriggers: StateFlow<Map<Long, String>> = repository.smokingEntries
-        .map { entities ->
-            entities.filter { it.trigger != null }.associate { it.timestamp to it.trigger!! }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyMap()
-        )
-
     val taperingPlanEnabled: StateFlow<Boolean> = dataStoreManager.taperingPlanEnabled.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -356,8 +354,11 @@ class MainViewModel(
         }
     }
 
-    fun recordLanguageChange() {
+    fun recordLanguageChange(languageTag: String) {
         viewModelScope.launch {
+            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+                dataStoreManager.saveAppLanguageTag(languageTag)
+            }
             dataStoreManager.recordThemeOrLangChange()
             achievementsCoordinator.checkAndUpdate()
         }

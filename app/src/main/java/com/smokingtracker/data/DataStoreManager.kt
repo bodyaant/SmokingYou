@@ -63,6 +63,7 @@ class DataStoreManager(private val context: Context) {
         val CUSTOM_FONT_WEIGHT = intPreferencesKey("custom_font_weight")
         val CUSTOM_FONT_WIDTH = floatPreferencesKey("custom_font_width")
         val CUSTOM_FONT_ROUNDNESS = floatPreferencesKey("custom_font_roundness")
+        val APP_LANGUAGE_TAG = stringPreferencesKey("app_language_tag")
     }
 
     val isRegistered: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -272,7 +273,24 @@ class DataStoreManager(private val context: Context) {
         hasBackupVal: Boolean = false,
         hasPriceChangedVal: Boolean = false,
         hasCancelled10sVal: Boolean = false,
-        launchesVal: List<Long> = emptyList()
+        launchesVal: List<Long> = emptyList(),
+        containerBorderEnabledVal: Boolean = true,
+        containerStyleVal: String = ContainerStyle.EXPRESSIVE.name,
+        useCustomVariableFontVal: Boolean = false,
+        customFontWeightVal: Int = 500,
+        customFontWidthVal: Float = 100f,
+        customFontRoundnessVal: Float = 0f,
+        taperingPlanEnabledVal: Boolean = false,
+        taperingIntervalDaysVal: Int = 7,
+        lastTaperingCheckinDateVal: Long = 0L,
+        hasHistoricalBaselineVal: Boolean = false,
+        historicalStartDateVal: Long = 0L,
+        historicalDailyAvgVal: Int = 0,
+        historicalPackPriceVal: Float = 0f,
+        historicalPackSizeVal: Int = 20,
+        historicalTriggerPrioritiesVal: List<String> = emptyList(),
+        appIconVal: String = AppIconPreset.DEFAULT.name,
+        checkUpdatesOnStartVal: Boolean = false
     ) {
         context.dataStore.edit { preferences ->
             preferences[IS_REGISTERED] = isReg
@@ -291,6 +309,23 @@ class DataStoreManager(private val context: Context) {
             preferences[HAS_CHANGED_PACK_PRICE] = hasPriceChangedVal
             preferences[HAS_CANCELLED_WITHIN_10S] = hasCancelled10sVal
             preferences[APP_LAUNCH_DATES] = gson.toJson(launchesVal)
+            preferences[CONTAINER_BORDER_ENABLED] = containerBorderEnabledVal
+            preferences[CONTAINER_STYLE] = containerStyleVal
+            preferences[USE_CUSTOM_VARIABLE_FONT] = useCustomVariableFontVal
+            preferences[CUSTOM_FONT_WEIGHT] = customFontWeightVal
+            preferences[CUSTOM_FONT_WIDTH] = customFontWidthVal
+            preferences[CUSTOM_FONT_ROUNDNESS] = customFontRoundnessVal
+            preferences[TAPERING_PLAN_ENABLED] = taperingPlanEnabledVal
+            preferences[TAPERING_INTERVAL_DAYS] = taperingIntervalDaysVal
+            preferences[LAST_TAPERING_CHECKIN_DATE] = lastTaperingCheckinDateVal
+            preferences[HAS_HISTORICAL_BASELINE] = hasHistoricalBaselineVal
+            preferences[HISTORICAL_START_DATE] = historicalStartDateVal
+            preferences[HISTORICAL_DAILY_AVG] = historicalDailyAvgVal
+            preferences[HISTORICAL_PACK_PRICE] = historicalPackPriceVal
+            preferences[HISTORICAL_PACK_SIZE] = historicalPackSizeVal
+            preferences[HISTORICAL_TRIGGER_PRIORITIES] = gson.toJson(historicalTriggerPrioritiesVal)
+            preferences[APP_ICON] = appIconVal
+            preferences[CHECK_UPDATES_ON_START] = checkUpdatesOnStartVal
         }
     }
 
@@ -475,6 +510,16 @@ class DataStoreManager(private val context: Context) {
     suspend fun saveCustomFontRoundness(roundness: Float) {
         context.dataStore.edit { preferences ->
             preferences[CUSTOM_FONT_ROUNDNESS] = roundness
+        }
+    }
+
+    val appLanguageTag: Flow<String?> = context.dataStore.data.map { preferences ->
+        preferences[APP_LANGUAGE_TAG]
+    }
+
+    suspend fun saveAppLanguageTag(tag: String) {
+        context.dataStore.edit { preferences ->
+            preferences[APP_LANGUAGE_TAG] = tag
         }
     }
 
