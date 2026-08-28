@@ -8,9 +8,6 @@
 }
 -keep @androidx.annotation.Keep class * { *; }
 
-# Keep BackupData specifically for Gson serialization
--keepclassmembers class com.smokingtracker.MainViewModel$BackupData { *; }
--keep class com.smokingtracker.MainViewModel$BackupData { *; }
 
 # Keep Glance SerializedName fields
 -keepclassmembers class * {
