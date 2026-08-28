@@ -13,20 +13,25 @@ class AppIconManager(private val application: Application) {
         val packageName = application.packageName
         val targetAlias = presetToAlias(packageName, preset)
 
-        allAliases(packageName).forEach { alias ->
-            val state = if (alias == targetAlias) {
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-            } else {
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-            }
+        try {
+            pm.setComponentEnabledSetting(
+                ComponentName(application, targetAlias),
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                PackageManager.DONT_KILL_APP
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to enable component alias: $targetAlias", e)
+        }
+
+        allAliases(packageName).filter { it != targetAlias }.forEach { alias ->
             try {
                 pm.setComponentEnabledSetting(
                     ComponentName(application, alias),
-                    state,
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                     PackageManager.DONT_KILL_APP
                 )
             } catch (e: Exception) {
-                Log.e(TAG, "Не удалось применить alias: $alias", e)
+                Log.e(TAG, "Failed to disable component alias: $alias", e)
             }
         }
     }
