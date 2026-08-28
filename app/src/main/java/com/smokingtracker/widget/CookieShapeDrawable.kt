@@ -5,19 +5,20 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
+import android.util.LruCache
 import kotlin.math.cos
 import kotlin.math.sin
 
 object CookieShapeDrawable {
 
-    private val cache = mutableMapOf<String, Bitmap>()
+    private val cache = LruCache<String, Bitmap>(16)
 
     fun createCookieBitmap(context: Context, sizeDp: Int, color: Int, petals: Int = 12): Bitmap {
         val density = context.resources.displayMetrics.density
         val sizePx = (sizeDp * density).toInt().coerceAtLeast(1)
         val cacheKey = "${sizePx}_${color}_$petals"
 
-        cache[cacheKey]?.let { if (!it.isRecycled) return it }
+        cache.get(cacheKey)?.let { if (!it.isRecycled) return it }
 
         val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
@@ -59,7 +60,7 @@ object CookieShapeDrawable {
         path.close()
         canvas.drawPath(path, paint)
 
-        cache[cacheKey] = bitmap
+        cache.put(cacheKey, bitmap)
         return bitmap
     }
 }

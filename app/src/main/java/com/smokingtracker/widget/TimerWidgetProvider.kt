@@ -11,6 +11,7 @@ import android.os.Looper
 import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.annotation.Keep
+import com.smokingtracker.AchievementsCoordinator
 import com.smokingtracker.MainActivity
 import com.smokingtracker.R
 import com.smokingtracker.data.DataStoreManager
@@ -21,6 +22,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import java.util.Calendar
+import androidx.core.graphics.toColorInt
 
 @Keep
 class TimerWidgetProvider : AppWidgetProvider(), KoinComponent {
@@ -41,6 +43,7 @@ class TimerWidgetProvider : AppWidgetProvider(), KoinComponent {
                 try {
                     val repository: SmokingRepository = get()
                     repository.addEntry(System.currentTimeMillis(), trigger = null)
+                    get<AchievementsCoordinator>().checkAndUpdate()
 
                     WidgetUpdateManager.updateAll(context)
 
@@ -96,9 +99,9 @@ class TimerWidgetProvider : AppWidgetProvider(), KoinComponent {
                         context.getString(R.string.widget_today_count, todayCount)
                     }
 
-                    val isLimitExceeded = dailyLimit > 0 && todayCount >= dailyLimit
+                    val isLimitExceeded = dailyLimit in 1..todayCount
                     val countColor = if (isLimitExceeded) {
-                        Color.parseColor("#FF5252")
+                        "#FF5252".toColorInt()
                     } else {
                         androidx.core.content.ContextCompat.getColor(context, R.color.widget_accent_color)
                     }

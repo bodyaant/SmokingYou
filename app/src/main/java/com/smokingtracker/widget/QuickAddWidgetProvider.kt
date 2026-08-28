@@ -10,6 +10,7 @@ import android.os.Looper
 import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.annotation.Keep
+import com.smokingtracker.AchievementsCoordinator
 import com.smokingtracker.R
 import com.smokingtracker.data.repository.SmokingRepository
 import kotlinx.coroutines.CoroutineScope
@@ -36,6 +37,7 @@ class QuickAddWidgetProvider : AppWidgetProvider(), KoinComponent {
                 try {
                     val repository: SmokingRepository = get()
                     repository.addEntry(System.currentTimeMillis(), trigger = null)
+                    get<AchievementsCoordinator>().checkAndUpdate()
 
                     WidgetUpdateManager.updateAll(context)
 
