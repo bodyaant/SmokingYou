@@ -115,10 +115,7 @@ internal fun HomeScreenContent(
     onNavigateToAchievements: () -> Unit = {},
     onNavigateToGraphs: (String) -> Unit = {}
 ) {
-    val cookieShape = MaterialShapes.Cookie12Sided.toShape()
-
     var currentDate by remember { mutableStateOf(Calendar.getInstance()) }
-    val entryTriggers by viewModel?.entryTriggers?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(emptyMap<Long, String>()) }
 
     var timePassedText by remember { mutableStateOf("") }
     val calculatingText = stringResource(R.string.time_calculating)
@@ -1244,12 +1241,14 @@ fun EntryItem(
         label = "chevron_rotation"
     )
 
-    val cal = Calendar.getInstance().apply { timeInMillis = entryTime }
-    val timePickerState = rememberTimePickerState(
-        initialHour = cal.get(Calendar.HOUR_OF_DAY),
-        initialMinute = cal.get(Calendar.MINUTE),
-        is24Hour = true,
-    )
+    val timePickerState = remember(entryTime) {
+        val cal = Calendar.getInstance().apply { timeInMillis = entryTime }
+        TimePickerState(
+            initialHour = cal.get(Calendar.HOUR_OF_DAY),
+            initialMinute = cal.get(Calendar.MINUTE),
+            is24Hour = true,
+        )
+    }
 
     if (showTimePicker) {
         TimePickerDialog(

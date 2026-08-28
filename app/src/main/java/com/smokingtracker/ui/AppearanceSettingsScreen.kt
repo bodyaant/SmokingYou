@@ -108,6 +108,7 @@ fun AppearanceSettingsScreen(
                 navigationIcon = {
                     FilledTonalIconButton(
                         onClick = onBack,
+                        modifier = Modifier.padding(start = 12.dp),
                         colors = IconButtonDefaults.filledTonalIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                             contentColor = MaterialTheme.colorScheme.onSurface

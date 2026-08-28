@@ -136,6 +136,7 @@ fun HistoryGeneratorScreen(viewModel: MainViewModel, navController: NavHostContr
                 navigationIcon = {
                     FilledTonalIconButton(
                         onClick = { navController.navigateUp() },
+                        modifier = Modifier.padding(start = 12.dp),
                         colors = IconButtonDefaults.filledTonalIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                             contentColor = MaterialTheme.colorScheme.onSurface
@@ -148,7 +149,7 @@ fun HistoryGeneratorScreen(viewModel: MainViewModel, navController: NavHostContr
                     }
                 },
                 actions = {
-                    Spacer(modifier = Modifier.width(48.dp))
+                    Spacer(modifier = Modifier.width(60.dp))
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color.Transparent

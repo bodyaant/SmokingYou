@@ -81,7 +81,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 @Composable
 fun GraphScreen(viewModel: MainViewModel, initialTarget: String? = null) {
     val entries by viewModel.smokingEntries.collectAsStateWithLifecycle()
-    val entryTriggers by viewModel.entryTriggers.collectAsStateWithLifecycle()
+    val nonResistedEntities by viewModel.nonResistedEntities.collectAsStateWithLifecycle()
     val dailyLimit by viewModel.dailyLimit.collectAsStateWithLifecycle()
     val packPrice by viewModel.packPrice.collectAsStateWithLifecycle()
     val packSize by viewModel.packSize.collectAsStateWithLifecycle()
@@ -95,7 +95,7 @@ fun GraphScreen(viewModel: MainViewModel, initialTarget: String? = null) {
 
     GraphScreenContent(
         entries = entries,
-        entryTriggers = entryTriggers,
+        triggerEntities = nonResistedEntities,
         dailyLimit = dailyLimit,
         packPrice = packPrice,
         packSize = packSize,
@@ -110,7 +110,7 @@ fun GraphScreen(viewModel: MainViewModel, initialTarget: String? = null) {
 @Composable
 fun GraphScreenContent(
     entries: List<Long>,
-    entryTriggers: Map<Long, String>,
+    triggerEntities: List<com.smokingtracker.data.local.SmokingEntryEntity> = emptyList(),
     dailyLimit: Int = 0,
     packPrice: Float = 0f,
     packSize: Int = 20,
@@ -421,12 +421,12 @@ fun GraphScreenContent(
                     }
                 }
                 2 -> {
-                    val triggerCounts = remember(entries, entryTriggers) {
+                    val triggerCounts = remember(triggerEntities) {
                         val counts = com.smokingtracker.data.TriggerType.allKeys()
                             .associateWith { 0 }.toMutableMap()
-                        val entrySet = entries.toSet()
-                        entryTriggers.forEach { (timestamp, trigger) ->
-                            if (entrySet.contains(timestamp)) {
+                        triggerEntities.forEach { entity ->
+                            val trigger = entity.trigger
+                            if (trigger != null) {
                                 counts[trigger] = (counts[trigger] ?: 0) + 1
                             }
                         }
@@ -736,7 +736,7 @@ fun LineGraph(dataPoints: List<Int>, modifier: Modifier = Modifier) {
 @Composable
 private fun GraphScreenPreview() {
     MaterialTheme {
-        GraphScreenContent(entries = emptyList(), entryTriggers = emptyMap())
+        GraphScreenContent(entries = emptyList())
     }
 }
 

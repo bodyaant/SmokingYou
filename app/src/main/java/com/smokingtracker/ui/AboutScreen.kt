@@ -88,6 +88,7 @@ fun AboutScreen(onBack: () -> Unit) {
                 navigationIcon = {
                     FilledTonalIconButton(
                         onClick = onBack,
+                        modifier = Modifier.padding(start = 12.dp),
                         colors = IconButtonDefaults.filledTonalIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                             contentColor = MaterialTheme.colorScheme.onSurface
@@ -137,7 +138,7 @@ fun AboutScreen(onBack: () -> Unit) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
+                        .padding(horizontal = 16.dp),
                     shape = RoundedCornerShape(32.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.92f)
