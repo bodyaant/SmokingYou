@@ -64,6 +64,14 @@ class DataStoreManager(private val context: Context) {
         val CUSTOM_FONT_WIDTH = floatPreferencesKey("custom_font_width")
         val CUSTOM_FONT_ROUNDNESS = floatPreferencesKey("custom_font_roundness")
         val APP_LANGUAGE_TAG = stringPreferencesKey("app_language_tag")
+        val CUSTOM_TRIGGERS = stringPreferencesKey("custom_triggers_list")
+        val DISABLED_DEFAULT_TRIGGERS = stringSetPreferencesKey("disabled_default_triggers_set")
+        val NOTIFICATION_ENABLED = booleanPreferencesKey("notification_enabled")
+        val NOTIFICATION_LOW_PRIORITY = booleanPreferencesKey("notification_low_priority")
+        val NOTIFICATION_SHOW_TIMER = booleanPreferencesKey("notification_show_timer")
+        val NOTIFICATION_SHOW_PROGRESS = booleanPreferencesKey("notification_show_progress")
+        val NOTIFICATION_SHOW_ADD_BUTTON = booleanPreferencesKey("notification_show_add_button")
+        val NOTIFICATION_SHOW_RESIST_BUTTON = booleanPreferencesKey("notification_show_resist_button")
     }
 
     val isRegistered: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -290,7 +298,15 @@ class DataStoreManager(private val context: Context) {
         historicalPackSizeVal: Int = 20,
         historicalTriggerPrioritiesVal: List<String> = emptyList(),
         appIconVal: String = AppIconPreset.DEFAULT.name,
-        checkUpdatesOnStartVal: Boolean = false
+        checkUpdatesOnStartVal: Boolean = false,
+        customTriggersVal: List<String> = emptyList(),
+        disabledDefaultTriggersVal: Set<String> = emptySet(),
+        notificationEnabledVal: Boolean = false,
+        notificationLowPriorityVal: Boolean = true,
+        notificationShowTimerVal: Boolean = true,
+        notificationShowProgressVal: Boolean = true,
+        notificationShowAddButtonVal: Boolean = true,
+        notificationShowResistButtonVal: Boolean = false
     ) {
         context.dataStore.edit { preferences ->
             preferences[IS_REGISTERED] = isReg
@@ -326,6 +342,132 @@ class DataStoreManager(private val context: Context) {
             preferences[HISTORICAL_TRIGGER_PRIORITIES] = gson.toJson(historicalTriggerPrioritiesVal)
             preferences[APP_ICON] = appIconVal
             preferences[CHECK_UPDATES_ON_START] = checkUpdatesOnStartVal
+            preferences[CUSTOM_TRIGGERS] = gson.toJson(customTriggersVal)
+            preferences[DISABLED_DEFAULT_TRIGGERS] = disabledDefaultTriggersVal
+            preferences[NOTIFICATION_ENABLED] = notificationEnabledVal
+            preferences[NOTIFICATION_LOW_PRIORITY] = notificationLowPriorityVal
+            preferences[NOTIFICATION_SHOW_TIMER] = notificationShowTimerVal
+            preferences[NOTIFICATION_SHOW_PROGRESS] = notificationShowProgressVal
+            preferences[NOTIFICATION_SHOW_ADD_BUTTON] = notificationShowAddButtonVal
+            preferences[NOTIFICATION_SHOW_RESIST_BUTTON] = notificationShowResistButtonVal
+        }
+    }
+
+    val ongoingNotificationEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[NOTIFICATION_ENABLED] ?: false
+    }
+
+    val notificationLowPriority: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[NOTIFICATION_LOW_PRIORITY] ?: true
+    }
+
+    val notificationShowTimer: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[NOTIFICATION_SHOW_TIMER] ?: true
+    }
+
+    val notificationShowProgress: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[NOTIFICATION_SHOW_PROGRESS] ?: true
+    }
+
+    val notificationShowAddButton: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[NOTIFICATION_SHOW_ADD_BUTTON] ?: true
+    }
+
+    val notificationShowResistButton: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[NOTIFICATION_SHOW_RESIST_BUTTON] ?: false
+    }
+
+    suspend fun saveOngoingNotificationEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[NOTIFICATION_ENABLED] = enabled
+        }
+    }
+
+    suspend fun saveNotificationLowPriority(lowPriority: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[NOTIFICATION_LOW_PRIORITY] = lowPriority
+        }
+    }
+
+    suspend fun saveNotificationShowTimer(show: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[NOTIFICATION_SHOW_TIMER] = show
+        }
+    }
+
+    suspend fun saveNotificationShowProgress(show: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[NOTIFICATION_SHOW_PROGRESS] = show
+        }
+    }
+
+    suspend fun saveNotificationShowAddButton(show: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[NOTIFICATION_SHOW_ADD_BUTTON] = show
+        }
+    }
+
+    suspend fun saveNotificationShowResistButton(show: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[NOTIFICATION_SHOW_RESIST_BUTTON] = show
+        }
+    }
+
+    val customTriggers: Flow<List<String>> = context.dataStore.data.map { preferences ->
+        val json = preferences[CUSTOM_TRIGGERS] ?: "[]"
+        val listType = object : TypeToken<List<String>>() {}.type
+        gson.fromJson(json, listType) ?: emptyList()
+    }
+
+    val disabledDefaultTriggers: Flow<Set<String>> = context.dataStore.data.map { preferences ->
+        preferences[DISABLED_DEFAULT_TRIGGERS] ?: emptySet()
+    }
+
+    fun formatTriggerName(name: String): String {
+        val trimmed = name.trim()
+        if (trimmed.isEmpty()) return ""
+        return trimmed.replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString()
+        }
+    }
+
+    suspend fun addCustomTrigger(name: String): String? {
+        val formatted = formatTriggerName(name)
+        if (formatted.isBlank()) return null
+        var added: String? = null
+        context.dataStore.edit { preferences ->
+            val json = preferences[CUSTOM_TRIGGERS] ?: "[]"
+            val listType = object : TypeToken<List<String>>() {}.type
+            val current: MutableList<String> = gson.fromJson(json, listType) ?: mutableListOf()
+            val exists = current.any { it.equals(formatted, ignoreCase = true) }
+            if (!exists) {
+                current.add(formatted)
+                preferences[CUSTOM_TRIGGERS] = gson.toJson(current)
+                added = formatted
+            }
+        }
+        return added
+    }
+
+    suspend fun removeCustomTrigger(name: String) {
+        context.dataStore.edit { preferences ->
+            val json = preferences[CUSTOM_TRIGGERS] ?: "[]"
+            val listType = object : TypeToken<List<String>>() {}.type
+            val current: MutableList<String> = gson.fromJson(json, listType) ?: mutableListOf()
+            current.removeAll { it.equals(name, ignoreCase = true) }
+            preferences[CUSTOM_TRIGGERS] = gson.toJson(current)
+        }
+    }
+
+    suspend fun toggleDefaultTrigger(key: String, isEnabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            val current = preferences[DISABLED_DEFAULT_TRIGGERS]?.toMutableSet() ?: mutableSetOf()
+            if (isEnabled) {
+                current.remove(key)
+            } else {
+                current.add(key)
+            }
+            preferences[DISABLED_DEFAULT_TRIGGERS] = current
         }
     }
 

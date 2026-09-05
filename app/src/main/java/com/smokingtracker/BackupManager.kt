@@ -61,7 +61,15 @@ class BackupManager(
             historicalPackSize = dataStoreManager.historicalPackSize.first(),
             historicalTriggerPriorities = dataStoreManager.historicalTriggerPriorities.first(),
             appIcon = dataStoreManager.appIcon.first().name,
-            checkUpdatesOnStart = dataStoreManager.checkUpdatesOnStart.first()
+            checkUpdatesOnStart = dataStoreManager.checkUpdatesOnStart.first(),
+            customTriggers = dataStoreManager.customTriggers.first(),
+            disabledDefaultTriggers = dataStoreManager.disabledDefaultTriggers.first(),
+            notificationEnabled = dataStoreManager.ongoingNotificationEnabled.first(),
+            notificationLowPriority = dataStoreManager.notificationLowPriority.first(),
+            notificationShowTimer = dataStoreManager.notificationShowTimer.first(),
+            notificationShowProgress = dataStoreManager.notificationShowProgress.first(),
+            notificationShowAddButton = dataStoreManager.notificationShowAddButton.first(),
+            notificationShowResistButton = dataStoreManager.notificationShowResistButton.first()
         )
 
         application.contentResolver.openOutputStream(uri)?.use { outputStream ->
@@ -117,7 +125,15 @@ class BackupManager(
                     historicalPackSizeVal = data.historicalPackSize ?: 20,
                     historicalTriggerPrioritiesVal = data.historicalTriggerPriorities ?: emptyList(),
                     appIconVal = appIconVal,
-                    checkUpdatesOnStartVal = data.checkUpdatesOnStart ?: false
+                    checkUpdatesOnStartVal = data.checkUpdatesOnStart ?: false,
+                    customTriggersVal = data.customTriggers ?: emptyList(),
+                    disabledDefaultTriggersVal = data.disabledDefaultTriggers ?: emptySet(),
+                    notificationEnabledVal = data.notificationEnabled ?: false,
+                    notificationLowPriorityVal = data.notificationLowPriority ?: true,
+                    notificationShowTimerVal = data.notificationShowTimer ?: true,
+                    notificationShowProgressVal = data.notificationShowProgress ?: true,
+                    notificationShowAddButtonVal = data.notificationShowAddButton ?: true,
+                    notificationShowResistButtonVal = data.notificationShowResistButton ?: false
                 )
 
                 val backupEntries = data.entries ?: data.smokingEntries?.map { ts ->
@@ -189,6 +205,14 @@ class BackupManager(
         @SerializedName("historicalPackSize") val historicalPackSize: Int? = 20,
         @SerializedName("historicalTriggerPriorities") val historicalTriggerPriorities: List<String>? = emptyList(),
         @SerializedName("appIcon") val appIcon: String? = "DEFAULT",
-        @SerializedName("checkUpdatesOnStart") val checkUpdatesOnStart: Boolean? = false
+        @SerializedName("checkUpdatesOnStart") val checkUpdatesOnStart: Boolean? = false,
+        @SerializedName("customTriggers") val customTriggers: List<String>? = emptyList(),
+        @SerializedName("disabledDefaultTriggers") val disabledDefaultTriggers: Set<String>? = emptySet(),
+        @SerializedName("notificationEnabled") val notificationEnabled: Boolean? = false,
+        @SerializedName("notificationLowPriority") val notificationLowPriority: Boolean? = true,
+        @SerializedName("notificationShowTimer") val notificationShowTimer: Boolean? = true,
+        @SerializedName("notificationShowProgress") val notificationShowProgress: Boolean? = true,
+        @SerializedName("notificationShowAddButton") val notificationShowAddButton: Boolean? = true,
+        @SerializedName("notificationShowResistButton") val notificationShowResistButton: Boolean? = false
     )
 }

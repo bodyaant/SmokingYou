@@ -24,6 +24,8 @@ object WidgetUpdateManager : KoinComponent {
         if (timerIds.isNotEmpty()) {
             TimerWidgetProvider.updateAppWidgets(context, appWidgetManager, timerIds)
         }
+
+        com.smokingtracker.notification.OngoingNotificationManager.update(context)
     }
 
     fun updateAllAsync(context: Context) {
