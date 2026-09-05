@@ -4,4 +4,8 @@
         <item quantity="one">%d Tag</item>
         <item quantity="other">%d Tage</item>
     </plurals>
+    <plurals name="tapering_checkin_desc_days">
+        <item quantity="one">%1$d Tag seit Ihrem letzten Schritt ist vergangen! Sie haben das Limit von %2$d Zig. super eingehalten.</item>
+        <item quantity="other">%1$d Tage seit Ihrem letzten Schritt sind vergangen! Sie haben das Limit von %2$d Zig. super eingehalten.</item>
+    </plurals>
 </resources>

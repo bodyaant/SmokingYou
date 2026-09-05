@@ -224,6 +224,20 @@
     <string name="trigger_food_coffee">Еда / Кофе</string>
     <string name="trigger_alcohol">Алкоголь</string>
     <string name="trigger_none">Без причины</string>
+    <string name="trigger_management_title">Причины курения</string>
+    <string name="trigger_management_desc">Настройка причин и триггеров</string>
+    <string name="trigger_active_count">%1$d активных</string>
+    <string name="trigger_add_custom">Добавить свою причину</string>
+    <string name="trigger_new_title">Новая причина</string>
+    <string name="trigger_new_hint">например, Экзамен, Пробка, Перерыв</string>
+    <string name="trigger_custom_section">Свои причины</string>
+    <string name="trigger_custom_empty">Своих причин пока нет</string>
+    <string name="trigger_standard_section">Стандартные причины</string>
+    <string name="trigger_already_exists">Такая причина уже есть</string>
+    <string name="trigger_name_empty">Введите название причины</string>
+    <string name="trigger_delete_dialog_title">Удалить причину?</string>
+    <string name="trigger_delete_dialog_desc">Причина перестанет предлагаться при выборе. Существующие записи в истории сохранятся.</string>
+    <string name="trigger_quick_add_title">Добавить и выбрать</string>
     <string name="edit_time_label">Изменить время</string>
     <string name="edit_reason_label">Причина</string>
 
@@ -258,8 +272,24 @@
     <string name="who_oxygen_time">8 часов</string>
     <string name="who_co_desc">Очищение организма от окиси углерода</string>
     <string name="who_co_time">12 часов</string>
+    <string name="who_heart_attack_desc">Риск инфаркта миокарда начинает снижаться</string>
+    <string name="who_heart_attack_time">24 часа</string>
+    <string name="who_taste_smell_desc">Регенерация нервных окончаний, обострение вкуса и обоняния</string>
+    <string name="who_taste_smell_time">48 часов</string>
+    <string name="who_nicotine_desc">Никотин полностью выведен, бронхи расслабляются</string>
+    <string name="who_nicotine_time">72 часа</string>
     <string name="who_lung_desc">Улучшение работы легких и кровообращения</string>
     <string name="who_lung_time">2 недели</string>
+    <string name="who_cough_desc">Уменьшение кашля, одышки и заложенности носоглотки</string>
+    <string name="who_cough_time">1 месяц</string>
+    <string name="who_circulation_desc">Кровообращение и объем дыхания улучшаются до 30%</string>
+    <string name="who_circulation_time">3 месяца</string>
+    <string name="who_cilia_desc">Легкие очищаются от слизи, снижается риск инфекций</string>
+    <string name="who_cilia_time">6 месяцев</string>
+    <string name="who_bronchi_desc">Реснички эпителия восстановлены, дыхание чистое и глубокое</string>
+    <string name="who_bronchi_time">9 месяцев</string>
+    <string name="who_coronary_desc">Риск ишемической болезни сердца снижается на 50%</string>
+    <string name="who_coronary_time">1 год</string>
 
     <string name="minutes_format_zero">0 мин</string>
     <string name="minutes_format_day">%1$dд </string>
@@ -430,4 +460,33 @@
     <string name="achievement_unlocked_dialog_title">Достижение разблокировано!</string>
     <string name="achievement_view_all">Все достижения</string>
     <string name="dialog_awesome">Отлично!</string>
+
+    <!-- Ongoing Notification -->
+    <string name="settings_section_notifications">Уведомления</string>
+    <string name="settings_ongoing_notification_title">Уведомление в статус-баре</string>
+    <string name="settings_ongoing_notification_desc">Постоянный прогресс и быстрое добавление в шторке</string>
+    <string name="notification_status_enabled_format">Включено • %1$s</string>
+    <string name="notification_status_disabled">Выключено</string>
+    <string name="notification_preview_title">Предпросмотр</string>
+    <string name="notification_preview_timer_sample">2ч 45м</string>
+    <string name="notification_priority_label">Приоритет уведомления</string>
+    <string name="notification_priority_low">Тихий (Низкий)</string>
+    <string name="notification_priority_default">Обычный</string>
+    <string name="notification_show_timer">Таймер воздержания</string>
+    <string name="notification_show_progress">Дневной лимит и шкала прогресса</string>
+    <string name="notification_show_add_button">Кнопка «+1 Сигарета»</string>
+    <string name="notification_show_resist_button">Кнопка «Сдержался»</string>
+    <string name="notification_action_add">+1 Сигарета</string>
+    <string name="notification_action_resist">Сдержался</string>
+    <string name="notification_channel_ongoing_low_name">Постоянный статус (Тихий)</string>
+    <string name="notification_channel_ongoing_default_name">Постоянный статус</string>
+    <string name="notification_channel_ongoing_desc">Отображает время с последней сигареты и дневной прогресс</string>
+    <string name="notification_title_smoke_free">Не курите: %1$s</string>
+    <string name="notification_title_app_name">SmokingYou</string>
+    <string name="notification_content_with_limit">Сегодня: %1$d из %2$d (%3$d%%)</string>
+    <string name="notification_content_no_limit">Сегодня выкурено: %1$d</string>
+    <string name="notification_content_resisted_count"> • Сдержано: %1$d</string>
+    <string name="notification_toast_added">+1 сигарета записана</string>
+    <string name="notification_toast_resisted">Попытка сдержана!</string>
+    <string name="entry_over_limit_badge">Сверх лимита</string>
 </resources>

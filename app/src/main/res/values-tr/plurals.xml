@@ -4,4 +4,8 @@
         <item quantity="one">%d gün</item>
         <item quantity="other">%d gün</item>
     </plurals>
+    <plurals name="tapering_checkin_desc_days">
+        <item quantity="one">Son adımınızdan bu yana %1$d gün geçti! %2$d sigaralık limite harika uyum sağladınız.</item>
+        <item quantity="other">Son adımınızdan bu yana %1$d gün geçti! %2$d sigaralık limite harika uyum sağladınız.</item>
+    </plurals>
 </resources>

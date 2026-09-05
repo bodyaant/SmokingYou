@@ -6,4 +6,10 @@
         <item quantity="many">%d дней</item>
         <item quantity="other">%d дня</item>
     </plurals>
+    <plurals name="tapering_checkin_desc_days">
+        <item quantity="one">Прошел %1$d день с вашего прошлого шага! Вы отлично справлялись с лимитом %2$d сиг.</item>
+        <item quantity="few">Прошло %1$d дня с вашего прошлого шага! Вы отлично справлялись с лимитом %2$d сиг.</item>
+        <item quantity="many">Прошло %1$d дней с вашего прошлого шага! Вы отлично справлялись с лимитом %2$d сиг.</item>
+        <item quantity="other">Прошло %1$d дней с вашего прошлого шага! Вы отлично справлялись с лимитом %2$d сиг.</item>
+    </plurals>
 </resources>

@@ -221,6 +221,20 @@
     <string name="trigger_food_coffee">Yemek / Kahve</string>
     <string name="trigger_alcohol">Alkol</string>
     <string name="trigger_none">Neden yok</string>
+    <string name="trigger_management_title">Sigara Nedenleri</string>
+    <string name="trigger_management_desc">Tetikleyicileri ve nedenleri özelleştir</string>
+    <string name="trigger_active_count">%1$d etkin</string>
+    <string name="trigger_add_custom">Özel neden ekle</string>
+    <string name="trigger_new_title">Yeni Neden</string>
+    <string name="trigger_new_hint">örn. Sınav, Trafik, Kahve molası</string>
+    <string name="trigger_custom_section">Özel nedenler</string>
+    <string name="trigger_custom_empty">Henüz özel neden eklenmedi</string>
+    <string name="trigger_standard_section">Standart nedenler</string>
+    <string name="trigger_already_exists">Bu neden zaten mevcut</string>
+    <string name="trigger_name_empty">Neden adını girin</string>
+    <string name="trigger_delete_dialog_title">Neden silinsin mi?</string>
+    <string name="trigger_delete_dialog_desc">Bu neden gelecekteki seçimlerden kaldırılacaktır. Mevcut geçmiş kayıtları korunur.</string>
+    <string name="trigger_quick_add_title">Ekle ve kaydet</string>
     <string name="edit_time_label">Saati değiştir</string>
     <string name="edit_reason_label">Neden</string>
 
@@ -255,8 +269,24 @@
     <string name="who_oxygen_time">8 saat</string>
     <string name="who_co_desc">Karbonmonoksit vücuttan temizlenir</string>
     <string name="who_co_time">12 saat</string>
+    <string name="who_heart_attack_desc">Kalp krizi riski azalmaya başlar</string>
+    <string name="who_heart_attack_time">24 saat</string>
+    <string name="who_taste_smell_desc">Sinir uçları yenilenir, tat ve koku duyusu keskinleşir</string>
+    <string name="who_taste_smell_time">48 saat</string>
+    <string name="who_nicotine_desc">Nikotin tamamen temizlenir, bronşlar gevşer</string>
+    <string name="who_nicotine_time">72 saat</string>
     <string name="who_lung_desc">Akciğer fonksiyonu ve kan dolaşımı iyileşir</string>
     <string name="who_lung_time">2 hafta</string>
+    <string name="who_cough_desc">Öksürük, tıkanıklık ve yorgunluk azalır</string>
+    <string name="who_cough_time">1 ay</string>
+    <string name="who_circulation_desc">Kan dolaşımı ve akciğer kapasitesi %30\'a kadar artar</string>
+    <string name="who_circulation_time">3 ay</string>
+    <string name="who_cilia_desc">Akciğerler mukusu temizler, enfeksiyon riski düşer</string>
+    <string name="who_cilia_time">6 ay</string>
+    <string name="who_bronchi_desc">Bronş kirpikleri yenilenir, nefes alma temiz ve derinleşir</string>
+    <string name="who_bronchi_time">9 ay</string>
+    <string name="who_coronary_desc">Koroner kalp hastalığı riski %50 oranında azalır</string>
+    <string name="who_coronary_time">1 yıl</string>
 
     <string name="minutes_format_zero">0dk</string>
     <string name="minutes_format_day">%1$dg </string>
@@ -428,4 +458,33 @@
     <string name="achievement_unlocked_dialog_title">Başarım Açıldı!</string>
     <string name="achievement_view_all">Tüm Başarımlar</string>
     <string name="dialog_awesome">Harika!</string>
+
+    <!-- Ongoing Notification -->
+    <string name="settings_section_notifications">Bildirimler</string>
+    <string name="settings_ongoing_notification_title">Durum Çubuğu Bildirimi</string>
+    <string name="settings_ongoing_notification_desc">Bildirim alanında kalıcı ilerleme ve hızlı kayıt</string>
+    <string name="notification_status_enabled_format">Etkin • %1$s</string>
+    <string name="notification_status_disabled">Devre dışı</string>
+    <string name="notification_preview_title">Önizleme</string>
+    <string name="notification_preview_timer_sample">2sa 45dk</string>
+    <string name="notification_priority_label">Bildirim Önceliği</string>
+    <string name="notification_priority_low">Sessiz (Düşük)</string>
+    <string name="notification_priority_default">Standart</string>
+    <string name="notification_show_timer">Sigarasızlık sayacı</string>
+    <string name="notification_show_progress">Günlük limit ve ilerleme çubuğu</string>
+    <string name="notification_show_add_button">\"+1 Sigara\" düğmesi</string>
+    <string name="notification_show_resist_button">\"Direndim\" düğmesi</string>
+    <string name="notification_action_add">+1 Sigara</string>
+    <string name="notification_action_resist">Direndim</string>
+    <string name="notification_channel_ongoing_low_name">Kalıcı Durum (Sessiz)</string>
+    <string name="notification_channel_ongoing_default_name">Kalıcı Durum</string>
+    <string name="notification_channel_ongoing_desc">Sigarasızlık sayacını ve günlük içim ilerlemesini gösterir</string>
+    <string name="notification_title_smoke_free">Sigarasız: %1$s</string>
+    <string name="notification_title_app_name">SmokingYou</string>
+    <string name="notification_content_with_limit">Bugün: %1$d / %2$d (%%%3$d)</string>
+    <string name="notification_content_no_limit">Bugün içilen: %1$d</string>
+    <string name="notification_content_resisted_count"> • Direnilen: %1$d</string>
+    <string name="notification_toast_added">+1 sigara kaydedildi</string>
+    <string name="notification_toast_resisted">Kriz yenildi!</string>
+    <string name="entry_over_limit_badge">Limit aşıldı</string>
 </resources>

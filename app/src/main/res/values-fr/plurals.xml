@@ -4,4 +4,8 @@
         <item quantity="one">%d jour</item>
         <item quantity="other">%d jours</item>
     </plurals>
+    <plurals name="tapering_checkin_desc_days">
+        <item quantity="one">%1$d jour s’est écoulé depuis votre dernière étape ! Vous avez bien géré la limite de %2$d cigarettes.</item>
+        <item quantity="other">%1$d jours se sont écoulés depuis votre dernière étape ! Vous avez bien géré la limite de %2$d cigarettes.</item>
+    </plurals>
 </resources>

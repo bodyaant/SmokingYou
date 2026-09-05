@@ -222,6 +222,20 @@
     <string name="trigger_food_coffee">Food / Coffee</string>
     <string name="trigger_alcohol">Alcohol</string>
     <string name="trigger_none">No reason</string>
+    <string name="trigger_management_title">Smoking Triggers</string>
+    <string name="trigger_management_desc">Customize triggers and reasons</string>
+    <string name="trigger_active_count">%1$d active</string>
+    <string name="trigger_add_custom">Add custom reason</string>
+    <string name="trigger_new_title">New Reason</string>
+    <string name="trigger_new_hint">e.g., Exam, Traffic, Coffee break</string>
+    <string name="trigger_custom_section">Custom reasons</string>
+    <string name="trigger_custom_empty">No custom reasons added yet</string>
+    <string name="trigger_standard_section">Standard reasons</string>
+    <string name="trigger_already_exists">This reason already exists</string>
+    <string name="trigger_name_empty">Enter reason name</string>
+    <string name="trigger_delete_dialog_title">Delete Reason?</string>
+    <string name="trigger_delete_dialog_desc">This reason will be removed from future selection. Existing history entries will be kept.</string>
+    <string name="trigger_quick_add_title">Add &amp; Log</string>
     <string name="edit_time_label">Change time</string>
     <string name="edit_reason_label">Reason</string>
 
@@ -254,8 +268,24 @@
     <string name="who_oxygen_time">8 hours</string>
     <string name="who_co_desc">Carbon monoxide cleared from body</string>
     <string name="who_co_time">12 hours</string>
+    <string name="who_heart_attack_desc">Risk of heart attack begins to decrease</string>
+    <string name="who_heart_attack_time">24 hours</string>
+    <string name="who_taste_smell_desc">Nerve endings regrow, taste and smell sharpen</string>
+    <string name="who_taste_smell_time">48 hours</string>
+    <string name="who_nicotine_desc">Nicotine fully eliminated, bronchial tubes relax</string>
+    <string name="who_nicotine_time">72 hours</string>
     <string name="who_lung_desc">Lung function and circulation improve</string>
     <string name="who_lung_time">2 weeks</string>
+    <string name="who_cough_desc">Coughing, congestion and fatigue decrease</string>
+    <string name="who_cough_time">1 month</string>
+    <string name="who_circulation_desc">Circulation and lung capacity improve up to 30%</string>
+    <string name="who_circulation_time">3 months</string>
+    <string name="who_cilia_desc">Lungs clear mucus, risk of infections drops</string>
+    <string name="who_cilia_time">6 months</string>
+    <string name="who_bronchi_desc">Bronchial cilia restored, breathing is clean and deep</string>
+    <string name="who_bronchi_time">9 months</string>
+    <string name="who_coronary_desc">Risk of coronary heart disease cut by 50%</string>
+    <string name="who_coronary_time">1 year</string>
 
     <string name="minutes_format_zero">0m</string>
     <string name="minutes_format_day">%1$dd </string>
@@ -428,4 +458,33 @@
     <string name="achievement_unlocked_dialog_title">Achievement Unlocked!</string>
     <string name="achievement_view_all">View All</string>
     <string name="dialog_awesome">Awesome!</string>
+
+    <!-- Ongoing Notification -->
+    <string name="settings_section_notifications">Notifications</string>
+    <string name="settings_ongoing_notification_title">Status Bar Notification</string>
+    <string name="settings_ongoing_notification_desc">Sticky progress &amp; quick logging in notification shade</string>
+    <string name="notification_status_enabled_format">Enabled • %1$s</string>
+    <string name="notification_status_disabled">Disabled</string>
+    <string name="notification_preview_title">Preview</string>
+    <string name="notification_preview_timer_sample">2h 45m</string>
+    <string name="notification_priority_label">Notification Priority</string>
+    <string name="notification_priority_low">Silent (Low)</string>
+    <string name="notification_priority_default">Standard (Default)</string>
+    <string name="notification_show_timer">Abstinence timer</string>
+    <string name="notification_show_progress">Daily limit &amp; progress bar</string>
+    <string name="notification_show_add_button">\"+1 Cigarette\" button</string>
+    <string name="notification_show_resist_button">\"Resisted\" button</string>
+    <string name="notification_action_add">+1 Cigarette</string>
+    <string name="notification_action_resist">Resisted</string>
+    <string name="notification_channel_ongoing_low_name">Ongoing Status (Silent)</string>
+    <string name="notification_channel_ongoing_default_name">Ongoing Status</string>
+    <string name="notification_channel_ongoing_desc">Displays abstinence timer and daily smoking progress</string>
+    <string name="notification_title_smoke_free">Smoke-free: %1$s</string>
+    <string name="notification_title_app_name">SmokingYou</string>
+    <string name="notification_content_with_limit">Today: %1$d of %2$d (%3$d%%)</string>
+    <string name="notification_content_no_limit">Today smoked: %1$d</string>
+    <string name="notification_content_resisted_count"> • Resisted: %1$d</string>
+    <string name="notification_toast_added">+1 cigarette logged</string>
+    <string name="notification_toast_resisted">Craving resisted!</string>
+    <string name="entry_over_limit_badge">Over limit</string>
 </resources>

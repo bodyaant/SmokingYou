@@ -228,6 +228,20 @@
     <string name="trigger_food_coffee">Repas / Café</string>
     <string name="trigger_alcohol">Alcool</string>
     <string name="trigger_none">Sans raison</string>
+    <string name="trigger_management_title">Déclencheurs d\'envie</string>
+    <string name="trigger_management_desc">Personnaliser les déclencheurs et motifs</string>
+    <string name="trigger_active_count">%1$d actifs</string>
+    <string name="trigger_add_custom">Ajouter un motif personnalisé</string>
+    <string name="trigger_new_title">Nouveau motif</string>
+    <string name="trigger_new_hint">ex. Examen, Embouteillage, Pause café</string>
+    <string name="trigger_custom_section">Motifs personnalisés</string>
+    <string name="trigger_custom_empty">Aucun motif personnalisé pour l\'instant</string>
+    <string name="trigger_standard_section">Motifs standards</string>
+    <string name="trigger_already_exists">Ce motif existe déjà</string>
+    <string name="trigger_name_empty">Entrez le nom du motif</string>
+    <string name="trigger_delete_dialog_title">Supprimer le motif ?</string>
+    <string name="trigger_delete_dialog_desc">Ce motif ne sera plus proposé pour les futurs ajouts. Les entrées existantes seront conservées.</string>
+    <string name="trigger_quick_add_title">Ajouter et enregistrer</string>
     <string name="edit_time_label">Modifier l\'heure</string>
     <string name="edit_reason_label">Raison</string>
 
@@ -262,8 +276,24 @@
     <string name="who_oxygen_time">8 heures</string>
     <string name="who_co_desc">Le monoxyde de carbone est éliminé du corps</string>
     <string name="who_co_time">12 heures</string>
+    <string name="who_heart_attack_desc">Le risque de crise cardiaque commence à diminuer</string>
+    <string name="who_heart_attack_time">24 heures</string>
+    <string name="who_taste_smell_desc">Les terminaisons nerveuses repoussent, le goût et l\'odorat s\'améliorent</string>
+    <string name="who_taste_smell_time">48 heures</string>
+    <string name="who_nicotine_desc">La nicotine est totalement éliminée, les bronches se détendent</string>
+    <string name="who_nicotine_time">72 heures</string>
     <string name="who_lung_desc">La fonction pulmonaire et la circulation s\'améliorent</string>
     <string name="who_lung_time">2 semaines</string>
+    <string name="who_cough_desc">La toux, l\'essoufflement et la fatigue diminuent</string>
+    <string name="who_cough_time">1 mois</string>
+    <string name="who_circulation_desc">La circulation et la capacité pulmonaire augmentent jusqu\'à 30%</string>
+    <string name="who_circulation_time">3 mois</string>
+    <string name="who_cilia_desc">Les poumons évacuent le mucus, le risque d\'infection baisse</string>
+    <string name="who_cilia_time">6 mois</string>
+    <string name="who_bronchi_desc">Les cils bronchiques sont restaurés, respiration nette et profonde</string>
+    <string name="who_bronchi_time">9 mois</string>
+    <string name="who_coronary_desc">Le risque de maladie coronarienne est réduit de 50%</string>
+    <string name="who_coronary_time">1 an</string>
 
     <string name="minutes_format_zero">0m</string>
     <string name="minutes_format_day">%1$dj </string>
@@ -440,4 +470,33 @@
     <string name="achievement_unlocked_dialog_title">Succès débloqué !</string>
     <string name="achievement_view_all">Voir tous les succès</string>
     <string name="dialog_awesome">Super !</string>
+
+    <!-- Ongoing Notification -->
+    <string name="settings_section_notifications">Notifications</string>
+    <string name="settings_ongoing_notification_title">Notification dans la barre d\'état</string>
+    <string name="settings_ongoing_notification_desc">Progression permanente et ajout rapide dans les notifications</string>
+    <string name="notification_status_enabled_format">Activé • %1$s</string>
+    <string name="notification_status_disabled">Désactivé</string>
+    <string name="notification_preview_title">Aperçu</string>
+    <string name="notification_preview_timer_sample">2h 45m</string>
+    <string name="notification_priority_label">Priorité de la notification</string>
+    <string name="notification_priority_low">Silencieux (Faible)</string>
+    <string name="notification_priority_default">Standard</string>
+    <string name="notification_show_timer">Minuteur sans tabac</string>
+    <string name="notification_show_progress">Limite quotidienne et barre de progression</string>
+    <string name="notification_show_add_button">Bouton \"+1 Cigarette\"</string>
+    <string name="notification_show_resist_button">Bouton \"Résisté\"</string>
+    <string name="notification_action_add">+1 Cigarette</string>
+    <string name="notification_action_resist">Résisté</string>
+    <string name="notification_channel_ongoing_low_name">Statut permanent (Silencieux)</string>
+    <string name="notification_channel_ongoing_default_name">Statut permanent</string>
+    <string name="notification_channel_ongoing_desc">Affiche le minuteur sans tabac et la progression quotidienne</string>
+    <string name="notification_title_smoke_free">Sans fumer : %1$s</string>
+    <string name="notification_title_app_name">SmokingYou</string>
+    <string name="notification_content_with_limit">Aujourd\'hui : %1$d sur %2$d (%3$d%%)</string>
+    <string name="notification_content_no_limit">Fumées aujourd\'hui : %1$d</string>
+    <string name="notification_content_resisted_count"> • Résisté : %1$d</string>
+    <string name="notification_toast_added">+1 cigarette enregistrée</string>
+    <string name="notification_toast_resisted">Envie surmontée !</string>
+    <string name="entry_over_limit_badge">Au-delà de la limite</string>
 </resources>
