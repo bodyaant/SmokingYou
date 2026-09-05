@@ -1,6 +1,16 @@
 package com.smokingtracker.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.style.TextAlign
 import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.containerPadding
@@ -16,6 +26,7 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
@@ -120,6 +131,12 @@ fun StatisticsScreen(viewModel: MainViewModel, onBack: () -> Unit, onNavigateToS
     }
 }
 
+private data class WhoMilestone(
+    val labelResId: Int,
+    val timeResId: Int,
+    val targetMinutes: Float
+)
+
 @Composable
 fun StatisticsList(
     modifier: Modifier = Modifier,
@@ -159,6 +176,38 @@ fun StatisticsList(
             "UAH" -> "₴"
             else -> currency
         }
+    }
+
+    val whoMilestones = remember {
+        listOf(
+            WhoMilestone(R.string.who_bp_desc, R.string.who_bp_time, 20f),
+            WhoMilestone(R.string.who_oxygen_desc, R.string.who_oxygen_time, 480f),
+            WhoMilestone(R.string.who_co_desc, R.string.who_co_time, 720f),
+            WhoMilestone(R.string.who_heart_attack_desc, R.string.who_heart_attack_time, 1440f),
+            WhoMilestone(R.string.who_taste_smell_desc, R.string.who_taste_smell_time, 2880f),
+            WhoMilestone(R.string.who_nicotine_desc, R.string.who_nicotine_time, 4320f),
+            WhoMilestone(R.string.who_lung_desc, R.string.who_lung_time, 20160f),
+            WhoMilestone(R.string.who_cough_desc, R.string.who_cough_time, 43200f),
+            WhoMilestone(R.string.who_circulation_desc, R.string.who_circulation_time, 129600f),
+            WhoMilestone(R.string.who_cilia_desc, R.string.who_cilia_time, 259200f),
+            WhoMilestone(R.string.who_bronchi_desc, R.string.who_bronchi_time, 388800f),
+            WhoMilestone(R.string.who_coronary_desc, R.string.who_coronary_time, 525600f)
+        )
+    }
+
+    var isRecoveryExpanded by remember { mutableStateOf(false) }
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (isRecoveryExpanded) 180f else 0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "who_chevron_rotation"
+    )
+
+    val completedMilestonesCount = remember(timeElapsedMinutes, lastCigaretteTime) {
+        if (lastCigaretteTime == 0L) 0
+        else whoMilestones.count { timeElapsedMinutes >= it.targetMinutes }
     }
 
     LazyColumn(
@@ -231,6 +280,123 @@ fun StatisticsList(
                 }
             }
         }
+
+        item {
+            Card(
+                onClick = { isRecoveryExpanded = !isRecoveryExpanded },
+                modifier = Modifier.fillMaxWidth(),
+                shape = containerShape(RoundedCornerShape(24.dp)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                border = containerBorder()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(containerPadding(16.dp, 16.dp))
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ContainerIcon(
+                            icon = Icons.Filled.Favorite,
+                            tint = MaterialTheme.colorScheme.primary,
+                            backdropColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                            size = 40.dp
+                        )
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.stats_body_recovery_who),
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(100),
+                                    color = if (completedMilestonesCount == whoMilestones.size) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                                    contentColor = if (completedMilestonesCount == whoMilestones.size) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.primary
+                                ) {
+                                    Text(
+                                        text = "$completedMilestonesCount/${whoMilestones.size}",
+                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                    )
+                                }
+                                val percent = if (whoMilestones.isNotEmpty()) (completedMilestonesCount * 100) / whoMilestones.size else 0
+                                Text(
+                                    text = "$percent%",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Surface(
+                            onClick = { isRecoveryExpanded = !isRecoveryExpanded },
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(34.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Filled.KeyboardArrowDown,
+                                    contentDescription = if (isRecoveryExpanded) "Collapse" else "Expand",
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .graphicsLayer { rotationZ = chevronRotation }
+                                )
+                            }
+                        }
+                    }
+
+                    AnimatedVisibility(
+                        visible = isRecoveryExpanded,
+                        enter = expandVertically(
+                            animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow)
+                        ) + fadeIn(),
+                        exit = shrinkVertically(
+                            animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium)
+                        ) + fadeOut()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(bottom = 2.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                            )
+                            if (lastCigaretteTime == 0L) {
+                                Text(
+                                    text = stringResource(R.string.stats_recovery_no_data),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                )
+                            } else {
+                                whoMilestones.forEach { milestone ->
+                                    HealthProgressBar(
+                                        label = stringResource(milestone.labelResId),
+                                        timeLabel = stringResource(milestone.timeResId),
+                                        progress = (timeElapsedMinutes / milestone.targetMinutes).coerceIn(0f, 1f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         if (resistedCount > 0) {
             item {
                 Text(
@@ -411,50 +577,6 @@ fun StatisticsList(
                 icon = Icons.Filled.Info,
                 color = MaterialTheme.colorScheme.secondary
             )
-        }
-
-        item {
-            Text(
-                text = stringResource(R.string.stats_body_recovery_who),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 8.dp)
-            )
-        }
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = containerShape(RoundedCornerShape(24.dp)),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                border = containerBorder()
-            ) {
-                Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    if (lastCigaretteTime == 0L) {
-                        Text(stringResource(R.string.stats_recovery_no_data), style = MaterialTheme.typography.bodyMedium)
-                    } else {
-                        HealthProgressBar(
-                            label = stringResource(R.string.who_bp_desc),
-                            timeLabel = stringResource(R.string.who_bp_time),
-                            progress = (timeElapsedMinutes / 20f).coerceIn(0f, 1f)
-                        )
-                        HealthProgressBar(
-                            label = stringResource(R.string.who_oxygen_desc),
-                            timeLabel = stringResource(R.string.who_oxygen_time),
-                            progress = (timeElapsedMinutes / 480f).coerceIn(0f, 1f)
-                        )
-                        HealthProgressBar(
-                            label = stringResource(R.string.who_co_desc),
-                            timeLabel = stringResource(R.string.who_co_time),
-                            progress = (timeElapsedMinutes / 720f).coerceIn(0f, 1f)
-                        )
-                        HealthProgressBar(
-                            label = stringResource(R.string.who_lung_desc),
-                            timeLabel = stringResource(R.string.who_lung_time),
-                            progress = (timeElapsedMinutes / 20160f).coerceIn(0f, 1f)
-                        )
-                    }
-                }
-            }
         }
     }
 }
