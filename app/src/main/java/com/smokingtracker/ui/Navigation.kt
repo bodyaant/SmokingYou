@@ -442,7 +442,6 @@ fun BottomNavigationBar(navController: NavHostController, vibrationEnabled: Bool
             ShortNavigationBarItem(
                 selected = selected,
                 onClick = {
-                    com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                     if (currentRoute?.substringBefore("?") != screen.route) {
                         navController.navigate(screen.route) {
                             popUpTo(Screen.Home.route) { saveState = true }
@@ -549,7 +548,6 @@ fun StandardBottomNavigationBar(navController: NavHostController, vibrationEnabl
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
                             onClick = {
-                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                                 if (currentRoute != screen.route) {
                                     navController.navigate(screen.route) {
                                         popUpTo(Screen.Home.route) { saveState = true }

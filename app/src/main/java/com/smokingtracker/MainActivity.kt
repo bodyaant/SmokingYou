@@ -77,6 +77,7 @@ class MainActivity : ComponentActivity() {
             val customFontWeight by viewModel.customFontWeight.collectAsStateWithLifecycle()
             val customFontWidth by viewModel.customFontWidth.collectAsStateWithLifecycle()
             val customFontRoundness by viewModel.customFontRoundness.collectAsStateWithLifecycle()
+            val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
 
             val useDarkTheme = when (themePreference) {
                 ThemePreference.LIGHT -> false
@@ -96,11 +97,15 @@ class MainActivity : ComponentActivity() {
                 customFontWidth = customFontWidth,
                 customFontRoundness = customFontRoundness
             ) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                androidx.compose.runtime.CompositionLocalProvider(
+                    com.smokingtracker.ui.theme.LocalVibrationEnabled provides vibrationEnabled
                 ) {
-                    MainApp(viewModel = viewModel)
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        MainApp(viewModel = viewModel)
+                    }
                 }
             }
         }
