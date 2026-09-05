@@ -17,6 +17,8 @@ import com.smokingtracker.data.ContainerStyle
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -43,11 +45,13 @@ import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.LocalCafe
 import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.smokingtracker.data.TriggerType
+import com.smokingtracker.data.TriggerItem
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialShapes
@@ -93,10 +97,12 @@ fun HomeScreen(
     val entries by viewModel.smokingEntries.collectAsStateWithLifecycle()
     val dailyLimit by viewModel.dailyLimit.collectAsStateWithLifecycle()
     val unlockedAchievements by viewModel.unlockedAchievements.collectAsStateWithLifecycle()
+    val taperingIntervalDays by viewModel.taperingIntervalDays.collectAsStateWithLifecycle()
     HomeScreenContent(
         entries = entries,
         dailyLimit = dailyLimit,
         unlockedAchievements = unlockedAchievements,
+        taperingIntervalDays = taperingIntervalDays,
         viewModel = viewModel,
         vibrationEnabled = vibrationEnabled,
         onNavigateToAchievements = onNavigateToAchievements,
@@ -110,6 +116,7 @@ internal fun HomeScreenContent(
     entries: List<Long>,
     dailyLimit: Int,
     unlockedAchievements: Set<String> = emptySet(),
+    taperingIntervalDays: Int = 7,
     viewModel: HomeViewModel? = null,
     vibrationEnabled: Boolean = false,
     onNavigateToAchievements: () -> Unit = {},
@@ -132,8 +139,11 @@ internal fun HomeScreenContent(
     var showTriggerDialog by remember { mutableStateOf(false) }
     var showMindfulPauseDialog by remember { mutableStateOf(false) }
     var mindfulPauseTrigger by remember { mutableStateOf<String?>(null) }
+    var showAddTriggerDialog by remember { mutableStateOf(false) }
     val allEntities by viewModel?.allSmokingEntities?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(emptyList()) }
     val showTaperingCheckIn by viewModel?.showTaperingCheckIn?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(false) }
+    val activeTriggers by viewModel?.activeTriggers?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(TriggerType.allEntries().map { TriggerItem.fromBuiltIn(it) }) }
+    val customTriggers by viewModel?.customTriggers?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(emptyList()) }
     var pendingLogTime by remember { mutableLongStateOf(0L) }
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -141,6 +151,26 @@ internal fun HomeScreenContent(
 
     val context = androidx.compose.ui.platform.LocalContext.current
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+
+    if (showAddTriggerDialog) {
+        AddTriggerDialog(
+            customTriggers = customTriggers,
+            vibrationEnabled = vibrationEnabled,
+            onDismiss = { showAddTriggerDialog = false },
+            onConfirm = { name ->
+                viewModel?.addCustomTrigger(name) { added ->
+                    if (added != null) {
+                        showAddTriggerDialog = false
+                        if (pendingLogTime > 0L) {
+                            viewModel.addSmokingEntryWithTrigger(pendingLogTime, added)
+                        }
+                        showTriggerDialog = false
+                        isProcessingAdd = false
+                    }
+                }
+            }
+        )
+    }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -281,7 +311,6 @@ internal fun HomeScreenContent(
             dismissButton = {
                 OutlinedButton(
                     onClick = {
-                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                         showLimitWarning = false
                     },
                     shape = RoundedCornerShape(14.dp)
@@ -324,7 +353,6 @@ internal fun HomeScreenContent(
             },
             dismissButton = {
                 TextButton(onClick = {
-                    com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                     showDatePicker = false
                 }) {
                     Text(stringResource(R.string.dialog_cancel), fontWeight = FontWeight.Bold)
@@ -398,8 +426,7 @@ internal fun HomeScreenContent(
                             color = MaterialTheme.colorScheme.onSurface
                         )
 
-                        val triggers = com.smokingtracker.data.TriggerType.allEntries()
-                        val chunkedTriggers = triggers.chunked(2)
+                        val chunkedTriggers = activeTriggers.chunked(2)
 
                         Column(
                             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -410,12 +437,12 @@ internal fun HomeScreenContent(
                                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    rowTriggers.forEach { trigger ->
+                                    rowTriggers.forEach { triggerItem ->
                                         Card(
                                             onClick = {
                                                 com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
                                                 if (pendingLogTime > 0L) {
-                                                    viewModel?.addSmokingEntryWithTrigger(pendingLogTime, trigger.key)
+                                                    viewModel?.addSmokingEntryWithTrigger(pendingLogTime, triggerItem.key)
                                                 }
                                                 showTriggerDialog = false
                                                 isProcessingAdd = false
@@ -444,24 +471,100 @@ internal fun HomeScreenContent(
                                                     contentAlignment = Alignment.Center
                                                 ) {
                                                     Icon(
-                                                        imageVector = getTriggerIcon(trigger.key),
+                                                        imageVector = getTriggerIcon(triggerItem.key),
                                                         contentDescription = null,
                                                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                                         modifier = Modifier.size(18.dp)
                                                     )
                                                 }
                                                 Spacer(modifier = Modifier.height(4.dp))
+                                                val labelText = if (triggerItem.labelResId != null) stringResource(triggerItem.labelResId) else (triggerItem.customName ?: triggerItem.key)
                                                 Text(
-                                                    text = stringResource(trigger.labelResId),
+                                                    text = labelText,
                                                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
                                                     color = MaterialTheme.colorScheme.onSurface,
-                                                    maxLines = 1
+                                                    maxLines = 1,
+                                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                                 )
                                             }
                                         }
                                     }
                                     if (rowTriggers.size == 1) {
-                                        Spacer(modifier = Modifier.weight(1f))
+                                        Card(
+                                            onClick = {
+                                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                                showAddTriggerDialog = true
+                                            },
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(78.dp),
+                                            shape = containerShape(RoundedCornerShape(20.dp)),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                                                contentColor = MaterialTheme.colorScheme.primary
+                                            ),
+                                            border = containerBorder(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+                                        ) {
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.Center,
+                                                modifier = Modifier.fillMaxSize().padding(8.dp)
+                                            ) {
+                                                val cShape = MaterialShapes.Cookie9Sided.toShape()
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(34.dp)
+                                                        .clip(cShape)
+                                                        .background(MaterialTheme.colorScheme.primary),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.Add,
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.onPrimary,
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
+                                                }
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                                Text(
+                                                    text = stringResource(R.string.trigger_add_custom),
+                                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    maxLines = 1,
+                                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (activeTriggers.size % 2 == 0) {
+                                Surface(
+                                    onClick = {
+                                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                        showAddTriggerDialog = true
+                                    },
+                                    shape = RoundedCornerShape(18.dp),
+                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                                    contentColor = MaterialTheme.colorScheme.primary,
+                                    border = containerBorder(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Add,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = stringResource(R.string.trigger_add_custom),
+                                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                                        )
                                     }
                                 }
                             }
@@ -564,6 +667,7 @@ internal fun HomeScreenContent(
     if (showTaperingCheckIn) {
         TaperingCheckInBottomSheet(
             currentLimit = dailyLimit,
+            intervalDays = taperingIntervalDays,
             onReduceLimit = { viewModel?.acceptTaperingReduction() },
             onKeepLimit = { viewModel?.keepTaperingLimit() },
             onSnooze = { viewModel?.snoozeTaperingCheckIn() },
@@ -806,12 +910,12 @@ internal fun HomeScreenContent(
                                 onDragStart = { totalDragX = 0f },
                                 onDragEnd = {
                                     if (totalDragX > 80f) {
-                                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                                         val newDate = currentDate.clone() as Calendar
                                         newDate.add(Calendar.DAY_OF_YEAR, -1)
                                         currentDate = newDate
                                     } else if (totalDragX < -80f && !isToday) {
-                                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                                         val newDate = currentDate.clone() as Calendar
                                         newDate.add(Calendar.DAY_OF_YEAR, 1)
                                         currentDate = newDate
@@ -831,7 +935,7 @@ internal fun HomeScreenContent(
 
                     Surface(
                         onClick = {
-                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                             val newDate = currentDate.clone() as Calendar
                             newDate.add(Calendar.DAY_OF_YEAR, -1)
                             currentDate = newDate
@@ -880,7 +984,7 @@ internal fun HomeScreenContent(
 
                     Surface(
                         onClick = {
-                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                             val newDate = currentDate.clone() as Calendar
                             newDate.add(Calendar.DAY_OF_YEAR, 1)
                             currentDate = newDate
@@ -907,6 +1011,19 @@ internal fun HomeScreenContent(
                         checkCal.timeInMillis = entity.timestamp
                         checkCal.get(Calendar.YEAR) == currentYear && checkCal.get(Calendar.DAY_OF_YEAR) == currentDay
                     }.sortedByDescending { it.timestamp }
+                }
+
+                val overLimitEntryIds = remember(selectedDateAllEntities, dailyLimit) {
+                    if (dailyLimit > 0) {
+                        val nonResistedAsc = selectedDateAllEntities.filter { !it.isResisted }.sortedBy { it.timestamp }
+                        if (nonResistedAsc.size > dailyLimit) {
+                            nonResistedAsc.drop(dailyLimit).map { it.id }.toSet()
+                        } else {
+                            emptySet()
+                        }
+                    } else {
+                        emptySet()
+                    }
                 }
 
                 val entriesListState = androidx.compose.foundation.lazy.rememberLazyListState()
@@ -991,7 +1108,7 @@ internal fun HomeScreenContent(
                                         if (latestDismissOffset < minThreshold) {
                                             false
                                         } else {
-                                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performHeavyThreshold(vibrationEnabled, haptic, context)
                                             scope.launch {
                                                 viewModel?.removeSmokingEntry(entity.id, entity.timestamp)
                                                 val result = snackbarHostState.showSnackbar(
@@ -1058,8 +1175,11 @@ internal fun HomeScreenContent(
                                 entryTime = entity.timestamp,
                                 prevEntryTime = prevTime,
                                 isResisted = entity.isResisted,
+                                isOverLimit = overLimitEntryIds.contains(entity.id),
                                 index = index,
                                 trigger = entity.trigger,
+                                allTriggers = activeTriggers,
+                                vibrationEnabled = vibrationEnabled,
                                 onDelete = {
                                     com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                                     scope.launch {
@@ -1198,7 +1318,8 @@ fun StatItem(
 }
 
 private fun getTriggerIcon(triggerKey: String?): ImageVector {
-    val trigger = triggerKey?.let { TriggerType.fromKey(it) }
+    if (triggerKey == null) return Icons.Filled.SmokingRooms
+    val trigger = TriggerType.fromKey(triggerKey)
     return when (trigger) {
         TriggerType.STRESS -> Icons.Filled.Bolt
         TriggerType.BOREDOM -> Icons.Filled.HourglassEmpty
@@ -1206,7 +1327,7 @@ private fun getTriggerIcon(triggerKey: String?): ImageVector {
         TriggerType.ROUTINE -> Icons.Filled.Repeat
         TriggerType.FOOD_COFFEE -> Icons.Filled.LocalCafe
         TriggerType.ALCOHOL -> Icons.Filled.LocalBar
-        else -> Icons.Filled.SmokingRooms
+        null -> Icons.Filled.Psychology
     }
 }
 
@@ -1222,8 +1343,11 @@ fun EntryItem(
     entryTime: Long = System.currentTimeMillis(),
     prevEntryTime: Long? = null,
     isResisted: Boolean = false,
+    isOverLimit: Boolean = false,
     index: Int = 0,
     trigger: String? = null,
+    allTriggers: List<TriggerItem> = remember { TriggerType.allEntries().map { TriggerItem.fromBuiltIn(it) } },
+    vibrationEnabled: Boolean = false,
     onDelete: () -> Unit = {},
     onEdit: (Long) -> Unit = {},
     onUpdateTrigger: (String?) -> Unit = {}
@@ -1280,16 +1404,17 @@ fun EntryItem(
                 state = timePickerState,
                 colors = TimePickerDefaults.colors(
                     clockDialColor = pastelContainer,
-                    timeSelectorUnselectedContainerColor = pastelContainer,
+                    timeSelectorContainerColor = pastelContainer,
                     timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                     timeSelectorSelectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    timeSelectorUnselectedContentColor = MaterialTheme.colorScheme.onSurface
+                    timeSelectorContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
         }
     }
 
     val colorScheme = MaterialTheme.colorScheme
+    val isDark = colorScheme.surface.luminance() < 0.5f
 
     val (accentColor, accentContainer, onAccentContainer) = when (index % 3) {
         0 -> Triple(colorScheme.tertiary, colorScheme.tertiaryContainer, colorScheme.onTertiaryContainer)
@@ -1297,22 +1422,36 @@ fun EntryItem(
         else -> Triple(colorScheme.primary, colorScheme.primaryContainer, colorScheme.onPrimaryContainer)
     }
 
+    val cardBgColor = when {
+        isResisted -> if (isDark) Color(0xFF142416) else Color(0xFFF0F7ED)
+        isOverLimit -> colorScheme.errorContainer.copy(alpha = if (isDark) 0.28f else 0.32f).compositeOver(colorScheme.surfaceContainer)
+        else -> colorScheme.surfaceContainer
+    }
+
+    val timePillBg = when {
+        isResisted -> if (isDark) Color(0xFF224426) else Color(0xFFD6ECCF)
+        isOverLimit -> colorScheme.errorContainer
+        else -> accentContainer
+    }
+
+    val timePillContent = when {
+        isResisted -> if (isDark) Color(0xFFAFE1B3) else Color(0xFF184D20)
+        isOverLimit -> colorScheme.onErrorContainer
+        else -> onAccentContainer
+    }
+
     Card(
         onClick = {
-            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(true, haptic, context)
             isExpanded = !isExpanded
         },
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 5.dp),
         colors = CardDefaults.cardColors(
-            containerColor = colorScheme.surfaceContainer
+            containerColor = cardBgColor
         ),
         shape = containerShape(RoundedCornerShape(24.dp)),
-        border = containerBorder(
-            if (isResisted) 1.5.dp else 1.dp,
-            if (isResisted) colorScheme.primary else colorScheme.outlineVariant.copy(alpha = 0.25f)
-        )
+        border = containerBorder()
     ) {
         Column(
             modifier = Modifier
@@ -1329,13 +1468,12 @@ fun EntryItem(
                 Surface(
                     onClick = {
                         if (!isResisted) {
-                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(true, haptic, context)
                             showTimePicker = true
                         }
                     },
                     shape = CircleShape,
-                    color = if (isResisted) colorScheme.primaryContainer else accentContainer,
-                    contentColor = if (isResisted) colorScheme.onPrimaryContainer else onAccentContainer
+                    color = timePillBg,
+                    contentColor = timePillContent
                 ) {
                     Box(
                         contentAlignment = Alignment.Center,
@@ -1355,6 +1493,7 @@ fun EntryItem(
                 val triggerLabel = when {
                     isResisted -> stringResource(R.string.mindful_pause_resisted)
                     triggerType != null -> stringResource(triggerType.labelResId)
+                    !trigger.isNullOrBlank() -> trigger
                     else -> stringResource(R.string.trigger_none)
                 }
                 val triggerIcon = when {
@@ -1362,31 +1501,71 @@ fun EntryItem(
                     else -> getTriggerIcon(trigger)
                 }
 
-                Surface(
-                    shape = RoundedCornerShape(14.dp),
-                    color = if (isResisted) colorScheme.primaryContainer.copy(alpha = 0.25f)
-                            else if (triggerType != null) accentContainer.copy(alpha = 0.35f)
-                            else colorScheme.surfaceVariant.copy(alpha = 0.45f),
-                    contentColor = if (isResisted) colorScheme.primary
-                                   else if (triggerType != null) accentColor
-                                   else colorScheme.onSurfaceVariant
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp),
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                val triggerChipBg = when {
+                    isResisted -> if (isDark) Color(0xFF224426).copy(alpha = 0.6f) else Color(0xFFD6ECCF).copy(alpha = 0.6f)
+                    isOverLimit -> colorScheme.errorContainer.copy(alpha = if (isDark) 0.35f else 0.45f)
+                    trigger != null -> accentContainer.copy(alpha = 0.35f)
+                    else -> colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                }
+
+                val triggerChipContent = when {
+                    isResisted -> if (isDark) Color(0xFFAFE1B3) else Color(0xFF1E5E28)
+                    isOverLimit -> colorScheme.error
+                    trigger != null -> accentColor
+                    else -> colorScheme.onSurfaceVariant
+                }
+
+                if (!isOverLimit || trigger != null) {
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = triggerChipBg,
+                        contentColor = triggerChipContent,
+                        modifier = Modifier.widthIn(max = if (isOverLimit) 105.dp else 145.dp)
                     ) {
-                        Icon(
-                            imageVector = triggerIcon,
-                            contentDescription = null,
-                            modifier = Modifier.size(15.dp)
-                        )
-                        Text(
-                            text = triggerLabel,
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            maxLines = 1,
-                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Icon(
+                                imageVector = triggerIcon,
+                                contentDescription = null,
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Text(
+                                text = triggerLabel,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
+
+                if (isOverLimit) {
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = colorScheme.errorContainer.copy(alpha = if (isDark) 0.45f else 0.6f),
+                        contentColor = colorScheme.error,
+                        modifier = Modifier.widthIn(max = 120.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Warning,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.entry_over_limit_badge),
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
 
@@ -1408,14 +1587,14 @@ fun EntryItem(
                         Text(
                             text = intervalStr,
                             style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
-                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            color = if (isOverLimit) colorScheme.error.copy(alpha = 0.8f) else colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                             maxLines = 1
                         )
                     } else {
                         Text(
                             text = stringResource(R.string.first_of_the_day),
                             style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
-                            color = accentColor.copy(alpha = 0.85f),
+                            color = if (isOverLimit) colorScheme.error.copy(alpha = 0.85f) else accentColor.copy(alpha = 0.85f),
                             maxLines = 1
                         )
                     }
@@ -1424,7 +1603,6 @@ fun EntryItem(
                 // 4. Android notification-style expand chevron button
                 Surface(
                     onClick = {
-                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(true, haptic, context)
                         isExpanded = !isExpanded
                     },
                     shape = CircleShape,
@@ -1474,7 +1652,7 @@ fun EntryItem(
                         // Time Editor Button
                         Surface(
                             onClick = {
-                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(true, haptic, context)
+                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                                 showTimePicker = true
                             },
                             shape = RoundedCornerShape(16.dp),
@@ -1535,8 +1713,7 @@ fun EntryItem(
                             modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 2.dp)
                         )
 
-                        val allTriggers = remember { TriggerType.allEntries() }
-                        val chunkedTriggers = remember { allTriggers.chunked(2) }
+                        val chunkedTriggers = remember(allTriggers) { allTriggers.chunked(2) }
 
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             chunkedTriggers.forEach { rowTriggers ->
@@ -1544,15 +1721,15 @@ fun EntryItem(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    rowTriggers.forEach { type ->
-                                        val isSelected = trigger == type.key
+                                    rowTriggers.forEach { triggerItem ->
+                                        val isSelected = trigger == triggerItem.key
                                         Surface(
                                             onClick = {
-                                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(true, haptic, context)
+                                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                                                 if (isSelected) {
                                                     onUpdateTrigger(null)
                                                 } else {
-                                                    onUpdateTrigger(type.key)
+                                                    onUpdateTrigger(triggerItem.key)
                                                 }
                                             },
                                             shape = RoundedCornerShape(16.dp),
@@ -1574,14 +1751,15 @@ fun EntryItem(
                                                 horizontalArrangement = Arrangement.Center
                                             ) {
                                                 Icon(
-                                                    imageVector = getTriggerIcon(type.key),
+                                                    imageVector = getTriggerIcon(triggerItem.key),
                                                     contentDescription = null,
                                                     modifier = Modifier.size(18.dp),
                                                     tint = if (isSelected) colorScheme.primary else colorScheme.onSurfaceVariant
                                                 )
                                                 Spacer(modifier = Modifier.width(8.dp))
+                                                val itemLabel = if (triggerItem.labelResId != null) stringResource(triggerItem.labelResId) else (triggerItem.customName ?: triggerItem.key)
                                                 Text(
-                                                    text = stringResource(type.labelResId),
+                                                    text = itemLabel,
                                                     style = MaterialTheme.typography.labelMedium.copy(
                                                         fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold
                                                     ),

@@ -16,3 +16,33 @@ enum class TriggerType(val key: String, val labelResId: Int) {
         fun allEntries(): List<TriggerType> = entries.toList()
     }
 }
+
+data class TriggerItem(
+    val key: String,
+    val labelResId: Int? = null,
+    val customName: String? = null,
+    val isCustom: Boolean = false,
+    val isEnabled: Boolean = true
+) {
+    companion object {
+        fun fromBuiltIn(type: TriggerType, isEnabled: Boolean = true): TriggerItem {
+            return TriggerItem(
+                key = type.key,
+                labelResId = type.labelResId,
+                customName = null,
+                isCustom = false,
+                isEnabled = isEnabled
+            )
+        }
+
+        fun fromCustom(name: String): TriggerItem {
+            return TriggerItem(
+                key = name,
+                labelResId = null,
+                customName = name,
+                isCustom = true,
+                isEnabled = true
+            )
+        }
+    }
+}

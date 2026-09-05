@@ -194,7 +194,6 @@ fun GraphScreenContent(
             },
             dismissButton = {
                 TextButton(onClick = {
-                    com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                     activeDatePickerTarget = null
                 }) {
                     Text(stringResource(R.string.dialog_cancel), fontWeight = FontWeight.Bold)
@@ -223,7 +222,6 @@ fun GraphScreenContent(
                 ExpressiveTabSelector(
                     selectedTab = pagerState.currentPage,
                     onTabSelected = {
-                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                         coroutineScope.launch {
                             pagerState.animateScrollToPage(it)
                         }
@@ -552,7 +550,7 @@ fun GraphSection(
             ) {
                 Surface(
                     onClick = {
-                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                         onPrevious()
                     },
                     shape = cookieShape,
@@ -604,7 +602,7 @@ fun GraphSection(
 
                 Surface(
                     onClick = {
-                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                         onNext()
                     },
                     enabled = canGoNext,
@@ -1078,7 +1076,8 @@ fun AnimatedTriggerProgressBar(
 }
 
 private fun getTriggerIcon(triggerKey: String?): ImageVector {
-    val trigger = triggerKey?.let { TriggerType.fromKey(it) }
+    if (triggerKey == null) return Icons.Filled.SmokingRooms
+    val trigger = TriggerType.fromKey(triggerKey)
     return when (trigger) {
         TriggerType.STRESS -> Icons.Filled.Bolt
         TriggerType.BOREDOM -> Icons.Filled.HourglassEmpty
@@ -1086,7 +1085,7 @@ private fun getTriggerIcon(triggerKey: String?): ImageVector {
         TriggerType.ROUTINE -> Icons.Filled.Repeat
         TriggerType.FOOD_COFFEE -> Icons.Filled.LocalCafe
         TriggerType.ALCOHOL -> Icons.Filled.LocalBar
-        else -> Icons.Filled.SmokingRooms
+        null -> Icons.Filled.Psychology
     }
 }
 
@@ -1320,7 +1319,7 @@ private fun PeakSmokingHoursSection(distribution: StatisticsManager.HourlyDistri
                                     .background(barColor)
                                     .clickable {
                                         selectedHour = if (selectedHour == hour) null else hour
-                                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                                     }
                             )
                         }

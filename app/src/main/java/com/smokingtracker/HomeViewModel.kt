@@ -40,8 +40,51 @@ class HomeViewModel(
     val unlockedAchievements: StateFlow<Set<String>> = dataStoreManager.unlockedAchievements
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
 
+    val customTriggers: StateFlow<List<String>> = dataStoreManager.customTriggers
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val disabledDefaultTriggers: StateFlow<Set<String>> = dataStoreManager.disabledDefaultTriggers
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+
+    val activeTriggers: StateFlow<List<com.smokingtracker.data.TriggerItem>> = kotlinx.coroutines.flow.combine(
+        dataStoreManager.customTriggers,
+        dataStoreManager.disabledDefaultTriggers
+    ) { customList, disabledDefaults ->
+        val builtIn = com.smokingtracker.data.TriggerType.allEntries()
+            .filter { !disabledDefaults.contains(it.key) }
+            .map { com.smokingtracker.data.TriggerItem.fromBuiltIn(it, isEnabled = true) }
+        val custom = customList.map { com.smokingtracker.data.TriggerItem.fromCustom(it) }
+        builtIn + custom
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        com.smokingtracker.data.TriggerType.allEntries().map { com.smokingtracker.data.TriggerItem.fromBuiltIn(it) }
+    )
+
     private val _showTaperingCheckIn = MutableStateFlow(false)
     val showTaperingCheckIn: StateFlow<Boolean> = _showTaperingCheckIn.asStateFlow()
+
+    val taperingIntervalDays: StateFlow<Int> = dataStoreManager.taperingIntervalDays
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 7)
+
+    fun addCustomTrigger(name: String, onResult: (String?) -> Unit = {}) {
+        viewModelScope.launch {
+            val added = dataStoreManager.addCustomTrigger(name)
+            onResult(added)
+        }
+    }
+
+    fun removeCustomTrigger(name: String) {
+        viewModelScope.launch {
+            dataStoreManager.removeCustomTrigger(name)
+        }
+    }
+
+    fun toggleDefaultTrigger(key: String, isEnabled: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.toggleDefaultTrigger(key, isEnabled)
+        }
+    }
 
     init {
         viewModelScope.launch {
@@ -68,6 +111,7 @@ class HomeViewModel(
     fun addResistedEntry(trigger: String?, timestamp: Long = System.currentTimeMillis()) {
         viewModelScope.launch {
             repository.addResistedEntry(timestamp, trigger)
+            WidgetUpdateManager.updateAllAsync(getApplication())
         }
     }
 
@@ -102,6 +146,7 @@ class HomeViewModel(
     fun updateSmokingEntryTrigger(id: Long, trigger: String?) {
         viewModelScope.launch {
             repository.updateEntryTriggerById(id, trigger)
+            WidgetUpdateManager.updateAllAsync(getApplication())
         }
     }
 

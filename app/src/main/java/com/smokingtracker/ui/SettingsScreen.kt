@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Speed
 import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
@@ -49,6 +50,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.NotificationsOff
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
@@ -56,6 +62,7 @@ import com.smokingtracker.widget.QuickAddWidgetProvider
 import com.smokingtracker.widget.TimerWidgetProvider
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlin.math.roundToInt
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -97,6 +104,15 @@ fun PersonalScreen(
     val taperingPlanEnabled by viewModel.taperingPlanEnabled.collectAsStateWithLifecycle()
     val taperingIntervalDays by viewModel.taperingIntervalDays.collectAsStateWithLifecycle()
     val hasHistoricalBaseline by viewModel.hasHistoricalBaseline.collectAsStateWithLifecycle()
+    val customTriggers by viewModel.customTriggers.collectAsStateWithLifecycle()
+    val disabledDefaultTriggers by viewModel.disabledDefaultTriggers.collectAsStateWithLifecycle()
+    val ongoingNotificationEnabled by viewModel.ongoingNotificationEnabled.collectAsStateWithLifecycle()
+    val notificationLowPriority by viewModel.notificationLowPriority.collectAsStateWithLifecycle()
+    val notificationShowTimer by viewModel.notificationShowTimer.collectAsStateWithLifecycle()
+    val notificationShowProgress by viewModel.notificationShowProgress.collectAsStateWithLifecycle()
+    val notificationShowAddButton by viewModel.notificationShowAddButton.collectAsStateWithLifecycle()
+    val notificationShowResistButton by viewModel.notificationShowResistButton.collectAsStateWithLifecycle()
+    val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
 
     PersonalScreenContent(
         themePreference = themePreference,
@@ -109,7 +125,25 @@ fun PersonalScreen(
         updateCheckState = updateCheckState,
         taperingPlanEnabled = taperingPlanEnabled,
         taperingIntervalDays = taperingIntervalDays,
+        customTriggers = customTriggers,
+        disabledDefaultTriggers = disabledDefaultTriggers,
+        ongoingNotificationEnabled = ongoingNotificationEnabled,
+        notificationLowPriority = notificationLowPriority,
+        notificationShowTimer = notificationShowTimer,
+        notificationShowProgress = notificationShowProgress,
+        notificationShowAddButton = notificationShowAddButton,
+        notificationShowResistButton = notificationShowResistButton,
+        vibrationEnabled = vibrationEnabled,
+        onAddCustomTrigger = viewModel::addCustomTrigger,
+        onRemoveCustomTrigger = viewModel::removeCustomTrigger,
+        onToggleDefaultTrigger = viewModel::toggleDefaultTrigger,
         onSetTaperingPlanSettings = viewModel::setTaperingPlanSettings,
+        onOngoingNotificationEnabledChange = viewModel::updateOngoingNotificationEnabled,
+        onNotificationLowPriorityChange = viewModel::updateNotificationLowPriority,
+        onNotificationShowTimerChange = viewModel::updateNotificationShowTimer,
+        onNotificationShowProgressChange = viewModel::updateNotificationShowProgress,
+        onNotificationShowAddButtonChange = viewModel::updateNotificationShowAddButton,
+        onNotificationShowResistButtonChange = viewModel::updateNotificationShowResistButton,
         onThemeChange = viewModel::updateThemePreference,
         onSetDailyLimit = viewModel::setDailyLimit,
         onFontPresetChange = viewModel::updateFontPreset,
@@ -144,7 +178,25 @@ fun PersonalScreenContent(
     taperingPlanEnabled: Boolean = false,
     taperingIntervalDays: Int = 7,
     hasHistoricalBaseline: Boolean = false,
+    customTriggers: List<String> = emptyList(),
+    disabledDefaultTriggers: Set<String> = emptySet(),
+    ongoingNotificationEnabled: Boolean = false,
+    notificationLowPriority: Boolean = true,
+    notificationShowTimer: Boolean = true,
+    notificationShowProgress: Boolean = true,
+    notificationShowAddButton: Boolean = true,
+    notificationShowResistButton: Boolean = false,
+    vibrationEnabled: Boolean = false,
+    onAddCustomTrigger: (String, (String?) -> Unit) -> Unit = { _, _ -> },
+    onRemoveCustomTrigger: (String) -> Unit = {},
+    onToggleDefaultTrigger: (String, Boolean) -> Unit = { _, _ -> },
     onSetTaperingPlanSettings: (Boolean, Int) -> Unit = { _, _ -> },
+    onOngoingNotificationEnabledChange: (Boolean) -> Unit = {},
+    onNotificationLowPriorityChange: (Boolean) -> Unit = {},
+    onNotificationShowTimerChange: (Boolean) -> Unit = {},
+    onNotificationShowProgressChange: (Boolean) -> Unit = {},
+    onNotificationShowAddButtonChange: (Boolean) -> Unit = {},
+    onNotificationShowResistButtonChange: (Boolean) -> Unit = {},
     onThemeChange: (ThemePreference) -> Unit,
     onSetDailyLimit: (Int) -> Unit,
     onFontPresetChange: (FontPreset) -> Unit,
@@ -190,7 +242,25 @@ fun PersonalScreenContent(
             updateCheckState = updateCheckState,
             taperingPlanEnabled = taperingPlanEnabled,
             taperingIntervalDays = taperingIntervalDays,
+            customTriggers = customTriggers,
+            disabledDefaultTriggers = disabledDefaultTriggers,
+            ongoingNotificationEnabled = ongoingNotificationEnabled,
+            notificationLowPriority = notificationLowPriority,
+            notificationShowTimer = notificationShowTimer,
+            notificationShowProgress = notificationShowProgress,
+            notificationShowAddButton = notificationShowAddButton,
+            notificationShowResistButton = notificationShowResistButton,
+            vibrationEnabled = vibrationEnabled,
+            onAddCustomTrigger = onAddCustomTrigger,
+            onRemoveCustomTrigger = onRemoveCustomTrigger,
+            onToggleDefaultTrigger = onToggleDefaultTrigger,
             onSetTaperingPlanSettings = onSetTaperingPlanSettings,
+            onOngoingNotificationEnabledChange = onOngoingNotificationEnabledChange,
+            onNotificationLowPriorityChange = onNotificationLowPriorityChange,
+            onNotificationShowTimerChange = onNotificationShowTimerChange,
+            onNotificationShowProgressChange = onNotificationShowProgressChange,
+            onNotificationShowAddButtonChange = onNotificationShowAddButtonChange,
+            onNotificationShowResistButtonChange = onNotificationShowResistButtonChange,
             onThemeChange = onThemeChange,
             onSetDailyLimit = onSetDailyLimit,
             onFontPresetChange = onFontPresetChange,
@@ -228,7 +298,25 @@ fun SettingsTab(
     taperingPlanEnabled: Boolean = false,
     taperingIntervalDays: Int = 7,
     hasHistoricalBaseline: Boolean = false,
+    customTriggers: List<String> = emptyList(),
+    disabledDefaultTriggers: Set<String> = emptySet(),
+    ongoingNotificationEnabled: Boolean = false,
+    notificationLowPriority: Boolean = true,
+    notificationShowTimer: Boolean = true,
+    notificationShowProgress: Boolean = true,
+    notificationShowAddButton: Boolean = true,
+    notificationShowResistButton: Boolean = false,
+    vibrationEnabled: Boolean = false,
+    onAddCustomTrigger: (String, (String?) -> Unit) -> Unit = { _, _ -> },
+    onRemoveCustomTrigger: (String) -> Unit = {},
+    onToggleDefaultTrigger: (String, Boolean) -> Unit = { _, _ -> },
     onSetTaperingPlanSettings: (Boolean, Int) -> Unit = { _, _ -> },
+    onOngoingNotificationEnabledChange: (Boolean) -> Unit = {},
+    onNotificationLowPriorityChange: (Boolean) -> Unit = {},
+    onNotificationShowTimerChange: (Boolean) -> Unit = {},
+    onNotificationShowProgressChange: (Boolean) -> Unit = {},
+    onNotificationShowAddButtonChange: (Boolean) -> Unit = {},
+    onNotificationShowResistButtonChange: (Boolean) -> Unit = {},
     onThemeChange: (ThemePreference) -> Unit,
     onSetDailyLimit: (Int) -> Unit,
     onFontPresetChange: (FontPreset) -> Unit,
@@ -252,6 +340,8 @@ fun SettingsTab(
     var showWidgetDialog by remember { mutableStateOf(false) }
     var showBackupSheet by remember { mutableStateOf(false) }
     var showRestoreSheet by remember { mutableStateOf(false) }
+    var showTriggerManagementSheet by remember { mutableStateOf(false) }
+    var showNotificationSettingsSheet by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -319,6 +409,38 @@ fun SettingsTab(
                     }
                 )
             }
+        )
+    }
+
+    if (showTriggerManagementSheet) {
+        TriggerManagementBottomSheet(
+            customTriggers = customTriggers,
+            disabledDefaultTriggers = disabledDefaultTriggers,
+            onAddCustomTrigger = onAddCustomTrigger,
+            onRemoveCustomTrigger = onRemoveCustomTrigger,
+            onToggleDefaultTrigger = onToggleDefaultTrigger,
+            onDismissRequest = { showTriggerManagementSheet = false },
+            vibrationEnabled = vibrationEnabled
+        )
+    }
+
+    if (showNotificationSettingsSheet) {
+        NotificationSettingsBottomSheet(
+            enabled = ongoingNotificationEnabled,
+            onEnabledChange = onOngoingNotificationEnabledChange,
+            lowPriority = notificationLowPriority,
+            onLowPriorityChange = onNotificationLowPriorityChange,
+            showTimer = notificationShowTimer,
+            onShowTimerChange = onNotificationShowTimerChange,
+            showProgress = notificationShowProgress,
+            onShowProgressChange = onNotificationShowProgressChange,
+            showAddButton = notificationShowAddButton,
+            onShowAddButtonChange = onNotificationShowAddButtonChange,
+            showResistButton = notificationShowResistButton,
+            onShowResistButtonChange = onNotificationShowResistButtonChange,
+            dailyLimit = dailyLimit,
+            onDismissRequest = { showNotificationSettingsSheet = false },
+            vibrationEnabled = vibrationEnabled
         )
     }
 
@@ -668,6 +790,33 @@ fun SettingsTab(
 
         item {
             Text(
+                text = stringResource(R.string.settings_section_notifications),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 8.dp)
+            )
+        }
+        item {
+            val notifStatus = if (ongoingNotificationEnabled) {
+                stringResource(
+                    R.string.notification_status_enabled_format,
+                    stringResource(if (notificationLowPriority) R.string.notification_priority_low else R.string.notification_priority_default)
+                )
+            } else {
+                stringResource(R.string.notification_status_disabled)
+            }
+            SettingItem(
+                icon = Icons.Filled.Notifications,
+                title = stringResource(R.string.settings_ongoing_notification_title),
+                subtitle = notifStatus,
+                shape = RoundedCornerShape(24.dp),
+                groupPosition = ContainerGroupPosition.SINGLE,
+                onClick = { showNotificationSettingsSheet = true }
+            )
+        }
+
+        item {
+            Text(
                 text = stringResource(R.string.settings_section_goals),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.primary,
@@ -739,7 +888,7 @@ fun SettingsTab(
                                 )
                                 Slider(
                                     value = interval.toFloat(),
-                                    onValueChange = { interval = it.toInt() },
+                                    onValueChange = { interval = it.roundToInt() },
                                     valueRange = 3f..14f,
                                     steps = 10
                                 )
@@ -773,6 +922,19 @@ fun SettingsTab(
                 shape = RoundedCornerShape(8.dp),
                 groupPosition = ContainerGroupPosition.MIDDLE,
                 onClick = { showTaperingDialog = true }
+            )
+        }
+        item {
+            val activeTriggerCount = remember(customTriggers, disabledDefaultTriggers) {
+                (com.smokingtracker.data.TriggerType.allEntries().size - disabledDefaultTriggers.size) + customTriggers.size
+            }
+            SettingItem(
+                icon = Icons.Filled.Psychology,
+                title = stringResource(R.string.trigger_management_title),
+                subtitle = stringResource(R.string.trigger_active_count, activeTriggerCount),
+                shape = RoundedCornerShape(8.dp),
+                groupPosition = ContainerGroupPosition.MIDDLE,
+                onClick = { showTriggerManagementSheet = true }
             )
         }
         item {
@@ -1216,3 +1378,4 @@ fun WidgetPinDialog(
         }
     }
 }
+

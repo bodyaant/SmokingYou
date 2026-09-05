@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.containerShape
@@ -20,6 +21,7 @@ import com.smokingtracker.ui.theme.containerShape
 @Composable
 fun TaperingCheckInBottomSheet(
     currentLimit: Int,
+    intervalDays: Int = 7,
     onReduceLimit: () -> Unit,
     onKeepLimit: () -> Unit,
     onSnooze: () -> Unit,
@@ -69,8 +71,19 @@ fun TaperingCheckInBottomSheet(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            val descriptionText = if (intervalDays == 7) {
+                stringResource(R.string.tapering_checkin_desc, currentLimit)
+            } else {
+                pluralStringResource(
+                    R.plurals.tapering_checkin_desc_days,
+                    intervalDays,
+                    intervalDays,
+                    currentLimit
+                )
+            }
+
             Text(
-                text = stringResource(R.string.tapering_checkin_desc, currentLimit),
+                text = descriptionText,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center

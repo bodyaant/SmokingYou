@@ -226,6 +226,82 @@ class MainViewModel(
         initialValue = emptyList()
     )
 
+    val customTriggers: StateFlow<List<String>> = dataStoreManager.customTriggers
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val disabledDefaultTriggers: StateFlow<Set<String>> = dataStoreManager.disabledDefaultTriggers
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+
+    val ongoingNotificationEnabled: StateFlow<Boolean> = dataStoreManager.ongoingNotificationEnabled.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
+
+    val notificationLowPriority: StateFlow<Boolean> = dataStoreManager.notificationLowPriority.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = true
+    )
+
+    val notificationShowTimer: StateFlow<Boolean> = dataStoreManager.notificationShowTimer.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = true
+    )
+
+    val notificationShowProgress: StateFlow<Boolean> = dataStoreManager.notificationShowProgress.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = true
+    )
+
+    val notificationShowAddButton: StateFlow<Boolean> = dataStoreManager.notificationShowAddButton.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = true
+    )
+
+    val notificationShowResistButton: StateFlow<Boolean> = dataStoreManager.notificationShowResistButton.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
+
+    val activeTriggers: StateFlow<List<com.smokingtracker.data.TriggerItem>> = kotlinx.coroutines.flow.combine(
+        dataStoreManager.customTriggers,
+        dataStoreManager.disabledDefaultTriggers
+    ) { customList, disabledDefaults ->
+        val builtIn = com.smokingtracker.data.TriggerType.allEntries()
+            .filter { !disabledDefaults.contains(it.key) }
+            .map { com.smokingtracker.data.TriggerItem.fromBuiltIn(it, isEnabled = true) }
+        val custom = customList.map { com.smokingtracker.data.TriggerItem.fromCustom(it) }
+        builtIn + custom
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        com.smokingtracker.data.TriggerType.allEntries().map { com.smokingtracker.data.TriggerItem.fromBuiltIn(it) }
+    )
+
+    fun addCustomTrigger(name: String, onResult: (String?) -> Unit = {}) {
+        viewModelScope.launch {
+            val added = dataStoreManager.addCustomTrigger(name)
+            onResult(added)
+        }
+    }
+
+    fun removeCustomTrigger(name: String) {
+        viewModelScope.launch {
+            dataStoreManager.removeCustomTrigger(name)
+        }
+    }
+
+    fun toggleDefaultTrigger(key: String, isEnabled: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.toggleDefaultTrigger(key, isEnabled)
+        }
+    }
+
     val updateCheckState: StateFlow<UpdateCheckState> = updateManager.updateCheckState
 
     val taperingPlanEnabled: StateFlow<Boolean> = dataStoreManager.taperingPlanEnabled.stateIn(
@@ -423,6 +499,49 @@ class MainViewModel(
     fun setDailyLimit(limit: Int) {
         viewModelScope.launch {
             dataStoreManager.setDailyLimit(limit)
+            WidgetUpdateManager.updateAllAsync(getApplication())
+        }
+    }
+
+    fun updateOngoingNotificationEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.saveOngoingNotificationEnabled(enabled)
+            com.smokingtracker.notification.OngoingNotificationManager.update(getApplication())
+        }
+    }
+
+    fun updateNotificationLowPriority(lowPriority: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.saveNotificationLowPriority(lowPriority)
+            com.smokingtracker.notification.OngoingNotificationManager.update(getApplication())
+        }
+    }
+
+    fun updateNotificationShowTimer(show: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.saveNotificationShowTimer(show)
+            com.smokingtracker.notification.OngoingNotificationManager.update(getApplication())
+        }
+    }
+
+    fun updateNotificationShowProgress(show: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.saveNotificationShowProgress(show)
+            com.smokingtracker.notification.OngoingNotificationManager.update(getApplication())
+        }
+    }
+
+    fun updateNotificationShowAddButton(show: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.saveNotificationShowAddButton(show)
+            com.smokingtracker.notification.OngoingNotificationManager.update(getApplication())
+        }
+    }
+
+    fun updateNotificationShowResistButton(show: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.saveNotificationShowResistButton(show)
+            com.smokingtracker.notification.OngoingNotificationManager.update(getApplication())
         }
     }
     
