@@ -8,7 +8,7 @@
     <string name="time_calculating">Calculating…</string>
     <string name="invalid_future_entry">Invalid future entry</string>
     <string name="start_tracking">Start tracking</string>
-    <string name="time_past_label">Time past after last cigarette</string>
+    <string name="time_past_label">Time since last cigarette</string>
     <string name="stat_daily">Daily</string>
     <string name="stat_weekly">Weekly</string>
     <string name="stat_monthly">Monthly</string>
@@ -39,10 +39,6 @@
     <string name="settings_container_border_desc">Show subtle outline around cards and containers</string>
     <string name="settings_vibration">Haptic feedback</string>
     <string name="settings_vibration_desc">Vibrate on touches and interactions</string>
-    <string name="settings_container_style">Visual style</string>
-    <string name="settings_container_style_desc">Choose the visual style of cards, containers and navigation</string>
-    <string name="container_style_expressive">Expressive</string>
-    <string name="container_style_standard">Standard</string>
     <string name="limit_dialog_helper">Set to 0 for unlimited daily cigarettes</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
@@ -169,6 +165,14 @@
     <string name="add_anyway">Add Anyway</string>
     <string name="set_limit_title">Set Daily Limit</string>
     <string name="no_limit">0 (No limit)</string>
+    <string name="daily_limit_bottom_sheet_desc">Set the maximum number of cigarettes per day to control your habit</string>
+    <string name="daily_limit_switch_label">Daily limit active</string>
+    <string name="daily_limit_cigs_per_day">cigarettes per day</string>
+    <string name="daily_limit_presets">Quick select:</string>
+    <string name="daily_limit_active_subtitle">%1$d cig/day • Limit active</string>
+    <string name="daily_limit_off_subtitle">No limit set</string>
+    <string name="daily_limit_tapering_active_hint">Reduction plan is active (every %1$d days). Setting a new limit will update your baseline.</string>
+    <string name="daily_limit_info_hint">You will receive a warning when exceeding this limit, and progress will be displayed on the home screen and ongoing notification.</string>
 
     <string name="settings_info">About &amp; Updates</string>
     <string name="about_app">About the app</string>
@@ -198,13 +202,13 @@
     <string name="settings_color_preset">Color Scheme</string>
     <string name="settings_color_preset_desc">Choose accent color palette for the interface</string>
     <string name="color_preset_system">System</string>
-    <string name="color_preset_sage">Forest Sage</string>
-    <string name="color_preset_rose">Sunset Rose</string>
-    <string name="color_preset_ocean">Ocean Deep</string>
-    <string name="color_preset_purple">Purple Velvet</string>
-    <string name="color_preset_amber">Amber Honey</string>
-    <string name="color_preset_crimson">Crimson Berry</string>
-    <string name="color_preset_slate">Midnight Slate</string>
+    <string name="color_preset_sage">Sage</string>
+    <string name="color_preset_rose">Rose</string>
+    <string name="color_preset_ocean">Ocean</string>
+    <string name="color_preset_purple">Purple</string>
+    <string name="color_preset_amber">Amber</string>
+    <string name="color_preset_crimson">Ruby</string>
+    <string name="color_preset_slate">Slate</string>
     <string name="time_over_limit_hm">+%1$02dh %2$02dm</string>
     <string name="time_over_limit_m">+%1$02dm</string>
     <string name="first_of_the_day">First of the day</string>
@@ -252,6 +256,16 @@
     <string name="settings_currency">Currency</string>
     <string name="settings_tap_configure">Tap to configure</string>
     <string name="settings_pack_subtitle_pattern">%1$s %2$s (%3$d pcs)</string>
+    <string name="pack_settings_desc">Pack price and size for tracking your expenses and money saved</string>
+    <string name="pack_cost_summary_title">Live Cost Summary</string>
+    <string name="pack_per_cigarette_cost">1 cigarette: %1$s %2$s</string>
+    <string name="pack_daily_monthly_cost">At %1$d cig/day: ~%2$s %3$s/day (~%4$s %3$s/mo)</string>
+    <string name="pack_size_presets">Cigarettes in pack:</string>
+    <string name="pack_size_custom">Custom</string>
+    <string name="pack_save_button">Save</string>
+    <string name="pack_settings_saved">Pack settings saved</string>
+    <string name="pack_price_per_piece_format">%1$s %2$s / pc.</string>
+    <string name="pack_subtitle_piece_rate">%1$s %2$s/pc.</string>
 
     <string name="stats_money_saved">Money Saved</string>
     <string name="stats_life_saved">Life Reclaimed</string>
@@ -380,8 +394,12 @@
 
     <string name="stats_resisted_cravings">Resisted Cravings</string>
     <string name="stats_resisted_cravings_desc">You resisted %1$d times and saved %2$s</string>
+    <string name="stats_resisted_badge">%1$d resisted</string>
+    <string name="stats_resisted_avoided_cigs">Cigarettes Avoided</string>
+    <string name="stats_resisted_life_saved_note">+%1$s of life reclaimed via mindful pauses</string>
+    <string name="stats_resisted_motivational_note">Mindful pauses successfully prevented cravings</string>
 
-    <string name="history_generator_title">Past Smoking Experience</string>
+    <string name="history_generator_title">Smoking Baseline</string>
     <string name="history_generator_description">Estimate your past smoking experience prior to using
         the app to calculate your approximate total cigarettes and money spent in the past.</string>
     <string name="history_start_date_label">Smoking Start Date</string>
@@ -403,8 +421,7 @@
     <string name="history_banner_title">Have a history of smoking?</string>
     <string name="history_banner_desc">Estimation of past cigarettes and expenses prior to using the
         app.</string>
-    <string name="registration_history_note">You can also set up your past smoking history anytime
-        in Settings!</string>
+    <string name="registration_history_note">You can set up your smoking baseline anytime in Settings!</string>
     <string name="onboarding_feat_timer_title">Smart Timer</string>
     <string name="onboarding_feat_timer_desc">Track intervals and time between cigarettes</string>
     <string name="onboarding_feat_analytics_title">Trigger Analytics</string>
@@ -413,6 +430,40 @@
     <string name="onboarding_feat_mindful_desc">Take a pause and overcome cravings step by step</string>
     <string name="history_cigs_count_format">%1$s pcs.</string>
     <string name="history_duration_days_y_m">%1$d days (%2$dy %3$dm)</string>
+
+    <string name="settings_baseline_title">Smoking Baseline</string>
+    <string name="settings_baseline_subtitle_active">Base: %1$d pcs/day • %2$s</string>
+    <string name="settings_baseline_subtitle_off">Set your past habits to track reduction</string>
+    <string name="baseline_sheet_title">Smoking Baseline</string>
+    <string name="baseline_sheet_desc">Specify your usual smoking habit prior to using the app. This is used as your baseline benchmark to calculate your reduction progress (-%), avoided cigarettes, and pack-years index.</string>
+    <string name="baseline_daily_label">Habitual Cigarettes per Day</string>
+    <string name="baseline_start_date_label">Smoking Start Date</string>
+    <string name="baseline_years_format">%1$d years</string>
+    <string name="baseline_years_months_format">%1$dy %2$dm</string>
+    <string name="baseline_pack_years_title">Pack-Years Index</string>
+    <string name="baseline_pack_years_value">%1$.1f pack-years</string>
+    <string name="baseline_risk_low">Light Exposure</string>
+    <string name="baseline_risk_low_desc">Lungs and cardiovascular system recover rapidly upon reduction or quitting.</string>
+    <string name="baseline_risk_moderate">Moderate Exposure</string>
+    <string name="baseline_risk_moderate_desc">Significant cumulative burden. Risk threshold for chronic airway damage.</string>
+    <string name="baseline_risk_high">Heavy Exposure</string>
+    <string name="baseline_risk_high_desc">High cumulative exposure. Every cigarette avoided helps preserve lung capacity.</string>
+    <string name="baseline_save_button">Save Baseline</string>
+    <string name="baseline_reset_button">Reset Baseline</string>
+    <string name="baseline_reset_dialog_title">Reset Baseline?</string>
+    <string name="baseline_reset_dialog_desc">This will reset your smoking baseline and reduction comparison metrics.</string>
+    <string name="baseline_stats_card_title">Baseline &amp; Reduction</string>
+    <string name="baseline_stats_was_label">Baseline</string>
+    <string name="baseline_stats_now_label">Current (7d)</string>
+    <string name="baseline_stats_pcs_day">%1$.1f pcs/day</string>
+    <string name="baseline_stats_reduction_badge">−%1$d%% reduction</string>
+    <string name="baseline_stats_no_reduction_badge">At baseline</string>
+    <string name="baseline_stats_avoided_title">Cigarettes Avoided via Reduction</string>
+    <string name="baseline_stats_avoided_desc">%1$d cigarettes avoided • %2$s saved</string>
+    <string name="baseline_stats_past_summary">Past history: %1$s (~%2$s cigs, %3$s)</string>
+    <string name="baseline_banner_title">Track your reduction progress</string>
+    <string name="baseline_banner_desc">Set your past smoking baseline to see your progress (-%), avoided cigarettes, and pack-years index.</string>
+    <string name="baseline_banner_button">Set Baseline</string>
 
     <string name="widget_quick_add_title">Quick Add</string>
     <string name="widget_quick_add_description">1x1 widget to log a cigarette instantly</string>
@@ -459,7 +510,6 @@
     <string name="achievement_view_all">View All</string>
     <string name="dialog_awesome">Awesome!</string>
 
-    <!-- Ongoing Notification -->
     <string name="settings_section_notifications">Notifications</string>
     <string name="settings_ongoing_notification_title">Status Bar Notification</string>
     <string name="settings_ongoing_notification_desc">Sticky progress &amp; quick logging in notification shade</string>
@@ -487,4 +537,11 @@
     <string name="notification_toast_added">+1 cigarette logged</string>
     <string name="notification_toast_resisted">Craving resisted!</string>
     <string name="entry_over_limit_badge">Over limit</string>
+    <string name="action_smoked_cigarette">Smoked</string>
+    <string name="action_resisted_craving">Resisted</string>
+    <string name="action_mindful_pause">Mindful Pause</string>
+    <string name="resisted_craving_success">Craving resisted! Well done!</string>
+    <string name="widget_show_resist_button_title">«Resisted» button in widget</string>
+    <string name="widget_show_resist_button_desc">Show quick shield button in 3x1 widget</string>
+    <string name="close_menu">Close menu</string>
 </resources>

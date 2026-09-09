@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="stats_days_plural">
+        <item quantity="other">%d 天</item>
+    </plurals>
+    <plurals name="tapering_checkin_desc_days">
+        <item quantity="other">距离你上次减量已过去 %1$d 天！你很好地保持了 %2$d 支的限额。</item>
+    </plurals>
+</resources>

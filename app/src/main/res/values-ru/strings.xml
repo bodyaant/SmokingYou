@@ -39,10 +39,6 @@
     <string name="settings_container_border_desc">Показывать тонкую обводку у карточек и контейнеров</string>
     <string name="settings_vibration">Виброотклик</string>
     <string name="settings_vibration_desc">Вибрация при нажатиях и действиях</string>
-    <string name="settings_container_style">Стиль визуала</string>
-    <string name="settings_container_style_desc">Выберите визуальный стиль карточек, контейнеров и навигации</string>
-    <string name="container_style_expressive">Выразительный</string>
-    <string name="container_style_standard">Стандартный</string>
     <string name="limit_dialog_helper">Укажите 0 для курения без ежедневного лимита</string>
     <string name="theme_system">Система</string>
     <string name="theme_light">Светлая</string>
@@ -80,22 +76,22 @@
     <string name="ach_category_login">Использование приложения</string>
     <string name="ach_category_nosmoke">Дни без сигарет</string>
     <string name="ach_category_secret">Секретные достижения</string>
-    <string name="ach_secret_hidden_desc">Условия этой ачивки засекречены...</string>
+    <string name="ach_secret_hidden_desc">Условия этого достижения засекречены...</string>
 
     <string name="ach_curiosity_title">Любопытство</string>
     <string name="ach_curiosity_desc">Первый вход в приложение</string>
     <string name="ach_interest_title">Интерес</string>
-    <string name="ach_interest_desc">3 дня подряд входа в приложение</string>
+    <string name="ach_interest_desc">Заходить в приложение 3 дня подряд</string>
     <string name="ach_exploration_title">Разведка</string>
-    <string name="ach_exploration_desc">Неделя подряд входа в приложение</string>
+    <string name="ach_exploration_desc">Заходить в приложение 7 дней подряд</string>
     <string name="ach_discipline_title">Дисциплина</string>
-    <string name="ach_discipline_desc">Месяц подряд входа в приложение</string>
+    <string name="ach_discipline_desc">Заходить в приложение 30 дней подряд</string>
     <string name="ach_habit_title">Привычка</string>
-    <string name="ach_habit_desc">3 месяца подряд входа в приложение</string>
+    <string name="ach_habit_desc">Заходить в приложение 90 дней подряд (3 месяца)</string>
     <string name="ach_dedication_title">Преданность</string>
-    <string name="ach_dedication_desc">Полгода подряд входа в приложение</string>
+    <string name="ach_dedication_desc">Заходить в приложение 180 дней подряд (полгода)</string>
     <string name="ach_statistics_title">Статистика</string>
-    <string name="ach_statistics_desc">Год подряд входа в приложение</string>
+    <string name="ach_statistics_desc">Заходить в приложение 365 дней подряд</string>
 
     <string name="ach_nosmoke_1d_title">Первый шаг</string>
     <string name="ach_nosmoke_1d_desc">День без сигарет</string>
@@ -115,31 +111,28 @@
     <string name="ach_night_owl_title">Сова</string>
     <string name="ach_night_owl_desc">Выкурить сигарету между 03:00 и 05:00 утра</string>
     <string name="ach_morning_ritual_title">Утренний ритуал</string>
-    <string name="ach_morning_ritual_desc">Залогировать первую сигарету до 07:00 утра 5 дней подряд</string>
+    <string name="ach_morning_ritual_desc">Отметить первую сигарету до 07:00 утра 5 дней подряд</string>
     <string name="ach_synchronization_title">Синхронизация</string>
-    <string name="ach_synchronization_desc">Залогировать сигарету ровно в 00:00 или 12:00</string>
+    <string name="ach_synchronization_desc">Отметить сигарету ровно в 00:00 или 12:00</string>
     <string name="ach_punctuality_title">Пунктуальность</string>
     <string name="ach_punctuality_desc">Выкурить 3 сигареты подряд с абсолютно одинаковым интервалом</string>
 
     <string name="ach_hesitant_title">Сомневающийся</string>
-    <string name="ach_hesitant_desc">Занести сигарету и тут же нажать «Отмена» или «Удалить» в
-        течение 10 секунд</string>
+    <string name="ach_hesitant_desc">Записать сигарету и тут же нажать «Отмена» или «Удалить» в течение 10 секунд</string>
     <string name="ach_explorer_title">Исследователь</string>
     <string name="ach_explorer_desc">Переключить язык или поменять тему оформления больше 3 раз за
         день</string>
     <string name="ach_archivist_title">Архивариус</string>
     <string name="ach_archivist_desc">Сделать первый бэкап данных в Настройках</string>
     <string name="ach_analytics_collector_title">Сборщик аналитики</string>
-    <string name="ach_analytics_collector_desc">Зайти на вкладку Analytics более 10 раз за один день</string>
+    <string name="ach_analytics_collector_desc">Зайти на вкладку «Аналитика» более 10 раз за день</string>
 
     <string name="ach_double_damage_title">Двойной урон</string>
-    <string name="ach_double_damage_desc">Залогировать 2 сигареты с разницей менее 10 минут. Тяжелый
-        день?</string>
+    <string name="ach_double_damage_desc">Отметить 2 сигареты с разницей менее 10 минут. Тяжелый день?</string>
     <string name="ach_inflation_title">Инфляция</string>
     <string name="ach_inflation_desc">Изменить цену пачки в настройках</string>
     <string name="ach_crisis_title">Кризис</string>
-    <string name="ach_crisis_desc">Выкурить за день ровно столько же сигарет, сколько указано в
-        вашем Daily Cigarette Limit</string>
+    <string name="ach_crisis_desc">Выкурить за день ровно столько же сигарет, сколько указано в вашем дневном лимите</string>
     <string name="ach_blind_eye_title">Ничего не вижу</string>
     <string name="ach_blind_eye_desc">Превысить установленный лимит на 5+ сигарет за день. Лимит?
         Какой лимит?</string>
@@ -171,6 +164,14 @@
     <string name="add_anyway">Добавить</string>
     <string name="set_limit_title">Установить лимит</string>
     <string name="no_limit">0 (Без лимита)</string>
+    <string name="daily_limit_bottom_sheet_desc">Установите максимальное число сигарет в день для контроля привычки</string>
+    <string name="daily_limit_switch_label">Включить дневной лимит</string>
+    <string name="daily_limit_cigs_per_day">сигарет в день</string>
+    <string name="daily_limit_presets">Быстрый выбор:</string>
+    <string name="daily_limit_active_subtitle">%1$d сиг/день • Контроль включен</string>
+    <string name="daily_limit_off_subtitle">Без ограничений</string>
+    <string name="daily_limit_tapering_active_hint">Активен автоплан снижения (каждые %1$d дн.). Установка лимита обновит базовую планку.</string>
+    <string name="daily_limit_info_hint">При превышении появится предупреждение, а на главном экране и в уведомлении отобразится шкала прогресса.</string>
 
     <string name="settings_info">О приложении и обновления</string>
     <string name="about_app">О приложении</string>
@@ -200,13 +201,13 @@
     <string name="settings_color_preset">Цветовая схема</string>
     <string name="settings_color_preset_desc">Выбор цветовой палитры интерфейса</string>
     <string name="color_preset_system">Системная</string>
-    <string name="color_preset_sage">Лесной шалфей</string>
-    <string name="color_preset_rose">Закатная роза</string>
-    <string name="color_preset_ocean">Глубокий океан</string>
-    <string name="color_preset_purple">Фиолетовый бархат</string>
-    <string name="color_preset_amber">Янтарный мед</string>
-    <string name="color_preset_crimson">Ягодный рубин</string>
-    <string name="color_preset_slate">Тёмный графит</string>
+    <string name="color_preset_sage">Шалфей</string>
+    <string name="color_preset_rose">Роза</string>
+    <string name="color_preset_ocean">Океан</string>
+    <string name="color_preset_purple">Фиолет</string>
+    <string name="color_preset_amber">Янтарь</string>
+    <string name="color_preset_crimson">Рубин</string>
+    <string name="color_preset_slate">Графит</string>
     <string name="time_over_limit_hm">+%1$02dч %2$02dм</string>
     <string name="time_over_limit_m">+%1$02dм</string>
     <string name="first_of_the_day">Первая за день</string>
@@ -255,11 +256,21 @@
     <string name="settings_currency">Валюта</string>
     <string name="settings_tap_configure">Нажмите для настройки</string>
     <string name="settings_pack_subtitle_pattern">%1$s %2$s (%3$d шт.)</string>
+    <string name="pack_settings_desc">Стоимость и объем пачки для точного подсчета расходов и экономии</string>
+    <string name="pack_cost_summary_title">Расчет стоимости</string>
+    <string name="pack_per_cigarette_cost">1 сигарета: %1$s %2$s</string>
+    <string name="pack_daily_monthly_cost">При лимите %1$d шт./день: ~%2$s %3$s/день (~%4$s %3$s/мес)</string>
+    <string name="pack_size_presets">Сигарет в пачке:</string>
+    <string name="pack_size_custom">Своё</string>
+    <string name="pack_save_button">Сохранить</string>
+    <string name="pack_settings_saved">Параметры пачки сохранены</string>
+    <string name="pack_price_per_piece_format">%1$s %2$s / шт.</string>
+    <string name="pack_subtitle_piece_rate">%1$s %2$s/шт.</string>
 
     <string name="stats_money_saved">Сэкономлено денег</string>
-    <string name="stats_life_saved">Сэкономлено жизни</string>
+    <string name="stats_life_saved">Сохранено времени жизни</string>
     <string name="stats_savings_lifetime">Экономия за всё время</string>
-    <string name="stats_savings_current_streak">Экономия за текущий отказ</string>
+    <string name="stats_savings_current_streak">Экономия за текущую серию без курения</string>
     <string name="stats_savings_setup_warning">Настройте лимит курения и параметры пачки в
         настройках, чтобы начать отслеживать сэкономленные деньги и время жизни.</string>
     <string name="stats_body_recovery_who">Восстановление организма (ВОЗ)</string>
@@ -343,19 +354,18 @@
     <string name="mindful_pause_or_resist">Или если пытаетесь сдержаться:</string>
     <string name="mindful_pause_resisted">Преодолено</string>
     <string name="mindful_pause_add_15s">+15 сек</string>
-    <string name="mindful_pause_already_held">Уже выдержал</string>
-    <string name="mindful_pause_smoked_after_all">Все-таки выкурил сигарету</string>
+    <string name="mindful_pause_already_held">Тяга уже прошла</string>
+    <string name="mindful_pause_smoked_after_all">Всё же сигарета выкурена</string>
     <string name="mindful_pause_well_done">Вы отлично справились!</string>
     <string name="mindful_pause_breathe_in">Глубокий вдох...</string>
     <string name="mindful_pause_hold_breath">Задержка дыхания...</string>
     <string name="mindful_pause_breathe_out">Медленный выдох...</string>
     <string name="mindful_pause_sec">сек</string>
-    <string name="mindful_pause_tip_1">Пиковый порыв курения длится всего 15–30 секунд. Вы
-        справляетесь!</string>
+    <string name="mindful_pause_tip_1">Пик тяги к курению длится всего 15–30 секунд. Вы справитесь!</string>
     <string name="mindful_pause_tip_2">Сделайте глубокий вдох через нос и медленный выдох через рот.</string>
     <string name="mindful_pause_tip_3">Сделайте глоток холодной воды — это мгновенно переключает
         мозг.</string>
-    <string name="mindful_pause_tip_4">Каждый непреодоленный порыв делает вашу волю сильнее.</string>
+    <string name="mindful_pause_tip_4">Каждый преодоленный порыв закаляет вашу волю.</string>
     <string name="mindful_pause_tip_5">Ваши легкие начинают очищаться уже через 20 минут без
         курения.</string>
 
@@ -363,7 +373,7 @@
     <string name="tapering_plan_dialog_title">План постепенного снижения</string>
     <string name="tapering_plan_switch_label">Еженедельное снижение</string>
     <string name="tapering_plan_slider_label">Предлагать снизить лимит каждые %1$d дн.</string>
-    <string name="tapering_plan_subtitle_active">Снижение на 1 сиг. каждые %1$d дн.</string>
+    <string name="tapering_plan_subtitle_active">Снижение на 1 шт. каждые %1$d дн.</string>
     <string name="tapering_plan_subtitle_off">Выключен</string>
 
     <string name="tapering_checkin_title">План постепенного снижения</string>
@@ -371,19 +381,23 @@
         справлялись с лимитом в %1$d сигарет.</string>
     <string name="tapering_checkin_was">Было</string>
     <string name="tapering_checkin_will_be">Станет</string>
-    <string name="tapering_checkin_reduce_to">Снизить лимит до %1$d сиг/день</string>
+    <string name="tapering_checkin_reduce_to">Снизить лимит до %1$d шт./день</string>
     <string name="tapering_checkin_keep_limit">Оставить лимит %1$d сигарет</string>
     <string name="tapering_checkin_snooze">Напомнить через 3 дня</string>
 
-    <string name="stats_resisted_cravings">Преодоленные порывы</string>
+    <string name="stats_resisted_cravings">Преодоленная тяга</string>
     <string name="stats_resisted_cravings_desc">Вы устояли %1$d раз и сэкономили %2$s</string>
+    <string name="stats_resisted_badge">%1$d преодолено</string>
+    <string name="stats_resisted_avoided_cigs">Не выкурено сигарет</string>
+    <string name="stats_resisted_life_saved_note">+%1$s жизни спасено благодаря паузам осознанности</string>
+    <string name="stats_resisted_motivational_note">Осознанные паузы помогли успешно справиться с тягой</string>
 
     <string name="support_boosty">Поддержать на Boosty</string>
     <string name="crypto_wallets">Криптокошельки (USDT)</string>
     <string name="address_copied">Адрес скопирован в буфер обмена!</string>
     <string name="copy_address">Скопировать адрес</string>
 
-    <string name="history_generator_title">Прошлый стаж курения</string>
+    <string name="history_generator_title">Точка отсчёта и стаж</string>
     <string name="history_generator_description">Примерный расчет вашего стажа курения до установки приложения, чтобы узнать общее количество выкуренных сигарет и расходов за прошлые годы.</string>
     <string name="history_start_date_label">Дата начала курения</string>
     <string name="history_daily_avg_label">Среднее количество сигарет в день</string>
@@ -403,8 +417,7 @@
     <string name="history_reset_dialog_desc">Это сбросит сохраненный расчет прошлого стажа курения.</string>
     <string name="history_banner_title">У вас уже есть стаж курения?</string>
     <string name="history_banner_desc">Оценка примерного количества сигарет и расходов за прошлый период курения.</string>
-    <string name="registration_history_note">Вы также сможете заполнить прошлый опыт курения в любой
-        момент в Настройках!</string>
+    <string name="registration_history_note">Вы сможете настроить точку отсчёта и стаж в любой момент в Настройках!</string>
     <string name="onboarding_feat_timer_title">Умный таймер</string>
     <string name="onboarding_feat_timer_desc">Точный интервал и время между перекурами</string>
     <string name="onboarding_feat_analytics_title">Аналитика причин</string>
@@ -413,6 +426,40 @@
     <string name="onboarding_feat_mindful_desc">Паузы для снижения тяги шаг за шагом</string>
     <string name="history_cigs_count_format">%1$s шт.</string>
     <string name="history_duration_days_y_m">%1$d дн. (%2$dг %3$dм)</string>
+
+    <string name="settings_baseline_title">Точка отсчёта и стаж</string>
+    <string name="settings_baseline_subtitle_active">База: %1$d шт./день • %2$s</string>
+    <string name="settings_baseline_subtitle_off">Укажите привычную норму для отслеживания снижения</string>
+    <string name="baseline_sheet_title">Точка отсчёта (Базовый уровень)</string>
+    <string name="baseline_sheet_desc">Укажите вашу привычную норму курения до приложения. Это станет эталоном для подсчета реального процента сокращения (-%), невыкуренных сигарет и индекса пачко-лет.</string>
+    <string name="baseline_daily_label">Привычная норма (сигарет в день)</string>
+    <string name="baseline_start_date_label">Когда начали курить</string>
+    <string name="baseline_years_format">%1$d лет</string>
+    <string name="baseline_years_months_format">%1$dг %2$dм</string>
+    <string name="baseline_pack_years_title">Индекс пачко-лет</string>
+    <string name="baseline_pack_years_value">%1$.1f пачко-лет</string>
+    <string name="baseline_risk_low">Лёгкая нагрузка</string>
+    <string name="baseline_risk_low_desc">Низкая кумулятивная нагрузка. Лёгкие и сосуды восстанавливаются максимально быстро.</string>
+    <string name="baseline_risk_moderate">Умеренная нагрузка</string>
+    <string name="baseline_risk_moderate_desc">Значительный табачный стаж. Порог риска развития хронических заболеваний дыхательных путей.</string>
+    <string name="baseline_risk_high">Высокая нагрузка</string>
+    <string name="baseline_risk_high_desc">Высокая табачная нагрузка. Снижение потребления критически важно для защиты лёгких и сердца.</string>
+    <string name="baseline_save_button">Сохранить базовый уровень</string>
+    <string name="baseline_reset_button">Сбросить базовый уровень</string>
+    <string name="baseline_reset_dialog_title">Сбросить точку отсчёта?</string>
+    <string name="baseline_reset_dialog_desc">Это сбросит базовые привычки и метрики сравнения прогресса снижения.</string>
+    <string name="baseline_stats_card_title">Точка отсчёта и динамика</string>
+    <string name="baseline_stats_was_label">База</string>
+    <string name="baseline_stats_now_label">Сейчас (7 дн.)</string>
+    <string name="baseline_stats_pcs_day">%1$.1f шт./день</string>
+    <string name="baseline_stats_reduction_badge">−%1$d%% снижение</string>
+    <string name="baseline_stats_no_reduction_badge">На уровне базы</string>
+    <string name="baseline_stats_avoided_title">Не выкурено благодаря снижению</string>
+    <string name="baseline_stats_avoided_desc">%1$d сигарет не выкурено • %2$s сбережено</string>
+    <string name="baseline_stats_past_summary">Прошлый стаж: %1$s (~%2$s сиг., %3$s)</string>
+    <string name="baseline_banner_title">Следите за динамикой снижения</string>
+    <string name="baseline_banner_desc">Задайте точку отсчёта, чтобы видеть процент снижения (-%), количество невыкуренных сигарет и индекс пачко-лет.</string>
+    <string name="baseline_banner_button">Задать точку отсчёта</string>
 
     <string name="widget_quick_add_title">Быстрое добавление</string>
     <string name="widget_quick_add_description">Виджет 1x1 для мгновенной записи сигареты</string>
@@ -448,7 +495,7 @@
     <string name="weekly_comparison_last_week">На прошлой неделе: %1$d</string>
 
     <string name="peak_hours_title">Пиковые часы курения</string>
-    <string name="peak_hours_subtitle">Распределение покуров по часам суток</string>
+    <string name="peak_hours_subtitle">Распределение выкуренных сигарет по часам</string>
     <string name="peak_hours_summary">Пик активности: %1$s (%2$d%% всех сигарет)</string>
     <string name="peak_period_morning">Утром (06:00 - 12:00)</string>
     <string name="peak_period_afternoon">Днем (12:00 - 18:00)</string>
@@ -461,7 +508,6 @@
     <string name="achievement_view_all">Все достижения</string>
     <string name="dialog_awesome">Отлично!</string>
 
-    <!-- Ongoing Notification -->
     <string name="settings_section_notifications">Уведомления</string>
     <string name="settings_ongoing_notification_title">Уведомление в статус-баре</string>
     <string name="settings_ongoing_notification_desc">Постоянный прогресс и быстрое добавление в шторке</string>
@@ -485,8 +531,15 @@
     <string name="notification_title_app_name">SmokingYou</string>
     <string name="notification_content_with_limit">Сегодня: %1$d из %2$d (%3$d%%)</string>
     <string name="notification_content_no_limit">Сегодня выкурено: %1$d</string>
-    <string name="notification_content_resisted_count"> • Сдержано: %1$d</string>
+    <string name="notification_content_resisted_count"> • Преодолено: %1$d</string>
     <string name="notification_toast_added">+1 сигарета записана</string>
-    <string name="notification_toast_resisted">Попытка сдержана!</string>
+    <string name="notification_toast_resisted">Тяга преодолена!</string>
     <string name="entry_over_limit_badge">Сверх лимита</string>
+    <string name="action_smoked_cigarette">Выкурено</string>
+    <string name="action_resisted_craving">Сдержано</string>
+    <string name="action_mindful_pause">Осознанная пауза</string>
+    <string name="resisted_craving_success">Тяга преодолена! Отличная работа!</string>
+    <string name="widget_show_resist_button_title">Кнопка «Сдержался» в виджете</string>
+    <string name="widget_show_resist_button_desc">Отображать кнопку «Сдержался» в виджете 3x1</string>
+    <string name="close_menu">Закрыть меню</string>
 </resources>

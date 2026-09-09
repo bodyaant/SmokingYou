@@ -40,10 +40,6 @@
         contenedores</string>
     <string name="settings_vibration">Vibración</string>
     <string name="settings_vibration_desc">Vibración al pulsar y realizar acciones</string>
-    <string name="settings_container_style">Estilo visual</string>
-    <string name="settings_container_style_desc">Elige el estilo visual de tarjetas, contenedores y navegación</string>
-    <string name="container_style_expressive">Expresivo</string>
-    <string name="container_style_standard">Estándar</string>
     <string name="limit_dialog_helper">Establecer en 0 para cigarrillos diarios ilimitados</string>
     <string name="theme_system">Sistema</string>
     <string name="theme_light">Claro</string>
@@ -92,9 +88,9 @@
     <string name="ach_discipline_title">Disciplina</string>
     <string name="ach_discipline_desc">Entraste 30 días consecutivos</string>
     <string name="ach_habit_title">Hábito</string>
-    <string name="ach_habit_desc">Inició sesión 90 días consecutivos (3 meses)</string>
+    <string name="ach_habit_desc">Entraste 90 días consecutivos (3 meses)</string>
     <string name="ach_dedication_title">Dedicación</string>
-    <string name="ach_dedication_desc">Inició sesión 180 días consecutivos (6 meses)</string>
+    <string name="ach_dedication_desc">Entraste 180 días consecutivos (6 meses)</string>
     <string name="ach_statistics_title">Estadísticas</string>
     <string name="ach_statistics_desc">Entraste 365 días consecutivos</string>
 
@@ -129,7 +125,7 @@
         en 10 segundos</string>
     <string name="ach_explorer_title">Explorador</string>
     <string name="ach_explorer_desc">Cambia de idioma o tema más de 3 veces en un día</string>
-    <string name="ach_archivist_title">Archivero</string>
+    <string name="ach_archivist_title">Archivista</string>
     <string name="ach_archivist_desc">Haz tu primera copia de seguridad en Ajustes</string>
     <string name="ach_analytics_collector_title">Coleccionista de analíticas</string>
     <string name="ach_analytics_collector_desc">Visita la pestaña Analítica más de 10 veces en un
@@ -174,6 +170,14 @@
     <string name="add_anyway">Añadir de todos modos</string>
     <string name="set_limit_title">Establecer límite diario</string>
     <string name="no_limit">0 (Sin límite)</string>
+    <string name="daily_limit_bottom_sheet_desc">Establece el número máximo de cigarrillos por día para controlar tu hábito</string>
+    <string name="daily_limit_switch_label">Límite diario activo</string>
+    <string name="daily_limit_cigs_per_day">cigarrillos al día</string>
+    <string name="daily_limit_presets">Selección rápida:</string>
+    <string name="daily_limit_active_subtitle">%1$d cig/día • Límite activo</string>
+    <string name="daily_limit_off_subtitle">Sin límite establecido</string>
+    <string name="daily_limit_tapering_active_hint">El plan de reducción está activo (cada %1$d días). Establecer un nuevo límite actualizará tu nivel base.</string>
+    <string name="daily_limit_info_hint">Recibirás una alerta al superar este límite y el progreso se mostrará en la pantalla de inicio y en la notificación fija.</string>
 
     <string name="settings_info">Acerca de y actualizaciones</string>
     <string name="about_app">Acerca de la app</string>
@@ -203,13 +207,13 @@
     <string name="settings_color_preset">Esquema de colores</string>
     <string name="settings_color_preset_desc">Elige la paleta de colores para la interfaz</string>
     <string name="color_preset_system">Sistema</string>
-    <string name="color_preset_sage">Salvia de bosque</string>
-    <string name="color_preset_rose">Rosa al atardecer</string>
-    <string name="color_preset_ocean">Océano profundo</string>
-    <string name="color_preset_purple">Terciopelo púrpura</string>
-    <string name="color_preset_amber">Miel de ámbar</string>
-    <string name="color_preset_crimson">Baya carmesí</string>
-    <string name="color_preset_slate">Pizarra de medianoche</string>
+    <string name="color_preset_sage">Salvia</string>
+    <string name="color_preset_rose">Rosa</string>
+    <string name="color_preset_ocean">Océano</string>
+    <string name="color_preset_purple">Púrpura</string>
+    <string name="color_preset_amber">Ámbar</string>
+    <string name="color_preset_crimson">Rubí</string>
+    <string name="color_preset_slate">Pizarra</string>
     <string name="time_over_limit_hm">+%1$02dh %2$02dm</string>
     <string name="time_over_limit_m">+%1$02dm</string>
     <string name="first_of_the_day">Primero del día</string>
@@ -247,7 +251,7 @@
     <string name="tab_graphs">Gráficos</string>
     <string name="tab_triggers">Motivos</string>
     <string name="triggers_no_data">Añade motivos al registrar para ver estadísticas aquí.</string>
-    <string name="main_trigger">Trigger principal</string>
+    <string name="main_trigger">Motivo principal</string>
     <string name="triggers_title">Disparadores de antojo</string>
     <string name="trigger_count_pattern">%1$d veces (%2$d%%)</string>
 
@@ -257,6 +261,16 @@
     <string name="settings_currency">Moneda</string>
     <string name="settings_tap_configure">Toca para configurar</string>
     <string name="settings_pack_subtitle_pattern">%1$s %2$s (%3$d uds)</string>
+    <string name="pack_settings_desc">Precio y tamaño de la cajetilla para calcular gastos y ahorros exactos</string>
+    <string name="pack_cost_summary_title">Resumen de costes</string>
+    <string name="pack_per_cigarette_cost">1 cigarrillo: %1$s %2$s</string>
+    <string name="pack_daily_monthly_cost">A %1$d cig/día: ~%2$s %3$s/día (~%4$s %3$s/mes)</string>
+    <string name="pack_size_presets">Cigarrillos por cajetilla:</string>
+    <string name="pack_size_custom">Personalizado</string>
+    <string name="pack_save_button">Guardar</string>
+    <string name="pack_settings_saved">Ajustes de cajetilla guardados</string>
+    <string name="pack_price_per_piece_format">%1$s %2$s / ud.</string>
+    <string name="pack_subtitle_piece_rate">%1$s %2$s/ud.</string>
 
     <string name="stats_money_saved">Dinero ahorrado</string>
     <string name="stats_life_saved">Vida recuperada</string>
@@ -384,8 +398,12 @@
 
     <string name="stats_resisted_cravings">Deseos resistidos</string>
     <string name="stats_resisted_cravings_desc">Resististe %1$d veces y ahorraste %2$s</string>
+    <string name="stats_resisted_badge">%1$d resistidos</string>
+    <string name="stats_resisted_avoided_cigs">Cigarrillos evitados</string>
+    <string name="stats_resisted_life_saved_note">+%1$s de vida recuperada gracias a las pausas conscientes</string>
+    <string name="stats_resisted_motivational_note">Las pausas conscientes ayudaron a superar los antojos</string>
 
-    <string name="history_generator_title">Experiencia previa como fumador</string>
+    <string name="history_generator_title">Historial previo de consumo</string>
     <string name="history_generator_description">Calcula tu historial previo antes de usar la aplicación para estimar el total de cigarrillos y gastos pasados.</string>
     <string name="history_start_date_label">Fecha de inicio de fumar</string>
     <string name="history_daily_avg_label">Promedio de cigarrillos por día</string>
@@ -399,14 +417,13 @@
     <string name="history_preview_title">Estimación del historial previo</string>
     <string name="history_preview_total_cigs">Total fumado antes</string>
     <string name="history_preview_total_cost">Total gastado antes</string>
-    <string name="history_save_button">Guardar experiencia previa</string>
-    <string name="history_reset_button">Restablecer experiencia previa</string>
-    <string name="history_reset_dialog_title">¿Restablecer experiencia previa?</string>
-    <string name="history_reset_dialog_desc">Esto restablecerá el cálculo estimado de tu experiencia previa.</string>
+    <string name="history_save_button">Guardar historial</string>
+    <string name="history_reset_button">Restablecer historial previo</string>
+    <string name="history_reset_dialog_title">¿Restablecer historial previo?</string>
+    <string name="history_reset_dialog_desc">Esto restablecerá el cálculo estimado de tu historial previo.</string>
     <string name="history_banner_title">¿Tienes historial como fumador?</string>
     <string name="history_banner_desc">Estimación de cigarrillos y gastos previos antes de usar la aplicación.</string>
-    <string name="registration_history_note">¡También puedes configurar tu historial previo en
-        cualquier momento en Ajustes!</string>
+    <string name="registration_history_note">¡Puedes configurar tu punto de partida y hábitos en cualquier momento en Ajustes!</string>
     <string name="onboarding_feat_timer_title">Temporizador inteligente</string>
     <string name="onboarding_feat_timer_desc">Controla los intervalos y el tiempo entre cigarrillos</string>
     <string name="onboarding_feat_analytics_title">Análisis de motivos</string>
@@ -415,6 +432,40 @@
     <string name="onboarding_feat_mindful_desc">Haz pausas y reduce los antojos paso a paso</string>
     <string name="history_cigs_count_format">%1$s uds.</string>
     <string name="history_duration_days_y_m">%1$d días (%2$da %3$dm)</string>
+
+    <string name="settings_baseline_title">Punto de partida y experiencia</string>
+    <string name="settings_baseline_subtitle_active">Base: %1$d uds./día • %2$s</string>
+    <string name="settings_baseline_subtitle_off">Indica tu consumo habitual para medir la reducción</string>
+    <string name="baseline_sheet_title">Punto de partida (Línea base)</string>
+    <string name="baseline_sheet_desc">Indica tu hábito de consumo habitual antes de usar la aplicación. Se utilizará como referencia para calcular el progreso de reducción (-%), los cigarrillos evitados y el índice de paquetes-año.</string>
+    <string name="baseline_daily_label">Consumo habitual (cigarrillos al día)</string>
+    <string name="baseline_start_date_label">Fecha en la que empezaste a fumar</string>
+    <string name="baseline_years_format">%1$d años</string>
+    <string name="baseline_years_months_format">%1$da %2$dm</string>
+    <string name="baseline_pack_years_title">Índice de paquetes-año</string>
+    <string name="baseline_pack_years_value">%1$.1f paquetes-año</string>
+    <string name="baseline_risk_low">Exposición leve</string>
+    <string name="baseline_risk_low_desc">Baja carga acumulada. Los pulmones y el sistema cardiovascular se recuperan con rapidez al reducir o dejar el tabaco.</string>
+    <string name="baseline_risk_moderate">Exposición moderada</string>
+    <string name="baseline_risk_moderate_desc">Carga acumulada considerable. Umbral de riesgo para afecciones respiratorias crónicas.</string>
+    <string name="baseline_risk_high">Exposición alta</string>
+    <string name="baseline_risk_high_desc">Alta carga acumulativa. Cada cigarrillo evitado contribuye a proteger la capacidad pulmonar y el corazón.</string>
+    <string name="baseline_save_button">Guardar punto de partida</string>
+    <string name="baseline_reset_button">Restablecer punto de partida</string>
+    <string name="baseline_reset_dialog_title">¿Restablecer punto de partida?</string>
+    <string name="baseline_reset_dialog_desc">Esto restablecerá tu hábito base y las métricas de comparación de reducción.</string>
+    <string name="baseline_stats_card_title">Punto de partida y reducción</string>
+    <string name="baseline_stats_was_label">Base</string>
+    <string name="baseline_stats_now_label">Actual (7 días)</string>
+    <string name="baseline_stats_pcs_day">%1$.1f uds./día</string>
+    <string name="baseline_stats_reduction_badge">−%1$d%% reducción</string>
+    <string name="baseline_stats_no_reduction_badge">En nivel base</string>
+    <string name="baseline_stats_avoided_title">Cigarrillos evitados por reducción</string>
+    <string name="baseline_stats_avoided_desc">%1$d cigarrillos evitados • %2$s ahorrados</string>
+    <string name="baseline_stats_past_summary">Historial previo: %1$s (~%2$s cigs., %3$s)</string>
+    <string name="baseline_banner_title">Mide tu progreso de reducción</string>
+    <string name="baseline_banner_desc">Configura tu punto de partida para ver tu porcentaje de reducción (-%), cigarrillos evitados y tu índice de paquetes-año.</string>
+    <string name="baseline_banner_button">Configurar punto de partida</string>
 
     <string name="widget_quick_add_title">Añadir rápido</string>
     <string name="widget_quick_add_description">Widget 1x1 para registrar un cigarrillo al instante</string>
@@ -465,7 +516,6 @@
     <string name="achievement_view_all">Ver todos los logros</string>
     <string name="dialog_awesome">¡Genial!</string>
 
-    <!-- Ongoing Notification -->
     <string name="settings_section_notifications">Notificaciones</string>
     <string name="settings_ongoing_notification_title">Notificación en barra de estado</string>
     <string name="settings_ongoing_notification_desc">Progreso persistente y registro rápido en notificaciones</string>
@@ -493,4 +543,12 @@
     <string name="notification_toast_added">+1 cigarrillo registrado</string>
     <string name="notification_toast_resisted">¡Antojo resistido!</string>
     <string name="entry_over_limit_badge">Sobre el límite</string>
+
+    <string name="action_smoked_cigarette">Fumado</string>
+    <string name="action_resisted_craving">Resistido</string>
+    <string name="action_mindful_pause">Pausa consciente</string>
+    <string name="resisted_craving_success">¡Antojo resistido! ¡Bien hecho!</string>
+    <string name="widget_show_resist_button_title">Botón «Resistido» en el widget</string>
+    <string name="widget_show_resist_button_desc">Mostrar botón rápido de resistencia en el widget 3x1</string>
+    <string name="close_menu">Cerrar menú</string>
 </resources>
