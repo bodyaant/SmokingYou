@@ -11,6 +11,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
@@ -55,8 +57,8 @@ import androidx.compose.foundation.BorderStroke
 import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.ContainerIcon
-import com.smokingtracker.ui.theme.LocalContainerStyle
-import com.smokingtracker.data.ContainerStyle
+import com.smokingtracker.ui.theme.rememberBouncyPress
+import com.smokingtracker.ui.theme.bouncyPress
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -79,13 +81,21 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun GraphScreen(viewModel: MainViewModel, initialTarget: String? = null) {
+fun GraphScreen(
+    viewModel: MainViewModel,
+    initialTarget: String? = null,
+    onNavigateToSettings: (() -> Unit)? = null
+) {
     val entries by viewModel.smokingEntries.collectAsStateWithLifecycle()
     val nonResistedEntities by viewModel.nonResistedEntities.collectAsStateWithLifecycle()
+    val resistedEntries by viewModel.resistedEntries.collectAsStateWithLifecycle()
     val dailyLimit by viewModel.dailyLimit.collectAsStateWithLifecycle()
     val packPrice by viewModel.packPrice.collectAsStateWithLifecycle()
     val packSize by viewModel.packSize.collectAsStateWithLifecycle()
     val currency by viewModel.currency.collectAsStateWithLifecycle()
+    val hasHistoricalBaseline by viewModel.hasHistoricalBaseline.collectAsStateWithLifecycle()
+    val historicalStartDate by viewModel.historicalStartDate.collectAsStateWithLifecycle()
+    val historicalDailyAvg by viewModel.historicalDailyAvg.collectAsStateWithLifecycle()
     val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
     val scrollTarget by viewModel.graphScrollTarget.collectAsStateWithLifecycle()
 
@@ -95,6 +105,7 @@ fun GraphScreen(viewModel: MainViewModel, initialTarget: String? = null) {
 
     GraphScreenContent(
         entries = entries,
+        resistedCount = resistedEntries.size,
         triggerEntities = nonResistedEntities,
         dailyLimit = dailyLimit,
         packPrice = packPrice,
@@ -102,7 +113,13 @@ fun GraphScreen(viewModel: MainViewModel, initialTarget: String? = null) {
         currency = currency,
         vibrationEnabled = vibrationEnabled,
         scrollTarget = scrollTarget,
-        onClearScrollTarget = { viewModel.clearGraphScrollTarget() }
+        onClearScrollTarget = { viewModel.clearGraphScrollTarget() },
+        hasHistoricalBaseline = hasHistoricalBaseline,
+        historicalStartDate = historicalStartDate,
+        historicalDailyAvg = historicalDailyAvg,
+        onSaveBaseline = viewModel::saveBaseline,
+        onClearBaseline = viewModel::clearHistoricalBaseline,
+        onNavigateToSettings = onNavigateToSettings
     )
 }
 
@@ -110,18 +127,54 @@ fun GraphScreen(viewModel: MainViewModel, initialTarget: String? = null) {
 @Composable
 fun GraphScreenContent(
     entries: List<Long>,
+    resistedCount: Int = 0,
     triggerEntities: List<com.smokingtracker.data.local.SmokingEntryEntity> = emptyList(),
     dailyLimit: Int = 0,
     packPrice: Float = 0f,
     packSize: Int = 20,
     currency: String = "",
-    vibrationEnabled: Boolean = false,
+    vibrationEnabled: Boolean = true,
     scrollTarget: String? = null,
-    onClearScrollTarget: () -> Unit = {}
+    onClearScrollTarget: () -> Unit = {},
+    hasHistoricalBaseline: Boolean = false,
+    historicalStartDate: Long = 0L,
+    historicalDailyAvg: Int = 0,
+    onSaveBaseline: (startDate: Long, dailyAvg: Int) -> Unit = { _, _ -> },
+    onClearBaseline: () -> Unit = {},
+    onNavigateToSettings: (() -> Unit)? = null
 ) {
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { 3 })
     val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
+
+    var showBaselineSheet by remember { mutableStateOf(false) }
+
+    val baselineAnalytics = remember(hasHistoricalBaseline, historicalStartDate, historicalDailyAvg, packPrice, packSize, entries) {
+        if (hasHistoricalBaseline) {
+            StatisticsManager().calculateBaselineAnalytics(
+                startDate = historicalStartDate,
+                dailyAvg = historicalDailyAvg,
+                packPrice = packPrice,
+                packSize = packSize,
+                entries = entries
+            )
+        } else null
+    }
+
+    if (showBaselineSheet) {
+        BaselineBottomSheet(
+            hasBaseline = hasHistoricalBaseline,
+            historicalStartDate = historicalStartDate,
+            historicalDailyAvg = historicalDailyAvg,
+            packPrice = packPrice,
+            packSize = packSize,
+            currency = currency,
+            onSaveBaseline = onSaveBaseline,
+            onClearBaseline = onClearBaseline,
+            onDismissRequest = { showBaselineSheet = false },
+            vibrationEnabled = vibrationEnabled
+        )
+    }
 
     LaunchedEffect(scrollTarget) {
         if (scrollTarget != null) {
@@ -365,7 +418,7 @@ fun GraphScreenContent(
                 }
                 1 -> {
                     val stats = remember(entries) { StatisticsManager().calculateStats(entries) }
-                    if (entries.isEmpty()) {
+                    if (entries.isEmpty() && resistedCount == 0 && baselineAnalytics == null) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -410,11 +463,15 @@ fun GraphScreenContent(
                         StatisticsList(
                             stats = stats,
                             entries = entries,
+                            resistedCount = resistedCount,
                             dailyLimit = dailyLimit,
                             packPrice = packPrice,
                             packSize = packSize,
                             currency = currency,
-                            onNavigateToSettings = null
+                            baselineAnalytics = baselineAnalytics,
+                            hasHistoricalBaseline = hasHistoricalBaseline,
+                            onOpenBaselineSheet = { showBaselineSheet = true },
+                            onNavigateToSettings = onNavigateToSettings
                         )
                     }
                 }
@@ -453,7 +510,7 @@ fun GraphSection(
     onNext: () -> Unit,
     canGoNext: Boolean = true,
     onDateClick: (() -> Unit)? = null,
-    vibrationEnabled: Boolean = false
+    vibrationEnabled: Boolean = true
 ) {
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -543,6 +600,26 @@ fun GraphSection(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            val prevInteractionSource = remember { MutableInteractionSource() }
+            val prevBouncy = rememberBouncyPress(
+                interactionSource = prevInteractionSource,
+                targetScale = 0.86f,
+                targetRotation = -12f
+            )
+
+            val nextInteractionSource = remember { MutableInteractionSource() }
+            val nextBouncy = rememberBouncyPress(
+                interactionSource = nextInteractionSource,
+                targetScale = 0.86f,
+                targetRotation = 12f
+            )
+
+            val dateChipInteractionSource = remember { MutableInteractionSource() }
+            val dateChipBouncy = rememberBouncyPress(
+                interactionSource = dateChipInteractionSource,
+                targetScale = 0.94f
+            )
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -556,7 +633,10 @@ fun GraphSection(
                     shape = cookieShape,
                     color = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.size(48.dp)
+                    interactionSource = prevInteractionSource,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .bouncyPress(prevBouncy)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Previous")
@@ -572,7 +652,9 @@ fun GraphSection(
                     shape = RoundedCornerShape(24.dp),
                     color = if (onDateClick != null) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainer,
                     contentColor = if (onDateClick != null) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
-                    border = containerBorder(1.dp, if (onDateClick != null) MaterialTheme.colorScheme.primary.copy(alpha = 0.25f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
+                    border = containerBorder(1.dp, if (onDateClick != null) MaterialTheme.colorScheme.primary.copy(alpha = 0.25f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f)),
+                    interactionSource = dateChipInteractionSource,
+                    modifier = Modifier.bouncyPress(dateChipBouncy)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -611,7 +693,10 @@ fun GraphSection(
                             else MaterialTheme.colorScheme.surfaceVariant,
                     contentColor = if (canGoNext) MaterialTheme.colorScheme.onSecondaryContainer
                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                    modifier = Modifier.size(48.dp)
+                    interactionSource = nextInteractionSource,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .bouncyPress(nextBouncy)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Next")
@@ -873,7 +958,6 @@ fun TriggersTab(triggerCounts: Map<String, Int>, totalCount: Int) {
                 border = containerBorder()
             ) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                    val isStandardStyle = LocalContainerStyle.current == ContainerStyle.STANDARD
                     sortedTriggers.forEach { (triggerKey, count) ->
                         val triggerType = com.smokingtracker.data.TriggerType.fromKey(triggerKey)
                         val triggerName = triggerType?.let { stringResource(it.labelResId) } ?: triggerKey
@@ -893,8 +977,8 @@ fun TriggersTab(triggerCounts: Map<String, Int>, totalCount: Int) {
                                     Box(
                                         modifier = Modifier
                                             .size(32.dp)
-                                            .clip(if (isStandardStyle) CircleShape else cookieShape)
-                                            .background(if (isStandardStyle) Color.Transparent else MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                                            .clip(cookieShape)
+                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Icon(
@@ -1197,7 +1281,7 @@ private fun WeeklyComparisonCard(comparison: StatisticsManager.WeeklyComparisonD
 private data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 
 @Composable
-private fun PeakSmokingHoursSection(distribution: StatisticsManager.HourlyDistributionData, vibrationEnabled: Boolean = false) {
+private fun PeakSmokingHoursSection(distribution: StatisticsManager.HourlyDistributionData, vibrationEnabled: Boolean = true) {
     var selectedHour by remember { mutableStateOf<Int?>(null) }
     var isAnimated by remember { mutableStateOf(false) }
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current

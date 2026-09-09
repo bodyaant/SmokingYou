@@ -12,9 +12,17 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
+sealed interface HomeFabUiAction {
+    data object OpenSmokedDialog : HomeFabUiAction
+    data object OpenMindfulPauseDialog : HomeFabUiAction
+    data object ResistedCraving : HomeFabUiAction
+}
 
 class HomeViewModel(
     private val repository: SmokingRepository,
@@ -22,6 +30,27 @@ class HomeViewModel(
     private val achievementsCoordinator: AchievementsCoordinator,
     application: Application
 ) : AndroidViewModel(application) {
+
+    private val _fabActionEvents = MutableSharedFlow<HomeFabUiAction>(extraBufferCapacity = 1)
+    val fabActionEvents = _fabActionEvents.asSharedFlow()
+
+    fun triggerFabSmoked() {
+        viewModelScope.launch {
+            _fabActionEvents.emit(HomeFabUiAction.OpenSmokedDialog)
+        }
+    }
+
+    fun triggerFabMindfulPause() {
+        viewModelScope.launch {
+            _fabActionEvents.emit(HomeFabUiAction.OpenMindfulPauseDialog)
+        }
+    }
+
+    fun triggerFabResisted() {
+        viewModelScope.launch {
+            _fabActionEvents.emit(HomeFabUiAction.ResistedCraving)
+        }
+    }
 
     val smokingEntries: StateFlow<List<Long>> = repository.smokingEntries
         .map { entities -> entities.filter { !it.isResisted }.map { it.timestamp } }

@@ -12,8 +12,8 @@ import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.containerPadding
 import com.smokingtracker.ui.theme.ContainerIcon
-import com.smokingtracker.ui.theme.LocalContainerStyle
-import com.smokingtracker.data.ContainerStyle
+import com.smokingtracker.ui.theme.rememberBouncyPress
+import com.smokingtracker.ui.theme.bouncyPress
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.graphics.Color
@@ -33,6 +33,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -60,6 +61,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.rotate
+import androidx.compose.material.icons.outlined.SelfImprovement
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -90,7 +93,7 @@ private fun HomeScreenPreview() {
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    vibrationEnabled: Boolean = false,
+    vibrationEnabled: Boolean = true,
     onNavigateToAchievements: () -> Unit = {},
     onNavigateToGraphs: (String) -> Unit = {}
 ) {
@@ -110,6 +113,15 @@ fun HomeScreen(
     )
 }
 
+data class AppSnackbarVisuals(
+    override val message: String,
+    override val actionLabel: String? = null,
+    override val withDismissAction: Boolean = false,
+    override val duration: SnackbarDuration = SnackbarDuration.Short,
+    val icon: ImageVector = Icons.Filled.Shield,
+    val isError: Boolean = false
+) : SnackbarVisuals
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun HomeScreenContent(
@@ -118,7 +130,7 @@ internal fun HomeScreenContent(
     unlockedAchievements: Set<String> = emptySet(),
     taperingIntervalDays: Int = 7,
     viewModel: HomeViewModel? = null,
-    vibrationEnabled: Boolean = false,
+    vibrationEnabled: Boolean = true,
     onNavigateToAchievements: () -> Unit = {},
     onNavigateToGraphs: (String) -> Unit = {}
 ) {
@@ -145,12 +157,91 @@ internal fun HomeScreenContent(
     val activeTriggers by viewModel?.activeTriggers?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(TriggerType.allEntries().map { TriggerItem.fromBuiltIn(it) }) }
     val customTriggers by viewModel?.customTriggers?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(emptyList()) }
     var pendingLogTime by remember { mutableLongStateOf(0L) }
-    val snackbarHostState = remember { SnackbarHostState() }
+    var pendingTriggerToLog by remember { mutableStateOf<String?>(null) }
+    var startInMindfulPause by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val context = androidx.compose.ui.platform.LocalContext.current
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+
+    val resistedSuccessMsg = stringResource(R.string.resisted_craving_success)
+    LaunchedEffect(viewModel) {
+        viewModel?.fabActionEvents?.collect { action ->
+            when (action) {
+                is com.smokingtracker.HomeFabUiAction.OpenSmokedDialog -> {
+                    val now = Calendar.getInstance()
+                    val entryDate = currentDate.clone() as Calendar
+                    entryDate.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY))
+                    entryDate.set(Calendar.MINUTE, now.get(Calendar.MINUTE))
+                    entryDate.set(Calendar.SECOND, now.get(Calendar.SECOND))
+                    entryDate.set(Calendar.MILLISECOND, now.get(Calendar.MILLISECOND))
+                    pendingLogTime = if (entryDate.timeInMillis <= now.timeInMillis) entryDate.timeInMillis else now.timeInMillis
+                    startInMindfulPause = false
+                    showTriggerDialog = true
+                }
+                is com.smokingtracker.HomeFabUiAction.OpenMindfulPauseDialog -> {
+                    val now = Calendar.getInstance()
+                    val entryDate = currentDate.clone() as Calendar
+                    entryDate.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY))
+                    entryDate.set(Calendar.MINUTE, now.get(Calendar.MINUTE))
+                    entryDate.set(Calendar.SECOND, now.get(Calendar.SECOND))
+                    entryDate.set(Calendar.MILLISECOND, now.get(Calendar.MILLISECOND))
+                    pendingLogTime = if (entryDate.timeInMillis <= now.timeInMillis) entryDate.timeInMillis else now.timeInMillis
+                    mindfulPauseTrigger = null
+                    startInMindfulPause = true
+                    showTriggerDialog = true
+                }
+                is com.smokingtracker.HomeFabUiAction.ResistedCraving -> {
+                    com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
+                    val now = Calendar.getInstance()
+                    val entryDate = currentDate.clone() as Calendar
+                    entryDate.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY))
+                    entryDate.set(Calendar.MINUTE, now.get(Calendar.MINUTE))
+                    entryDate.set(Calendar.SECOND, now.get(Calendar.SECOND))
+                    entryDate.set(Calendar.MILLISECOND, now.get(Calendar.MILLISECOND))
+                    val logTime = if (entryDate.timeInMillis <= now.timeInMillis) entryDate.timeInMillis else now.timeInMillis
+                    viewModel.addResistedEntry(null, logTime)
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            AppSnackbarVisuals(
+                                message = resistedSuccessMsg,
+                                duration = SnackbarDuration.Short,
+                                icon = Icons.Filled.Shield,
+                                isError = false
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    val selectedDateEntries = remember(entries, currentDate) {
+        val currentYear = currentDate.get(Calendar.YEAR)
+        val currentDay = currentDate.get(Calendar.DAY_OF_YEAR)
+        val checkCal = Calendar.getInstance()
+        entries.filter { timestamp ->
+            checkCal.timeInMillis = timestamp
+            checkCal.get(Calendar.YEAR) == currentYear &&
+            checkCal.get(Calendar.DAY_OF_YEAR) == currentDay
+        }.sortedDescending()
+    }
+
+    val attemptLogSmoking: (String?) -> Unit = { triggerKey ->
+        if (dailyLimit in 1..selectedDateEntries.size) {
+            pendingTriggerToLog = triggerKey
+            showLimitWarning = true
+        } else {
+            com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
+            if (pendingLogTime > 0L) {
+                viewModel?.addSmokingEntryWithTrigger(pendingLogTime, triggerKey)
+            }
+            showTriggerDialog = false
+            isProcessingAdd = false
+        }
+    }
 
     if (showAddTriggerDialog) {
         AddTriggerDialog(
@@ -161,11 +252,7 @@ internal fun HomeScreenContent(
                 viewModel?.addCustomTrigger(name) { added ->
                     if (added != null) {
                         showAddTriggerDialog = false
-                        if (pendingLogTime > 0L) {
-                            viewModel.addSmokingEntryWithTrigger(pendingLogTime, added)
-                        }
-                        showTriggerDialog = false
-                        isProcessingAdd = false
+                        attemptLogSmoking(added)
                     }
                 }
             }
@@ -226,17 +313,6 @@ internal fun HomeScreenContent(
     val dateFormat = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
     val selectedDateStr = dateFormat.format(currentDate.time)
     
-    val selectedDateEntries = remember(entries, currentDate) {
-        val currentYear = currentDate.get(Calendar.YEAR)
-        val currentDay = currentDate.get(Calendar.DAY_OF_YEAR)
-        val checkCal = Calendar.getInstance()
-        entries.filter { timestamp ->
-            checkCal.timeInMillis = timestamp
-            checkCal.get(Calendar.YEAR) == currentYear &&
-            checkCal.get(Calendar.DAY_OF_YEAR) == currentDay
-        }.sortedDescending()
-    }
-
     val isToday = remember(currentDate) {
         val now = Calendar.getInstance()
         currentDate.get(Calendar.YEAR) == now.get(Calendar.YEAR) &&
@@ -245,7 +321,10 @@ internal fun HomeScreenContent(
                   
     if (showLimitWarning) {
         AlertDialog(
-            onDismissRequest = { showLimitWarning = false },
+            onDismissRequest = {
+                showLimitWarning = false
+                isProcessingAdd = false
+            },
             shape = containerShape(RoundedCornerShape(28.dp)),
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             icon = {
@@ -286,17 +365,12 @@ internal fun HomeScreenContent(
                         if (!isProcessingAdd) {
                             com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                             isProcessingAdd = true
-                            val now = Calendar.getInstance()
-                            val entryDate = currentDate.clone() as Calendar
-                            entryDate.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY))
-                            entryDate.set(Calendar.MINUTE, now.get(Calendar.MINUTE))
-                            entryDate.set(Calendar.SECOND, now.get(Calendar.SECOND))
-                            entryDate.set(Calendar.MILLISECOND, now.get(Calendar.MILLISECOND))
-                            if (entryDate.timeInMillis <= now.timeInMillis) {
-                                pendingLogTime = entryDate.timeInMillis
-                                showTriggerDialog = true
+                            if (pendingLogTime > 0L) {
+                                viewModel?.addSmokingEntryWithTrigger(pendingLogTime, pendingTriggerToLog)
                             }
                             showLimitWarning = false
+                            showTriggerDialog = false
+                            isProcessingAdd = false
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
@@ -312,6 +386,7 @@ internal fun HomeScreenContent(
                 OutlinedButton(
                     onClick = {
                         showLimitWarning = false
+                        isProcessingAdd = false
                     },
                     shape = RoundedCornerShape(14.dp)
                 ) {
@@ -365,13 +440,14 @@ internal fun HomeScreenContent(
 
     if (showTriggerDialog) {
         val triggerSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        var isMindfulPauseActive by remember { mutableStateOf(false) }
+        var isMindfulPauseActive by remember(showTriggerDialog) { mutableStateOf(startInMindfulPause) }
 
         ModalBottomSheet(
             onDismissRequest = {
                 showTriggerDialog = false
                 isProcessingAdd = false
                 isMindfulPauseActive = false
+                startInMindfulPause = false
             },
             sheetState = triggerSheetState,
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -397,18 +473,19 @@ internal fun HomeScreenContent(
                             showTriggerDialog = false
                             isProcessingAdd = false
                             isMindfulPauseActive = false
+                            startInMindfulPause = false
                         },
                         onSuccess = { trigger ->
                             viewModel?.addResistedEntry(trigger)
                             showTriggerDialog = false
                             isProcessingAdd = false
                             isMindfulPauseActive = false
+                            startInMindfulPause = false
                         },
                         onFailure = { trigger ->
-                            viewModel?.addSmokingEntryWithTrigger(System.currentTimeMillis(), trigger)
-                            showTriggerDialog = false
-                            isProcessingAdd = false
+                            attemptLogSmoking(trigger)
                             isMindfulPauseActive = false
+                            startInMindfulPause = false
                         }
                     )
                 } else {
@@ -440,12 +517,7 @@ internal fun HomeScreenContent(
                                     rowTriggers.forEach { triggerItem ->
                                         Card(
                                             onClick = {
-                                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
-                                                if (pendingLogTime > 0L) {
-                                                    viewModel?.addSmokingEntryWithTrigger(pendingLogTime, triggerItem.key)
-                                                }
-                                                showTriggerDialog = false
-                                                isProcessingAdd = false
+                                                attemptLogSmoking(triggerItem.key)
                                             },
                                             modifier = Modifier
                                                 .weight(1f)
@@ -572,7 +644,6 @@ internal fun HomeScreenContent(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Mindful Pause button
                         Surface(
                             onClick = {
                                 com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
@@ -605,15 +676,9 @@ internal fun HomeScreenContent(
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        // Skip / Without trigger Button
                         Button(
                             onClick = {
-                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
-                                if (pendingLogTime > 0L) {
-                                    viewModel?.addSmokingEntryWithTrigger(pendingLogTime, null)
-                                }
-                                showTriggerDialog = false
-                                isProcessingAdd = false
+                                attemptLogSmoking(null)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -698,6 +763,20 @@ internal fun HomeScreenContent(
                     .padding(bottom = 96.dp)
                     .padding(horizontal = 16.dp)
             ) { snackbarData ->
+                val customVisuals = snackbarData.visuals as? AppSnackbarVisuals
+                val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+                val isDelete = customVisuals?.isError ?: (snackbarData.visuals.actionLabel != null)
+                val icon = customVisuals?.icon ?: if (isDelete) Icons.Filled.Delete else Icons.Filled.Shield
+                val (tint, backdropColor) = if (isDelete) {
+                    MaterialTheme.colorScheme.onErrorContainer to MaterialTheme.colorScheme.errorContainer
+                } else {
+                    if (isDark) {
+                        Color(0xFFAFE1B3) to Color(0xFF224426)
+                    } else {
+                        Color(0xFF184D20) to Color(0xFFD6ECCF)
+                    }
+                }
+
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -727,9 +806,9 @@ internal fun HomeScreenContent(
                             modifier = Modifier.weight(1f)
                         ) {
                             ContainerIcon(
-                                icon = Icons.Filled.Delete,
-                                tint = MaterialTheme.colorScheme.onErrorContainer,
-                                backdropColor = MaterialTheme.colorScheme.errorContainer,
+                                icon = icon,
+                                tint = tint,
+                                backdropColor = backdropColor,
                                 size = 36.dp
                             )
                             Text(
@@ -933,6 +1012,26 @@ internal fun HomeScreenContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
 
+                    val prevInteractionSource = remember { MutableInteractionSource() }
+                    val prevBouncy = rememberBouncyPress(
+                        interactionSource = prevInteractionSource,
+                        targetScale = 0.86f,
+                        targetRotation = -12f
+                    )
+
+                    val nextInteractionSource = remember { MutableInteractionSource() }
+                    val nextBouncy = rememberBouncyPress(
+                        interactionSource = nextInteractionSource,
+                        targetScale = 0.86f,
+                        targetRotation = 12f
+                    )
+
+                    val datePickerInteractionSource = remember { MutableInteractionSource() }
+                    val datePickerBouncy = rememberBouncyPress(
+                        interactionSource = datePickerInteractionSource,
+                        targetScale = 0.94f
+                    )
+
                     Surface(
                         onClick = {
                             com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
@@ -943,7 +1042,10 @@ internal fun HomeScreenContent(
                         shape = MaterialShapes.Cookie9Sided.toShape(),
                         color = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.size(56.dp)
+                        interactionSource = prevInteractionSource,
+                        modifier = Modifier
+                            .size(56.dp)
+                            .bouncyPress(prevBouncy)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.previous_day))
@@ -958,7 +1060,9 @@ internal fun HomeScreenContent(
                         shape = RoundedCornerShape(24.dp),
                         color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        border = containerBorder(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f))
+                        border = containerBorder(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)),
+                        interactionSource = datePickerInteractionSource,
+                        modifier = Modifier.bouncyPress(datePickerBouncy)
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -993,7 +1097,10 @@ internal fun HomeScreenContent(
                         shape = MaterialShapes.Cookie9Sided.toShape(),
                         color = if (!isToday) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = if (!isToday) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                        modifier = Modifier.size(56.dp)
+                        interactionSource = nextInteractionSource,
+                        modifier = Modifier
+                            .size(56.dp)
+                            .bouncyPress(nextBouncy)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.next_day))
@@ -1037,7 +1144,7 @@ internal fun HomeScreenContent(
                 LazyColumn(
                     state = entriesListState,
                     modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(bottom = 190.dp)
+                    contentPadding = PaddingValues(bottom = 100.dp)
                 ) {
                     if (selectedDateAllEntities.isEmpty()) {
                         item {
@@ -1210,57 +1317,6 @@ internal fun HomeScreenContent(
                 }
             }
         }
-
-        val fabInteractionSource = remember { MutableInteractionSource() }
-        val isFabPressed by fabInteractionSource.collectIsPressedAsState()
-        val fabScale by animateFloatAsState(
-            targetValue = if (isFabPressed) 0.88f else 1f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessLow
-            ),
-            label = "fab_scale"
-        )
-
-        FloatingActionButton(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 110.dp, end = 24.dp)
-                .scale(fabScale),
-            onClick = {
-                com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
-
-                if (dailyLimit in 1..selectedDateEntries.size) {
-                    showLimitWarning = true
-                } else {
-                    val now = Calendar.getInstance()
-                    val entryDate = currentDate.clone() as Calendar
-                    entryDate.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY))
-                    entryDate.set(Calendar.MINUTE, now.get(Calendar.MINUTE))
-                    entryDate.set(Calendar.SECOND, now.get(Calendar.SECOND))
-                    entryDate.set(Calendar.MILLISECOND, now.get(Calendar.MILLISECOND))
-
-                    if (entryDate.timeInMillis <= now.timeInMillis) {
-                        pendingLogTime = entryDate.timeInMillis
-                        showTriggerDialog = true
-                    }
-                }
-            },
-            interactionSource = fabInteractionSource,
-            shape = containerShape(RoundedCornerShape(18.dp)),
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            elevation = FloatingActionButtonDefaults.elevation(
-                defaultElevation = 4.dp,
-                pressedElevation = 1.dp
-            )
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Add,
-                contentDescription = stringResource(R.string.add_entry),
-                modifier = Modifier.size(28.dp)
-            )
-        }
         }
     }
 }
@@ -1347,7 +1403,7 @@ fun EntryItem(
     index: Int = 0,
     trigger: String? = null,
     allTriggers: List<TriggerItem> = remember { TriggerType.allEntries().map { TriggerItem.fromBuiltIn(it) } },
-    vibrationEnabled: Boolean = false,
+    vibrationEnabled: Boolean = true,
     onDelete: () -> Unit = {},
     onEdit: (Long) -> Unit = {},
     onUpdateTrigger: (String?) -> Unit = {}
@@ -1458,13 +1514,11 @@ fun EntryItem(
                 .fillMaxWidth()
                 .padding(12.dp)
         ) {
-            // --- COLLAPSED HEADER ROW ---
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // 1. Time pill
                 Surface(
                     onClick = {
                         if (!isResisted) {
@@ -1488,7 +1542,6 @@ fun EntryItem(
                     }
                 }
 
-                // 2. Reason / Trigger info chip (Icon + Text)
                 val triggerType = trigger?.let { TriggerType.fromKey(it) }
                 val triggerLabel = when {
                     isResisted -> stringResource(R.string.mindful_pause_resisted)
@@ -1571,7 +1624,6 @@ fun EntryItem(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // 3. Interval / First of the day info
                 if (!isResisted) {
                     if (prevEntryTime != null) {
                         val intervalStr = remember(entryTime, prevEntryTime) {
@@ -1600,7 +1652,6 @@ fun EntryItem(
                     }
                 }
 
-                // 4. Android notification-style expand chevron button
                 Surface(
                     onClick = {
                         isExpanded = !isExpanded
@@ -1622,7 +1673,6 @@ fun EntryItem(
                 }
             }
 
-            // --- EXPANDABLE EDIT PANEL ---
             AnimatedVisibility(
                 visible = isExpanded,
                 enter = expandVertically(
@@ -1649,7 +1699,6 @@ fun EntryItem(
                     )
 
                     if (!isResisted) {
-                        // Time Editor Button
                         Surface(
                             onClick = {
                                 com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
@@ -1705,7 +1754,6 @@ fun EntryItem(
                             }
                         }
 
-                        // Reason / Trigger selector section
                         Text(
                             text = stringResource(R.string.edit_reason_label),
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
@@ -1779,7 +1827,6 @@ fun EntryItem(
                         }
                     }
 
-                    // Delete Button
                     Surface(
                         onClick = onDelete,
                         shape = RoundedCornerShape(16.dp),
