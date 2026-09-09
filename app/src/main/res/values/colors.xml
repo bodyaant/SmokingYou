@@ -8,4 +8,5 @@
     <color name="widget_primary_text_color">#191A23</color>
     <color name="widget_secondary_text_color">#616474</color>
     <color name="widget_accent_color">#E65100</color>
+    <color name="widget_shield_accent_color">#2E7D32</color>
 </resources>

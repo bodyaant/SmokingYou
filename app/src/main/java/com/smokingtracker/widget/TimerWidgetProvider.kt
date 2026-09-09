@@ -60,11 +60,34 @@ class TimerWidgetProvider : AppWidgetProvider(), KoinComponent {
                     pendingResult.finish()
                 }
             }
+        } else if (intent.action == ACTION_RESIST_TIMER) {
+            val pendingResult = goAsync()
+            get<CoroutineScope>().launch {
+                try {
+                    val repository: SmokingRepository = get()
+                    repository.addResistedEntry(System.currentTimeMillis(), trigger = null)
+
+                    WidgetUpdateManager.updateAll(context)
+
+                    Handler(Looper.getMainLooper()).post {
+                        Toast.makeText(
+                            context.applicationContext,
+                            context.getString(R.string.notification_toast_resisted),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    pendingResult.finish()
+                }
+            }
         }
     }
 
     companion object : KoinComponent {
         const val ACTION_QUICK_ADD_TIMER = "com.smokingtracker.ACTION_QUICK_ADD_TIMER"
+        const val ACTION_RESIST_TIMER = "com.smokingtracker.ACTION_RESIST_TIMER"
 
         fun updateAppWidgets(
             context: Context,
@@ -78,6 +101,7 @@ class TimerWidgetProvider : AppWidgetProvider(), KoinComponent {
 
                     val entries = repository.getAllEntries()
                     val dailyLimit = dataStoreManager.dailyLimit.first()
+                    val showResistButton = dataStoreManager.widgetShowResistButton.first()
 
                     val nonResistedEntries = entries.filter { !it.isResisted }.map { it.timestamp }
                     val lastTimestamp = nonResistedEntries.maxOrNull()
@@ -110,8 +134,14 @@ class TimerWidgetProvider : AppWidgetProvider(), KoinComponent {
                         val views = RemoteViews(context.packageName, R.layout.widget_timer)
 
                         val pillColor = androidx.core.content.ContextCompat.getColor(context, R.color.widget_pill_bg_color)
-                        val cookieBitmap = CookieShapeDrawable.createCookieBitmap(context, 52, pillColor, petals = 12)
+                        val cookieBitmap = CookieShapeDrawable.createCookieBitmap(context, 48, pillColor, petals = 12)
                         views.setImageViewBitmap(R.id.img_cookie_bg, cookieBitmap)
+                        views.setImageViewBitmap(R.id.img_cookie_bg_resist, cookieBitmap)
+
+                        views.setViewVisibility(
+                            R.id.btn_widget_resist,
+                            if (showResistButton) android.view.View.VISIBLE else android.view.View.GONE
+                        )
 
                         views.setTextViewText(R.id.tv_widget_timer, timeElapsedText)
                         views.setTextViewText(R.id.tv_widget_today_count, countText)
@@ -125,6 +155,17 @@ class TimerWidgetProvider : AppWidgetProvider(), KoinComponent {
                             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                         )
                         views.setOnClickPendingIntent(R.id.widget_timer_left_section, appPendingIntent)
+
+                        val resistIntent = Intent(context, TimerWidgetProvider::class.java).apply {
+                            action = ACTION_RESIST_TIMER
+                        }
+                        val resistPendingIntent = PendingIntent.getBroadcast(
+                            context,
+                            2,
+                            resistIntent,
+                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                        )
+                        views.setOnClickPendingIntent(R.id.btn_widget_resist, resistPendingIntent)
 
                         val addIntent = Intent(context, TimerWidgetProvider::class.java).apply {
                             action = ACTION_QUICK_ADD_TIMER
