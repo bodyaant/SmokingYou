@@ -45,6 +45,12 @@ android {
         generateLocaleConfig = false
     }
 
+    packaging {
+        resources {
+            excludes += "DebugProbesKt.bin"
+        }
+    }
+
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
