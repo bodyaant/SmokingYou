@@ -75,7 +75,6 @@ fun RegistrationScreenContent(onRegister: () -> Unit) {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Floating decorative shapes
         Box(
             modifier = Modifier
                 .offset(x = (-80).dp, y = (-120).dp)
@@ -95,7 +94,6 @@ fun RegistrationScreenContent(onRegister: () -> Unit) {
                 .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.45f))
         )
 
-        // Main onboarding content
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -105,7 +103,6 @@ fun RegistrationScreenContent(onRegister: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header / Hero Section
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(top = 16.dp)
@@ -150,7 +147,6 @@ fun RegistrationScreenContent(onRegister: () -> Unit) {
                 )
             }
 
-            // Feature Highlights Card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -201,7 +197,6 @@ fun RegistrationScreenContent(onRegister: () -> Unit) {
                 }
             }
 
-            // Bottom CTA Area
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

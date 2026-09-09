@@ -2,6 +2,7 @@ package com.smokingtracker
 
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.math.roundToInt
 
 data class StatisticsData(
     val maxPerDay: Int,
@@ -256,12 +257,132 @@ class StatisticsManager {
         return monthlyCounts.toList()
     }
 
+    enum class PackYearsRiskLevel {
+        LOW,
+        MODERATE,
+        HIGH
+    }
+
+    data class SmokingBaselineAnalytics(
+        val baselineDailyAvg: Int,
+        val smokingYears: Float,
+        val totalYearsInt: Int,
+        val totalMonthsInt: Int,
+        val packYears: Float,
+        val riskLevel: PackYearsRiskLevel,
+        val pastCigarettes: Long,
+        val pastMoneySpent: Double,
+        val currentAvg7Days: Float,
+        val reductionPercentage: Int,
+        val totalAvoidedCigarettes: Int,
+        val totalAvoidedMoney: Double
+    )
+
     data class HistoricalBaselineStats(
         val totalCigarettes: Int,
         val totalMoneySpent: Double,
         val totalDays: Int,
         val estimatedTriggerCounts: Map<String, Int>
     )
+
+    fun calculateBaselineAnalytics(
+        startDate: Long,
+        dailyAvg: Int,
+        packPrice: Float,
+        packSize: Int,
+        entries: List<Long>
+    ): SmokingBaselineAnalytics? {
+        if (startDate <= 0L || dailyAvg <= 0) return null
+
+        val now = System.currentTimeMillis()
+        if (startDate >= now) return null
+
+        val diffMs = now - startDate
+        val totalDaysUntilNow = TimeUnit.MILLISECONDS.toDays(diffMs).coerceAtLeast(1)
+        val smokingYears = (totalDaysUntilNow / 365.25f).coerceAtLeast(0.1f)
+        val totalYearsInt = (totalDaysUntilNow / 365).toInt()
+        val totalMonthsInt = ((totalDaysUntilNow % 365) / 30).toInt()
+
+        val packYears = (dailyAvg.toFloat() / 20f) * smokingYears
+        val riskLevel = when {
+            packYears < 10f -> PackYearsRiskLevel.LOW
+            packYears < 20f -> PackYearsRiskLevel.MODERATE
+            else -> PackYearsRiskLevel.HIGH
+        }
+
+        val pricePerCig = if (packSize > 0) (packPrice / packSize).toDouble() else 0.0
+
+        val firstEntryTime = entries.minOrNull() ?: now
+        val priorDurationMs = (firstEntryTime - startDate).coerceAtLeast(0L)
+        val priorDays = TimeUnit.MILLISECONDS.toDays(priorDurationMs).coerceAtLeast(0)
+        val pastCigarettes = priorDays * dailyAvg
+        val pastMoneySpent = pastCigarettes * pricePerCig
+
+        val sevenDaysAgo = now - TimeUnit.DAYS.toMillis(7)
+        val last7DaysCount = entries.count { it in sevenDaysAgo..now }
+        val currentAvg7Days = last7DaysCount / 7.0f
+
+        val reductionDiff = dailyAvg - currentAvg7Days
+        val reductionPercentage = if (dailyAvg > 0) {
+            ((reductionDiff / dailyAvg.toFloat()) * 100f).roundToInt().coerceIn(-100, 100)
+        } else 0
+
+        var avoidedSum = 0
+        if (entries.isNotEmpty()) {
+            val cal = Calendar.getInstance()
+            val countsByDay = mutableMapOf<Long, Int>()
+            entries.forEach { timestamp ->
+                cal.timeInMillis = timestamp
+                cal.set(Calendar.HOUR_OF_DAY, 0)
+                cal.set(Calendar.MINUTE, 0)
+                cal.set(Calendar.SECOND, 0)
+                cal.set(Calendar.MILLISECOND, 0)
+                val dayKey = cal.timeInMillis
+                countsByDay[dayKey] = (countsByDay[dayKey] ?: 0) + 1
+            }
+
+            cal.timeInMillis = firstEntryTime
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+            var currentDay = cal.timeInMillis
+
+            val todayCal = Calendar.getInstance()
+            todayCal.set(Calendar.HOUR_OF_DAY, 0)
+            todayCal.set(Calendar.MINUTE, 0)
+            todayCal.set(Calendar.SECOND, 0)
+            todayCal.set(Calendar.MILLISECOND, 0)
+            val todayMidnight = todayCal.timeInMillis
+
+            while (currentDay <= todayMidnight) {
+                val actual = countsByDay[currentDay] ?: 0
+                if (actual < dailyAvg) {
+                    avoidedSum += (dailyAvg - actual)
+                }
+                cal.timeInMillis = currentDay
+                cal.add(Calendar.DAY_OF_YEAR, 1)
+                currentDay = cal.timeInMillis
+            }
+        }
+        val totalAvoidedCigarettes = avoidedSum
+        val totalAvoidedMoney = totalAvoidedCigarettes * pricePerCig
+
+        return SmokingBaselineAnalytics(
+            baselineDailyAvg = dailyAvg,
+            smokingYears = smokingYears,
+            totalYearsInt = totalYearsInt,
+            totalMonthsInt = totalMonthsInt,
+            packYears = packYears,
+            riskLevel = riskLevel,
+            pastCigarettes = pastCigarettes,
+            pastMoneySpent = pastMoneySpent,
+            currentAvg7Days = currentAvg7Days,
+            reductionPercentage = reductionPercentage,
+            totalAvoidedCigarettes = totalAvoidedCigarettes,
+            totalAvoidedMoney = totalAvoidedMoney
+        )
+    }
 
     fun calculateHistoricalBaseline(
         startDate: Long,

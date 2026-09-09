@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -29,6 +30,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -64,22 +66,37 @@ fun StatisticsScreen(viewModel: MainViewModel, onBack: () -> Unit, onNavigateToS
     val hasHistoricalBaseline by viewModel.hasHistoricalBaseline.collectAsStateWithLifecycle()
     val historicalStartDate by viewModel.historicalStartDate.collectAsStateWithLifecycle()
     val historicalDailyAvg by viewModel.historicalDailyAvg.collectAsStateWithLifecycle()
-    val historicalPackPrice by viewModel.historicalPackPrice.collectAsStateWithLifecycle()
-    val historicalPackSize by viewModel.historicalPackSize.collectAsStateWithLifecycle()
-    val historicalTriggerPriorities by viewModel.historicalTriggerPriorities.collectAsStateWithLifecycle()
+    val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
+
+    var showBaselineSheet by remember { mutableStateOf(false) }
 
     val stats = remember(entries) { StatisticsManager().calculateStats(entries) }
 
-    val baselineStats = remember(hasHistoricalBaseline, historicalStartDate, historicalDailyAvg, historicalPackPrice, historicalPackSize, historicalTriggerPriorities) {
+    val baselineAnalytics = remember(hasHistoricalBaseline, historicalStartDate, historicalDailyAvg, packPrice, packSize, entries) {
         if (hasHistoricalBaseline) {
-            StatisticsManager().calculateHistoricalBaseline(
+            StatisticsManager().calculateBaselineAnalytics(
                 startDate = historicalStartDate,
                 dailyAvg = historicalDailyAvg,
-                packPrice = historicalPackPrice,
-                packSize = historicalPackSize,
-                rankedTriggers = historicalTriggerPriorities
+                packPrice = packPrice,
+                packSize = packSize,
+                entries = entries
             )
         } else null
+    }
+
+    if (showBaselineSheet) {
+        BaselineBottomSheet(
+            hasBaseline = hasHistoricalBaseline,
+            historicalStartDate = historicalStartDate,
+            historicalDailyAvg = historicalDailyAvg,
+            packPrice = packPrice,
+            packSize = packSize,
+            currency = currency,
+            onSaveBaseline = viewModel::saveBaseline,
+            onClearBaseline = viewModel::clearHistoricalBaseline,
+            onDismissRequest = { showBaselineSheet = false },
+            vibrationEnabled = vibrationEnabled
+        )
     }
 
     Scaffold(
@@ -107,7 +124,7 @@ fun StatisticsScreen(viewModel: MainViewModel, onBack: () -> Unit, onNavigateToS
             )
         }
     ) { paddingValues ->
-        if (entries.isEmpty() && resistedEntries.isEmpty() && baselineStats == null) {
+        if (entries.isEmpty() && resistedEntries.isEmpty() && baselineAnalytics == null) {
             Box(
                 modifier = Modifier.fillMaxSize().padding(paddingValues),
                 contentAlignment = Alignment.Center
@@ -124,7 +141,9 @@ fun StatisticsScreen(viewModel: MainViewModel, onBack: () -> Unit, onNavigateToS
                 packPrice = packPrice,
                 packSize = packSize,
                 currency = currency,
-                baselineStats = baselineStats,
+                baselineAnalytics = baselineAnalytics,
+                hasHistoricalBaseline = hasHistoricalBaseline,
+                onOpenBaselineSheet = { showBaselineSheet = true },
                 onNavigateToSettings = onNavigateToSettings
             )
         }
@@ -147,7 +166,9 @@ fun StatisticsList(
     packPrice: Float,
     packSize: Int,
     currency: String,
-    baselineStats: StatisticsManager.HistoricalBaselineStats? = null,
+    baselineAnalytics: StatisticsManager.SmokingBaselineAnalytics? = null,
+    hasHistoricalBaseline: Boolean = false,
+    onOpenBaselineSheet: () -> Unit = {},
     onNavigateToSettings: (() -> Unit)? = null,
     contentPadding: PaddingValues = PaddingValues(top = 16.dp, bottom = 120.dp)
 ) {
@@ -217,64 +238,276 @@ fun StatisticsList(
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        if (baselineStats != null && baselineStats.totalCigarettes > 0) {
+        if (baselineAnalytics != null) {
             item {
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                     ),
                     shape = containerShape(RoundedCornerShape(24.dp)),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.BarChart,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onTertiaryContainer
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(R.string.history_preview_title),
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onTertiaryContainer
-                            )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(36.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = Icons.Default.History,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = stringResource(R.string.baseline_stats_card_title),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+
+                            IconButton(
+                                onClick = onOpenBaselineSheet,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Edit Baseline",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        HorizontalDivider(color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.2f))
-                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column {
                                 Text(
-                                    text = stringResource(R.string.history_preview_total_cigs),
+                                    text = stringResource(R.string.baseline_stats_was_label),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = stringResource(
-                                        R.string.history_cigs_count_format,
-                                        String.format(Locale.getDefault(), "%,d", baselineStats.totalCigarettes)
-                                    ),
-                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                                    text = "${baselineAnalytics.baselineDailyAvg} " + stringResource(R.string.history_cigs_count_format, "").trim(),
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
+
                             Column(horizontalAlignment = Alignment.End) {
                                 Text(
-                                    text = stringResource(R.string.history_preview_total_cost),
+                                    text = stringResource(R.string.baseline_stats_now_label),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = String.format(Locale.getDefault(), "%,.0f %s", baselineStats.totalMoneySpent, currencySymbol),
-                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                                    text = stringResource(R.string.baseline_stats_pcs_day, baselineAnalytics.currentAvg7Days),
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Surface(
+                            shape = CircleShape,
+                            color = if (baselineAnalytics.reductionPercentage > 0) {
+                                MaterialTheme.colorScheme.primaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainerHighest
+                            }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (baselineAnalytics.reductionPercentage > 0) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.TrendingDown,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = stringResource(R.string.baseline_stats_reduction_badge, baselineAnalytics.reductionPercentage),
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                } else {
+                                    Text(
+                                        text = stringResource(R.string.baseline_stats_no_reduction_badge),
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+
+                        if (baselineAnalytics.totalAvoidedCigarettes > 0) {
+                            Spacer(modifier = Modifier.height(14.dp))
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceContainer,
+                                border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.padding(14.dp)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Savings,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = stringResource(R.string.baseline_stats_avoided_title),
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = stringResource(
+                                            R.string.baseline_stats_avoided_desc,
+                                            baselineAnalytics.totalAvoidedCigarettes,
+                                            String.format(Locale.getDefault(), "%,.0f %s", baselineAnalytics.totalAvoidedMoney, currencySymbol)
+                                        ),
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(14.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        val riskColor = when (baselineAnalytics.riskLevel) {
+                            StatisticsManager.PackYearsRiskLevel.LOW -> MaterialTheme.colorScheme.primary
+                            StatisticsManager.PackYearsRiskLevel.MODERATE -> MaterialTheme.colorScheme.tertiary
+                            StatisticsManager.PackYearsRiskLevel.HIGH -> MaterialTheme.colorScheme.error
+                        }
+                        val riskText = when (baselineAnalytics.riskLevel) {
+                            StatisticsManager.PackYearsRiskLevel.LOW -> stringResource(R.string.baseline_risk_low)
+                            StatisticsManager.PackYearsRiskLevel.MODERATE -> stringResource(R.string.baseline_risk_moderate)
+                            StatisticsManager.PackYearsRiskLevel.HIGH -> stringResource(R.string.baseline_risk_high)
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.MedicalServices,
+                                    contentDescription = null,
+                                    tint = riskColor,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = stringResource(R.string.baseline_pack_years_title),
+                                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            Text(
+                                text = "${String.format(Locale.getDefault(), "%.1f", baselineAnalytics.packYears)} • $riskText",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = riskColor
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = stringResource(
+                                R.string.baseline_stats_past_summary,
+                                stringResource(R.string.baseline_years_format, baselineAnalytics.totalYearsInt),
+                                String.format(Locale.getDefault(), "%,d", baselineAnalytics.pastCigarettes),
+                                String.format(Locale.getDefault(), "%,.0f %s", baselineAnalytics.pastMoneySpent, currencySymbol)
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        } else if (!hasHistoricalBaseline) {
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                    ),
+                    shape = containerShape(RoundedCornerShape(24.dp)),
+                    modifier = Modifier.fillMaxWidth(),
+                    border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                ) {
+                    Column(modifier = Modifier.padding(18.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Default.History,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = stringResource(R.string.baseline_banner_title),
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = stringResource(R.string.baseline_banner_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Button(
+                            onClick = onOpenBaselineSheet,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = stringResource(R.string.baseline_banner_button),
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 }
@@ -320,8 +553,8 @@ fun StatisticsList(
                             ) {
                                 Surface(
                                     shape = RoundedCornerShape(100),
-                                    color = if (completedMilestonesCount == whoMilestones.size) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
-                                    contentColor = if (completedMilestonesCount == whoMilestones.size) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.primary
+                                    color = if (completedMilestonesCount == whoMilestones.size) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = if (completedMilestonesCount == whoMilestones.size) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
                                 ) {
                                     Text(
                                         text = "$completedMilestonesCount/${whoMilestones.size}",
@@ -333,7 +566,7 @@ fun StatisticsList(
                                 Text(
                                     text = "$percent%",
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -399,29 +632,12 @@ fun StatisticsList(
 
         if (resistedCount > 0) {
             item {
-                Text(
-                    text = stringResource(R.string.stats_resisted_cravings),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp, start = 8.dp)
-                )
-            }
-            item {
-                val resistedMoneySaved = if (packSize > 0 && packPrice > 0f) {
-                    resistedCount * (packPrice / packSize.toFloat())
-                } else 0f
-
-                val formattedSavedStr = if (packPrice > 0f) String.format(Locale.getDefault(), "%.1f %s", resistedMoneySaved, currency) else ""
-
-                StatCard(
-                    title = stringResource(R.string.stats_resisted_cravings),
-                    value = if (packPrice > 0f) {
-                        stringResource(R.string.stats_resisted_cravings_desc, resistedCount, formattedSavedStr)
-                    } else {
-                        pluralStringResource(R.plurals.stats_days_plural, resistedCount, resistedCount)
-                    },
-                    icon = Icons.Default.Shield,
-                    color = MaterialTheme.colorScheme.primary
+                ResistedCravingsCard(
+                    resistedCount = resistedCount,
+                    packPrice = packPrice,
+                    packSize = packSize,
+                    currencySymbol = currencySymbol,
+                    context = context
                 )
             }
         }
@@ -472,31 +688,41 @@ fun StatisticsList(
                     modifier = Modifier.fillMaxWidth(),
                     shape = containerShape(RoundedCornerShape(24.dp)),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                     ),
-                    border = containerBorder(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                    border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
                 ) {
-                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Filled.Info,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Info,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
                             Text(
                                 text = stringResource(R.string.stats_savings_setup_warning),
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f)
                             )
                         }
                         if (onNavigateToSettings != null) {
                             Button(
                                 onClick = onNavigateToSettings,
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
+                                shape = RoundedCornerShape(14.dp),
                                 contentPadding = PaddingValues(vertical = 10.dp)
                             ) {
                                 Icon(
@@ -614,7 +840,7 @@ fun StatCard(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -646,7 +872,7 @@ fun StatCard(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -657,6 +883,162 @@ fun StatCard(
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ResistedCravingsCard(
+    resistedCount: Int,
+    packPrice: Float,
+    packSize: Int,
+    currencySymbol: String,
+    context: android.content.Context,
+    modifier: Modifier = Modifier
+) {
+    val resistedMoneySaved = if (packSize > 0 && packPrice > 0f) {
+        resistedCount * (packPrice / packSize.toFloat())
+    } else 0f
+    val resistedLifeMinutes = resistedCount * 11
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = containerShape(RoundedCornerShape(24.dp)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        border = containerBorder()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(containerPadding(16.dp, 16.dp))
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ContainerIcon(
+                    icon = Icons.Default.Shield,
+                    tint = MaterialTheme.colorScheme.primary,
+                    backdropColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                    size = 40.dp
+                )
+                Spacer(modifier = Modifier.width(14.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.stats_resisted_cravings),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Surface(
+                    shape = RoundedCornerShape(100),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Text(
+                        text = stringResource(R.string.stats_resisted_badge, resistedCount),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.stats_resisted_avoided_cigs),
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "$resistedCount",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp)
+                    ) {
+                        if (packPrice > 0f && packSize > 0) {
+                            Text(
+                                text = stringResource(R.string.stats_money_saved),
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "${String.format(Locale.getDefault(), "%.1f", resistedMoneySaved)} $currencySymbol",
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(R.string.stats_life_saved),
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = formatMinutes(resistedLifeMinutes, context),
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                color = MaterialTheme.colorScheme.tertiary
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = if (resistedLifeMinutes > 0) {
+                            stringResource(R.string.stats_resisted_life_saved_note, formatMinutes(resistedLifeMinutes, context))
+                        } else {
+                            stringResource(R.string.stats_resisted_motivational_note)
+                        },
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

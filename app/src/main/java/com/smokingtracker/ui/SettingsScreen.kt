@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Brightness4
@@ -31,13 +32,12 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.History
 import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.containerPadding
 import com.smokingtracker.ui.theme.containerGroupGap
-import com.smokingtracker.ui.theme.LocalContainerStyle
 import com.smokingtracker.ui.theme.ContainerGroupPosition
-import com.smokingtracker.data.ContainerStyle
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -90,8 +90,7 @@ fun PersonalScreen(
     onNavigateToAbout: () -> Unit,
     onNavigateToAchievements: () -> Unit,
     onNavigateToStatistics: () -> Unit,
-    onNavigateToAppearance: () -> Unit,
-    onNavigateToHistoryGenerator: () -> Unit = {}
+    onNavigateToAppearance: () -> Unit
 ) {
     val themePreference by viewModel.themePreference.collectAsStateWithLifecycle()
     val dailyLimit by viewModel.dailyLimit.collectAsStateWithLifecycle()
@@ -104,6 +103,8 @@ fun PersonalScreen(
     val taperingPlanEnabled by viewModel.taperingPlanEnabled.collectAsStateWithLifecycle()
     val taperingIntervalDays by viewModel.taperingIntervalDays.collectAsStateWithLifecycle()
     val hasHistoricalBaseline by viewModel.hasHistoricalBaseline.collectAsStateWithLifecycle()
+    val historicalStartDate by viewModel.historicalStartDate.collectAsStateWithLifecycle()
+    val historicalDailyAvg by viewModel.historicalDailyAvg.collectAsStateWithLifecycle()
     val customTriggers by viewModel.customTriggers.collectAsStateWithLifecycle()
     val disabledDefaultTriggers by viewModel.disabledDefaultTriggers.collectAsStateWithLifecycle()
     val ongoingNotificationEnabled by viewModel.ongoingNotificationEnabled.collectAsStateWithLifecycle()
@@ -112,6 +113,7 @@ fun PersonalScreen(
     val notificationShowProgress by viewModel.notificationShowProgress.collectAsStateWithLifecycle()
     val notificationShowAddButton by viewModel.notificationShowAddButton.collectAsStateWithLifecycle()
     val notificationShowResistButton by viewModel.notificationShowResistButton.collectAsStateWithLifecycle()
+    val widgetShowResistButton by viewModel.widgetShowResistButton.collectAsStateWithLifecycle()
     val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
 
     PersonalScreenContent(
@@ -133,6 +135,7 @@ fun PersonalScreen(
         notificationShowProgress = notificationShowProgress,
         notificationShowAddButton = notificationShowAddButton,
         notificationShowResistButton = notificationShowResistButton,
+        widgetShowResistButton = widgetShowResistButton,
         vibrationEnabled = vibrationEnabled,
         onAddCustomTrigger = viewModel::addCustomTrigger,
         onRemoveCustomTrigger = viewModel::removeCustomTrigger,
@@ -144,6 +147,7 @@ fun PersonalScreen(
         onNotificationShowProgressChange = viewModel::updateNotificationShowProgress,
         onNotificationShowAddButtonChange = viewModel::updateNotificationShowAddButton,
         onNotificationShowResistButtonChange = viewModel::updateNotificationShowResistButton,
+        onWidgetShowResistButtonChange = viewModel::updateWidgetShowResistButton,
         onThemeChange = viewModel::updateThemePreference,
         onSetDailyLimit = viewModel::setDailyLimit,
         onFontPresetChange = viewModel::updateFontPreset,
@@ -159,8 +163,10 @@ fun PersonalScreen(
         onNavigateToStatistics = onNavigateToStatistics,
         onNavigateToAppearance = onNavigateToAppearance,
         hasHistoricalBaseline = hasHistoricalBaseline,
-        onNavigateToHistoryGenerator = onNavigateToHistoryGenerator,
-        onClearHistoricalBaseline = viewModel::clearHistoricalBaseline
+        historicalStartDate = historicalStartDate,
+        historicalDailyAvg = historicalDailyAvg,
+        onSaveBaseline = viewModel::saveBaseline,
+        onClearBaseline = viewModel::clearHistoricalBaseline
     )
 }
 
@@ -177,7 +183,6 @@ fun PersonalScreenContent(
     updateCheckState: UpdateCheckState,
     taperingPlanEnabled: Boolean = false,
     taperingIntervalDays: Int = 7,
-    hasHistoricalBaseline: Boolean = false,
     customTriggers: List<String> = emptyList(),
     disabledDefaultTriggers: Set<String> = emptySet(),
     ongoingNotificationEnabled: Boolean = false,
@@ -186,7 +191,8 @@ fun PersonalScreenContent(
     notificationShowProgress: Boolean = true,
     notificationShowAddButton: Boolean = true,
     notificationShowResistButton: Boolean = false,
-    vibrationEnabled: Boolean = false,
+    widgetShowResistButton: Boolean = true,
+    vibrationEnabled: Boolean = true,
     onAddCustomTrigger: (String, (String?) -> Unit) -> Unit = { _, _ -> },
     onRemoveCustomTrigger: (String) -> Unit = {},
     onToggleDefaultTrigger: (String, Boolean) -> Unit = { _, _ -> },
@@ -197,6 +203,7 @@ fun PersonalScreenContent(
     onNotificationShowProgressChange: (Boolean) -> Unit = {},
     onNotificationShowAddButtonChange: (Boolean) -> Unit = {},
     onNotificationShowResistButtonChange: (Boolean) -> Unit = {},
+    onWidgetShowResistButtonChange: (Boolean) -> Unit = {},
     onThemeChange: (ThemePreference) -> Unit,
     onSetDailyLimit: (Int) -> Unit,
     onFontPresetChange: (FontPreset) -> Unit,
@@ -211,8 +218,11 @@ fun PersonalScreenContent(
     onNavigateToAchievements: () -> Unit = {},
     onNavigateToStatistics: () -> Unit = {},
     onNavigateToAppearance: () -> Unit = {},
-    onNavigateToHistoryGenerator: () -> Unit = {},
-    onClearHistoricalBaseline: () -> Unit = {}
+    hasHistoricalBaseline: Boolean = false,
+    historicalStartDate: Long = 0L,
+    historicalDailyAvg: Int = 0,
+    onSaveBaseline: (Long, Int) -> Unit = { _, _ -> },
+    onClearBaseline: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -250,6 +260,7 @@ fun PersonalScreenContent(
             notificationShowProgress = notificationShowProgress,
             notificationShowAddButton = notificationShowAddButton,
             notificationShowResistButton = notificationShowResistButton,
+            widgetShowResistButton = widgetShowResistButton,
             vibrationEnabled = vibrationEnabled,
             onAddCustomTrigger = onAddCustomTrigger,
             onRemoveCustomTrigger = onRemoveCustomTrigger,
@@ -261,6 +272,7 @@ fun PersonalScreenContent(
             onNotificationShowProgressChange = onNotificationShowProgressChange,
             onNotificationShowAddButtonChange = onNotificationShowAddButtonChange,
             onNotificationShowResistButtonChange = onNotificationShowResistButtonChange,
+            onWidgetShowResistButtonChange = onWidgetShowResistButtonChange,
             onThemeChange = onThemeChange,
             onSetDailyLimit = onSetDailyLimit,
             onFontPresetChange = onFontPresetChange,
@@ -276,8 +288,10 @@ fun PersonalScreenContent(
             onNavigateToStatistics = onNavigateToStatistics,
             onNavigateToAppearance = onNavigateToAppearance,
             hasHistoricalBaseline = hasHistoricalBaseline,
-            onNavigateToHistoryGenerator = onNavigateToHistoryGenerator,
-            onClearHistoricalBaseline = onClearHistoricalBaseline
+            historicalStartDate = historicalStartDate,
+            historicalDailyAvg = historicalDailyAvg,
+            onSaveBaseline = onSaveBaseline,
+            onClearBaseline = onClearBaseline
         )
     }
 }
@@ -298,6 +312,8 @@ fun SettingsTab(
     taperingPlanEnabled: Boolean = false,
     taperingIntervalDays: Int = 7,
     hasHistoricalBaseline: Boolean = false,
+    historicalStartDate: Long = 0L,
+    historicalDailyAvg: Int = 0,
     customTriggers: List<String> = emptyList(),
     disabledDefaultTriggers: Set<String> = emptySet(),
     ongoingNotificationEnabled: Boolean = false,
@@ -306,7 +322,8 @@ fun SettingsTab(
     notificationShowProgress: Boolean = true,
     notificationShowAddButton: Boolean = true,
     notificationShowResistButton: Boolean = false,
-    vibrationEnabled: Boolean = false,
+    widgetShowResistButton: Boolean = true,
+    vibrationEnabled: Boolean = true,
     onAddCustomTrigger: (String, (String?) -> Unit) -> Unit = { _, _ -> },
     onRemoveCustomTrigger: (String) -> Unit = {},
     onToggleDefaultTrigger: (String, Boolean) -> Unit = { _, _ -> },
@@ -317,6 +334,7 @@ fun SettingsTab(
     onNotificationShowProgressChange: (Boolean) -> Unit = {},
     onNotificationShowAddButtonChange: (Boolean) -> Unit = {},
     onNotificationShowResistButtonChange: (Boolean) -> Unit = {},
+    onWidgetShowResistButtonChange: (Boolean) -> Unit = {},
     onThemeChange: (ThemePreference) -> Unit,
     onSetDailyLimit: (Int) -> Unit,
     onFontPresetChange: (FontPreset) -> Unit,
@@ -331,12 +349,13 @@ fun SettingsTab(
     onNavigateToAchievements: () -> Unit,
     onNavigateToStatistics: () -> Unit,
     onNavigateToAppearance: () -> Unit,
-    onNavigateToHistoryGenerator: () -> Unit = {},
-    onClearHistoricalBaseline: () -> Unit = {}
+    onSaveBaseline: (Long, Int) -> Unit = { _, _ -> },
+    onClearBaseline: () -> Unit = {}
 ) {
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showLimitDialog by remember { mutableStateOf(false) }
     var showPackDialog by remember { mutableStateOf(false) }
+    var showBaselineSheet by remember { mutableStateOf(false) }
     var showWidgetDialog by remember { mutableStateOf(false) }
     var showBackupSheet by remember { mutableStateOf(false) }
     var showRestoreSheet by remember { mutableStateOf(false) }
@@ -454,7 +473,8 @@ fun SettingsTab(
             "tr" to "Türkçe",
             "it" to "Italiano",
             "pt" to "Português",
-            "uk" to "Українська"
+            "uk" to "Українська",
+            "zh" to "中文"
         )
         ModalBottomSheet(
             onDismissRequest = { showLanguageDialog = false },
@@ -524,222 +544,49 @@ fun SettingsTab(
     }
 
     if (showLimitDialog) {
-        var newLimit by remember { mutableStateOf(dailyLimit.toString()) }
-        val limitValid = newLimit.isEmpty() || newLimit.toIntOrNull() != null
-
-        BasicAlertDialog(onDismissRequest = { showLimitDialog = false }) {
-            Surface(shape = containerShape(RoundedCornerShape(28.dp)), color = MaterialTheme.colorScheme.surface) {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Text(
-                        stringResource(R.string.set_limit_title),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = newLimit,
-                        onValueChange = { newLimit = it },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(R.string.set_limit_title)) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Speed,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        },
-                        shape = RoundedCornerShape(16.dp),
-                        singleLine = true,
-                        isError = !limitValid,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-                            focusedLabelColor = MaterialTheme.colorScheme.primary,
-                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        ),
-                        supportingText = {
-                            Text(stringResource(R.string.limit_dialog_helper))
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        listOf(0, 5, 10, 15, 20).forEach { preset ->
-                            val isSelected = newLimit.toIntOrNull() == preset
-                            Surface(
-                                onClick = { newLimit = preset.toString() },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(36.dp),
-                                shape = containerShape(RoundedCornerShape(12.dp)),
-                                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                                border = containerBorder(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        text = preset.toString(),
-                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium),
-                                        maxLines = 1
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                        TextButton(onClick = { showLimitDialog = false }) {
-                            Text(stringResource(R.string.dialog_cancel), fontWeight = FontWeight.Bold)
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = {
-                                onSetDailyLimit(newLimit.toIntOrNull() ?: 0)
-                                Toast.makeText(context, savedStr, Toast.LENGTH_SHORT).show()
-                                showLimitDialog = false
-                            },
-                            enabled = limitValid
-                        ) {
-                            Text(stringResource(R.string.dialog_ok), fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            }
-        }
+        DailyLimitBottomSheet(
+            dailyLimit = dailyLimit,
+            taperingPlanEnabled = taperingPlanEnabled,
+            taperingIntervalDays = taperingIntervalDays,
+            onSetDailyLimit = onSetDailyLimit,
+            onDismissRequest = { showLimitDialog = false },
+            vibrationEnabled = vibrationEnabled
+        )
     }
 
     if (showPackDialog) {
-        var priceInput by remember { mutableStateOf(if (packPrice > 0f) packPrice.toString() else "") }
-        var sizeInput by remember { mutableStateOf(packSize.toString()) }
-        var selectedCurrency by remember { mutableStateOf(currency) }
-        val priceValid = priceInput.isEmpty() || priceInput.toFloatOrNull() != null
+        PackSettingsBottomSheet(
+            packPrice = packPrice,
+            packSize = packSize,
+            currency = currency,
+            dailyLimit = dailyLimit,
+            onUpdatePackDetails = onUpdatePackDetails,
+            onDismissRequest = { showPackDialog = false },
+            vibrationEnabled = vibrationEnabled
+        )
+    }
 
-        BasicAlertDialog(onDismissRequest = { showPackDialog = false }) {
-            Surface(shape = containerShape(RoundedCornerShape(28.dp)), color = MaterialTheme.colorScheme.surface) {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Text(
-                        stringResource(R.string.settings_pack_params),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = priceInput,
-                        onValueChange = { priceInput = it },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(R.string.settings_pack_price)) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.AttachMoney,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        },
-                        shape = RoundedCornerShape(16.dp),
-                        singleLine = true,
-                        isError = !priceValid,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-                            focusedLabelColor = MaterialTheme.colorScheme.primary,
-                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        ),
-                        supportingText = if (!priceValid) {
-                            { Text(stringResource(R.string.error_invalid_price)) }
-                        } else null
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    OutlinedTextField(
-                        value = sizeInput,
-                        onValueChange = { sizeInput = it },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(R.string.settings_pack_size)) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Info,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
-                                )
-                        },
-                        shape = RoundedCornerShape(16.dp),
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-                            focusedLabelColor = MaterialTheme.colorScheme.primary,
-                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(stringResource(R.string.settings_currency), style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
-                    Spacer(modifier = Modifier.height(8.dp))
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        items(listOf("USD", "EUR", "RUB", "GBP", "TRY", "KZT", "UAH")) { curr ->
-                            val isSelected = selectedCurrency == curr
-                            Surface(
-                                onClick = { selectedCurrency = curr },
-                                modifier = Modifier.height(36.dp),
-                                shape = containerShape(RoundedCornerShape(12.dp)),
-                                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                                border = containerBorder(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
-                            ) {
-                                Box(
-                                    modifier = Modifier.padding(horizontal = 14.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = curr,
-                                        style = MaterialTheme.typography.labelLarge.copy(
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                                        ),
-                                        maxLines = 1
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                        TextButton(onClick = { showPackDialog = false }) {
-                            Text(stringResource(R.string.dialog_cancel), fontWeight = FontWeight.Bold)
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            enabled = priceValid,
-                            onClick = {
-                                val price = priceInput.toFloatOrNull() ?: 0.0f
-                                val size = sizeInput.toIntOrNull() ?: 20
-                                onUpdatePackDetails(price, size, selectedCurrency)
-                                Toast.makeText(context, savedStr, Toast.LENGTH_SHORT).show()
-                                showPackDialog = false
-                            }
-                        ) {
-                            Text(stringResource(R.string.dialog_ok), fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            }
-        }
+    if (showBaselineSheet) {
+        BaselineBottomSheet(
+            hasBaseline = hasHistoricalBaseline,
+            historicalStartDate = historicalStartDate,
+            historicalDailyAvg = historicalDailyAvg,
+            packPrice = packPrice,
+            packSize = packSize,
+            currency = currency,
+            onSaveBaseline = onSaveBaseline,
+            onClearBaseline = onClearBaseline,
+            onDismissRequest = { showBaselineSheet = false },
+            vibrationEnabled = vibrationEnabled
+        )
     }
 
     if (showWidgetDialog) {
-        WidgetPinDialog(onDismiss = { showWidgetDialog = false })
+        WidgetPinDialog(
+            widgetShowResistButton = widgetShowResistButton,
+            onWidgetShowResistButtonChange = onWidgetShowResistButtonChange,
+            onDismiss = { showWidgetDialog = false }
+        )
     }
 
     LazyColumn(
@@ -824,10 +671,15 @@ fun SettingsTab(
             )
         }
         item {
+            val limitSubtitle = if (dailyLimit > 0) {
+                stringResource(R.string.daily_limit_active_subtitle, dailyLimit)
+            } else {
+                stringResource(R.string.daily_limit_off_subtitle)
+            }
             SettingItem(
-                icon = Icons.Filled.Warning,
+                icon = Icons.Default.Speed,
                 title = stringResource(R.string.settings_daily_limit),
-                subtitle = if (dailyLimit > 0) dailyLimit.toString() else stringResource(R.string.no_limit),
+                subtitle = limitSubtitle,
                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp),
                 groupPosition = ContainerGroupPosition.FIRST,
                 onClick = { showLimitDialog = true }
@@ -925,6 +777,26 @@ fun SettingsTab(
             )
         }
         item {
+            val yearsSmoked = if (historicalStartDate > 0L) {
+                val days = java.util.concurrent.TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() - historicalStartDate)
+                (days / 365).toInt()
+            } else 0
+            val baselineSubtitle = if (hasHistoricalBaseline && historicalDailyAvg > 0) {
+                val yearsStr = stringResource(R.string.baseline_years_format, yearsSmoked)
+                stringResource(R.string.settings_baseline_subtitle_active, historicalDailyAvg, yearsStr)
+            } else {
+                stringResource(R.string.settings_baseline_subtitle_off)
+            }
+            SettingItem(
+                icon = Icons.Default.History,
+                title = stringResource(R.string.settings_baseline_title),
+                subtitle = baselineSubtitle,
+                shape = RoundedCornerShape(8.dp),
+                groupPosition = ContainerGroupPosition.MIDDLE,
+                onClick = { showBaselineSheet = true }
+            )
+        }
+        item {
             val activeTriggerCount = remember(customTriggers, disabledDefaultTriggers) {
                 (com.smokingtracker.data.TriggerType.allEntries().size - disabledDefaultTriggers.size) + customTriggers.size
             }
@@ -938,14 +810,20 @@ fun SettingsTab(
             )
         }
         item {
+            val packSubtitle = if (packPrice > 0f) {
+                val formattedPrice = if (packPrice % 1f == 0f) packPrice.toInt().toString() else packPrice.toString()
+                val pricePerCig = if (packSize > 0) packPrice / packSize else 0f
+                val formattedPerCig = String.format(Locale.getDefault(), "%.2f", pricePerCig)
+                val base = stringResource(R.string.settings_pack_subtitle_pattern, formattedPrice, currency, packSize)
+                val rate = stringResource(R.string.pack_subtitle_piece_rate, formattedPerCig, currency)
+                "$base • $rate"
+            } else {
+                stringResource(R.string.settings_tap_configure)
+            }
             SettingItem(
-                icon = Icons.Filled.AttachMoney,
+                icon = Icons.Default.AccountBalanceWallet,
                 title = stringResource(R.string.settings_pack_params),
-                subtitle = if (packPrice > 0f) {
-                    stringResource(R.string.settings_pack_subtitle_pattern, packPrice.toString(), currency, packSize)
-                } else {
-                    stringResource(R.string.settings_tap_configure)
-                },
+                subtitle = packSubtitle,
                 shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
                 groupPosition = ContainerGroupPosition.LAST,
                 onClick = { showPackDialog = true }
@@ -975,58 +853,10 @@ fun SettingsTab(
                 icon = Icons.Filled.Restore,
                 title = stringResource(R.string.settings_restore),
                 subtitle = stringResource(R.string.restore_desc),
-                shape = RoundedCornerShape(8.dp),
-                groupPosition = ContainerGroupPosition.MIDDLE,
+                shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
+                groupPosition = ContainerGroupPosition.LAST,
                 onClick = { showRestoreSheet = true }
             )
-        }
-        item {
-            SettingItem(
-                icon = Icons.Filled.AutoAwesome,
-                title = stringResource(R.string.history_generator_title),
-                subtitle = if (hasHistoricalBaseline) stringResource(R.string.history_preview_title) else stringResource(R.string.history_banner_desc),
-                shape = if (hasHistoricalBaseline) RoundedCornerShape(8.dp) else RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
-                groupPosition = if (hasHistoricalBaseline) ContainerGroupPosition.MIDDLE else ContainerGroupPosition.LAST,
-                onClick = onNavigateToHistoryGenerator
-            )
-        }
-        if (hasHistoricalBaseline) {
-            item {
-                var showResetDialog by remember { mutableStateOf(false) }
-
-                if (showResetDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showResetDialog = false },
-                        title = { Text(stringResource(R.string.history_reset_dialog_title)) },
-                        text = { Text(stringResource(R.string.history_reset_dialog_desc)) },
-                        confirmButton = {
-                            Button(
-                                onClick = {
-                                    onClearHistoricalBaseline()
-                                    showResetDialog = false
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                            ) {
-                                Text(stringResource(R.string.history_reset_button))
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showResetDialog = false }) {
-                                Text(stringResource(R.string.dialog_cancel))
-                            }
-                        }
-                    )
-                }
-
-                SettingItem(
-                    icon = Icons.Filled.Delete,
-                    title = stringResource(R.string.history_reset_button),
-                    subtitle = stringResource(R.string.history_reset_dialog_desc),
-                    shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
-                    groupPosition = ContainerGroupPosition.LAST,
-                    onClick = { showResetDialog = true }
-                )
-            }
         }
 
         item {
@@ -1081,7 +911,6 @@ fun SettingItemWithSwitch(
     shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(28.dp),
     groupPosition: ContainerGroupPosition = ContainerGroupPosition.SINGLE
 ) {
-    val isStandardStyle = LocalContainerStyle.current == ContainerStyle.STANDARD
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = containerShape(shape, groupPosition),
@@ -1095,19 +924,17 @@ fun SettingItemWithSwitch(
                 .padding(containerPadding(20.dp, 18.dp)),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (!isStandardStyle) {
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
-                    contentColor = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
-                    }
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                contentColor = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
                 }
-                Spacer(modifier = Modifier.width(16.dp))
             }
+            Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
@@ -1117,7 +944,7 @@ fun SettingItemWithSwitch(
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
@@ -1178,26 +1005,23 @@ fun SettingItemContent(
     subtitle: String,
     onClick: (() -> Unit)? = null
 ) {
-    val isStandardStyle = LocalContainerStyle.current == ContainerStyle.STANDARD
     val rowModifier = Modifier
         .fillMaxWidth()
         .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
         .padding(containerPadding(20.dp, 18.dp))
 
     Row(modifier = rowModifier, verticalAlignment = Alignment.CenterVertically) {
-        if (!isStandardStyle) {
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
-                contentColor = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(40.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
-                }
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+            contentColor = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(40.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
             }
-            Spacer(modifier = Modifier.width(16.dp))
         }
+        Spacer(modifier = Modifier.width(16.dp))
         Column {
             Text(
                 text = title,
@@ -1207,7 +1031,7 @@ fun SettingItemContent(
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -1232,6 +1056,8 @@ fun changeLanguage(context: android.content.Context, languageTag: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WidgetPinDialog(
+    widgetShowResistButton: Boolean = true,
+    onWidgetShowResistButtonChange: (Boolean) -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -1361,6 +1187,40 @@ fun WidgetPinDialog(
                         text = stringResource(R.string.widget_timer_description),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = containerShape(RoundedCornerShape(16.dp)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.widget_show_resist_button_title),
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = stringResource(R.string.widget_show_resist_button_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Switch(
+                        checked = widgetShowResistButton,
+                        onCheckedChange = onWidgetShowResistButtonChange
                     )
                 }
             }
