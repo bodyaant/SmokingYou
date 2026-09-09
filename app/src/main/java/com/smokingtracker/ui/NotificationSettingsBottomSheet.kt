@@ -57,7 +57,7 @@ fun NotificationSettingsBottomSheet(
     onShowResistButtonChange: (Boolean) -> Unit,
     dailyLimit: Int,
     onDismissRequest: () -> Unit,
-    vibrationEnabled: Boolean = false
+    vibrationEnabled: Boolean = true
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
@@ -107,7 +107,6 @@ fun NotificationSettingsBottomSheet(
                 .padding(start = 20.dp, end = 20.dp, bottom = 20.dp, top = 4.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Header
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = stringResource(R.string.settings_ongoing_notification_title),
@@ -121,7 +120,6 @@ fun NotificationSettingsBottomSheet(
                 )
             }
 
-            // Master Switch Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = containerShape(RoundedCornerShape(20.dp)),
@@ -188,7 +186,6 @@ fun NotificationSettingsBottomSheet(
                 }
             }
 
-            // Expanded Options & Interactive Live Preview
             AnimatedVisibility(
                 visible = enabled,
                 enter = expandVertically(animationSpec = tween(220)) + fadeIn(animationSpec = tween(200)),
@@ -198,7 +195,6 @@ fun NotificationSettingsBottomSheet(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    // Live Preview Card
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = stringResource(R.string.notification_preview_title),
@@ -216,7 +212,6 @@ fun NotificationSettingsBottomSheet(
                         )
                     }
 
-                    // Priority Selector
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = stringResource(R.string.notification_priority_label),
@@ -286,7 +281,6 @@ fun NotificationSettingsBottomSheet(
                         }
                     }
 
-                    // Element toggles container
                     Surface(
                         shape = containerShape(RoundedCornerShape(20.dp)),
                         color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -399,7 +393,6 @@ private fun NotificationLivePreviewCard(
                 .padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Notification System Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -441,7 +434,6 @@ private fun NotificationLivePreviewCard(
                 }
             }
 
-            // Notification Content text
             val contentText = if (showProgress && sampleLimit > 0) {
                 stringResource(R.string.notification_content_with_limit, sampleSmoked, sampleLimit, samplePercent)
             } else {
@@ -455,7 +447,6 @@ private fun NotificationLivePreviewCard(
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            // Progress Bar
             if (showProgress && sampleLimit > 0) {
                 LinearProgressIndicator(
                     progress = { samplePercent / 100f },
@@ -468,7 +459,6 @@ private fun NotificationLivePreviewCard(
                 )
             }
 
-            // Action Buttons
             if (showAddButton || showResistButton) {
                 Row(
                     modifier = Modifier

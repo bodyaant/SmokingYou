@@ -6,7 +6,6 @@ import androidx.annotation.Keep
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.smokingtracker.data.AppIconPreset
-import com.smokingtracker.data.ContainerStyle
 import com.smokingtracker.data.DataStoreManager
 import com.smokingtracker.data.local.SmokingEntryEntity
 import com.smokingtracker.data.repository.SmokingRepository
@@ -46,7 +45,6 @@ class BackupManager(
             hasCancelledWithin10s = dataStoreManager.hasCancelledWithin10s.first(),
             appLaunchDates = dataStoreManager.appLaunchDates.first(),
             containerBorderEnabled = dataStoreManager.containerBorderEnabled.first(),
-            containerStyle = dataStoreManager.containerStyle.first().name,
             useCustomVariableFont = dataStoreManager.useCustomVariableFont.first(),
             customFontWeight = dataStoreManager.customFontWeight.first(),
             customFontWidth = dataStoreManager.customFontWidth.first(),
@@ -89,8 +87,7 @@ class BackupManager(
                     ?: throw IllegalStateException("Backup data is null or corrupted")
 
                 val colorPresetVal = data.colorPreset ?: "SYSTEM"
-                val fontPresetVal = data.fontPreset ?: "WIDE"
-                val containerStyleVal = data.containerStyle ?: ContainerStyle.EXPRESSIVE.name
+                val fontPresetVal = data.fontPreset ?: "SYSTEM"
                 val appIconVal = data.appIcon ?: AppIconPreset.DEFAULT.name
 
                 dataStoreManager.restoreFromBackup(
@@ -104,13 +101,12 @@ class BackupManager(
                     colorPresetVal = colorPresetVal,
                     fontPresetVal = fontPresetVal,
                     amoledThemeVal = data.amoledTheme ?: false,
-                    vibrationEnabledVal = data.vibrationEnabled ?: false,
+                    vibrationEnabledVal = data.vibrationEnabled ?: true,
                     hasBackupVal = data.hasMadeBackup ?: false,
                     hasPriceChangedVal = data.hasChangedPackPrice ?: false,
                     hasCancelled10sVal = data.hasCancelledWithin10s ?: false,
                     launchesVal = data.appLaunchDates ?: emptyList(),
-                    containerBorderEnabledVal = data.containerBorderEnabled ?: true,
-                    containerStyleVal = containerStyleVal,
+                    containerBorderEnabledVal = data.containerBorderEnabled ?: false,
                     useCustomVariableFontVal = data.useCustomVariableFont ?: false,
                     customFontWeightVal = data.customFontWeight ?: 500,
                     customFontWidthVal = data.customFontWidth ?: 100f,
@@ -182,14 +178,14 @@ class BackupManager(
         @SerializedName("currency") val currency: String? = "USD",
         @SerializedName("colorPreset") val colorPreset: String? = "SYSTEM",
         @SerializedName("entryTriggers") val entryTriggers: Map<Long, String>? = emptyMap(),
-        @SerializedName("fontPreset") val fontPreset: String? = "WIDE",
+        @SerializedName("fontPreset") val fontPreset: String? = "SYSTEM",
         @SerializedName("amoledTheme") val amoledTheme: Boolean? = false,
-        @SerializedName("vibrationEnabled") val vibrationEnabled: Boolean? = false,
+        @SerializedName("vibrationEnabled") val vibrationEnabled: Boolean? = true,
         @SerializedName("hasMadeBackup") val hasMadeBackup: Boolean? = false,
         @SerializedName("hasChangedPackPrice") val hasChangedPackPrice: Boolean? = false,
         @SerializedName("hasCancelledWithin10s") val hasCancelledWithin10s: Boolean? = false,
         @SerializedName("appLaunchDates") val appLaunchDates: List<Long>? = emptyList(),
-        @SerializedName("containerBorderEnabled") val containerBorderEnabled: Boolean? = true,
+        @SerializedName("containerBorderEnabled") val containerBorderEnabled: Boolean? = false,
         @SerializedName("containerStyle") val containerStyle: String? = "EXPRESSIVE",
         @SerializedName("useCustomVariableFont") val useCustomVariableFont: Boolean? = false,
         @SerializedName("customFontWeight") val customFontWeight: Int? = 500,

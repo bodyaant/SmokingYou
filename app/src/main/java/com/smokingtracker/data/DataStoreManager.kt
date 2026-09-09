@@ -18,7 +18,6 @@ enum class ThemePreference {
 enum class FontPreset { ZENITH, NEO, COMPACT, AIRY, SYSTEM, WIDE, OUTFIT }
 enum class ColorPreset { SYSTEM, FOREST_SAGE, SUNSET_ROSE, OCEAN_DEEP, PURPLE_NEBULA, AMBER_GOLD, CRIMSON_BERRY, SLATE_MONO }
 enum class AppIconPreset { DEFAULT, DARK, SUNSET, CREAM, NEON, GREEN, NIGHT, MONOCHROME }
-enum class ContainerStyle { EXPRESSIVE, STANDARD }
 
 class DataStoreManager(private val context: Context) {
     private val gson = Gson()
@@ -58,7 +57,6 @@ class DataStoreManager(private val context: Context) {
         val HISTORICAL_TRIGGER_PRIORITIES = stringPreferencesKey("historical_trigger_priorities")
         val CONTAINER_BORDER_ENABLED = booleanPreferencesKey("container_border_enabled")
         val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
-        val CONTAINER_STYLE = stringPreferencesKey("container_style")
         val USE_CUSTOM_VARIABLE_FONT = booleanPreferencesKey("use_custom_variable_font")
         val CUSTOM_FONT_WEIGHT = intPreferencesKey("custom_font_weight")
         val CUSTOM_FONT_WIDTH = floatPreferencesKey("custom_font_width")
@@ -72,6 +70,7 @@ class DataStoreManager(private val context: Context) {
         val NOTIFICATION_SHOW_PROGRESS = booleanPreferencesKey("notification_show_progress")
         val NOTIFICATION_SHOW_ADD_BUTTON = booleanPreferencesKey("notification_show_add_button")
         val NOTIFICATION_SHOW_RESIST_BUTTON = booleanPreferencesKey("notification_show_resist_button")
+        val WIDGET_SHOW_RESIST_BUTTON = booleanPreferencesKey("widget_show_resist_button")
     }
 
     val isRegistered: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -111,12 +110,12 @@ class DataStoreManager(private val context: Context) {
     }
 
     val fontPreset: Flow<FontPreset> = context.dataStore.data.map { preferences ->
-        val name = preferences[FONT_PRESET] ?: FontPreset.ZENITH.name
+        val name = preferences[FONT_PRESET] ?: FontPreset.SYSTEM.name
         try {
             val preset = FontPreset.valueOf(name)
-            if (preset == FontPreset.WIDE) FontPreset.ZENITH else preset
+            if (preset == FontPreset.WIDE) FontPreset.SYSTEM else preset
         } catch (_: Exception) {
-            FontPreset.ZENITH
+            FontPreset.SYSTEM
         }
     }
 
@@ -277,13 +276,12 @@ class DataStoreManager(private val context: Context) {
         colorPresetVal: String,
         fontPresetVal: String,
         amoledThemeVal: Boolean,
-        vibrationEnabledVal: Boolean = false,
+        vibrationEnabledVal: Boolean = true,
         hasBackupVal: Boolean = false,
         hasPriceChangedVal: Boolean = false,
         hasCancelled10sVal: Boolean = false,
         launchesVal: List<Long> = emptyList(),
-        containerBorderEnabledVal: Boolean = true,
-        containerStyleVal: String = ContainerStyle.EXPRESSIVE.name,
+        containerBorderEnabledVal: Boolean = false,
         useCustomVariableFontVal: Boolean = false,
         customFontWeightVal: Int = 500,
         customFontWidthVal: Float = 100f,
@@ -326,7 +324,6 @@ class DataStoreManager(private val context: Context) {
             preferences[HAS_CANCELLED_WITHIN_10S] = hasCancelled10sVal
             preferences[APP_LAUNCH_DATES] = gson.toJson(launchesVal)
             preferences[CONTAINER_BORDER_ENABLED] = containerBorderEnabledVal
-            preferences[CONTAINER_STYLE] = containerStyleVal
             preferences[USE_CUSTOM_VARIABLE_FONT] = useCustomVariableFontVal
             preferences[CUSTOM_FONT_WEIGHT] = customFontWeightVal
             preferences[CUSTOM_FONT_WIDTH] = customFontWidthVal
@@ -377,6 +374,10 @@ class DataStoreManager(private val context: Context) {
         preferences[NOTIFICATION_SHOW_RESIST_BUTTON] ?: false
     }
 
+    val widgetShowResistButton: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[WIDGET_SHOW_RESIST_BUTTON] ?: true
+    }
+
     suspend fun saveOngoingNotificationEnabled(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[NOTIFICATION_ENABLED] = enabled
@@ -410,6 +411,12 @@ class DataStoreManager(private val context: Context) {
     suspend fun saveNotificationShowResistButton(show: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[NOTIFICATION_SHOW_RESIST_BUTTON] = show
+        }
+    }
+
+    suspend fun saveWidgetShowResistButton(show: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[WIDGET_SHOW_RESIST_BUTTON] = show
         }
     }
 
@@ -585,7 +592,7 @@ class DataStoreManager(private val context: Context) {
     }
 
     val containerBorderEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
-        preferences[CONTAINER_BORDER_ENABLED] ?: true
+        preferences[CONTAINER_BORDER_ENABLED] ?: false
     }
 
     suspend fun saveContainerBorderEnabled(enabled: Boolean) {
@@ -595,23 +602,12 @@ class DataStoreManager(private val context: Context) {
     }
 
     val vibrationEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
-        preferences[VIBRATION_ENABLED] ?: false
+        preferences[VIBRATION_ENABLED] ?: true
     }
 
     suspend fun saveVibrationEnabled(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[VIBRATION_ENABLED] = enabled
-        }
-    }
-
-    val containerStyle: Flow<ContainerStyle> = context.dataStore.data.map { preferences ->
-        val name = preferences[CONTAINER_STYLE] ?: ContainerStyle.EXPRESSIVE.name
-        try { ContainerStyle.valueOf(name) } catch (_: Exception) { ContainerStyle.EXPRESSIVE }
-    }
-
-    suspend fun saveContainerStyle(style: ContainerStyle) {
-        context.dataStore.edit { preferences ->
-            preferences[CONTAINER_STYLE] = style.name
         }
     }
 

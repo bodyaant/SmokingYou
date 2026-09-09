@@ -32,7 +32,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.compose.ui.tooling.preview.Preview
 import com.smokingtracker.data.ColorPreset
-import com.smokingtracker.data.ContainerStyle
 import com.smokingtracker.data.FontPreset
 
 
@@ -530,8 +529,7 @@ private val SlateDarkColors = darkColorScheme(
     outlineVariant = Color(0xFF444444)
 )
 
-val LocalContainerBorderEnabled = staticCompositionLocalOf { true }
-val LocalContainerStyle = staticCompositionLocalOf { ContainerStyle.EXPRESSIVE }
+val LocalContainerBorderEnabled = staticCompositionLocalOf { false }
 
 @Composable
 fun containerBorder(
@@ -544,27 +542,13 @@ fun containerBorder(
 enum class ContainerGroupPosition { SINGLE, FIRST, MIDDLE, LAST }
 
 @Composable
-fun containerShape(expressive: Shape): Shape {
-    return if (LocalContainerStyle.current == ContainerStyle.STANDARD) RoundedCornerShape(16.dp) else expressive
-}
+fun containerShape(expressive: Shape): Shape = expressive
 
 @Composable
-fun containerShape(expressive: Shape, groupPosition: ContainerGroupPosition): Shape {
-    if (LocalContainerStyle.current != ContainerStyle.STANDARD) return expressive
-    val outer = 16.dp
-    val inner = 4.dp
-    return when (groupPosition) {
-        ContainerGroupPosition.SINGLE -> RoundedCornerShape(outer)
-        ContainerGroupPosition.FIRST -> RoundedCornerShape(topStart = outer, topEnd = outer, bottomStart = inner, bottomEnd = inner)
-        ContainerGroupPosition.MIDDLE -> RoundedCornerShape(inner)
-        ContainerGroupPosition.LAST -> RoundedCornerShape(topStart = inner, topEnd = inner, bottomStart = outer, bottomEnd = outer)
-    }
-}
+fun containerShape(expressive: Shape, groupPosition: ContainerGroupPosition): Shape = expressive
 
 @Composable
-fun containerGroupGap(): Dp {
-    return if (LocalContainerStyle.current == ContainerStyle.STANDARD) 3.dp else 4.dp
-}
+fun containerGroupGap(): Dp = 4.dp
 
 @Composable
 fun containerPadding(
@@ -573,11 +557,7 @@ fun containerPadding(
     standardHorizontal: Dp = 16.dp,
     standardVertical: Dp = 12.dp
 ): PaddingValues {
-    return if (LocalContainerStyle.current == ContainerStyle.STANDARD) {
-        PaddingValues(horizontal = standardHorizontal, vertical = standardVertical)
-    } else {
-        PaddingValues(horizontal = expressiveHorizontal, vertical = expressiveVertical)
-    }
+    return PaddingValues(horizontal = expressiveHorizontal, vertical = expressiveVertical)
 }
 
 @Composable
@@ -587,27 +567,18 @@ fun ContainerIcon(
     backdropColor: Color,
     size: Dp = 40.dp
 ) {
-    if (LocalContainerStyle.current == ContainerStyle.STANDARD) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = tint,
-            modifier = Modifier.size(size * 0.5f)
-        )
-    } else {
-        Surface(
-            shape = CircleShape,
-            color = backdropColor,
-            modifier = Modifier.size(size)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = tint,
-                    modifier = Modifier.size(size * 0.5f)
-                )
-            }
+    Surface(
+        shape = CircleShape,
+        color = backdropColor,
+        modifier = Modifier.size(size)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(size * 0.5f)
+            )
         }
     }
 }
@@ -616,11 +587,10 @@ fun ContainerIcon(
 @Composable
 fun AppTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
-    fontPreset: FontPreset = FontPreset.ZENITH,
+    fontPreset: FontPreset = FontPreset.SYSTEM,
     amoledThemeEnabled: Boolean = false,
     colorPreset: ColorPreset = ColorPreset.SYSTEM,
-    containerBorderEnabled: Boolean = true,
-    containerStyle: ContainerStyle = ContainerStyle.EXPRESSIVE,
+    containerBorderEnabled: Boolean = false,
     useCustomVariableFont: Boolean = false,
     customFontWeight: Int = 500,
     customFontWidth: Float = 100f,
@@ -696,8 +666,7 @@ fun AppTheme(
     }
 
     CompositionLocalProvider(
-        LocalContainerBorderEnabled provides containerBorderEnabled,
-        LocalContainerStyle provides containerStyle
+        LocalContainerBorderEnabled provides containerBorderEnabled
     ) {
         MaterialTheme(
             colorScheme = finalColors,

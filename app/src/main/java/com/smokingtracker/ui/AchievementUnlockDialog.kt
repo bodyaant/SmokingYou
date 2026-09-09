@@ -26,8 +26,6 @@ import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
 import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
-import com.smokingtracker.ui.theme.LocalContainerStyle
-import com.smokingtracker.data.ContainerStyle
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -69,7 +67,6 @@ fun AchievementUnlockDialog(
             ),
             border = containerBorder()
         ) {
-            val isStandardStyle = LocalContainerStyle.current == ContainerStyle.STANDARD
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -80,8 +77,8 @@ fun AchievementUnlockDialog(
                 Box(
                     modifier = Modifier
                         .size(72.dp)
-                        .clip(if (isStandardStyle) CircleShape else MaterialShapes.Cookie12Sided.toShape())
-                        .background(if (isStandardStyle) Color.Transparent else MaterialTheme.colorScheme.primaryContainer),
+                        .clip(MaterialShapes.Cookie12Sided.toShape())
+                        .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(

@@ -27,9 +27,6 @@ object HapticFeedbackHelper {
         }
     }
 
-    /**
-     * Standard crisp click for key actions (buttons, switches, trigger selection).
-     */
     fun performClick(isVibrationEnabled: Boolean, haptic: HapticFeedback? = null, context: Context? = null) {
         if (!isVibrationEnabled) return
         try {
@@ -51,9 +48,6 @@ object HapticFeedbackHelper {
         }
     }
 
-    /**
-     * Light subtle tick for continuous adjustments (time picker, sliders, day navigation).
-     */
     fun performTick(isVibrationEnabled: Boolean, haptic: HapticFeedback? = null, context: Context? = null) {
         if (!isVibrationEnabled) return
         try {
@@ -75,9 +69,6 @@ object HapticFeedbackHelper {
         }
     }
 
-    /**
-     * Heavy tactile pulse for threshold triggers (swipe-to-dismiss deletion threshold, heavy snap).
-     */
     fun performHeavyThreshold(isVibrationEnabled: Boolean, haptic: HapticFeedback? = null, context: Context? = null) {
         if (!isVibrationEnabled) return
         try {
@@ -99,10 +90,6 @@ object HapticFeedbackHelper {
         }
     }
 
-    /**
-     * Success confirmation (e.g., resisted craving in Mindful Pause, successful restore).
-     * Creates a refined double-impulse (click + subtle fall).
-     */
     fun performSuccess(isVibrationEnabled: Boolean, haptic: HapticFeedback? = null, context: Context? = null) {
         if (!isVibrationEnabled) return
         try {
@@ -135,9 +122,6 @@ object HapticFeedbackHelper {
         }
     }
 
-    /**
-     * Error / Reject feedback (e.g., duplicate input, invalid time in future).
-     */
     fun performError(isVibrationEnabled: Boolean, haptic: HapticFeedback? = null, context: Context? = null) {
         if (!isVibrationEnabled) return
         try {
@@ -159,9 +143,6 @@ object HapticFeedbackHelper {
         }
     }
 
-    /**
-     * Celebratory vibration pattern for unlocking an achievement.
-     */
     fun performAchievementUnlock(isVibrationEnabled: Boolean, context: Context) {
         if (!isVibrationEnabled) return
         try {

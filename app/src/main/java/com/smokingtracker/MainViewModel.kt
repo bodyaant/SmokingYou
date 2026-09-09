@@ -6,7 +6,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.smokingtracker.data.AppIconPreset
 import com.smokingtracker.data.ColorPreset
-import com.smokingtracker.data.ContainerStyle
 import com.smokingtracker.data.DataStoreManager
 import com.smokingtracker.data.FontPreset
 import com.smokingtracker.data.ThemePreference
@@ -97,7 +96,7 @@ class MainViewModel(
     val fontPreset: StateFlow<FontPreset> = dataStoreManager.fontPreset.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = FontPreset.ZENITH
+        initialValue = FontPreset.SYSTEM
     )
 
     val amoledTheme: StateFlow<Boolean> = dataStoreManager.amoledTheme.stateIn(
@@ -109,7 +108,7 @@ class MainViewModel(
     val vibrationEnabled: StateFlow<Boolean> = dataStoreManager.vibrationEnabled.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = false
+        initialValue = true
     )
 
     val appLaunchDates: StateFlow<List<Long>> = dataStoreManager.appLaunchDates.stateIn(
@@ -157,13 +156,7 @@ class MainViewModel(
     val containerBorderEnabled: StateFlow<Boolean> = dataStoreManager.containerBorderEnabled.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = true
-    )
-
-    val containerStyle: StateFlow<ContainerStyle> = dataStoreManager.containerStyle.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ContainerStyle.EXPRESSIVE
+        initialValue = false
     )
 
     val useCustomVariableFont: StateFlow<Boolean> = dataStoreManager.useCustomVariableFont.stateIn(
@@ -266,6 +259,12 @@ class MainViewModel(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = false
+    )
+
+    val widgetShowResistButton: StateFlow<Boolean> = dataStoreManager.widgetShowResistButton.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = true
     )
 
     val activeTriggers: StateFlow<List<com.smokingtracker.data.TriggerItem>> = kotlinx.coroutines.flow.combine(
@@ -376,12 +375,6 @@ class MainViewModel(
     fun updateContainerBorderEnabled(enabled: Boolean) {
         viewModelScope.launch {
             dataStoreManager.saveContainerBorderEnabled(enabled)
-        }
-    }
-
-    fun updateContainerStyle(style: ContainerStyle) {
-        viewModelScope.launch {
-            dataStoreManager.saveContainerStyle(style)
         }
     }
 
@@ -544,6 +537,13 @@ class MainViewModel(
             com.smokingtracker.notification.OngoingNotificationManager.update(getApplication())
         }
     }
+
+    fun updateWidgetShowResistButton(show: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.saveWidgetShowResistButton(show)
+            com.smokingtracker.widget.WidgetUpdateManager.updateAll(getApplication())
+        }
+    }
     
     fun backupData(uri: Uri, onSuccess: () -> Unit, onError: () -> Unit) {
         viewModelScope.launch {
@@ -554,6 +554,23 @@ class MainViewModel(
     fun restoreData(uri: Uri, onSuccess: () -> Unit, onError: () -> Unit) {
         viewModelScope.launch {
             try { backupManager.restore(uri); onSuccess() } catch (e: Exception) { onError() }
+        }
+    }
+
+    fun saveBaseline(
+        startDate: Long,
+        dailyAvg: Int,
+        packPrice: Float = this.packPrice.value,
+        packSize: Int = this.packSize.value
+    ) {
+        viewModelScope.launch {
+            dataStoreManager.saveHistoricalBaseline(
+                startDate = startDate,
+                dailyAvg = dailyAvg,
+                packPrice = packPrice,
+                packSize = packSize,
+                triggerPriorities = emptyList()
+            )
         }
     }
 

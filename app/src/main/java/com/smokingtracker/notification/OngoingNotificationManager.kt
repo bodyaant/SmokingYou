@@ -104,7 +104,6 @@ object OngoingNotificationManager : KoinComponent {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setPriority(if (isLowPriority) NotificationCompat.PRIORITY_LOW else NotificationCompat.PRIORITY_DEFAULT)
 
-        // Title and Chronometer
         if (showTimer && lastSmokedEntity != null) {
             builder.setUsesChronometer(true)
             builder.setWhen(lastSmokedEntity.timestamp)
@@ -115,7 +114,6 @@ object OngoingNotificationManager : KoinComponent {
             builder.setContentTitle(context.getString(R.string.notification_title_app_name))
         }
 
-        // Content / Progress summary
         val contentText = when {
             showProgress && dailyLimit > 0 -> {
                 val percent = (todaySmokedCount.toFloat() / dailyLimit.toFloat() * 100).toInt()
@@ -138,7 +136,6 @@ object OngoingNotificationManager : KoinComponent {
             builder.setProgress(dailyLimit, todaySmokedCount.coerceAtMost(dailyLimit), false)
         }
 
-        // Action 1: Add Cigarette
         if (showAddButton) {
             val addIntent = Intent(context, NotificationActionReceiver::class.java).apply {
                 action = NotificationActionReceiver.ACTION_ADD
@@ -156,7 +153,6 @@ object OngoingNotificationManager : KoinComponent {
             )
         }
 
-        // Action 2: Resisted
         if (showResistButton) {
             val resistIntent = Intent(context, NotificationActionReceiver::class.java).apply {
                 action = NotificationActionReceiver.ACTION_RESIST

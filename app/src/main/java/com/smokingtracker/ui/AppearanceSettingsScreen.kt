@@ -9,6 +9,9 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -19,23 +22,23 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.CropSquare
-import androidx.compose.material.icons.filled.ViewAgenda
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.TouchApp
 import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.containerPadding
 import com.smokingtracker.ui.theme.containerGroupGap
-import com.smokingtracker.ui.theme.LocalContainerStyle
 import com.smokingtracker.ui.theme.ContainerGroupPosition
 import androidx.compose.material3.*
+import androidx.compose.material3.ToggleButtonDefaults
+import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,7 +50,6 @@ import com.smokingtracker.MainViewModel
 import com.smokingtracker.R
 import com.smokingtracker.data.AppIconPreset
 import com.smokingtracker.data.ColorPreset
-import com.smokingtracker.data.ContainerStyle
 import com.smokingtracker.data.FontPreset
 import com.smokingtracker.data.ThemePreference
 import androidx.compose.material.icons.filled.Palette
@@ -63,12 +65,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 
 
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AppearanceSettingsScreen(
     viewModel: MainViewModel,
@@ -81,12 +86,10 @@ fun AppearanceSettingsScreen(
     val appIcon by viewModel.appIcon.collectAsStateWithLifecycle()
     val containerBorderEnabled by viewModel.containerBorderEnabled.collectAsStateWithLifecycle()
     val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
-    val containerStyle by viewModel.containerStyle.collectAsStateWithLifecycle()
     val useCustomVariableFont by viewModel.useCustomVariableFont.collectAsStateWithLifecycle()
     val customFontWeight by viewModel.customFontWeight.collectAsStateWithLifecycle()
     val customFontWidth by viewModel.customFontWidth.collectAsStateWithLifecycle()
     val customFontRoundness by viewModel.customFontRoundness.collectAsStateWithLifecycle()
-    val isStandardStyle = containerStyle == ContainerStyle.STANDARD
     val context = LocalContext.current
 
     val useDarkTheme = when (themePreference) {
@@ -148,19 +151,27 @@ fun AppearanceSettingsScreen(
                 ) {
                     Column(modifier = Modifier.padding(containerPadding(20.dp, 20.dp))) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (!isStandardStyle) {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.secondaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    modifier = Modifier.size(48.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(Icons.Filled.Palette, contentDescription = null)
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    val themeIcon = when (themePreference) {
+                                        ThemePreference.SYSTEM -> Icons.Filled.BrightnessAuto
+                                        ThemePreference.LIGHT -> Icons.Filled.LightMode
+                                        ThemePreference.DARK -> Icons.Filled.DarkMode
+                                    }
+                                    AnimatedContent(
+                                        targetState = themeIcon,
+                                        label = "theme_header_icon"
+                                    ) { icon ->
+                                        Icon(icon, contentDescription = null)
                                     }
                                 }
-                                Spacer(modifier = Modifier.width(16.dp))
                             }
+                            Spacer(modifier = Modifier.width(16.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     stringResource(R.string.settings_theme),
@@ -189,49 +200,6 @@ fun AppearanceSettingsScreen(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                     border = containerBorder()
                 ) {
-                    Column(modifier = Modifier.padding(containerPadding(20.dp, 20.dp))) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (!isStandardStyle) {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.secondaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    modifier = Modifier.size(48.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(Icons.Filled.ViewAgenda, contentDescription = null)
-                                    }
-                                }
-                                Spacer(modifier = Modifier.width(16.dp))
-                            }
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    stringResource(R.string.settings_container_style),
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                                )
-                                Text(
-                                    stringResource(R.string.settings_container_style_desc),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        ContainerStyleSegmentedButton(
-                            currentStyle = containerStyle,
-                            onStyleChange = viewModel::updateContainerStyle
-                        )
-                    }
-                }
-            }
-
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = containerShape(RoundedCornerShape(8.dp), ContainerGroupPosition.MIDDLE),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    border = containerBorder()
-                ) {
                     val isAmoledSwitchEnabled = useDarkTheme
                     Row(
                         modifier = Modifier
@@ -239,19 +207,17 @@ fun AppearanceSettingsScreen(
                             .padding(containerPadding(20.dp, 18.dp)),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (!isStandardStyle) {
-                            Surface(
-                                shape = CircleShape,
-                                color = if (isAmoledSwitchEnabled) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.38f),
-                                contentColor = if (isAmoledSwitchEnabled) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.38f),
-                                modifier = Modifier.size(48.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(Icons.Filled.Brightness4, contentDescription = null)
-                                }
+                        Surface(
+                            shape = CircleShape,
+                            color = if (isAmoledSwitchEnabled) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.38f),
+                            contentColor = if (isAmoledSwitchEnabled) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.38f),
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(Icons.Filled.Brightness4, contentDescription = null)
                             }
-                            Spacer(modifier = Modifier.width(16.dp))
                         }
+                        Spacer(modifier = Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = stringResource(R.string.settings_amoled_theme),
@@ -289,19 +255,17 @@ fun AppearanceSettingsScreen(
                             .padding(containerPadding(20.dp, 18.dp)),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (!isStandardStyle) {
-                            Surface(
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.size(48.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(Icons.Filled.CropSquare, contentDescription = null)
-                                }
+                        Surface(
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(Icons.Filled.CropSquare, contentDescription = null)
                             }
-                            Spacer(modifier = Modifier.width(16.dp))
                         }
+                        Spacer(modifier = Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = stringResource(R.string.settings_container_border),
@@ -338,19 +302,17 @@ fun AppearanceSettingsScreen(
                             .padding(containerPadding(20.dp, 18.dp)),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (!isStandardStyle) {
-                            Surface(
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.size(48.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(Icons.Filled.TouchApp, contentDescription = null)
-                                }
+                        Surface(
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(Icons.Filled.TouchApp, contentDescription = null)
                             }
-                            Spacer(modifier = Modifier.width(16.dp))
                         }
+                        Spacer(modifier = Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = stringResource(R.string.settings_vibration),
@@ -398,36 +360,50 @@ fun AppearanceSettingsScreen(
                 ) {
                     Column(modifier = Modifier.padding(containerPadding(20.dp, 20.dp))) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (!isStandardStyle) {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.secondaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    modifier = Modifier.size(48.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(Icons.Filled.Palette, contentDescription = null)
-                                    }
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Filled.Palette, contentDescription = null)
                                 }
-                                Spacer(modifier = Modifier.width(16.dp))
                             }
+                            Spacer(modifier = Modifier.width(16.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     stringResource(R.string.settings_color_preset),
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                                 )
-                                Text(
-                                    stringResource(R.string.settings_color_preset_desc),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                                )
+                                val currentPresetTitle = when (colorPreset) {
+                                    ColorPreset.SYSTEM -> stringResource(R.string.color_preset_system)
+                                    ColorPreset.FOREST_SAGE -> stringResource(R.string.color_preset_sage)
+                                    ColorPreset.SUNSET_ROSE -> stringResource(R.string.color_preset_rose)
+                                    ColorPreset.OCEAN_DEEP -> stringResource(R.string.color_preset_ocean)
+                                    ColorPreset.PURPLE_NEBULA -> stringResource(R.string.color_preset_purple)
+                                    ColorPreset.AMBER_GOLD -> stringResource(R.string.color_preset_amber)
+                                    ColorPreset.CRIMSON_BERRY -> stringResource(R.string.color_preset_crimson)
+                                    ColorPreset.SLATE_MONO -> stringResource(R.string.color_preset_slate)
+                                }
+                                AnimatedContent(
+                                    targetState = currentPresetTitle,
+                                    label = "color_preset_subtitle"
+                                ) { titleText ->
+                                    Text(
+                                        text = titleText,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                    )
+                                }
                             }
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                         ColorPresetSelector(
                             currentPreset = colorPreset,
                             useDarkTheme = useDarkTheme,
-                            onPresetChange = viewModel::updateColorPreset
+                            onPresetChange = viewModel::updateColorPreset,
+                            vibrationEnabled = vibrationEnabled
                         )
                     }
                 }
@@ -452,22 +428,20 @@ fun AppearanceSettingsScreen(
                 ) {
                     Column(modifier = Modifier.padding(containerPadding(20.dp, 20.dp))) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (!isStandardStyle) {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.secondaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    modifier = Modifier.size(48.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            imageVector = androidx.compose.material.icons.Icons.Filled.Palette,
-                                            contentDescription = null
-                                        )
-                                    }
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = androidx.compose.material.icons.Icons.Filled.Palette,
+                                        contentDescription = null
+                                    )
                                 }
-                                Spacer(modifier = Modifier.width(16.dp))
                             }
+                            Spacer(modifier = Modifier.width(16.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     stringResource(R.string.settings_app_icon),
@@ -508,19 +482,17 @@ fun AppearanceSettingsScreen(
                 ) {
                     Column(modifier = Modifier.padding(containerPadding(20.dp, 20.dp))) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (!isStandardStyle) {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.secondaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    modifier = Modifier.size(48.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(Icons.Filled.TextFields, contentDescription = null)
-                                    }
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Filled.TextFields, contentDescription = null)
                                 }
-                                Spacer(modifier = Modifier.width(16.dp))
                             }
+                            Spacer(modifier = Modifier.width(16.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     stringResource(R.string.settings_font),
@@ -559,8 +531,6 @@ fun ThemeSegmentedButton(
     currentTheme: ThemePreference,
     onThemeChange: (ThemePreference) -> Unit
 ) {
-    val isStandardStyle = LocalContainerStyle.current == ContainerStyle.STANDARD
-
     val options = listOf(
         Triple(ThemePreference.SYSTEM, stringResource(R.string.theme_system), Icons.Filled.BrightnessAuto),
         Triple(ThemePreference.LIGHT, stringResource(R.string.theme_light), Icons.Filled.LightMode),
@@ -575,13 +545,13 @@ fun ThemeSegmentedButton(
     ) {
         options.forEachIndexed { index, (theme, title, icon) ->
             val isSelected = currentTheme == theme
-            
+
             val animatedWeight by androidx.compose.animation.core.animateFloatAsState(
                 targetValue = if (isSelected) 1.2f else 1.0f,
                 animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
                 label = "theme_weight_$index"
             )
-            
+
             val startR by animateDpAsState(
                 targetValue = if (isSelected || index == 0) 24.dp else 8.dp,
                 animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
@@ -617,96 +587,12 @@ fun ThemeSegmentedButton(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.padding(horizontal = 4.dp)
                     ) {
-                        if (!isStandardStyle) {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                        }
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
                         )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ContainerStyleSegmentedButton(
-    currentStyle: ContainerStyle,
-    onStyleChange: (ContainerStyle) -> Unit
-) {
-    val isStandardStyle = LocalContainerStyle.current == ContainerStyle.STANDARD
-    val options = listOf(
-        Triple(ContainerStyle.EXPRESSIVE, stringResource(R.string.container_style_expressive), Icons.Filled.AutoAwesome),
-        Triple(ContainerStyle.STANDARD, stringResource(R.string.container_style_standard), Icons.Filled.CropSquare)
-    )
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        options.forEachIndexed { index, (style, title, icon) ->
-            val isSelected = currentStyle == style
-
-            val animatedWeight by androidx.compose.animation.core.animateFloatAsState(
-                targetValue = if (isSelected) 1.2f else 1.0f,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
-                label = "container_style_weight_$index"
-            )
-
-            val startR by animateDpAsState(
-                targetValue = if (isSelected || index == 0) 24.dp else 8.dp,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
-                label = "container_style_startR_$index"
-            )
-            val endR by animateDpAsState(
-                targetValue = if (isSelected || index == options.size - 1) 24.dp else 8.dp,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
-                label = "container_style_endR_$index"
-            )
-
-            val containerColor by animateColorAsState(
-                targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
-                label = "container_style_container_$index"
-            )
-            val contentColor by animateColorAsState(
-                targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer,
-                label = "container_style_content_$index"
-            )
-
-            Surface(
-                onClick = { onStyleChange(style) },
-                modifier = Modifier
-                    .weight(animatedWeight)
-                    .height(48.dp),
-                shape = RoundedCornerShape(topStart = startR, bottomStart = startR, topEnd = endR, bottomEnd = endR),
-                color = containerColor,
-                contentColor = contentColor
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(horizontal = 4.dp)
-                    ) {
-                        if (!isStandardStyle) {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                        }
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = title,
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
@@ -732,9 +618,8 @@ fun FontSelectionSection(
     onCustomFontWidthChange: (Float) -> Unit,
     customFontRoundness: Float,
     onCustomFontRoundnessChange: (Float) -> Unit,
-    vibrationEnabled: Boolean = false
+    vibrationEnabled: Boolean = true
 ) {
-    val isStandardStyle = LocalContainerStyle.current == ContainerStyle.STANDARD
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
 
@@ -824,14 +709,12 @@ fun FontSelectionSection(
                             horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.padding(horizontal = 4.dp)
                         ) {
-                            if (!isStandardStyle) {
-                                Icon(
-                                    imageVector = icon,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                            }
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = title,
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
@@ -853,7 +736,6 @@ fun FontSelectionSection(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Switch: Custom Variable Font
                 Surface(
                     shape = containerShape(RoundedCornerShape(20.dp)),
                     color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
@@ -892,7 +774,6 @@ fun FontSelectionSection(
                     }
                 }
 
-                // Either 4 Presets OR Custom Sliders + Live Preview
                 AnimatedContent(
                     targetState = useCustomVariableFont,
                     transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(200)) },
@@ -997,7 +878,6 @@ fun FontSelectionSection(
                                 }
                             }
 
-                            // 1. Weight Slider
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -1023,7 +903,6 @@ fun FontSelectionSection(
                                 )
                             }
 
-                            // 2. Width Slider
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -1049,7 +928,6 @@ fun FontSelectionSection(
                                 )
                             }
 
-                            // 3. Roundness Slider
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -1081,136 +959,251 @@ fun FontSelectionSection(
         }
     }
 }
+private data class ColorPresetOption(
+    val preset: ColorPreset,
+    val nameRes: Int,
+    val containerColor: Color,
+    val contentColor: Color,
+    val checkedContainerColor: Color,
+    val checkedContentColor: Color
+)
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun toggleButtonColors(
+    containerColor: Color,
+    contentColor: Color,
+    checkedContainerColor: Color,
+    checkedContentColor: Color
+): ToggleButtonColors = ToggleButtonColors(
+    containerColor = containerColor,
+    contentColor = contentColor,
+    disabledContainerColor = containerColor.copy(alpha = 0.38f),
+    disabledContentColor = contentColor.copy(alpha = 0.38f),
+    checkedContainerColor = checkedContainerColor,
+    checkedContentColor = checkedContentColor
+)
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ColorPresetSelector(
     currentPreset: ColorPreset,
     useDarkTheme: Boolean,
-    onPresetChange: (ColorPreset) -> Unit
+    onPresetChange: (ColorPreset) -> Unit,
+    vibrationEnabled: Boolean = true
 ) {
+    val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
-    val systemColor = remember(useDarkTheme) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val scheme = if (useDarkTheme) {
-                dynamicDarkColorScheme(context)
-            } else {
-                dynamicLightColorScheme(context)
-            }
-            scheme.primary
-        } else {
-            if (useDarkTheme) Color(0xFFD0BCFF) else Color(0xFF6750A4)
-        }
+
+    val colorPresets = remember(useDarkTheme) {
+        listOf(
+            ColorPresetOption(
+                preset = ColorPreset.FOREST_SAGE,
+                nameRes = R.string.color_preset_sage,
+                containerColor = if (useDarkTheme) Color(0xFF354E16) else Color(0xFFCDEDA3),
+                contentColor = if (useDarkTheme) Color(0xFFCDEDA3) else Color(0xFF101F00),
+                checkedContainerColor = if (useDarkTheme) Color(0xFFB1D18A) else Color(0xFF4C662B),
+                checkedContentColor = if (useDarkTheme) Color(0xFF1F3701) else Color(0xFFFFFFFF)
+            ),
+            ColorPresetOption(
+                preset = ColorPreset.SUNSET_ROSE,
+                nameRes = R.string.color_preset_rose,
+                containerColor = if (useDarkTheme) Color(0xFF723523) else Color(0xFFFFDBD1),
+                contentColor = if (useDarkTheme) Color(0xFFFFDBD1) else Color(0xFF3A0B01),
+                checkedContainerColor = if (useDarkTheme) Color(0xFFF5B5A1) else Color(0xFF8F4C38),
+                checkedContentColor = if (useDarkTheme) Color(0xFF561F0F) else Color(0xFFFFFFFF)
+            ),
+            ColorPresetOption(
+                preset = ColorPreset.OCEAN_DEEP,
+                nameRes = R.string.color_preset_ocean,
+                containerColor = if (useDarkTheme) Color(0xFF004C69) else Color(0xFFC0E8FF),
+                contentColor = if (useDarkTheme) Color(0xFFC0E8FF) else Color(0xFF001E2C),
+                checkedContainerColor = if (useDarkTheme) Color(0xFF76D1FF) else Color(0xFF006689),
+                checkedContentColor = if (useDarkTheme) Color(0xFF003549) else Color(0xFFFFFFFF)
+            ),
+            ColorPresetOption(
+                preset = ColorPreset.PURPLE_NEBULA,
+                nameRes = R.string.color_preset_purple,
+                containerColor = if (useDarkTheme) Color(0xFF533588) else Color(0xFFEBDCFF),
+                contentColor = if (useDarkTheme) Color(0xFFEBDCFF) else Color(0xFF250059),
+                checkedContainerColor = if (useDarkTheme) Color(0xFFD4BBFF) else Color(0xFF6B4EA2),
+                checkedContentColor = if (useDarkTheme) Color(0xFF3B1D71) else Color(0xFFFFFFFF)
+            ),
+            ColorPresetOption(
+                preset = ColorPreset.AMBER_GOLD,
+                nameRes = R.string.color_preset_amber,
+                containerColor = if (useDarkTheme) Color(0xFF633F00) else Color(0xFFFFDDB3),
+                contentColor = if (useDarkTheme) Color(0xFFFFDDB3) else Color(0xFF291800),
+                checkedContainerColor = if (useDarkTheme) Color(0xFFFFB95B) else Color(0xFF825500),
+                checkedContentColor = if (useDarkTheme) Color(0xFF452B00) else Color(0xFFFFFFFF)
+            ),
+            ColorPresetOption(
+                preset = ColorPreset.CRIMSON_BERRY,
+                nameRes = R.string.color_preset_crimson,
+                containerColor = if (useDarkTheme) Color(0xFF7C002C) else Color(0xFFFFD9DD),
+                contentColor = if (useDarkTheme) Color(0xFFFFD9DD) else Color(0xFF3A0010),
+                checkedContainerColor = if (useDarkTheme) Color(0xFFFFB2BE) else Color(0xFF980038),
+                checkedContentColor = if (useDarkTheme) Color(0xFF5F0021) else Color(0xFFFFFFFF)
+            ),
+            ColorPresetOption(
+                preset = ColorPreset.SLATE_MONO,
+                nameRes = R.string.color_preset_slate,
+                containerColor = if (useDarkTheme) Color(0xFF383838) else Color(0xFFE2E2E2),
+                contentColor = if (useDarkTheme) Color(0xFFE2E2E2) else Color(0xFF1A1A1A),
+                checkedContainerColor = if (useDarkTheme) Color(0xFFC6C6C6) else Color(0xFF474747),
+                checkedContentColor = if (useDarkTheme) Color(0xFF202020) else Color(0xFFFFFFFF)
+            )
+        )
     }
 
-    val options = listOf(
-        Triple(ColorPreset.SYSTEM, stringResource(R.string.color_preset_system), systemColor),
-        Triple(ColorPreset.FOREST_SAGE, stringResource(R.string.color_preset_sage), if (useDarkTheme) Color(0xFFB1D18A) else Color(0xFF4C662B)),
-        Triple(ColorPreset.SUNSET_ROSE, stringResource(R.string.color_preset_rose), if (useDarkTheme) Color(0xFFF5B5A1) else Color(0xFF8F4C38)),
-        Triple(ColorPreset.OCEAN_DEEP, stringResource(R.string.color_preset_ocean), if (useDarkTheme) Color(0xFF76D1FF) else Color(0xFF006689)),
-        Triple(ColorPreset.PURPLE_NEBULA, stringResource(R.string.color_preset_purple), if (useDarkTheme) Color(0xFFD4BBFF) else Color(0xFF6B4EA2)),
-        Triple(ColorPreset.AMBER_GOLD, stringResource(R.string.color_preset_amber), if (useDarkTheme) Color(0xFFFFB95B) else Color(0xFF825500)),
-        Triple(ColorPreset.CRIMSON_BERRY, stringResource(R.string.color_preset_crimson), if (useDarkTheme) Color(0xFFFFB2BE) else Color(0xFF980038)),
-        Triple(ColorPreset.SLATE_MONO, stringResource(R.string.color_preset_slate), if (useDarkTheme) Color(0xFFC6C6C6) else Color(0xFF474747))
-    )
+    val isSystemSelected = currentPreset == ColorPreset.SYSTEM
+    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            item {
+                val systemEndR by animateDpAsState(
+                    targetValue = if (isSystemSelected) 20.dp else 6.dp,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow),
+                    label = "color_system_endR"
+                )
+                val systemShape = RoundedCornerShape(
+                    topStart = 20.dp,
+                    bottomStart = 20.dp,
+                    topEnd = systemEndR,
+                    bottomEnd = systemEndR
+                )
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 4.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        val chunkedOptions = options.chunked(4)
-        chunkedOptions.forEach { rowItems ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                rowItems.forEach { (preset, title, mainColor) ->
-                    val isSelected = currentPreset == preset
-
-                    val scale by androidx.compose.animation.core.animateFloatAsState(
-                        targetValue = if (isSelected) 1.12f else 1.0f,
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioLowBouncy,
-                            stiffness = Spring.StiffnessLow
-                        ),
-                        label = "color_scale_$preset"
-                    )
-
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .weight(1f)
-                            .scale(scale)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = { onPresetChange(preset) }
-                            )
+                ToggleButton(
+                    checked = isSystemSelected,
+                    onCheckedChange = {
+                        if (!isSystemSelected) {
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                            onPresetChange(ColorPreset.SYSTEM)
+                        }
+                    },
+                    shapes = ToggleButtonShapes(systemShape, systemShape, systemShape),
+                    colors = toggleButtonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        checkedContainerColor = MaterialTheme.colorScheme.primary,
+                        checkedContentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    modifier = Modifier
+                        .height(40.dp)
+                        .widthIn(min = 40.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .size(52.dp)
-                                .then(
-                                    if (isSelected) {
-                                        Modifier.border(
-                                            border = BorderStroke(
-                                                width = 3.dp,
-                                                color = MaterialTheme.colorScheme.primary
-                                            ),
-                                            shape = CircleShape
+                        AnimatedContent(
+                            targetState = isSystemSelected,
+                            transitionSpec = {
+                                (fadeIn(animationSpec = tween(140)) +
+                                 scaleIn(initialScale = 0.75f, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow)))
+                                    .togetherWith(
+                                        fadeOut(animationSpec = tween(70)) +
+                                        scaleOut(targetScale = 0.75f, animationSpec = tween(70))
+                                    )
+                            },
+                            label = "color_system_icon"
+                        ) { checked ->
+                            Icon(
+                                imageVector = if (checked) Icons.Filled.Check else Icons.Filled.AutoAwesome,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Text(
+                            text = stringResource(R.string.color_preset_system),
+                            style = MaterialTheme.typography.labelLarge,
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
+
+            itemsIndexed(colorPresets, key = { _, item -> item.preset }) { index, item ->
+                val isChecked = currentPreset == item.preset
+                val isLast = index == colorPresets.size - 1
+
+                val startR by animateDpAsState(
+                    targetValue = if (isChecked) 20.dp else 6.dp,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow),
+                    label = "color_startR_$index"
+                )
+                val endR by animateDpAsState(
+                    targetValue = if (isChecked || isLast) 20.dp else 6.dp,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow),
+                    label = "color_endR_$index"
+                )
+                val itemShape = RoundedCornerShape(
+                    topStart = startR,
+                    bottomStart = startR,
+                    topEnd = endR,
+                    bottomEnd = endR
+                )
+
+                ToggleButton(
+                    checked = isChecked,
+                    onCheckedChange = {
+                        if (!isChecked) {
+                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                            onPresetChange(item.preset)
+                        }
+                    },
+                    shapes = ToggleButtonShapes(itemShape, itemShape, itemShape),
+                    colors = toggleButtonColors(
+                        containerColor = item.containerColor,
+                        contentColor = item.contentColor,
+                        checkedContainerColor = item.checkedContainerColor,
+                        checkedContentColor = item.checkedContentColor
+                    ),
+                    modifier = Modifier
+                        .height(40.dp)
+                        .widthIn(min = 40.dp)
+                ) {
+                    AnimatedContent(
+                        targetState = isChecked,
+                        transitionSpec = {
+                            (fadeIn(animationSpec = tween(150, delayMillis = 50)) +
+                             scaleIn(initialScale = 0.85f, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow)))
+                                .togetherWith(
+                                    fadeOut(animationSpec = tween(70)) +
+                                    scaleOut(targetScale = 0.85f, animationSpec = tween(70))
+                                )
+                                .using(
+                                    SizeTransform(clip = false) { _, _ ->
+                                        spring(
+                                            dampingRatio = Spring.DampingRatioLowBouncy,
+                                            stiffness = Spring.StiffnessMediumLow
                                         )
-                                    } else {
-                                        Modifier
                                     }
                                 )
-                                .padding(4.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(
-                                        color = mainColor,
-                                        shape = CircleShape
-                                    )
-                            )
-
-                            if (isSelected) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(
-                                            color = Color.Black.copy(alpha = 0.2f),
-                                            shape = CircleShape
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Check,
-                                        contentDescription = null,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(22.dp)
-                                    )
-                                }
+                        },
+                        label = "color_preset_content_${item.preset.name}"
+                    ) { checked ->
+                        if (checked) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Text(
+                                    text = stringResource(item.nameRes),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    maxLines = 1
+                                )
                             }
                         }
-
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium
-                            ),
-                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                            textAlign = TextAlign.Center,
-                            maxLines = 2,
-                            minLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 2.dp)
-                        )
                     }
                 }
             }

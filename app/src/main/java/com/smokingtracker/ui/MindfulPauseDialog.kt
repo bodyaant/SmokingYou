@@ -36,7 +36,7 @@ import com.smokingtracker.ui.theme.containerShape
 @Composable
 fun MindfulPauseDialog(
     selectedTrigger: String?,
-    vibrationEnabled: Boolean = false,
+    vibrationEnabled: Boolean = true,
     onDismiss: () -> Unit,
     onSuccess: (String?) -> Unit,
     onFailure: (String?) -> Unit = {}
@@ -61,7 +61,7 @@ fun MindfulPauseDialog(
 @Composable
 fun MindfulPauseContent(
     selectedTrigger: String?,
-    vibrationEnabled: Boolean = false,
+    vibrationEnabled: Boolean = true,
     onDismiss: () -> Unit,
     onSuccess: (String?) -> Unit,
     onFailure: (String?) -> Unit = {}

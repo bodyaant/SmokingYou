@@ -56,7 +56,7 @@ fun TriggerManagementBottomSheet(
     onRemoveCustomTrigger: (String) -> Unit,
     onToggleDefaultTrigger: (String, Boolean) -> Unit,
     onDismissRequest: () -> Unit,
-    vibrationEnabled: Boolean = false
+    vibrationEnabled: Boolean = true
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showAddDialog by remember { mutableStateOf(false) }
@@ -164,7 +164,6 @@ fun TriggerManagementBottomSheet(
                 .verticalScroll(rememberScrollState())
                 .padding(start = 20.dp, end = 20.dp, bottom = 36.dp, top = 4.dp)
         ) {
-            // Header
             Text(
                 text = stringResource(R.string.trigger_management_title),
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
@@ -179,7 +178,6 @@ fun TriggerManagementBottomSheet(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Section 1: Custom reasons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -324,7 +322,6 @@ fun TriggerManagementBottomSheet(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Add button
             FilledTonalButton(
                 onClick = {
                     showAddDialog = true
@@ -348,7 +345,6 @@ fun TriggerManagementBottomSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Section 2: Standard reasons
             Text(
                 text = stringResource(R.string.trigger_standard_section),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -433,7 +429,7 @@ fun TriggerManagementBottomSheet(
 @Composable
 fun AddTriggerDialog(
     customTriggers: List<String>,
-    vibrationEnabled: Boolean = false,
+    vibrationEnabled: Boolean = true,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
