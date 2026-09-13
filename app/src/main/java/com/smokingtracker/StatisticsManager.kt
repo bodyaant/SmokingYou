@@ -133,7 +133,10 @@ class StatisticsManager {
 
     fun getWeeklyCount(entries: List<Long>, date: Calendar): Int {
         val weekStart = date.clone() as Calendar
-        weekStart.set(Calendar.DAY_OF_WEEK, weekStart.firstDayOfWeek)
+        weekStart.firstDayOfWeek = Calendar.MONDAY
+        while (weekStart.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+            weekStart.add(Calendar.DAY_OF_YEAR, -1)
+        }
         weekStart.set(Calendar.HOUR_OF_DAY, 0)
         weekStart.set(Calendar.MINUTE, 0)
         weekStart.set(Calendar.SECOND, 0)
@@ -178,7 +181,10 @@ class StatisticsManager {
 
     fun generateWeeklyData(entries: List<Long>, date: Calendar): List<Int> {
         val weekStart = date.clone() as Calendar
-        weekStart.set(Calendar.DAY_OF_WEEK, weekStart.firstDayOfWeek)
+        weekStart.firstDayOfWeek = Calendar.MONDAY
+        while (weekStart.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+            weekStart.add(Calendar.DAY_OF_YEAR, -1)
+        }
         weekStart.set(Calendar.HOUR_OF_DAY, 0)
         weekStart.set(Calendar.MINUTE, 0)
         weekStart.set(Calendar.SECOND, 0)
@@ -233,6 +239,29 @@ class StatisticsManager {
             weeklyChunks.add(sum)
         }
         return weeklyChunks
+    }
+
+    fun generateMonthlyDailyData(entries: List<Long>, date: Calendar): List<Int> {
+        val monthStart = date.clone() as Calendar
+        monthStart.set(Calendar.DAY_OF_MONTH, 1)
+        monthStart.set(Calendar.HOUR_OF_DAY, 0)
+        monthStart.set(Calendar.MINUTE, 0)
+        monthStart.set(Calendar.SECOND, 0)
+        monthStart.set(Calendar.MILLISECOND, 0)
+        val monthStartMillis = monthStart.timeInMillis
+        val monthEnd = monthStart.clone() as Calendar
+        monthEnd.add(Calendar.MONTH, 1)
+        val monthEndMillis = monthEnd.timeInMillis
+        val monthEntries = entries.filter { it >= monthStartMillis && it < monthEndMillis }
+        val daysInMonth = monthStart.getActualMaximum(Calendar.DAY_OF_MONTH)
+        val dailyCounts = IntArray(daysInMonth) { 0 }
+        val cal = Calendar.getInstance()
+        monthEntries.forEach { time ->
+            cal.timeInMillis = time
+            val dayIndex = cal.get(Calendar.DAY_OF_MONTH) - 1
+            if (dayIndex in 0 until daysInMonth) dailyCounts[dayIndex]++
+        }
+        return dailyCounts.toList()
     }
 
     fun generateYearlyData(entries: List<Long>, date: Calendar): List<Int> {
@@ -451,14 +480,14 @@ class StatisticsManager {
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
 
-        val firstDay = cal.firstDayOfWeek
+        val firstDay = Calendar.MONDAY
         while (cal.get(Calendar.DAY_OF_WEEK) != firstDay) {
             cal.add(Calendar.DAY_OF_YEAR, -1)
         }
         val thisWeekStart = cal.timeInMillis
 
         val prevWeekStartCal = cal.clone() as Calendar
-        prevWeekStartCal.add(Calendar.WEEK_OF_YEAR, -1)
+        prevWeekStartCal.add(Calendar.DAY_OF_YEAR, -7)
         val prevWeekStart = prevWeekStartCal.timeInMillis
 
         val prevWeekEnd = thisWeekStart
