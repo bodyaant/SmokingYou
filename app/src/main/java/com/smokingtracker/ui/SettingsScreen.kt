@@ -4,9 +4,7 @@ import android.app.LocaleManager
 import android.os.Build
 import android.os.LocaleList
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -33,7 +31,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.History
-import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.containerPadding
 import com.smokingtracker.ui.theme.containerGroupGap
@@ -56,10 +53,6 @@ import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
-import com.smokingtracker.widget.QuickAddWidgetProvider
-import com.smokingtracker.widget.TimerWidgetProvider
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import kotlin.math.roundToInt
@@ -114,6 +107,7 @@ fun PersonalScreen(
     val notificationShowAddButton by viewModel.notificationShowAddButton.collectAsStateWithLifecycle()
     val notificationShowResistButton by viewModel.notificationShowResistButton.collectAsStateWithLifecycle()
     val widgetShowResistButton by viewModel.widgetShowResistButton.collectAsStateWithLifecycle()
+    val showLimitOnGraph by viewModel.showLimitOnGraph.collectAsStateWithLifecycle()
     val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
 
     PersonalScreenContent(
@@ -149,6 +143,8 @@ fun PersonalScreen(
         onNotificationShowResistButtonChange = viewModel::updateNotificationShowResistButton,
         onWidgetShowResistButtonChange = viewModel::updateWidgetShowResistButton,
         onThemeChange = viewModel::updateThemePreference,
+        showLimitOnGraph = showLimitOnGraph,
+        onSetShowLimitOnGraph = viewModel::setShowLimitOnGraph,
         onSetDailyLimit = viewModel::setDailyLimit,
         onFontPresetChange = viewModel::updateFontPreset,
         onUpdatePackDetails = viewModel::updatePackDetails,
@@ -192,11 +188,13 @@ fun PersonalScreenContent(
     notificationShowAddButton: Boolean = true,
     notificationShowResistButton: Boolean = false,
     widgetShowResistButton: Boolean = true,
+    showLimitOnGraph: Boolean = true,
     vibrationEnabled: Boolean = true,
     onAddCustomTrigger: (String, (String?) -> Unit) -> Unit = { _, _ -> },
     onRemoveCustomTrigger: (String) -> Unit = {},
     onToggleDefaultTrigger: (String, Boolean) -> Unit = { _, _ -> },
     onSetTaperingPlanSettings: (Boolean, Int) -> Unit = { _, _ -> },
+    onSetShowLimitOnGraph: (Boolean) -> Unit = {},
     onOngoingNotificationEnabledChange: (Boolean) -> Unit = {},
     onNotificationLowPriorityChange: (Boolean) -> Unit = {},
     onNotificationShowTimerChange: (Boolean) -> Unit = {},
@@ -261,11 +259,13 @@ fun PersonalScreenContent(
             notificationShowAddButton = notificationShowAddButton,
             notificationShowResistButton = notificationShowResistButton,
             widgetShowResistButton = widgetShowResistButton,
+            showLimitOnGraph = showLimitOnGraph,
             vibrationEnabled = vibrationEnabled,
             onAddCustomTrigger = onAddCustomTrigger,
             onRemoveCustomTrigger = onRemoveCustomTrigger,
             onToggleDefaultTrigger = onToggleDefaultTrigger,
             onSetTaperingPlanSettings = onSetTaperingPlanSettings,
+            onSetShowLimitOnGraph = onSetShowLimitOnGraph,
             onOngoingNotificationEnabledChange = onOngoingNotificationEnabledChange,
             onNotificationLowPriorityChange = onNotificationLowPriorityChange,
             onNotificationShowTimerChange = onNotificationShowTimerChange,
@@ -323,11 +323,13 @@ fun SettingsTab(
     notificationShowAddButton: Boolean = true,
     notificationShowResistButton: Boolean = false,
     widgetShowResistButton: Boolean = true,
+    showLimitOnGraph: Boolean = true,
     vibrationEnabled: Boolean = true,
     onAddCustomTrigger: (String, (String?) -> Unit) -> Unit = { _, _ -> },
     onRemoveCustomTrigger: (String) -> Unit = {},
     onToggleDefaultTrigger: (String, Boolean) -> Unit = { _, _ -> },
     onSetTaperingPlanSettings: (Boolean, Int) -> Unit = { _, _ -> },
+    onSetShowLimitOnGraph: (Boolean) -> Unit = {},
     onOngoingNotificationEnabledChange: (Boolean) -> Unit = {},
     onNotificationLowPriorityChange: (Boolean) -> Unit = {},
     onNotificationShowTimerChange: (Boolean) -> Unit = {},
@@ -548,7 +550,10 @@ fun SettingsTab(
             dailyLimit = dailyLimit,
             taperingPlanEnabled = taperingPlanEnabled,
             taperingIntervalDays = taperingIntervalDays,
+            showLimitOnGraph = showLimitOnGraph,
             onSetDailyLimit = onSetDailyLimit,
+            onSetTaperingPlanSettings = onSetTaperingPlanSettings,
+            onSetShowLimitOnGraph = onSetShowLimitOnGraph,
             onDismissRequest = { showLimitDialog = false },
             vibrationEnabled = vibrationEnabled
         )
@@ -582,10 +587,12 @@ fun SettingsTab(
     }
 
     if (showWidgetDialog) {
-        WidgetPinDialog(
+        WidgetSettingsBottomSheet(
             widgetShowResistButton = widgetShowResistButton,
             onWidgetShowResistButtonChange = onWidgetShowResistButtonChange,
-            onDismiss = { showWidgetDialog = false }
+            dailyLimit = dailyLimit,
+            vibrationEnabled = vibrationEnabled,
+            onDismissRequest = { showWidgetDialog = false }
         )
     }
 
@@ -672,7 +679,11 @@ fun SettingsTab(
         }
         item {
             val limitSubtitle = if (dailyLimit > 0) {
-                stringResource(R.string.daily_limit_active_subtitle, dailyLimit)
+                if (taperingPlanEnabled) {
+                    stringResource(R.string.daily_limit_subtitle_with_tapering, dailyLimit, taperingIntervalDays)
+                } else {
+                    stringResource(R.string.daily_limit_active_subtitle, dailyLimit)
+                }
             } else {
                 stringResource(R.string.daily_limit_off_subtitle)
             }
@@ -683,97 +694,6 @@ fun SettingsTab(
                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp),
                 groupPosition = ContainerGroupPosition.FIRST,
                 onClick = { showLimitDialog = true }
-            )
-        }
-        item {
-            var showTaperingDialog by remember { mutableStateOf(false) }
-
-            if (showTaperingDialog) {
-                var enabled by remember(taperingPlanEnabled) { mutableStateOf(taperingPlanEnabled) }
-                var interval by remember(taperingIntervalDays) { mutableIntStateOf(taperingIntervalDays) }
-
-                ModalBottomSheet(
-                    onDismissRequest = { showTaperingDialog = false },
-                    sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden),
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(rememberScrollState())
-                            .padding(start = 24.dp, end = 24.dp, bottom = 48.dp, top = 8.dp)
-                    ) {
-                        Text(
-                            stringResource(R.string.tapering_plan_dialog_title),
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                stringResource(R.string.tapering_plan_switch_label),
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.weight(1f).padding(end = 12.dp)
-                            )
-                            Switch(
-                                checked = enabled,
-                                onCheckedChange = { enabled = it },
-                                thumbContent = { SwitchThumb(enabled) }
-                            )
-                        }
-
-                        AnimatedVisibility(
-                            visible = enabled,
-                            enter = expandVertically(animationSpec = spring(dampingRatio = 0.8f, stiffness = 400f)) + fadeIn(),
-                            exit = shrinkVertically(animationSpec = spring(dampingRatio = 0.8f, stiffness = 400f)) + fadeOut()
-                        ) {
-                            Column {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    stringResource(R.string.tapering_plan_slider_label, interval),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Slider(
-                                    value = interval.toFloat(),
-                                    onValueChange = { interval = it.roundToInt() },
-                                    valueRange = 3f..14f,
-                                    steps = 10
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                            TextButton(onClick = { showTaperingDialog = false }) {
-                                Text(stringResource(R.string.dialog_cancel), fontWeight = FontWeight.Bold)
-                            }
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Button(
-                                onClick = {
-                                    onSetTaperingPlanSettings(enabled, interval)
-                                    showTaperingDialog = false
-                                }
-                            ) {
-                                Text(stringResource(R.string.dialog_ok), fontWeight = FontWeight.Bold)
-                            }
-                        }
-                    }
-                }
-            }
-
-            SettingItem(
-                icon = Icons.AutoMirrored.Filled.TrendingDown,
-                title = stringResource(R.string.tapering_plan_title),
-                subtitle = if (taperingPlanEnabled) stringResource(R.string.tapering_plan_subtitle_active, taperingIntervalDays) else stringResource(R.string.tapering_plan_subtitle_off),
-                shape = RoundedCornerShape(8.dp),
-                groupPosition = ContainerGroupPosition.MIDDLE,
-                onClick = { showTaperingDialog = true }
             )
         }
         item {
@@ -914,8 +834,7 @@ fun SettingItemWithSwitch(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = containerShape(shape, groupPosition),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        border = containerBorder()
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
     ) {
         Row(
             modifier = Modifier
@@ -991,8 +910,7 @@ fun SettingItem(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = containerShape(shape, groupPosition),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        border = containerBorder()
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
     ) {
         SettingItemContent(icon = icon, title = title, subtitle = subtitle, onClick = onClick)
     }
@@ -1053,189 +971,5 @@ fun changeLanguage(context: android.content.Context, languageTag: String) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun WidgetPinDialog(
-    widgetShowResistButton: Boolean = true,
-    onWidgetShowResistButtonChange: (Boolean) -> Unit = {},
-    onDismiss: () -> Unit
-) {
-    val context = LocalContext.current
 
-    fun requestPin(providerClass: Class<*>) {
-        val appWidgetManager = AppWidgetManager.getInstance(context)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && appWidgetManager.isRequestPinAppWidgetSupported) {
-            val myProvider = ComponentName(context, providerClass)
-            appWidgetManager.requestPinAppWidget(myProvider, null, null)
-        } else {
-            Toast.makeText(
-                context,
-                context.getString(R.string.widget_pin_unsupported_toast),
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(start = 24.dp, end = 24.dp, bottom = 48.dp, top = 8.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.settings_widgets_title),
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = stringResource(R.string.settings_widgets_desc),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = containerShape(RoundedCornerShape(16.dp)),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.widget_quick_add_title),
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.weight(1f, fill = false)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = {
-                                requestPin(QuickAddWidgetProvider::class.java)
-                            },
-                            shape = RoundedCornerShape(12.dp),
-                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.widget_pin_button_1x1),
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = stringResource(R.string.widget_quick_add_description),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = containerShape(RoundedCornerShape(16.dp)),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.widget_timer_title),
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.weight(1f, fill = false)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = {
-                                requestPin(TimerWidgetProvider::class.java)
-                            },
-                            shape = RoundedCornerShape(12.dp),
-                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.widget_pin_button_3x1),
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = stringResource(R.string.widget_timer_description),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = containerShape(RoundedCornerShape(16.dp)),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.widget_show_resist_button_title),
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = stringResource(R.string.widget_show_resist_button_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Switch(
-                        checked = widgetShowResistButton,
-                        onCheckedChange = onWidgetShowResistButtonChange
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.dialog_cancel), fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-    }
-}
 
