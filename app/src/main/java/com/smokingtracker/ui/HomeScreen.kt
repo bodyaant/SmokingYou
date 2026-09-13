@@ -7,8 +7,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.BorderStroke
-import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.containerPadding
 import com.smokingtracker.ui.theme.ContainerIcon
@@ -48,7 +46,7 @@ import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.smokingtracker.data.TriggerType
@@ -69,6 +67,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.smokingtracker.HomeViewModel
@@ -526,8 +525,7 @@ internal fun HomeScreenContent(
                                             colors = CardDefaults.cardColors(
                                                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
                                                 contentColor = MaterialTheme.colorScheme.onSurface
-                                            ),
-                                            border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+                                            )
                                         ) {
                                             Column(
                                                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -574,8 +572,7 @@ internal fun HomeScreenContent(
                                             colors = CardDefaults.cardColors(
                                                 containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
                                                 contentColor = MaterialTheme.colorScheme.primary
-                                            ),
-                                            border = containerBorder(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+                                            )
                                         ) {
                                             Column(
                                                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -619,7 +616,6 @@ internal fun HomeScreenContent(
                                     shape = RoundedCornerShape(18.dp),
                                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
                                     contentColor = MaterialTheme.colorScheme.primary,
-                                    border = containerBorder(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Row(
@@ -653,7 +649,6 @@ internal fun HomeScreenContent(
                             shape = RoundedCornerShape(18.dp),
                             color = MaterialTheme.colorScheme.secondaryContainer,
                             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            border = containerBorder(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
@@ -736,7 +731,8 @@ internal fun HomeScreenContent(
             onReduceLimit = { viewModel?.acceptTaperingReduction() },
             onKeepLimit = { viewModel?.keepTaperingLimit() },
             onSnooze = { viewModel?.snoozeTaperingCheckIn() },
-            onDismiss = { viewModel?.dismissTaperingCheckIn() }
+            onDismiss = { viewModel?.dismissTaperingCheckIn() },
+            vibrationEnabled = vibrationEnabled
         )
     }
 
@@ -787,10 +783,6 @@ internal fun HomeScreenContent(
                     ),
                     elevation = CardDefaults.cardElevation(
                         defaultElevation = 6.dp
-                    ),
-                    border = containerBorder(
-                        strokeWidth = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
                     )
                 ) {
                     Row(
@@ -882,33 +874,21 @@ internal fun HomeScreenContent(
                     .padding(horizontal = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainer,
                     ),
-                    shape = containerShape(RoundedCornerShape(32.dp)),
-                    border = containerBorder()
+                    shape = containerShape(RoundedCornerShape(28.dp))
                 ) {
                     Column(
-                        modifier = Modifier.padding(containerPadding(32.dp, 32.dp, standardHorizontal = 20.dp, standardVertical = 20.dp)).fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(containerPadding(20.dp, 16.dp, standardHorizontal = 18.dp, standardVertical = 16.dp)),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        val heroTextStyle = when {
-                            timePassedText.length > 16 -> MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold)
-                            timePassedText.length > 10 -> MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold)
-                            else -> MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold)
-                        }
-                        Text(
-                            text = timePassedText,
-                            style = heroTextStyle,
-                            color = MaterialTheme.colorScheme.primary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
@@ -926,57 +906,119 @@ internal fun HomeScreenContent(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                             )
                         }
+                        Spacer(modifier = Modifier.height(6.dp))
+                        val heroTextStyle = when {
+                            timePassedText.length > 16 -> MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold)
+                            timePassedText.length > 10 -> MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold)
+                            else -> MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold)
+                        }
+                        Text(
+                            text = timePassedText,
+                            style = heroTextStyle,
+                            color = MaterialTheme.colorScheme.primary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        if (dailyLimit > 0) {
+                            val progress = (selectedDateEntries.size.toFloat() / dailyLimit.toFloat()).coerceIn(0f, 1f)
+                            val isLimitReached = progress >= 1f
+
+                            Spacer(modifier = Modifier.height(14.dp))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = if (isLimitReached) Icons.Filled.Warning else Icons.Filled.SmokingRooms,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(15.dp),
+                                        tint = if (isLimitReached) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = stringResource(R.string.home_daily_limit),
+                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Text(
+                                    text = "${selectedDateEntries.size} / $dailyLimit",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = if (isLimitReached) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            LinearWavyProgressIndicator(
+                                progress = { progress },
+                                modifier = Modifier.fillMaxWidth(),
+                                amplitude = { if (isLimitReached) 0f else 1f },
+                                waveSpeed = if (isLimitReached) 0.dp else 16.dp,
+                                color = if (isLimitReached) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        }
                     }
                 }
 
-                if (dailyLimit > 0) {
-                    val progress = (selectedDateEntries.size.toFloat() / dailyLimit.toFloat()).coerceIn(0f, 1f)
-                    val isLimitReached = progress >= 1f
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    LinearWavyProgressIndicator(
-                        progress = { progress },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
-                        amplitude = { if (isLimitReached) 0f else 1f },
-                        waveSpeed = if (isLimitReached) 0.dp else 16.dp,
-                        color = if (isLimitReached) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 val weeklyCount = remember(entries, currentDate) { StatisticsManager().getWeeklyCount(entries, currentDate) }
                 val monthlyCount = remember(entries, currentDate) { StatisticsManager().getMonthlyCount(entries, currentDate) }
 
-                Row(
+                Card(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    shape = containerShape(RoundedCornerShape(20.dp)),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
                 ) {
-                    StatItem(
-                        label = stringResource(R.string.stat_daily),
-                        value = selectedDateEntries.size.toString(),
-                        onClick = { onNavigateToGraphs("daily") },
-                        modifier = Modifier.weight(1f)
-                    )
-                    StatItem(
-                        label = stringResource(R.string.stat_weekly),
-                        value = weeklyCount.toString(),
-                        onClick = { onNavigateToGraphs("weekly") },
-                        modifier = Modifier.weight(1f)
-                    )
-                    StatItem(
-                        label = stringResource(R.string.stat_monthly),
-                        value = monthlyCount.toString(),
-                        onClick = { onNavigateToGraphs("monthly") },
-                        modifier = Modifier.weight(1f)
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp, horizontal = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        StatItem(
+                            label = stringResource(R.string.stat_daily),
+                            value = selectedDateEntries.size.toString(),
+                            onClick = { onNavigateToGraphs("daily") },
+                            vibrationEnabled = vibrationEnabled,
+                            modifier = Modifier.weight(1f)
+                        )
+                        VerticalDivider(
+                            modifier = Modifier.height(28.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                        )
+                        StatItem(
+                            label = stringResource(R.string.stat_weekly),
+                            value = weeklyCount.toString(),
+                            onClick = { onNavigateToGraphs("weekly") },
+                            vibrationEnabled = vibrationEnabled,
+                            modifier = Modifier.weight(1f)
+                        )
+                        VerticalDivider(
+                            modifier = Modifier.height(28.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                        )
+                        StatItem(
+                            label = stringResource(R.string.stat_monthly),
+                            value = monthlyCount.toString(),
+                            onClick = { onNavigateToGraphs("monthly") },
+                            vibrationEnabled = vibrationEnabled,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 var totalDragX by remember { mutableFloatStateOf(0f) }
 
@@ -1008,7 +1050,7 @@ internal fun HomeScreenContent(
                                 }
                             )
                         },
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
 
@@ -1034,6 +1076,7 @@ internal fun HomeScreenContent(
 
                     Surface(
                         onClick = {
+                            prevBouncy.bounce()
                             com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                             val newDate = currentDate.clone() as Calendar
                             newDate.add(Calendar.DAY_OF_YEAR, -1)
@@ -1044,7 +1087,7 @@ internal fun HomeScreenContent(
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         interactionSource = prevInteractionSource,
                         modifier = Modifier
-                            .size(56.dp)
+                            .size(48.dp)
                             .bouncyPress(prevBouncy)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
@@ -1054,40 +1097,52 @@ internal fun HomeScreenContent(
 
                     Surface(
                         onClick = {
+                            datePickerBouncy.bounce()
                             com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                             showDatePicker = true
                         },
                         shape = RoundedCornerShape(24.dp),
                         color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        border = containerBorder(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)),
                         interactionSource = datePickerInteractionSource,
-                        modifier = Modifier.bouncyPress(datePickerBouncy)
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                            .bouncyPress(datePickerBouncy)
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 10.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.DateRange,
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp)
                             )
+                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = selectedDateStr,
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.weight(1f, fill = false)
                             )
+                            Spacer(modifier = Modifier.width(4.dp))
                             Icon(
                                 imageVector = Icons.Filled.KeyboardArrowDown,
                                 contentDescription = null,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                     }
 
                     Surface(
                         onClick = {
+                            nextBouncy.bounce()
                             com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                             val newDate = currentDate.clone() as Calendar
                             newDate.add(Calendar.DAY_OF_YEAR, 1)
@@ -1099,7 +1154,7 @@ internal fun HomeScreenContent(
                         contentColor = if (!isToday) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         interactionSource = nextInteractionSource,
                         modifier = Modifier
-                            .size(56.dp)
+                            .size(48.dp)
                             .bouncyPress(nextBouncy)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
@@ -1141,62 +1196,88 @@ internal fun HomeScreenContent(
                     }
                 }
 
-                LazyColumn(
-                    state = entriesListState,
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(bottom = 100.dp)
-                ) {
-                    if (selectedDateAllEntities.isEmpty()) {
-                        item {
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 24.dp, horizontal = 4.dp),
-                                shape = containerShape(RoundedCornerShape(24.dp)),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.5f)
-                                ),
-                                border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(32.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Surface(
-                                        shape = MaterialShapes.Cookie9Sided.toShape(),
-                                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                                        contentColor = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(56.dp)
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Icon(
-                                                imageVector = Icons.Filled.History,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(28.dp)
-                                            )
+                if (selectedDateAllEntities.isEmpty()) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(bottom = 88.dp, start = 4.dp, end = 4.dp)
+                            .pointerInput(currentDate, isToday) {
+                                detectHorizontalDragGestures(
+                                    onDragStart = { totalDragX = 0f },
+                                    onDragEnd = {
+                                        if (totalDragX > 80f) {
+                                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
+                                            val newDate = currentDate.clone() as Calendar
+                                            newDate.add(Calendar.DAY_OF_YEAR, -1)
+                                            currentDate = newDate
+                                        } else if (totalDragX < -80f && !isToday) {
+                                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
+                                            val newDate = currentDate.clone() as Calendar
+                                            newDate.add(Calendar.DAY_OF_YEAR, 1)
+                                            currentDate = newDate
                                         }
+                                        totalDragX = 0f
+                                    },
+                                    onDragCancel = { totalDragX = 0f },
+                                    onHorizontalDrag = { change, dragAmount ->
+                                        change.consume()
+                                        totalDragX += dragAmount
                                     }
-                                    Spacer(modifier = Modifier.height(14.dp))
-                                    Text(
-                                        text = stringResource(R.string.home_no_entries_title),
-                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Text(
-                                        text = stringResource(R.string.home_no_entries_desc),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                        textAlign = TextAlign.Center
-                                    )
+                                )
+                            },
+                        shape = containerShape(RoundedCornerShape(24.dp)),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.45f)
+                        )
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(24.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Surface(
+                                    shape = MaterialShapes.Cookie9Sided.toShape(),
+                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                                    contentColor = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(56.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = Icons.Filled.History,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(28.dp)
+                                        )
+                                    }
                                 }
+                                Spacer(modifier = Modifier.height(14.dp))
+                                Text(
+                                    text = stringResource(R.string.home_no_entries_title),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = stringResource(R.string.home_no_entries_desc),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                    textAlign = TextAlign.Center
+                                )
                             }
                         }
-                    } else {
+                    }
+                } else {
+                    LazyColumn(
+                        state = entriesListState,
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(bottom = 100.dp)
+                    ) {
                         itemsIndexed(
                             items = selectedDateAllEntities,
                             key = { _, entity -> entity.id }
@@ -1327,47 +1408,56 @@ fun StatItem(
     label: String,
     value: String,
     modifier: Modifier = Modifier,
+    vibrationEnabled: Boolean = true,
     onClick: (() -> Unit)? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed && onClick != null) 0.93f else 1f,
+        targetValue = if (isPressed && onClick != null) 0.92f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
         ),
         label = "stat_scale"
     )
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
 
-    Card(
+    Surface(
         modifier = modifier
-            .aspectRatio(1f)
-            .scale(scale),
-        onClick = { onClick?.invoke() },
+            .scale(scale)
+            .clip(RoundedCornerShape(16.dp)),
+        onClick = {
+            if (onClick != null) {
+                com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                onClick.invoke()
+            }
+        },
         enabled = onClick != null,
         interactionSource = interactionSource,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-        ),
-        shape = containerShape(RoundedCornerShape(24.dp)),
-        border = containerBorder()
+        color = Color.Transparent,
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp, horizontal = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = value,
-                style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
                 color = MaterialTheme.colorScheme.primary
             )
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
         }
     }
@@ -1506,8 +1596,7 @@ fun EntryItem(
         colors = CardDefaults.cardColors(
             containerColor = cardBgColor
         ),
-        shape = containerShape(RoundedCornerShape(24.dp)),
-        border = containerBorder()
+        shape = containerShape(RoundedCornerShape(24.dp))
     ) {
         Column(
             modifier = Modifier
@@ -1707,7 +1796,6 @@ fun EntryItem(
                             shape = RoundedCornerShape(16.dp),
                             color = colorScheme.surfaceVariant.copy(alpha = 0.45f),
                             contentColor = colorScheme.onSurfaceVariant,
-                            border = containerBorder(1.dp, colorScheme.outlineVariant.copy(alpha = 0.25f)),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp)
@@ -1783,10 +1871,6 @@ fun EntryItem(
                                             shape = RoundedCornerShape(16.dp),
                                             color = if (isSelected) colorScheme.primaryContainer else colorScheme.surfaceVariant.copy(alpha = 0.4f),
                                             contentColor = if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurfaceVariant,
-                                            border = containerBorder(
-                                                1.dp,
-                                                if (isSelected) colorScheme.primary else colorScheme.outlineVariant.copy(alpha = 0.25f)
-                                            ),
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .height(46.dp)
@@ -1832,7 +1916,6 @@ fun EntryItem(
                         shape = RoundedCornerShape(16.dp),
                         color = colorScheme.errorContainer.copy(alpha = 0.4f),
                         contentColor = colorScheme.error,
-                        border = containerBorder(1.dp, colorScheme.error.copy(alpha = 0.3f)),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp)
