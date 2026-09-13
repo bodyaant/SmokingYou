@@ -529,16 +529,6 @@ private val SlateDarkColors = darkColorScheme(
     outlineVariant = Color(0xFF444444)
 )
 
-val LocalContainerBorderEnabled = staticCompositionLocalOf { false }
-
-@Composable
-fun containerBorder(
-    strokeWidth: Dp = 1.dp,
-    color: Color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
-): BorderStroke? {
-    return if (LocalContainerBorderEnabled.current) BorderStroke(strokeWidth, color) else null
-}
-
 enum class ContainerGroupPosition { SINGLE, FIRST, MIDDLE, LAST }
 
 @Composable
@@ -590,7 +580,6 @@ fun AppTheme(
     fontPreset: FontPreset = FontPreset.SYSTEM,
     amoledThemeEnabled: Boolean = false,
     colorPreset: ColorPreset = ColorPreset.SYSTEM,
-    containerBorderEnabled: Boolean = false,
     useCustomVariableFont: Boolean = false,
     customFontWeight: Int = 500,
     customFontWidth: Float = 100f,
@@ -665,13 +654,9 @@ fun AppTheme(
         }
     }
 
-    CompositionLocalProvider(
-        LocalContainerBorderEnabled provides containerBorderEnabled
-    ) {
-        MaterialTheme(
-            colorScheme = finalColors,
-            typography = typography,
-            content = content
-        )
-    }
+    MaterialTheme(
+        colorScheme = finalColors,
+        typography = typography,
+        content = content
+    )
 }

@@ -211,7 +211,6 @@ fun MindfulPauseContent(
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
             ),
-            border = com.smokingtracker.ui.theme.containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
             shape = containerShape(RoundedCornerShape(16.dp)),
             modifier = Modifier.fillMaxWidth()
         ) {

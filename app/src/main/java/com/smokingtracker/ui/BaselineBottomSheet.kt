@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
-import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
 import java.text.SimpleDateFormat
 import java.util.*
@@ -186,8 +185,7 @@ fun BaselineBottomSheet(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
                 ),
                 shape = containerShape(RoundedCornerShape(20.dp)),
-                modifier = Modifier.fillMaxWidth(),
-                border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
@@ -260,8 +258,7 @@ fun BaselineBottomSheet(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
                 ),
                 shape = containerShape(RoundedCornerShape(20.dp)),
-                modifier = Modifier.fillMaxWidth(),
-                border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
@@ -278,8 +275,7 @@ fun BaselineBottomSheet(
                         Surface(
                             onClick = { showDatePickerDialog = true },
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
@@ -377,8 +373,7 @@ fun BaselineBottomSheet(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 ),
                 shape = containerShape(RoundedCornerShape(20.dp)),
-                modifier = Modifier.fillMaxWidth(),
-                border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(

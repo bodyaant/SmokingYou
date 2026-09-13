@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
-import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
 import java.util.Locale
 
@@ -158,10 +157,6 @@ fun PackSettingsBottomSheet(
                 shape = containerShape(RoundedCornerShape(20.dp)),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                ),
-                border = containerBorder(
-                    1.dp,
-                    if (priceVal > 0f && sizeValid) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
                 )
             ) {
                 Column(
@@ -290,8 +285,7 @@ fun PackSettingsBottomSheet(
                                 .height(42.dp),
                             shape = containerShape(RoundedCornerShape(12.dp)),
                             color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer,
-                            contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                            border = containerBorder(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                            contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Text(
@@ -314,8 +308,7 @@ fun PackSettingsBottomSheet(
                             .height(42.dp),
                         shape = containerShape(RoundedCornerShape(12.dp)),
                         color = if (isCustomSize) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer,
-                        contentColor = if (isCustomSize) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                        border = containerBorder(1.dp, if (isCustomSize) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                        contentColor = if (isCustomSize) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
@@ -377,8 +370,7 @@ fun PackSettingsBottomSheet(
                             modifier = Modifier.height(40.dp),
                             shape = containerShape(RoundedCornerShape(12.dp)),
                             color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer,
-                            contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                            border = containerBorder(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                            contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                         ) {
                             Box(
                                 modifier = Modifier.padding(horizontal = 14.dp),

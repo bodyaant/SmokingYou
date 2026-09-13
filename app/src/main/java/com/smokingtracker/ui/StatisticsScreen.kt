@@ -8,10 +8,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Spring
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
-import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.containerPadding
 import com.smokingtracker.ui.theme.ContainerIcon
@@ -245,8 +243,7 @@ fun StatisticsList(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                     ),
                     shape = containerShape(RoundedCornerShape(24.dp)),
-                    modifier = Modifier.fillMaxWidth(),
-                    border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Row(
@@ -366,7 +363,6 @@ fun StatisticsList(
                             Surface(
                                 shape = RoundedCornerShape(16.dp),
                                 color = MaterialTheme.colorScheme.surfaceContainer,
-                                border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Column(modifier = Modifier.padding(14.dp)) {
@@ -462,8 +458,7 @@ fun StatisticsList(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                     ),
                     shape = containerShape(RoundedCornerShape(24.dp)),
-                    modifier = Modifier.fillMaxWidth(),
-                    border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(18.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -519,8 +514,7 @@ fun StatisticsList(
                 onClick = { isRecoveryExpanded = !isRecoveryExpanded },
                 modifier = Modifier.fillMaxWidth(),
                 shape = containerShape(RoundedCornerShape(24.dp)),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                border = containerBorder()
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
             ) {
                 Column(
                     modifier = Modifier
@@ -689,8 +683,7 @@ fun StatisticsList(
                     shape = containerShape(RoundedCornerShape(24.dp)),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                    ),
-                    border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+                    )
                 ) {
                     Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Row(
@@ -819,8 +812,7 @@ fun StatCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = containerShape(RoundedCornerShape(24.dp)),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        border = containerBorder()
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
     ) {
         if (isCompact) {
             Column(
@@ -907,8 +899,7 @@ fun ResistedCravingsCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = containerShape(RoundedCornerShape(24.dp)),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        border = containerBorder()
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
     ) {
         Column(
             modifier = Modifier

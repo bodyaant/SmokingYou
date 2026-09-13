@@ -71,7 +71,6 @@ class MainActivity : ComponentActivity() {
             val fontPreset by viewModel.fontPreset.collectAsStateWithLifecycle()
             val amoledTheme by viewModel.amoledTheme.collectAsStateWithLifecycle()
             val colorPreset by viewModel.colorPreset.collectAsStateWithLifecycle()
-            val containerBorderEnabled by viewModel.containerBorderEnabled.collectAsStateWithLifecycle()
             val useCustomVariableFont by viewModel.useCustomVariableFont.collectAsStateWithLifecycle()
             val customFontWeight by viewModel.customFontWeight.collectAsStateWithLifecycle()
             val customFontWidth by viewModel.customFontWidth.collectAsStateWithLifecycle()
@@ -89,7 +88,6 @@ class MainActivity : ComponentActivity() {
                 fontPreset = fontPreset,
                 amoledThemeEnabled = amoledTheme,
                 colorPreset = colorPreset,
-                containerBorderEnabled = containerBorderEnabled,
                 useCustomVariableFont = useCustomVariableFont,
                 customFontWeight = customFontWeight,
                 customFontWidth = customFontWidth,

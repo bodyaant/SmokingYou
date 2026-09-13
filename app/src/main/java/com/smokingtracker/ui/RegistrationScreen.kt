@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.smokingtracker.MainViewModel
 import com.smokingtracker.R
-import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
 
 @Composable
@@ -154,8 +153,7 @@ fun RegistrationScreenContent(onRegister: () -> Unit) {
                 shape = containerShape(RoundedCornerShape(28.dp)),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.88f)
-                ),
-                border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
+                )
             ) {
                 Column(
                     modifier = Modifier

@@ -28,10 +28,8 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.material.icons.filled.TextFields
-import androidx.compose.material.icons.filled.CropSquare
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.TouchApp
-import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.containerPadding
 import com.smokingtracker.ui.theme.containerGroupGap
@@ -84,7 +82,6 @@ fun AppearanceSettingsScreen(
     val amoledTheme by viewModel.amoledTheme.collectAsStateWithLifecycle()
     val colorPreset by viewModel.colorPreset.collectAsStateWithLifecycle()
     val appIcon by viewModel.appIcon.collectAsStateWithLifecycle()
-    val containerBorderEnabled by viewModel.containerBorderEnabled.collectAsStateWithLifecycle()
     val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
     val useCustomVariableFont by viewModel.useCustomVariableFont.collectAsStateWithLifecycle()
     val customFontWeight by viewModel.customFontWeight.collectAsStateWithLifecycle()
@@ -146,8 +143,7 @@ fun AppearanceSettingsScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = containerShape(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp), ContainerGroupPosition.FIRST),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    border = containerBorder()
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                 ) {
                     Column(modifier = Modifier.padding(containerPadding(20.dp, 20.dp))) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -197,8 +193,7 @@ fun AppearanceSettingsScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = containerShape(RoundedCornerShape(8.dp), ContainerGroupPosition.MIDDLE),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    border = containerBorder()
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                 ) {
                     val isAmoledSwitchEnabled = useDarkTheme
                     Row(
@@ -245,56 +240,8 @@ fun AppearanceSettingsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = containerShape(RoundedCornerShape(8.dp), ContainerGroupPosition.MIDDLE),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    border = containerBorder()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(containerPadding(20.dp, 18.dp)),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier.size(48.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(Icons.Filled.CropSquare, contentDescription = null)
-                            }
-                        }
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.settings_container_border),
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = stringResource(R.string.settings_container_border_desc),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                            )
-                        }
-                        Switch(
-                            checked = containerBorderEnabled,
-                            onCheckedChange = viewModel::updateContainerBorderEnabled,
-                            thumbContent = {
-                                SwitchThumb(containerBorderEnabled)
-                            }
-                        )
-                    }
-                }
-            }
-
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
                     shape = containerShape(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp), ContainerGroupPosition.LAST),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    border = containerBorder()
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                 ) {
                     Row(
                         modifier = Modifier
@@ -355,8 +302,7 @@ fun AppearanceSettingsScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = containerShape(RoundedCornerShape(24.dp)),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    border = containerBorder()
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                 ) {
                     Column(modifier = Modifier.padding(containerPadding(20.dp, 20.dp))) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -423,8 +369,7 @@ fun AppearanceSettingsScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = containerShape(RoundedCornerShape(24.dp)),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    border = containerBorder()
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                 ) {
                     Column(modifier = Modifier.padding(containerPadding(20.dp, 20.dp))) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -477,8 +422,7 @@ fun AppearanceSettingsScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = containerShape(RoundedCornerShape(24.dp)),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    border = containerBorder()
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                 ) {
                     Column(modifier = Modifier.padding(containerPadding(20.dp, 20.dp))) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -739,7 +683,6 @@ fun FontSelectionSection(
                 Surface(
                     shape = containerShape(RoundedCornerShape(20.dp)),
                     color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
-                    border = containerBorder(),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
@@ -858,7 +801,6 @@ fun FontSelectionSection(
                                 colors = CardDefaults.cardColors(
                                     containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
                                 ),
-                                border = containerBorder(),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Column(

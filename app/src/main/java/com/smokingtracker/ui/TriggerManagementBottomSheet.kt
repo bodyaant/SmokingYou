@@ -43,7 +43,6 @@ import com.smokingtracker.R
 import com.smokingtracker.data.TriggerType
 import com.smokingtracker.ui.theme.ContainerGroupPosition
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
-import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerGroupGap
 import com.smokingtracker.ui.theme.containerShape
 
@@ -211,8 +210,7 @@ fun TriggerManagementBottomSheet(
                     shape = containerShape(RoundedCornerShape(20.dp)),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-                    ),
-                    border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
+                    )
                 ) {
                     Row(
                         modifier = Modifier
@@ -264,7 +262,6 @@ fun TriggerManagementBottomSheet(
                         Surface(
                             shape = shape,
                             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
@@ -373,7 +370,6 @@ fun TriggerManagementBottomSheet(
                     Surface(
                         shape = shape,
                         color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(

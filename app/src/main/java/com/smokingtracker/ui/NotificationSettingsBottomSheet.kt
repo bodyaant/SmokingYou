@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
-import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -123,8 +122,7 @@ fun NotificationSettingsBottomSheet(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = containerShape(RoundedCornerShape(20.dp)),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                border = containerBorder()
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
             ) {
                 Row(
                     modifier = Modifier
@@ -257,8 +255,7 @@ fun NotificationSettingsBottomSheet(
                                         .height(46.dp),
                                     shape = RoundedCornerShape(topStart = startR, bottomStart = startR, topEnd = endR, bottomEnd = endR),
                                     color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                                    contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    border = containerBorder(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
+                                    contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                                 ) {
                                     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                                         Row(
@@ -283,8 +280,7 @@ fun NotificationSettingsBottomSheet(
 
                     Surface(
                         shape = containerShape(RoundedCornerShape(20.dp)),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        border = containerBorder()
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh
                     ) {
                         Column(
                             modifier = Modifier
@@ -384,8 +380,7 @@ private fun NotificationLivePreviewCard(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
-        ),
-        border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+        )
     ) {
         Column(
             modifier = Modifier
@@ -471,7 +466,6 @@ private fun NotificationLivePreviewCard(
                             shape = RoundedCornerShape(10.dp),
                             color = MaterialTheme.colorScheme.surfaceContainerHigh,
                             contentColor = MaterialTheme.colorScheme.primary,
-                            border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
                             modifier = Modifier.height(34.dp)
                         ) {
                             Row(
@@ -498,7 +492,6 @@ private fun NotificationLivePreviewCard(
                             shape = RoundedCornerShape(10.dp),
                             color = MaterialTheme.colorScheme.surfaceContainerHigh,
                             contentColor = MaterialTheme.colorScheme.primary,
-                            border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
                             modifier = Modifier.height(34.dp)
                         ) {
                             Row(

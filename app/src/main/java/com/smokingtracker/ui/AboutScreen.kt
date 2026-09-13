@@ -6,8 +6,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
-import com.smokingtracker.ui.theme.containerBorder
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -142,8 +140,7 @@ fun AboutScreen(onBack: () -> Unit) {
                     shape = RoundedCornerShape(32.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.92f)
-                    ),
-                    border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                    )
                 ) {
                     Column(
                         modifier = Modifier
@@ -357,7 +354,6 @@ fun CryptoWalletItem(
             .padding(vertical = 4.dp),
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-        border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)),
         onClick = onCopy
     ) {
         Row(
