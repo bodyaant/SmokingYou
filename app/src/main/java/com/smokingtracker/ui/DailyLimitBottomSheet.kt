@@ -15,6 +15,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Speed
@@ -32,8 +34,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
-import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,7 +46,10 @@ fun DailyLimitBottomSheet(
     dailyLimit: Int,
     taperingPlanEnabled: Boolean = false,
     taperingIntervalDays: Int = 7,
+    showLimitOnGraph: Boolean = true,
     onSetDailyLimit: (Int) -> Unit,
+    onSetTaperingPlanSettings: (Boolean, Int) -> Unit = { _, _ -> },
+    onSetShowLimitOnGraph: (Boolean) -> Unit = {},
     onDismissRequest: () -> Unit,
     vibrationEnabled: Boolean = true
 ) {
@@ -52,6 +59,9 @@ fun DailyLimitBottomSheet(
 
     var limitEnabled by remember { mutableStateOf(dailyLimit > 0) }
     var limitValue by remember { mutableIntStateOf(if (dailyLimit > 0) dailyLimit else 10) }
+    var taperingEnabled by remember { mutableStateOf(taperingPlanEnabled && dailyLimit > 0) }
+    var taperingInterval by remember { mutableIntStateOf(if (taperingIntervalDays in 3..14) taperingIntervalDays else 7) }
+    var limitOnGraphEnabled by remember { mutableStateOf(showLimitOnGraph) }
 
     val savedStr = stringResource(R.string.settings_saved)
 
@@ -110,8 +120,7 @@ fun DailyLimitBottomSheet(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = containerShape(RoundedCornerShape(20.dp)),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                border = containerBorder()
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
             ) {
                 Row(
                     modifier = Modifier
@@ -167,8 +176,7 @@ fun DailyLimitBottomSheet(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = containerShape(RoundedCornerShape(24.dp)),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-                        border = containerBorder()
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
                     ) {
                         Column(
                             modifier = Modifier
@@ -266,8 +274,7 @@ fun DailyLimitBottomSheet(
                                         .height(40.dp),
                                     shape = containerShape(RoundedCornerShape(12.dp)),
                                     color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer,
-                                    contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    border = containerBorder(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                                    contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
                                         Text(
@@ -282,29 +289,254 @@ fun DailyLimitBottomSheet(
                         }
                     }
 
-                    if (taperingPlanEnabled) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = containerShape(RoundedCornerShape(16.dp)),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-                            border = containerBorder(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = containerShape(RoundedCornerShape(20.dp)),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                    limitOnGraphEnabled = !limitOnGraphEnabled
+                                }
+                                .padding(horizontal = 18.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Row(
-                                modifier = Modifier.padding(14.dp),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.TrendingDown,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
+                                Surface(
+                                    shape = CircleShape,
+                                    color = if (limitOnGraphEnabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    contentColor = if (limitOnGraphEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(38.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = Icons.Filled.BarChart,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                                Column {
+                                    Text(
+                                        text = stringResource(R.string.graph_setting_show_limit),
+                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.graph_setting_show_limit_desc),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            Switch(
+                                checked = limitOnGraphEnabled,
+                                onCheckedChange = {
+                                    HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                    limitOnGraphEnabled = it
+                                },
+                                thumbContent = { SwitchThumb(limitOnGraphEnabled) },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                                    checkedTrackColor = MaterialTheme.colorScheme.primary
                                 )
-                                Text(
-                                    text = stringResource(R.string.daily_limit_tapering_active_hint, taperingIntervalDays),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = containerShape(RoundedCornerShape(20.dp)),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                    ) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                        taperingEnabled = !taperingEnabled
+                                    }
+                                    .padding(horizontal = 18.dp, vertical = 14.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(end = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = if (taperingEnabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+                                        contentColor = if (taperingEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(38.dp)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Filled.TrendingDown,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+                                    Column {
+                                        Text(
+                                            text = stringResource(R.string.tapering_plan_dialog_title),
+                                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = if (taperingEnabled) {
+                                                stringResource(R.string.tapering_plan_subtitle_active, taperingInterval)
+                                            } else {
+                                                stringResource(R.string.tapering_plan_subtitle_off)
+                                            },
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = if (taperingEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                                Switch(
+                                    checked = taperingEnabled,
+                                    onCheckedChange = {
+                                        HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                        taperingEnabled = it
+                                    },
+                                    thumbContent = { SwitchThumb(taperingEnabled) },
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                                        checkedTrackColor = MaterialTheme.colorScheme.primary
+                                    )
                                 )
+                            }
+
+                            AnimatedVisibility(
+                                visible = taperingEnabled,
+                                enter = expandVertically() + fadeIn(),
+                                exit = shrinkVertically() + fadeOut()
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 18.dp, end = 18.dp, bottom = 18.dp),
+                                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                                ) {
+                                    HorizontalDivider(
+                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                                        thickness = 1.dp
+                                    )
+
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Text(
+                                            text = stringResource(R.string.tapering_plan_pace_label),
+                                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            listOf(3, 5, 7, 10, 14).forEach { intervalDaysOption ->
+                                                val isSelected = taperingInterval == intervalDaysOption
+                                                Surface(
+                                                    onClick = {
+                                                        HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                                                        taperingInterval = intervalDaysOption
+                                                    },
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .height(38.dp),
+                                                    shape = containerShape(RoundedCornerShape(10.dp)),
+                                                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+                                                    contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                                ) {
+                                                    Box(contentAlignment = Alignment.Center) {
+                                                        Text(
+                                                            text = stringResource(R.string.tapering_plan_pace_days, intervalDaysOption),
+                                                            style = MaterialTheme.typography.labelMedium.copy(
+                                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                                            )
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        Slider(
+                                            value = taperingInterval.toFloat(),
+                                            onValueChange = {
+                                                val rounded = it.roundToInt()
+                                                if (rounded != taperingInterval) {
+                                                    taperingInterval = rounded
+                                                }
+                                            },
+                                            valueRange = 3f..14f,
+                                            steps = 10,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
+
+                                    val totalDaysToZero = remember(limitValue, taperingInterval) {
+                                        (limitValue * taperingInterval).coerceAtLeast(taperingInterval)
+                                    }
+                                    val targetDateStr = remember(totalDaysToZero) {
+                                        val cal = Calendar.getInstance().apply {
+                                            add(Calendar.DAY_OF_YEAR, totalDaysToZero)
+                                        }
+                                        SimpleDateFormat("d MMMM", Locale.getDefault()).format(cal.time)
+                                    }
+
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = containerShape(RoundedCornerShape(14.dp)),
+                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(12.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.EmojiEvents,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                                Text(
+                                                    text = stringResource(R.string.tapering_plan_forecast_title),
+                                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.tapering_plan_forecast_desc, totalDaysToZero, targetDateStr),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    Text(
+                                        text = stringResource(R.string.tapering_plan_step_info, taperingInterval),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
                     }
@@ -312,8 +544,7 @@ fun DailyLimitBottomSheet(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = containerShape(RoundedCornerShape(16.dp)),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                        border = containerBorder()
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
                     ) {
                         Row(
                             modifier = Modifier.padding(14.dp),
@@ -341,8 +572,11 @@ fun DailyLimitBottomSheet(
             Button(
                 onClick = {
                     val finalLimit = if (limitEnabled) limitValue else 0
+                    val finalTapering = limitEnabled && taperingEnabled
                     HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                     onSetDailyLimit(finalLimit)
+                    onSetTaperingPlanSettings(finalTapering, taperingInterval)
+                    onSetShowLimitOnGraph(limitOnGraphEnabled)
                     Toast.makeText(context, savedStr, Toast.LENGTH_SHORT).show()
                     onDismissRequest()
                 },
