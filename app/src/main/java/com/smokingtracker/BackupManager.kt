@@ -32,6 +32,7 @@ class BackupManager(
             },
             appTheme = dataStoreManager.appTheme.first().name,
             unlockedAchievements = dataStoreManager.unlockedAchievements.first(),
+            achievementUnlockDates = dataStoreManager.achievementUnlockDates.first(),
             dailyLimit = dataStoreManager.dailyLimit.first(),
             packPrice = dataStoreManager.packPrice.first(),
             packSize = dataStoreManager.packSize.first(),
@@ -44,7 +45,6 @@ class BackupManager(
             hasChangedPackPrice = dataStoreManager.hasChangedPackPrice.first(),
             hasCancelledWithin10s = dataStoreManager.hasCancelledWithin10s.first(),
             appLaunchDates = dataStoreManager.appLaunchDates.first(),
-            containerBorderEnabled = dataStoreManager.containerBorderEnabled.first(),
             useCustomVariableFont = dataStoreManager.useCustomVariableFont.first(),
             customFontWeight = dataStoreManager.customFontWeight.first(),
             customFontWidth = dataStoreManager.customFontWidth.first(),
@@ -106,7 +106,6 @@ class BackupManager(
                     hasPriceChangedVal = data.hasChangedPackPrice ?: false,
                     hasCancelled10sVal = data.hasCancelledWithin10s ?: false,
                     launchesVal = data.appLaunchDates ?: emptyList(),
-                    containerBorderEnabledVal = data.containerBorderEnabled ?: false,
                     useCustomVariableFontVal = data.useCustomVariableFont ?: false,
                     customFontWeightVal = data.customFontWeight ?: 500,
                     customFontWidthVal = data.customFontWidth ?: 100f,
@@ -129,7 +128,8 @@ class BackupManager(
                     notificationShowTimerVal = data.notificationShowTimer ?: true,
                     notificationShowProgressVal = data.notificationShowProgress ?: true,
                     notificationShowAddButtonVal = data.notificationShowAddButton ?: true,
-                    notificationShowResistButtonVal = data.notificationShowResistButton ?: false
+                    notificationShowResistButtonVal = data.notificationShowResistButton ?: false,
+                    achievementUnlockDatesVal = data.achievementUnlockDates ?: emptyMap()
                 )
 
                 val backupEntries = data.entries ?: data.smokingEntries?.map { ts ->
@@ -172,6 +172,7 @@ class BackupManager(
         @SerializedName("smokingEntries") val smokingEntries: List<Long>? = null,
         @SerializedName("appTheme") val appTheme: String,
         @SerializedName("unlockedAchievements") val unlockedAchievements: Set<String>,
+        @SerializedName("achievementUnlockDates") val achievementUnlockDates: Map<String, Long>? = null,
         @SerializedName("dailyLimit") val dailyLimit: Int? = 0,
         @SerializedName("packPrice") val packPrice: Float? = 0.0f,
         @SerializedName("packSize") val packSize: Int? = 20,
@@ -185,7 +186,6 @@ class BackupManager(
         @SerializedName("hasChangedPackPrice") val hasChangedPackPrice: Boolean? = false,
         @SerializedName("hasCancelledWithin10s") val hasCancelledWithin10s: Boolean? = false,
         @SerializedName("appLaunchDates") val appLaunchDates: List<Long>? = emptyList(),
-        @SerializedName("containerBorderEnabled") val containerBorderEnabled: Boolean? = false,
         @SerializedName("containerStyle") val containerStyle: String? = "EXPRESSIVE",
         @SerializedName("useCustomVariableFont") val useCustomVariableFont: Boolean? = false,
         @SerializedName("customFontWeight") val customFontWeight: Int? = 500,

@@ -24,7 +24,6 @@ import androidx.compose.ui.window.Dialog
 import com.smokingtracker.Achievement
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
-import com.smokingtracker.ui.theme.containerBorder
 import com.smokingtracker.ui.theme.containerShape
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -64,8 +63,7 @@ fun AchievementUnlockDialog(
             shape = containerShape(RoundedCornerShape(28.dp)),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-            ),
-            border = containerBorder()
+            )
         ) {
             Column(
                 modifier = Modifier

@@ -54,6 +54,7 @@ class AchievementsCoordinator(
             )
 
             val previouslyUnlocked = dataStoreManager.unlockedAchievements.first()
+            val existingDates = dataStoreManager.achievementUnlockDates.first().toMutableMap()
             val newUnlockedSet = achievementsManager.calculateUnlockedAchievements(ctx)
 
             val noSmokeIds = achievementsManager.achievementsList
@@ -75,9 +76,23 @@ class AchievementsCoordinator(
                 achievementsManager.getAchievementById(achievementId)?.let { ach ->
                     _newAchievements.emit(ach)
                 }
+                existingDates[achievementId] = now
+            }
+
+            effectiveUnlockedSet.forEach { achievementId ->
+                if (!existingDates.containsKey(achievementId)) {
+                    val estimated = achievementsManager.estimateHistoricalUnlockTimestamp(
+                        achievementId = achievementId,
+                        entries = entries,
+                        launches = launches,
+                        dailyLimit = dailyLimit
+                    ) ?: now
+                    existingDates[achievementId] = estimated
+                }
             }
 
             dataStoreManager.setUnlockedAchievements(effectiveUnlockedSet)
+            dataStoreManager.saveAchievementUnlockDates(existingDates)
         }
     }
 }

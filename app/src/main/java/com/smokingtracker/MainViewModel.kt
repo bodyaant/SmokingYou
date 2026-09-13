@@ -86,6 +86,12 @@ class MainViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptySet()
     )
+
+    val achievementUnlockDates: StateFlow<Map<String, Long>> = dataStoreManager.achievementUnlockDates.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyMap()
+    )
     
     val dailyLimit: StateFlow<Int> = dataStoreManager.dailyLimit.stateIn(
         scope = viewModelScope,
@@ -151,12 +157,6 @@ class MainViewModel(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = AppIconPreset.DEFAULT
-    )
-
-    val containerBorderEnabled: StateFlow<Boolean> = dataStoreManager.containerBorderEnabled.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = false
     )
 
     val useCustomVariableFont: StateFlow<Boolean> = dataStoreManager.useCustomVariableFont.stateIn(
@@ -267,6 +267,12 @@ class MainViewModel(
         initialValue = true
     )
 
+    val showLimitOnGraph: StateFlow<Boolean> = dataStoreManager.showLimitOnGraph.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = true
+    )
+
     val activeTriggers: StateFlow<List<com.smokingtracker.data.TriggerItem>> = kotlinx.coroutines.flow.combine(
         dataStoreManager.customTriggers,
         dataStoreManager.disabledDefaultTriggers
@@ -372,12 +378,6 @@ class MainViewModel(
         }
     }
 
-    fun updateContainerBorderEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            dataStoreManager.saveContainerBorderEnabled(enabled)
-        }
-    }
-
     fun checkForUpdates(isManual: Boolean) {
         viewModelScope.launch { updateManager.checkForUpdatesWithState(isManual) }
     }
@@ -420,6 +420,12 @@ class MainViewModel(
             dataStoreManager.saveThemePreference(theme)
             dataStoreManager.recordThemeOrLangChange()
             achievementsCoordinator.checkAndUpdate()
+        }
+    }
+
+    fun setShowLimitOnGraph(enabled: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.setShowLimitOnGraph(enabled)
         }
     }
 

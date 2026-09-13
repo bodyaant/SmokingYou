@@ -28,6 +28,7 @@ class DataStoreManager(private val context: Context) {
         val APP_THEME = stringPreferencesKey("app_theme")
         val UNLOCKED_ACHIEVEMENTS = stringPreferencesKey("unlocked_achievements")
         val UNLOCKED_ACHIEVEMENTS_SET = stringSetPreferencesKey("unlocked_achievements_set")
+        val ACHIEVEMENT_UNLOCK_DATES = stringPreferencesKey("achievement_unlock_dates")
         val DAILY_LIMIT = intPreferencesKey("daily_limit")
         val APP_LAUNCH_DATES = stringPreferencesKey("app_launch_dates")
         val FONT_PRESET = stringPreferencesKey("font_preset")
@@ -55,7 +56,6 @@ class DataStoreManager(private val context: Context) {
         val HISTORICAL_PACK_PRICE = floatPreferencesKey("historical_pack_price")
         val HISTORICAL_PACK_SIZE = intPreferencesKey("historical_pack_size")
         val HISTORICAL_TRIGGER_PRIORITIES = stringPreferencesKey("historical_trigger_priorities")
-        val CONTAINER_BORDER_ENABLED = booleanPreferencesKey("container_border_enabled")
         val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
         val USE_CUSTOM_VARIABLE_FONT = booleanPreferencesKey("use_custom_variable_font")
         val CUSTOM_FONT_WEIGHT = intPreferencesKey("custom_font_weight")
@@ -71,6 +71,7 @@ class DataStoreManager(private val context: Context) {
         val NOTIFICATION_SHOW_ADD_BUTTON = booleanPreferencesKey("notification_show_add_button")
         val NOTIFICATION_SHOW_RESIST_BUTTON = booleanPreferencesKey("notification_show_resist_button")
         val WIDGET_SHOW_RESIST_BUTTON = booleanPreferencesKey("widget_show_resist_button")
+        val SHOW_LIMIT_ON_GRAPH = booleanPreferencesKey("show_limit_on_graph")
     }
 
     val isRegistered: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -97,6 +98,16 @@ class DataStoreManager(private val context: Context) {
                     emptySet()
                 }
             }
+    }
+
+    val achievementUnlockDates: Flow<Map<String, Long>> = context.dataStore.data.map { preferences ->
+        val json = preferences[ACHIEVEMENT_UNLOCK_DATES]
+        if (json != null) {
+            val mapType = object : TypeToken<Map<String, Long>>() {}.type
+            gson.fromJson(json, mapType) ?: emptyMap()
+        } else {
+            emptyMap()
+        }
     }
     
     val dailyLimit: Flow<Int> = context.dataStore.data.map { preferences ->
@@ -232,6 +243,28 @@ class DataStoreManager(private val context: Context) {
             preferences.remove(UNLOCKED_ACHIEVEMENTS)
         }
     }
+
+    suspend fun saveAchievementUnlockDates(dates: Map<String, Long>) {
+        context.dataStore.edit { preferences ->
+            preferences[ACHIEVEMENT_UNLOCK_DATES] = gson.toJson(dates)
+        }
+    }
+
+    suspend fun recordAchievementUnlockDate(achievementId: String, timestamp: Long) {
+        context.dataStore.edit { preferences ->
+            val json = preferences[ACHIEVEMENT_UNLOCK_DATES]
+            val mapType = object : TypeToken<Map<String, Long>>() {}.type
+            val currentMap: MutableMap<String, Long> = if (json != null) {
+                (gson.fromJson<Map<String, Long>>(json, mapType) ?: emptyMap()).toMutableMap()
+            } else {
+                mutableMapOf()
+            }
+            if (!currentMap.containsKey(achievementId)) {
+                currentMap[achievementId] = timestamp
+                preferences[ACHIEVEMENT_UNLOCK_DATES] = gson.toJson(currentMap)
+            }
+        }
+    }
     
     suspend fun setDailyLimit(limit: Int) {
         context.dataStore.edit { preferences ->
@@ -281,7 +314,6 @@ class DataStoreManager(private val context: Context) {
         hasPriceChangedVal: Boolean = false,
         hasCancelled10sVal: Boolean = false,
         launchesVal: List<Long> = emptyList(),
-        containerBorderEnabledVal: Boolean = false,
         useCustomVariableFontVal: Boolean = false,
         customFontWeightVal: Int = 500,
         customFontWidthVal: Float = 100f,
@@ -304,13 +336,17 @@ class DataStoreManager(private val context: Context) {
         notificationShowTimerVal: Boolean = true,
         notificationShowProgressVal: Boolean = true,
         notificationShowAddButtonVal: Boolean = true,
-        notificationShowResistButtonVal: Boolean = false
+        notificationShowResistButtonVal: Boolean = false,
+        achievementUnlockDatesVal: Map<String, Long> = emptyMap()
     ) {
         context.dataStore.edit { preferences ->
             preferences[IS_REGISTERED] = isReg
             preferences[APP_THEME] = theme
             preferences[UNLOCKED_ACHIEVEMENTS_SET] = achievements
             preferences.remove(UNLOCKED_ACHIEVEMENTS)
+            if (achievementUnlockDatesVal.isNotEmpty()) {
+                preferences[ACHIEVEMENT_UNLOCK_DATES] = gson.toJson(achievementUnlockDatesVal)
+            }
             preferences[DAILY_LIMIT] = limit
             preferences[PACK_PRICE] = price
             preferences[PACK_SIZE] = size
@@ -323,7 +359,6 @@ class DataStoreManager(private val context: Context) {
             preferences[HAS_CHANGED_PACK_PRICE] = hasPriceChangedVal
             preferences[HAS_CANCELLED_WITHIN_10S] = hasCancelled10sVal
             preferences[APP_LAUNCH_DATES] = gson.toJson(launchesVal)
-            preferences[CONTAINER_BORDER_ENABLED] = containerBorderEnabledVal
             preferences[USE_CUSTOM_VARIABLE_FONT] = useCustomVariableFontVal
             preferences[CUSTOM_FONT_WEIGHT] = customFontWeightVal
             preferences[CUSTOM_FONT_WIDTH] = customFontWidthVal
@@ -378,6 +413,10 @@ class DataStoreManager(private val context: Context) {
         preferences[WIDGET_SHOW_RESIST_BUTTON] ?: true
     }
 
+    val showLimitOnGraph: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[SHOW_LIMIT_ON_GRAPH] ?: true
+    }
+
     suspend fun saveOngoingNotificationEnabled(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[NOTIFICATION_ENABLED] = enabled
@@ -417,6 +456,12 @@ class DataStoreManager(private val context: Context) {
     suspend fun saveWidgetShowResistButton(show: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[WIDGET_SHOW_RESIST_BUTTON] = show
+        }
+    }
+
+    suspend fun setShowLimitOnGraph(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[SHOW_LIMIT_ON_GRAPH] = enabled
         }
     }
 
@@ -588,16 +633,6 @@ class DataStoreManager(private val context: Context) {
             prefs.remove(HISTORICAL_PACK_PRICE)
             prefs.remove(HISTORICAL_PACK_SIZE)
             prefs.remove(HISTORICAL_TRIGGER_PRIORITIES)
-        }
-    }
-
-    val containerBorderEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
-        preferences[CONTAINER_BORDER_ENABLED] ?: false
-    }
-
-    suspend fun saveContainerBorderEnabled(enabled: Boolean) {
-        context.dataStore.edit { preferences ->
-            preferences[CONTAINER_BORDER_ENABLED] = enabled
         }
     }
 
