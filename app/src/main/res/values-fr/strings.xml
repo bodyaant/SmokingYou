@@ -29,15 +29,30 @@
     <string name="weekly_overview">Aperçu hebdomadaire</string>
     <string name="monthly_overview">Aperçu mensuel</string>
     <string name="yearly_overview">Aperçu annuel</string>
+    <string name="graph_period_day">Jour</string>
+    <string name="graph_period_week">Semaine</string>
+    <string name="graph_period_month">Mois</string>
+    <string name="graph_period_year">Année</string>
+    <string name="graph_limit_line">Limite : %1$d</string>
+    <string name="graph_over_limit_badge">+%1$d hors limite</string>
+    <string name="graph_within_limit_badge">Dans la limite</string>
+    <string name="graph_avg_label">Moy. : %1$s</string>
+    <string name="graph_peak_label">Pic : %1$d</string>
+    <string name="graph_total_label">Total : %1$d</string>
+    <string name="graph_in_limit_days">%1$d/%2$d dans la limite</string>
+    <string name="graph_metric_avg">Moyenne</string>
+    <string name="graph_metric_in_limit">Dans la limite</string>
+    <string name="graph_metric_peak">Pic</string>
+    <string name="weekly_comparison_this_week_label">Cette semaine</string>
+    <string name="weekly_comparison_last_week_label">Semaine dernière</string>
+    <string name="graph_setting_show_limit">Ligne de limite sur les graphiques</string>
+    <string name="graph_setting_show_limit_desc">Afficher la ligne d\'objectif quotidien et marquer les dépassements en rouge</string>
     <string name="personal_title">Paramètres</string>
     <string name="tab_settings">Paramètres</string>
     <string name="tab_achievements">Succès</string>
     <string name="settings_appearance">Thème</string>
     <string name="settings_theme">Thème</string>
     <string name="settings_theme_desc">Personnaliser l\'apparence de l\'application</string>
-    <string name="settings_container_border">Bordures des conteneurs</string>
-    <string name="settings_container_border_desc">Afficher une bordure subtile autour des cartes et
-        conteneurs</string>
     <string name="settings_vibration">Retour haptique</string>
     <string name="settings_vibration_desc">Vibration lors des appuis et actions</string>
     <string name="limit_dialog_helper">Régler sur 0 pour un nombre illimité de cigarettes
@@ -163,6 +178,7 @@
     <string name="backup_restore_close">Fermer</string>
     <string name="language_dialog_title">Choisir la langue</string>
     <string name="settings_daily_limit">Limite quotidienne de cigarettes</string>
+    <string name="home_daily_limit">Limite quotidienne</string>
 
     <string name="daily_limit_desc">Avertir en cas de dépassement de cette limite</string>
     <string name="limit_warning_title">Limite dépassée</string>
@@ -256,6 +272,21 @@
     <string name="main_trigger">Déclencheur principal</string>
     <string name="triggers_title">Déclencheurs de tabagisme</string>
     <string name="trigger_count_pattern">%1$d fois (%2$d%%)</string>
+    <string name="trigger_period_all">Tout le temps</string>
+    <string name="trigger_period_month">30 jours</string>
+    <string name="trigger_period_week">7 jours</string>
+    <string name="triggers_period_no_data">Aucun déclencheur enregistré sur cette période</string>
+    <string name="trigger_peak_time_prefix">Pic d\'activité : %1$s</string>
+    <string name="trigger_strategy_title">Stratégie de substitution</string>
+    <string name="trigger_tip_stress">Essayez la respiration 4-7-8 ou faites une pause attentive avant d\'allumer une cigarette.</string>
+    <string name="trigger_tip_boredom">Changez d\'activité : faites une marche de 5 minutes, étirez-vous ou changez de pièce.</string>
+    <string name="trigger_tip_social">Gardez un verre en main ou sortez prendre l\'air sans allumer de cigarette.</string>
+    <string name="trigger_tip_routine">Brisez la routine : changez d\'itinéraire, buvez un verre d\'eau fraîche ou occupez vos mains.</string>
+    <string name="trigger_tip_food_coffee">Remplacez la cigarette après le repas ou le café par une pastille de menthe, de l\'eau ou brossez-vous les dents.</string>
+    <string name="trigger_tip_alcohol">Alternez l\'alcool avec de l\'eau gazeuse et évitez de suivre le groupe de fumeurs.</string>
+    <string name="trigger_tip_custom">Observez l\'envie sans jugement, prenez trois inspirations profondes et laissez passer la vague.</string>
+    <string name="trigger_manage_title">Gérer les déclencheurs</string>
+    <string name="trigger_manage_desc">Ajouter des motifs personnalisés ou modifier les standards</string>
 
     <string name="settings_pack_params">Paramètres du paquet</string>
     <string name="settings_pack_price">Prix du paquet</string>
@@ -391,8 +422,18 @@
     <string name="tapering_plan_slider_label">Suggérer une réduction tous les %1$d jours</string>
     <string name="tapering_plan_subtitle_active">Réduction de 1 cig. tous les %1$d jours</string>
     <string name="tapering_plan_subtitle_off">Désactivé</string>
+    <string name="daily_limit_subtitle_with_tapering">%1$d cig/jour • Réduction tous les %2$d j.</string>
+    <string name="tapering_plan_pace_label">Rythme de réduction</string>
+    <string name="tapering_plan_pace_days">%1$d j.</string>
+    <string name="tapering_plan_forecast_title">Objectif 0 cigarette</string>
+    <string name="tapering_plan_forecast_desc">Non-fumeur dans ~%1$d jours (%2$s)</string>
+    <string name="tapering_plan_step_info">Tous les %1$d jours, l\'application vous proposera de réduire votre limite d\'une cigarette.</string>
 
     <string name="tapering_checkin_title">Plan de réduction progressive</string>
+    <string name="tapering_checkin_celebration_title">Nouvelle étape franchie !</string>
+    <string name="tapering_checkin_new_goal">Nouvel objectif</string>
+    <string name="tapering_checkin_cigs_per_day_unit">cig/jour</string>
+    <string name="tapering_checkin_savings_hint">Réduire d\'une cigarette vous évitera ~30 cigarettes le mois prochain !</string>
     <string name="tapering_checkin_desc">Une semaine s’est écoulée depuis votre dernière étape !
         Vous avez bien géré la limite de %1$d cigarettes.</string>
     <string name="tapering_checkin_was">Avant</string>
@@ -557,4 +598,27 @@
     <string name="widget_show_resist_button_title">Bouton « Résisté » dans le widget</string>
     <string name="widget_show_resist_button_desc">Afficher le bouton rapide de résistance dans le widget 3x1</string>
     <string name="close_menu">Fermer le menu</string>
+    <string name="widget_tab_timer">Minuteur et contrôle (3x1)</string>
+    <string name="widget_tab_quick_add">Ajout rapide (1x1)</string>
+    <string name="widget_add_to_home_screen">Ajouter à l\'écran d\'accueil</string>
+    <string name="widget_pin_hint">Si le lanceur ne prend pas en charge l\'ajout automatique, maintenez un espace vide sur l\'écran d\'accueil → Widgets → SmokingYou</string>
+    <string name="widget_feature_bg_update">Mise à jour automatique</string>
+    <string name="widget_feature_one_tap">En 1 geste</string>
+    <string name="widget_feature_instant">Sans ouvrir l\'application</string>
+    <string name="widget_preview_screen_title">Écran d\'accueil</string>
+    <string name="widget_quick_add_info_text">Icône compacte 1x1 pour enregistrer une cigarette instantanément d\'un simple geste sans ouvrir l\'application.</string>
+    <string name="ach_category_all">Tous</string>
+    <string name="ach_view_grid">Grille</string>
+    <string name="ach_view_list">Liste</string>
+    <string name="ach_hero_title">Maîtrise des succès</string>
+    <string name="ach_unlocked_count">%1$d sur %2$d débloqués (%3$d%%)</string>
+    <string name="ach_streak_days">%1$d jours</string>
+    <string name="ach_streak_smokefree">Série sans fumer</string>
+    <string name="ach_status_unlocked">Débloqué</string>
+    <string name="ach_status_in_progress">En cours</string>
+    <string name="ach_status_secret">Condition secrète</string>
+    <string name="ach_secret_locked_hint">Continuez à utiliser l\'application pour révéler ce succès secret.</string>
+    <string name="ach_progress_remaining">Restant : %1$s</string>
+    <string name="ach_unlocked_date">Débloqué le %1$s</string>
+    <string name="ach_close">Fermer</string>
 </resources>

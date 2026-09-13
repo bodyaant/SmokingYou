@@ -29,15 +29,30 @@
     <string name="weekly_overview">Resumen semanal</string>
     <string name="monthly_overview">Resumen mensual</string>
     <string name="yearly_overview">Resumen anual</string>
+    <string name="graph_period_day">Día</string>
+    <string name="graph_period_week">Semana</string>
+    <string name="graph_period_month">Mes</string>
+    <string name="graph_period_year">Año</string>
+    <string name="graph_limit_line">Límite: %1$d</string>
+    <string name="graph_over_limit_badge">+%1$d sobre el límite</string>
+    <string name="graph_within_limit_badge">Dentro del límite</string>
+    <string name="graph_avg_label">Media: %1$s</string>
+    <string name="graph_peak_label">Pico: %1$d</string>
+    <string name="graph_total_label">Total: %1$d</string>
+    <string name="graph_in_limit_days">%1$d/%2$d en el límite</string>
+    <string name="graph_metric_avg">Media</string>
+    <string name="graph_metric_in_limit">En norma</string>
+    <string name="graph_metric_peak">Pico</string>
+    <string name="weekly_comparison_this_week_label">Esta semana</string>
+    <string name="weekly_comparison_last_week_label">Semana pasada</string>
+    <string name="graph_setting_show_limit">Línea de límite en gráficos</string>
+    <string name="graph_setting_show_limit_desc">Mostrar la línea de objetivo diario y resaltar los excesos en rojo</string>
     <string name="personal_title">Ajustes</string>
     <string name="tab_settings">Ajustes</string>
     <string name="tab_achievements">Logros</string>
     <string name="settings_appearance">Apariencia</string>
     <string name="settings_theme">Tema</string>
     <string name="settings_theme_desc">Personaliza la apariencia de la aplicación</string>
-    <string name="settings_container_border">Bordes de contenedores</string>
-    <string name="settings_container_border_desc">Mostrar borde sutil alrededor de tarjetas y
-        contenedores</string>
     <string name="settings_vibration">Vibración</string>
     <string name="settings_vibration_desc">Vibración al pulsar y realizar acciones</string>
     <string name="limit_dialog_helper">Establecer en 0 para cigarrillos diarios ilimitados</string>
@@ -162,6 +177,7 @@
     <string name="backup_restore_close">Cerrar</string>
     <string name="language_dialog_title">Seleccionar idioma</string>
     <string name="settings_daily_limit">Límite diario de cigarrillos</string>
+    <string name="home_daily_limit">Límite diario</string>
 
     <string name="daily_limit_desc">Avisar si superas este límite</string>
     <string name="limit_warning_title">Límite superado</string>
@@ -254,6 +270,21 @@
     <string name="main_trigger">Motivo principal</string>
     <string name="triggers_title">Disparadores de antojo</string>
     <string name="trigger_count_pattern">%1$d veces (%2$d%%)</string>
+    <string name="trigger_period_all">Todo el tiempo</string>
+    <string name="trigger_period_month">30 días</string>
+    <string name="trigger_period_week">7 días</string>
+    <string name="triggers_period_no_data">No hay registros de motivos en este período</string>
+    <string name="trigger_peak_time_prefix">Momento pico: %1$s</string>
+    <string name="trigger_strategy_title">Estrategia para cambiar el hábito</string>
+    <string name="trigger_tip_stress">Prueba la técnica de respiración 4-7-8 o haz una pausa consciente antes de encender un cigarrillo.</string>
+    <string name="trigger_tip_boredom">Cambia de actividad: da una caminata de 5 minutos, estírate o cambia de entorno.</string>
+    <string name="trigger_tip_social">Ten una bebida en la mano o sal a tomar aire fresco sin encender un cigarrillo.</string>
+    <string name="trigger_tip_routine">Rompe el patrón automático: cambia de ruta, toma un vaso de agua fría u ocupa tus manos.</string>
+    <string name="trigger_tip_food_coffee">Sustituye el cigarrillo tras la comida o café por un caramelo de menta, agua o cepíllate los dientes.</string>
+    <string name="trigger_tip_alcohol">Alterna las bebidas alcohólicas con agua y evita unirte a los grupos de fumadores.</string>
+    <string name="trigger_tip_custom">Observa el deseo sin juzgarte, respira hondo tres veces y deja pasar la ola de ansiedad.</string>
+    <string name="trigger_manage_title">Gestionar motivos</string>
+    <string name="trigger_manage_desc">Añadir personalizados o ajustar los estándar</string>
 
     <string name="settings_pack_params">Ajustes de cajetilla</string>
     <string name="settings_pack_price">Precio de la cajetilla</string>
@@ -386,8 +417,18 @@
     <string name="tapering_plan_slider_label">Sugerir reducción cada %1$d días</string>
     <string name="tapering_plan_subtitle_active">Reducción de 1 cig. cada %1$d días</string>
     <string name="tapering_plan_subtitle_off">Desactivado</string>
+    <string name="daily_limit_subtitle_with_tapering">%1$d cig/día • Reducción cada %2$d d.</string>
+    <string name="tapering_plan_pace_label">Ritmo de reducción</string>
+    <string name="tapering_plan_pace_days">%1$d d.</string>
+    <string name="tapering_plan_forecast_title">Pronóstico para dejar de fumar (0 cig.)</string>
+    <string name="tapering_plan_forecast_desc">Sin fumar en ~%1$d días (%2$s)</string>
+    <string name="tapering_plan_step_info">Cada %1$d días, la app te sugerirá reducir tu límite en 1 cigarrillo.</string>
 
     <string name="tapering_checkin_title">Plan de reducción gradual</string>
+    <string name="tapering_checkin_celebration_title">¡Nuevo logro alcanzado!</string>
+    <string name="tapering_checkin_new_goal">Nueva meta</string>
+    <string name="tapering_checkin_cigs_per_day_unit">cig/día</string>
+    <string name="tapering_checkin_savings_hint">¡Reducir 1 cigarrillo te ahorrará ~30 cigarrillos el próximo mes!</string>
     <string name="tapering_checkin_desc">¡Ha pasado una semana desde tu último paso! Lo hiciste muy
         bien con el límite de %1$d cigarrillos.</string>
     <string name="tapering_checkin_was">Antes</string>
@@ -551,4 +592,27 @@
     <string name="widget_show_resist_button_title">Botón «Resistido» en el widget</string>
     <string name="widget_show_resist_button_desc">Mostrar botón rápido de resistencia en el widget 3x1</string>
     <string name="close_menu">Cerrar menú</string>
+    <string name="widget_tab_timer">Temporizador y control (3x1)</string>
+    <string name="widget_tab_quick_add">Registro rápido (1x1)</string>
+    <string name="widget_add_to_home_screen">Añadir a la pantalla de inicio</string>
+    <string name="widget_pin_hint">Si el lanzador no admite el anclaje automático, mantén pulsado un espacio vacío en la pantalla de inicio → Widgets → SmokingYou</string>
+    <string name="widget_feature_bg_update">Actualización automática</string>
+    <string name="widget_feature_one_tap">En 1 toque</string>
+    <string name="widget_feature_instant">Sin abrir la aplicación</string>
+    <string name="widget_preview_screen_title">Pantalla de inicio</string>
+    <string name="widget_quick_add_info_text">Icono compacto 1x1 para registrar un cigarrillo al instante con un solo toque sin abrir la aplicación.</string>
+    <string name="ach_category_all">Todos</string>
+    <string name="ach_view_grid">Cuadrícula</string>
+    <string name="ach_view_list">Lista</string>
+    <string name="ach_hero_title">Maestría de logros</string>
+    <string name="ach_unlocked_count">%1$d de %2$d desbloqueados (%3$d%%)</string>
+    <string name="ach_streak_days">%1$d días</string>
+    <string name="ach_streak_smokefree">Racha sin fumar</string>
+    <string name="ach_status_unlocked">Desbloqueado</string>
+    <string name="ach_status_in_progress">En progreso</string>
+    <string name="ach_status_secret">Condición secreta</string>
+    <string name="ach_secret_locked_hint">Sigue usando la app para descubrir este logro secreto.</string>
+    <string name="ach_progress_remaining">Restante: %1$s</string>
+    <string name="ach_unlocked_date">Desbloqueado el %1$s</string>
+    <string name="ach_close">Cerrar</string>
 </resources>

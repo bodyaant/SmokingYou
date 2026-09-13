@@ -29,15 +29,30 @@
     <string name="weekly_overview">Panoramica settimanale</string>
     <string name="monthly_overview">Panoramica mensile</string>
     <string name="yearly_overview">Panoramica annuale</string>
+    <string name="graph_period_day">Giorno</string>
+    <string name="graph_period_week">Settimana</string>
+    <string name="graph_period_month">Mese</string>
+    <string name="graph_period_year">Anno</string>
+    <string name="graph_limit_line">Limite: %1$d</string>
+    <string name="graph_over_limit_badge">+%1$d oltre il limite</string>
+    <string name="graph_within_limit_badge">Nel limite</string>
+    <string name="graph_avg_label">Media: %1$s</string>
+    <string name="graph_peak_label">Picco: %1$d</string>
+    <string name="graph_total_label">Totale: %1$d</string>
+    <string name="graph_in_limit_days">%1$d/%2$d nel limite</string>
+    <string name="graph_metric_avg">Media</string>
+    <string name="graph_metric_in_limit">Nel limite</string>
+    <string name="graph_metric_peak">Picco</string>
+    <string name="weekly_comparison_this_week_label">Questa settimana</string>
+    <string name="weekly_comparison_last_week_label">Settimana scorsa</string>
+    <string name="graph_setting_show_limit">Linea del limite sui grafici</string>
+    <string name="graph_setting_show_limit_desc">Mostra la riga dell\'obiettivo giornaliero ed evidenzia i superamenti in rosso</string>
     <string name="personal_title">Impostazioni</string>
     <string name="tab_settings">Impostazioni</string>
     <string name="tab_achievements">Obiettivi</string>
     <string name="settings_appearance">Tema</string>
     <string name="settings_theme">Tema</string>
     <string name="settings_theme_desc">Personalizza l\'aspetto dell\'applicazione</string>
-    <string name="settings_container_border">Bordi dei contenitori</string>
-    <string name="settings_container_border_desc">Mostra un bordo sottile attorno a schede e
-        contenitori</string>
     <string name="settings_vibration">Feedback aptico</string>
     <string name="settings_vibration_desc">Vibrazione al tocco e durante le azioni</string>
     <string name="limit_dialog_helper">Imposta a 0 per sigarette giornaliere illimitate</string>
@@ -161,6 +176,7 @@
     <string name="backup_restore_close">Chiudi</string>
     <string name="language_dialog_title">Seleziona lingua</string>
     <string name="settings_daily_limit">Limite giornaliero di sigarette</string>
+    <string name="home_daily_limit">Limite giornaliero</string>
 
     <string name="daily_limit_desc">Avvisa se superi questo limite</string>
     <string name="limit_warning_title">Limite superato</string>
@@ -254,6 +270,21 @@
     <string name="main_trigger">Fattore scatenante principale</string>
     <string name="triggers_title">Fattori scatenanti del fumo</string>
     <string name="trigger_count_pattern">%1$d volte (%2$d%%)</string>
+    <string name="trigger_period_all">Tutto il periodo</string>
+    <string name="trigger_period_month">30 giorni</string>
+    <string name="trigger_period_week">7 giorni</string>
+    <string name="triggers_period_no_data">Nessun fattore scatenante in questo periodo</string>
+    <string name="trigger_peak_time_prefix">Picco di attività: %1$s</string>
+    <string name="trigger_strategy_title">Strategia per cambiare abitudine</string>
+    <string name="trigger_tip_stress">Prova la tecnica di respirazione 4-7-8 o fai una pausa consapevole prima di fumare.</string>
+    <string name="trigger_tip_boredom">Cambia attività: fai una camminata di 5 minuti, un po\' di stretching o cambia stanza.</string>
+    <string name="trigger_tip_social">Tieni una bevanda in mano o esci a prendere aria fresca senza accendere una sigaretta.</string>
+    <string name="trigger_tip_routine">Spezza la routine: cambia percorso, bevi un bicchiere d\'acqua fresca o tieni le mani occupate.</string>
+    <string name="trigger_tip_food_coffee">Sostituisci la sigaretta dopo i pasti o il caffè con una mentina, dell\'acqua o lavati i denti.</string>
+    <string name="trigger_tip_alcohol">Alterna le bevande alcoliche con acqua frizzante ed evita di seguire il gruppo di fumatori.</string>
+    <string name="trigger_tip_custom">Accogli il desiderio senza giudicarti, fai tre respiri profondi e lascia che l\'ondata si plachi.</string>
+    <string name="trigger_manage_title">Gestisci fattori scatenanti</string>
+    <string name="trigger_manage_desc">Aggiungi motivi personalizzati o modifica quelli standard</string>
 
     <string name="settings_pack_params">Impostazioni pacchetto</string>
     <string name="settings_pack_price">Prezzo pacchetto</string>
@@ -389,8 +420,18 @@
     <string name="tapering_plan_slider_label">Suggerisci riduzione ogni %1$d giorni</string>
     <string name="tapering_plan_subtitle_active">Riduzione di 1 sig. ogni %1$d giorni</string>
     <string name="tapering_plan_subtitle_off">Disattivato</string>
+    <string name="daily_limit_subtitle_with_tapering">%1$d sig/giorno • Riduzione ogni %2$d gg.</string>
+    <string name="tapering_plan_pace_label">Ritmo di riduzione</string>
+    <string name="tapering_plan_pace_days">%1$d gg.</string>
+    <string name="tapering_plan_forecast_title">Obiettivo zero sigarette</string>
+    <string name="tapering_plan_forecast_desc">Senza fumo in ~%1$d giorni (%2$s)</string>
+    <string name="tapering_plan_step_info">Ogni %1$d giorni l\'app ti proporrà di ridurre il limite di 1 sigaretta.</string>
 
     <string name="tapering_checkin_title">Piano di riduzione graduale</string>
+    <string name="tapering_checkin_celebration_title">Nuovo traguardo raggiunto!</string>
+    <string name="tapering_checkin_new_goal">Nuovo obiettivo</string>
+    <string name="tapering_checkin_cigs_per_day_unit">sig/giorno</string>
+    <string name="tapering_checkin_savings_hint">Ridurre di 1 sigaretta ti farà risparmiare ~30 sigarette il prossimo mese!</string>
     <string name="tapering_checkin_desc">È passata una settimana dal tuo ultimo passo! Hai gestito
         bene il limite di %1$d sigarette.</string>
     <string name="tapering_checkin_was">Prima</string>
@@ -554,4 +595,27 @@
     <string name="widget_show_resist_button_title">Pulsante «Superato» nel widget</string>
     <string name="widget_show_resist_button_desc">Mostra il pulsante rapido di resistenza nel widget 3x1</string>
     <string name="close_menu">Chiudi menu</string>
+    <string name="widget_tab_timer">Timer e controllo (3x1)</string>
+    <string name="widget_tab_quick_add">Registrazione rapida (1x1)</string>
+    <string name="widget_add_to_home_screen">Aggiungi alla schermata iniziale</string>
+    <string name="widget_pin_hint">Se il launcher non supporta l\'aggiunta automatica, tieni premuto uno spazio vuoto nella schermata iniziale → Widget → SmokingYou</string>
+    <string name="widget_feature_bg_update">Aggiornamento automatico</string>
+    <string name="widget_feature_one_tap">In 1 tocco</string>
+    <string name="widget_feature_instant">Senza aprire l\'app</string>
+    <string name="widget_preview_screen_title">Schermata iniziale</string>
+    <string name="widget_quick_add_info_text">Icona compatta 1x1 per registrare all\'istante una sigaretta con un solo tocco senza aprire l\'app.</string>
+    <string name="ach_category_all">Tutti</string>
+    <string name="ach_view_grid">Griglia</string>
+    <string name="ach_view_list">Elenco</string>
+    <string name="ach_hero_title">Maestria dei traguardi</string>
+    <string name="ach_unlocked_count">%1$d su %2$d sbloccati (%3$d%%)</string>
+    <string name="ach_streak_days">%1$d giorni</string>
+    <string name="ach_streak_smokefree">Serie senza fumo</string>
+    <string name="ach_status_unlocked">Sbloccato</string>
+    <string name="ach_status_in_progress">In corso</string>
+    <string name="ach_status_secret">Condizione segreta</string>
+    <string name="ach_secret_locked_hint">Continua a usare l\'app per svelare questo traguardo segreto.</string>
+    <string name="ach_progress_remaining">Rimanenti: %1$s</string>
+    <string name="ach_unlocked_date">Sbloccato il %1$s</string>
+    <string name="ach_close">Chiudi</string>
 </resources>

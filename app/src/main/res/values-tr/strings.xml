@@ -29,15 +29,30 @@
     <string name="weekly_overview">Haftalık Genel Bakış</string>
     <string name="monthly_overview">Aylık Genel Bakış</string>
     <string name="yearly_overview">Yıllık Genel Bakış</string>
+    <string name="graph_period_day">Gün</string>
+    <string name="graph_period_week">Hafta</string>
+    <string name="graph_period_month">Ay</string>
+    <string name="graph_period_year">Yıl</string>
+    <string name="graph_limit_line">Limit: %1$d</string>
+    <string name="graph_over_limit_badge">+%1$d limit aşımı</string>
+    <string name="graph_within_limit_badge">Limit dahilinde</string>
+    <string name="graph_avg_label">Ort.: %1$s</string>
+    <string name="graph_peak_label">Zirve: %1$d</string>
+    <string name="graph_total_label">Toplam: %1$d</string>
+    <string name="graph_in_limit_days">%1$d/%2$d limit dahilinde</string>
+    <string name="graph_metric_avg">Ortalama</string>
+    <string name="graph_metric_in_limit">Limit içi</string>
+    <string name="graph_metric_peak">Zirve</string>
+    <string name="weekly_comparison_this_week_label">Bu hafta</string>
+    <string name="weekly_comparison_last_week_label">Geçen hafta</string>
+    <string name="graph_setting_show_limit">Grafiklerde limit çizgisi</string>
+    <string name="graph_setting_show_limit_desc">Günlük hedef çizgisini göster ve aşılan sigaraları kırmızıyla vurgula</string>
     <string name="personal_title">Ayarlar</string>
     <string name="tab_settings">Ayarlar</string>
     <string name="tab_achievements">Başarılar</string>
     <string name="settings_appearance">Görünüm</string>
     <string name="settings_theme">Tema</string>
     <string name="settings_theme_desc">Uygulama görünümünü özelleştirin</string>
-    <string name="settings_container_border">Kapsayıcı kenarlıkları</string>
-    <string name="settings_container_border_desc">Kartların ve kapsayıcıların etrafında ince
-        kenarlık göster</string>
     <string name="settings_vibration">Titreşim geri bildirimi</string>
     <string name="settings_vibration_desc">Dokunma ve işlemlerde titreşim</string>
     <string name="limit_dialog_helper">Sınırsız günlük sigara için 0 yapın</string>
@@ -156,6 +171,7 @@
     <string name="backup_restore_close">Kapat</string>
     <string name="language_dialog_title">Dil Seçin</string>
     <string name="settings_daily_limit">Günlük Sigara Limiti</string>
+    <string name="home_daily_limit">Günlük limit</string>
 
     <string name="daily_limit_desc">Bu limiti aşarsanız uyar</string>
     <string name="limit_warning_title">Limit Aşıldı</string>
@@ -249,6 +265,21 @@
     <string name="main_trigger">Ana tetikleyici</string>
     <string name="triggers_title">Sigara Tetikleyicileri</string>
     <string name="trigger_count_pattern">%1$d kez (%2$d%%)</string>
+    <string name="trigger_period_all">Tüm zamanlar</string>
+    <string name="trigger_period_month">30 gün</string>
+    <string name="trigger_period_week">7 gün</string>
+    <string name="triggers_period_no_data">Bu dönemde kaydedilmiş tetikleyici yok</string>
+    <string name="trigger_peak_time_prefix">En yoğun zaman: %1$s</string>
+    <string name="trigger_strategy_title">Alışkanlık Değiştirme Stratejisi</string>
+    <string name="trigger_tip_stress">4-7-8 nefes tekniğini deneyin veya sigara yakmadan önce bilinçli bir mola verin.</string>
+    <string name="trigger_tip_boredom">Aktivitenizi değiştirin: 5 dakikalık bir yürüyüş yapın, esneyin veya ortamınızı değiştirin.</string>
+    <string name="trigger_tip_social">Elinizde bir içecek tutun veya sigara yakmadan temiz hava almak için dışarı çıkın.</string>
+    <string name="trigger_tip_routine">Otomatik döngüyü kırın: rotanızı değiştirin, soğuk su için veya ellerinizi meşgul edin.</string>
+    <string name="trigger_tip_food_coffee">Yemek veya kahve sonrası sigarayı naneli şekerle, suyla değiştirin veya dişlerinizi fırçalayın.</string>
+    <string name="trigger_tip_alcohol">Alkollü içecekleri su ile dönüştürün ve sigara içilen alanlardan uzak durmaya çalışın.</string>
+    <string name="trigger_tip_custom">İsteği yargılamadan fark edin, üç derin nefes alın ve istek dalgasının geçmesini bekleyin.</string>
+    <string name="trigger_manage_title">Tetikleyicileri Yönet</string>
+    <string name="trigger_manage_desc">Özel tetikleyiciler ekleyin veya standart olanları düzenleyin</string>
 
     <string name="settings_pack_params">Paket Ayarları</string>
     <string name="settings_pack_price">Paket Fiyatı</string>
@@ -383,8 +414,18 @@
     <string name="tapering_plan_slider_label">Her %1$d günde bir azaltma öner</string>
     <string name="tapering_plan_subtitle_active">Her %1$d günde 1 sigara azaltma</string>
     <string name="tapering_plan_subtitle_off">Kapalı</string>
+    <string name="daily_limit_subtitle_with_tapering">%1$d sigara/gün • Her %2$d günde azalt</string>
+    <string name="tapering_plan_pace_label">Azaltma Temposu</string>
+    <string name="tapering_plan_pace_days">%1$d gün</string>
+    <string name="tapering_plan_forecast_title">Bırakma Hedefi Tahmini (0 sigara)</string>
+    <string name="tapering_plan_forecast_desc">~%1$d gün sonra tamamen bırakma (%2$s)</string>
+    <string name="tapering_plan_step_info">Uygulama her %1$d günde bir limiti 1 sigara düşürmenizi önerecektir.</string>
 
     <string name="tapering_checkin_title">Kademeli Azaltma Planı</string>
+    <string name="tapering_checkin_celebration_title">Yeni Aşamaya Geçildi!</string>
+    <string name="tapering_checkin_new_goal">Yeni Hedef</string>
+    <string name="tapering_checkin_cigs_per_day_unit">sigara/gün</string>
+    <string name="tapering_checkin_savings_hint">1 sigara azaltmak önümüzdeki ay size ~30 sigara kazandıracak!</string>
     <string name="tapering_checkin_desc">Son adımınızdan bu yana tam bir hafta geçti! %1$d sigaralık
         limitle harika gittiniz.</string>
     <string name="tapering_checkin_was">Önceki</string>
@@ -545,4 +586,27 @@
     <string name="widget_show_resist_button_title">Araç takımında «Direndim» düğmesi</string>
     <string name="widget_show_resist_button_desc">3x1 araç takımında hızlı direnme düğmesini göster</string>
     <string name="close_menu">Menüyü kapat</string>
+    <string name="widget_tab_timer">Zamanlayıcı ve Kontrol (3x1)</string>
+    <string name="widget_tab_quick_add">Hızlı Kayıt (1x1)</string>
+    <string name="widget_add_to_home_screen">Ana ekrana ekle</string>
+    <string name="widget_pin_hint">Başlatıcı otomatik eklemeyi desteklemiyorsa, ana ekranda boş bir alana basılı tutun → Araç takımları → SmokingYou</string>
+    <string name="widget_feature_bg_update">Otomatik güncelleme</string>
+    <string name="widget_feature_one_tap">Tek dokunuşla</string>
+    <string name="widget_feature_instant">Uygulama açılmadan</string>
+    <string name="widget_preview_screen_title">Ana ekran</string>
+    <string name="widget_quick_add_info_text">Uygulamayı açmadan tek bir dokunuşla sigara kaydetmek için kompakt 1x1 simgesi.</string>
+    <string name="ach_category_all">Tümü</string>
+    <string name="ach_view_grid">Izgara</string>
+    <string name="ach_view_list">Liste</string>
+    <string name="ach_hero_title">Başarım Ustalığı</string>
+    <string name="ach_unlocked_count">%1$d / %2$d açıldı (%%%3$d)</string>
+    <string name="ach_streak_days">%1$d gün</string>
+    <string name="ach_streak_smokefree">Sigarasız seri</string>
+    <string name="ach_status_unlocked">Açıldı</string>
+    <string name="ach_status_in_progress">Devam ediyor</string>
+    <string name="ach_status_secret">Gizli Koşul</string>
+    <string name="ach_secret_locked_hint">Bu gizli başarımı keşfetmek için uygulamayı kullanmaya devam edin.</string>
+    <string name="ach_progress_remaining">Kalan: %1$s</string>
+    <string name="ach_unlocked_date">%1$s tarihinde açıldı</string>
+    <string name="ach_close">Kapat</string>
 </resources>
