@@ -1,6 +1,7 @@
 package com.smokingtracker.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
@@ -14,11 +15,8 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -27,7 +25,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.ViewAgenda
+import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
@@ -35,11 +35,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.smokingtracker.Achievement
 import com.smokingtracker.AchievementCategory
@@ -56,6 +58,7 @@ import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.rememberBouncyPress
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -170,126 +173,168 @@ fun AchievementsTab(
         allAchievements.count { unlockedAchievements.contains(it.id) }
     }
 
-    val gridState = rememberLazyGridState()
-    val listState = rememberLazyGridState()
-
-    LaunchedEffect(isGridView) {
-        if (isGridView) {
-            val listIndex = listState.firstVisibleItemIndex
-            val listOffset = listState.firstVisibleItemScrollOffset
-            gridState.scrollToItem(listIndex, listOffset)
-        } else {
-            val gridIndex = gridState.firstVisibleItemIndex
-            val gridOffset = gridState.firstVisibleItemScrollOffset
-            listState.scrollToItem(gridIndex, gridOffset)
-        }
-    }
+    val scrollState = rememberScrollState()
 
     SharedTransitionLayout(modifier = modifier.fillMaxSize()) {
-        AnimatedContent(
-            targetState = isGridView,
-            transitionSpec = {
-                fadeIn(animationSpec = tween(300, easing = FastOutSlowInEasing)) togetherWith
-                fadeOut(animationSpec = tween(200, easing = FastOutSlowInEasing))
-            },
-            label = "viewModeSharedTransition"
-        ) { targetIsGrid ->
-            val columns = if (targetIsGrid) GridCells.Fixed(3) else GridCells.Fixed(1)
-            val currentState = if (targetIsGrid) gridState else listState
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            val heroKey = "hero_section"
+            val heroAppeared = appearedItemKeys[heroKey] == true
+            AchievementHeroSection(
+                smokeFreeStreakDays = smokeFreeStreakDays,
+                unlockedCount = unlockedCount,
+                totalCount = allAchievements.size,
+                modifier = Modifier.entrance(
+                    index = 0,
+                    alreadyAppeared = heroAppeared,
+                    delayMs = if (isInitialCascade) 0L else 0L,
+                    onAppeared = { appearedItemKeys[heroKey] = true }
+                )
+            )
 
-            LazyVerticalGrid(
-                columns = columns,
-                state = currentState,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                item(span = { GridItemSpan(if (targetIsGrid) 3 else 1) }) {
-                    val key = "hero_section"
-                    val alreadyAppeared = appearedItemKeys[key] == true
-                    AchievementHeroSection(
-                        smokeFreeStreakDays = smokeFreeStreakDays,
-                        unlockedCount = unlockedCount,
-                        totalCount = allAchievements.size,
-                        modifier = Modifier
-                            .sharedBounds(
-                                sharedContentState = rememberSharedContentState(key = "hero_section"),
-                                animatedVisibilityScope = this@AnimatedContent,
-                                boundsTransform = { _, _ -> spring(dampingRatio = 0.82f, stiffness = 380f) }
-                            )
-                            .entrance(
-                                index = 0,
-                                alreadyAppeared = alreadyAppeared,
-                                delayMs = if (isInitialCascade) 0L else 0L,
-                                onAppeared = { appearedItemKeys[key] = true }
-                            )
-                    )
+            val filterKey = "filter_row"
+            val filterAppeared = appearedItemKeys[filterKey] == true
+            CategoryFilterRow(
+                allAchievements = allAchievements,
+                unlockedAchievements = unlockedAchievements,
+                selectedCategory = selectedCategory,
+                onSelectCategory = { selectedCategory = it },
+                modifier = Modifier.entrance(
+                    index = 1,
+                    alreadyAppeared = filterAppeared,
+                    delayMs = if (isInitialCascade) 36L else 0L,
+                    onAppeared = { appearedItemKeys[filterKey] = true }
+                )
+            )
+
+            val density = LocalDensity.current
+            val activeMorphRange = remember(isGridView, displayedAchievements.size) {
+                if (displayedAchievements.size <= 15) {
+                    0..displayedAchievements.size
+                } else {
+                    val scrollPx = scrollState.value
+                    val scrollDp = with(density) { scrollPx.toDp() }
+                    val approxTopRow = ((scrollDp - 140.dp) / 148.dp).toInt().coerceAtLeast(0)
+                    val approxTopList = ((scrollDp - 140.dp) / 110.dp).toInt().coerceAtLeast(0)
+                    val minIndex = minOf(approxTopRow * 3, approxTopList).coerceAtLeast(0)
+                    val maxIndex = (minIndex + 14).coerceAtMost(displayedAchievements.size - 1)
+                    minIndex..maxIndex
                 }
-
-                item(span = { GridItemSpan(if (targetIsGrid) 3 else 1) }) {
-                    val key = "filter_row"
-                    val alreadyAppeared = appearedItemKeys[key] == true
-                    CategoryFilterRow(
-                        allAchievements = allAchievements,
-                        unlockedAchievements = unlockedAchievements,
-                        selectedCategory = selectedCategory,
-                        onSelectCategory = { selectedCategory = it },
-                        modifier = Modifier
-                            .sharedBounds(
-                                sharedContentState = rememberSharedContentState(key = "filter_row"),
-                                animatedVisibilityScope = this@AnimatedContent,
-                                boundsTransform = { _, _ -> spring(dampingRatio = 0.82f, stiffness = 380f) }
-                            )
-                            .entrance(
-                                index = 1,
-                                alreadyAppeared = alreadyAppeared,
-                                delayMs = if (isInitialCascade) 36L else 0L,
-                                onAppeared = { appearedItemKeys[key] = true }
-                            )
-                    )
+            }
+            val sharedBoundsTransform = remember {
+                BoundsTransform { _, _ ->
+                    spring(dampingRatio = 0.86f, stiffness = 520f)
                 }
+            }
 
-                itemsIndexed(
-                    items = displayedAchievements,
-                    key = { _, ach -> ach.id }
-                ) { index, achievement ->
-                    val isUnlocked = unlockedAchievements.contains(achievement.id)
-                    val progress = remember(achievement.id, entries, launches) {
-                        manager.getAchievementProgress(achievement.id, entries, launches)
+            AnimatedContent(
+                targetState = isGridView,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(240, easing = FastOutSlowInEasing)) togetherWith
+                    fadeOut(animationSpec = tween(180, easing = FastOutSlowInEasing))
+                },
+                label = "viewModeSharedTransition"
+            ) { targetIsGrid ->
+                if (targetIsGrid) {
+                    val rows = remember(displayedAchievements) {
+                        displayedAchievements.chunked(3)
                     }
-                    val key = achievement.id
-                    val alreadyAppeared = appearedItemKeys[key] == true
-                    val itemModifier = Modifier
-                        .sharedBounds(
-                            sharedContentState = rememberSharedContentState(key = "card_${achievement.id}"),
-                            animatedVisibilityScope = this@AnimatedContent,
-                            boundsTransform = { _, _ -> spring(dampingRatio = 0.82f, stiffness = 380f) }
-                        )
-                        .entrance(
-                            index = 2 + index,
-                            alreadyAppeared = alreadyAppeared,
-                            delayMs = if (isInitialCascade) ((2 + index) * 36L).coerceAtMost(360L) else 0L,
-                            onAppeared = { appearedItemKeys[key] = true }
-                        )
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        for ((rowIndex, row) in rows.withIndex()) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                for ((colIndex, achievement) in row.withIndex()) {
+                                    val itemIndex = rowIndex * 3 + colIndex
+                                    val isUnlocked = unlockedAchievements.contains(achievement.id)
+                                    val progress = remember(achievement.id, entries, launches) {
+                                        manager.getAchievementProgress(achievement.id, entries, launches)
+                                    }
+                                    val key = achievement.id
+                                    val alreadyAppeared = !isInitialCascade || appearedItemKeys[key] == true
+                                    val shouldMorph = itemIndex in activeMorphRange
+                                    val itemSharedModifier = if (shouldMorph) {
+                                        Modifier.sharedBounds(
+                                            sharedContentState = rememberSharedContentState(key = "card_${achievement.id}"),
+                                            animatedVisibilityScope = this@AnimatedContent,
+                                            boundsTransform = sharedBoundsTransform
+                                        )
+                                    } else {
+                                        Modifier
+                                    }
 
-                    if (targetIsGrid) {
-                        AchievementGridTile(
-                            achievement = achievement,
-                            isUnlocked = isUnlocked,
-                            progressFraction = progress.fraction,
-                            onClick = { detailAchievement = achievement },
-                            modifier = itemModifier
-                        )
-                    } else {
-                        AchievementBentoCard(
-                            achievement = achievement,
-                            isUnlocked = isUnlocked,
-                            progress = progress,
-                            unlockTimestamp = achievementUnlockDates[achievement.id],
-                            onClick = { detailAchievement = achievement },
-                            modifier = itemModifier
-                        )
+                                    AchievementGridTile(
+                                        achievement = achievement,
+                                        isUnlocked = isUnlocked,
+                                        progressFraction = progress.fraction,
+                                        unlockTimestamp = achievementUnlockDates[achievement.id],
+                                        onClick = { detailAchievement = achievement },
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .then(itemSharedModifier)
+                                            .entrance(
+                                                index = 2 + itemIndex,
+                                                alreadyAppeared = alreadyAppeared,
+                                                delayMs = if (isInitialCascade) ((2 + itemIndex) * 36L).coerceAtMost(360L) else 0L,
+                                                onAppeared = { appearedItemKeys[key] = true }
+                                            )
+                                    )
+                                }
+                                repeat(3 - row.size) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        for ((itemIndex, achievement) in displayedAchievements.withIndex()) {
+                            val isUnlocked = unlockedAchievements.contains(achievement.id)
+                            val progress = remember(achievement.id, entries, launches) {
+                                manager.getAchievementProgress(achievement.id, entries, launches)
+                            }
+                            val key = achievement.id
+                            val alreadyAppeared = !isInitialCascade || appearedItemKeys[key] == true
+                            val shouldMorph = itemIndex in activeMorphRange
+                            val itemSharedModifier = if (shouldMorph) {
+                                Modifier.sharedBounds(
+                                    sharedContentState = rememberSharedContentState(key = "card_${achievement.id}"),
+                                    animatedVisibilityScope = this@AnimatedContent,
+                                    boundsTransform = sharedBoundsTransform
+                                )
+                            } else {
+                                Modifier
+                            }
+
+                            AchievementBentoCard(
+                                achievement = achievement,
+                                isUnlocked = isUnlocked,
+                                progress = progress,
+                                unlockTimestamp = achievementUnlockDates[achievement.id],
+                                onClick = { detailAchievement = achievement },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .then(itemSharedModifier)
+                                    .entrance(
+                                        index = 2 + itemIndex,
+                                        alreadyAppeared = alreadyAppeared,
+                                        delayMs = if (isInitialCascade) ((2 + itemIndex) * 36L).coerceAtMost(360L) else 0L,
+                                        onAppeared = { appearedItemKeys[key] = true }
+                                    )
+                            )
+                        }
                     }
                 }
             }
@@ -472,12 +517,16 @@ private fun CategoryFilterRow(
     }
 }
 
+private val gridCardShape = RoundedCornerShape(22.dp)
+private val bentoCardShape = RoundedCornerShape(24.dp)
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun AchievementGridTile(
     achievement: Achievement,
     isUnlocked: Boolean,
     progressFraction: Float,
+    unlockTimestamp: Long? = null,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -490,7 +539,7 @@ private fun AchievementGridTile(
             onClick()
         },
         interactionSource = interactionSource,
-        shape = containerShape(RoundedCornerShape(22.dp)),
+        shape = gridCardShape,
         color = if (isUnlocked) {
             MaterialTheme.colorScheme.surfaceContainer
         } else {
@@ -504,7 +553,7 @@ private fun AchievementGridTile(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 14.dp, bottom = 12.dp, start = 8.dp, end = 8.dp),
+                .padding(top = 13.dp, bottom = 11.dp, start = 6.dp, end = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -536,10 +585,54 @@ private fun AchievementGridTile(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(14.dp),
+                    .height(16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (!isUnlocked && !achievement.isSecret) {
+                if (isUnlocked) {
+                    val formattedDate = remember(unlockTimestamp) {
+                        if (unlockTimestamp != null && unlockTimestamp > 0L) {
+                            val nowCal = Calendar.getInstance()
+                            val dateCal = Calendar.getInstance().apply { timeInMillis = unlockTimestamp }
+                            if (nowCal.get(Calendar.YEAR) == dateCal.get(Calendar.YEAR)) {
+                                SimpleDateFormat("d MMM", Locale.getDefault()).format(Date(unlockTimestamp))
+                            } else {
+                                SimpleDateFormat("d MMM yyyy", Locale.getDefault()).format(Date(unlockTimestamp))
+                            }
+                        } else {
+                            null
+                        }
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.CalendarMonth,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(11.dp)
+                        )
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text(
+                            text = formattedDate ?: stringResource(R.string.ach_status_unlocked),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                } else if (achievement.isSecret) {
+                    Icon(
+                        imageVector = Icons.Rounded.Lock,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
+                        modifier = Modifier.size(12.dp)
+                    )
+                } else {
                     LinearWavyProgressIndicator(
                         progress = { progressFraction.coerceIn(0f, 1f) },
                         modifier = Modifier.fillMaxWidth(0.88f),
@@ -572,7 +665,7 @@ private fun AchievementBentoCard(
             onClick()
         },
         interactionSource = interactionSource,
-        shape = containerShape(RoundedCornerShape(24.dp)),
+        shape = bentoCardShape,
         color = if (isUnlocked) {
             MaterialTheme.colorScheme.surfaceContainer
         } else {
@@ -648,30 +741,33 @@ private fun AchievementBentoCard(
                 )
 
                 if (isUnlocked && unlockTimestamp != null && unlockTimestamp > 0L) {
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     val formattedDate = remember(unlockTimestamp) {
                         SimpleDateFormat("d MMMM yyyy", Locale.getDefault()).format(Date(unlockTimestamp))
                     }
-                    Text(
-                        text = stringResource(R.string.ach_unlocked_date, formattedDate),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.CalendarMonth,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                            modifier = Modifier.size(13.dp)
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = formattedDate,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
+                        )
+                    }
                 }
 
                 if (!isUnlocked && !achievement.isSecret) {
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    val animProgress = remember { Animatable(0f) }
-                    LaunchedEffect(progress.fraction) {
-                        animProgress.animateTo(
-                            progress.fraction,
-                            animationSpec = tween(800, easing = FastOutSlowInEasing)
-                        )
-                    }
-
                     LinearWavyProgressIndicator(
-                        progress = { animProgress.value },
+                        progress = { progress.fraction.coerceIn(0f, 1f) },
                         modifier = Modifier.fillMaxWidth(),
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f),

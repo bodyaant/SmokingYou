@@ -128,33 +128,38 @@ fun badgeIcon(id: String, isSecret: Boolean, isUnlocked: Boolean): ImageVector {
 
 @Composable
 fun badgeGradient(category: AchievementCategory, isUnlocked: Boolean): Brush {
-    if (!isUnlocked) {
-        val darkBg = MaterialTheme.colorScheme.surfaceContainerHighest
-        val lightBg = MaterialTheme.colorScheme.surfaceContainerHigh
-        return Brush.linearGradient(listOf(darkBg, lightBg))
-    }
-    return when (category) {
-        AchievementCategory.LOGIN -> Brush.linearGradient(
-            listOf(
-                Color(0xFFFF8F00),
-                Color(0xFFFFB300),
-                MaterialTheme.colorScheme.primary
-            )
-        )
-        AchievementCategory.NO_SMOKE -> Brush.linearGradient(
-            listOf(
-                Color(0xFF00897B),
-                Color(0xFF26A69A),
-                MaterialTheme.colorScheme.primary
-            )
-        )
-        AchievementCategory.SECRET -> Brush.linearGradient(
-            listOf(
-                Color(0xFF7B1FA2),
-                Color(0xFF512DA8),
-                MaterialTheme.colorScheme.tertiary
-            )
-        )
+    val darkBg = MaterialTheme.colorScheme.surfaceContainerHighest
+    val lightBg = MaterialTheme.colorScheme.surfaceContainerHigh
+    val primary = MaterialTheme.colorScheme.primary
+    val tertiary = MaterialTheme.colorScheme.tertiary
+    return remember(category, isUnlocked, darkBg, lightBg, primary, tertiary) {
+        if (!isUnlocked) {
+            Brush.linearGradient(listOf(darkBg, lightBg))
+        } else {
+            when (category) {
+                AchievementCategory.LOGIN -> Brush.linearGradient(
+                    listOf(
+                        Color(0xFFFF8F00),
+                        Color(0xFFFFB300),
+                        primary
+                    )
+                )
+                AchievementCategory.NO_SMOKE -> Brush.linearGradient(
+                    listOf(
+                        Color(0xFF00897B),
+                        Color(0xFF26A69A),
+                        primary
+                    )
+                )
+                AchievementCategory.SECRET -> Brush.linearGradient(
+                    listOf(
+                        Color(0xFF7B1FA2),
+                        Color(0xFF512DA8),
+                        tertiary
+                    )
+                )
+            }
+        }
     }
 }
 
@@ -168,7 +173,7 @@ fun BadgeMedallion(
     modifier: Modifier = Modifier
 ) {
     val shape = badgeShape(id)
-    val icon = badgeIcon(id, isSecret, isUnlocked)
+    val icon = remember(id, isSecret, isUnlocked) { badgeIcon(id, isSecret, isUnlocked) }
     val bgBrush = badgeGradient(category, isUnlocked)
 
     Box(
