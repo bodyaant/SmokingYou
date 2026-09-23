@@ -10,7 +10,7 @@ import org.koin.core.component.get
 
 object WidgetUpdateManager : KoinComponent {
 
-    fun updateAll(context: Context) {
+    suspend fun updateAll(context: Context) {
         val appWidgetManager = AppWidgetManager.getInstance(context)
 
         val quickAddComponent = ComponentName(context, QuickAddWidgetProvider::class.java)
@@ -25,7 +25,7 @@ object WidgetUpdateManager : KoinComponent {
             TimerWidgetProvider.updateAppWidgets(context, appWidgetManager, timerIds)
         }
 
-        com.smokingtracker.notification.OngoingNotificationManager.update(context)
+        com.smokingtracker.notification.OngoingNotificationManager.updateSuspend(context)
     }
 
     fun updateAllAsync(context: Context) {

@@ -25,11 +25,15 @@ object OngoingNotificationManager : KoinComponent {
     fun update(context: Context) {
         val coroutineScope: CoroutineScope = get()
         coroutineScope.launch {
-            try {
-                updateInternal(context)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            updateSuspend(context)
+        }
+    }
+
+    suspend fun updateSuspend(context: Context) {
+        try {
+            updateInternal(context)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

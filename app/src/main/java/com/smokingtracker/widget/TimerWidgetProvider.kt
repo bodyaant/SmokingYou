@@ -32,7 +32,35 @@ class TimerWidgetProvider : AppWidgetProvider(), KoinComponent {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        updateAppWidgets(context, appWidgetManager, appWidgetIds)
+        val pendingResult = goAsync()
+        get<CoroutineScope>().launch {
+            try {
+                updateAppWidgets(context, appWidgetManager, appWidgetIds)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                pendingResult.finish()
+            }
+        }
+    }
+
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: android.os.Bundle
+    ) {
+        super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
+        val pendingResult = goAsync()
+        get<CoroutineScope>().launch {
+            try {
+                updateAppWidgets(context, appWidgetManager, intArrayOf(appWidgetId))
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                pendingResult.finish()
+            }
+        }
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -89,13 +117,12 @@ class TimerWidgetProvider : AppWidgetProvider(), KoinComponent {
         const val ACTION_QUICK_ADD_TIMER = "com.smokingtracker.ACTION_QUICK_ADD_TIMER"
         const val ACTION_RESIST_TIMER = "com.smokingtracker.ACTION_RESIST_TIMER"
 
-        fun updateAppWidgets(
+        suspend fun updateAppWidgets(
             context: Context,
             appWidgetManager: AppWidgetManager,
             appWidgetIds: IntArray
         ) {
-            get<CoroutineScope>().launch {
-                try {
+            try {
                     val repository: SmokingRepository = get()
                     val dataStoreManager: DataStoreManager = get()
 
@@ -184,7 +211,6 @@ class TimerWidgetProvider : AppWidgetProvider(), KoinComponent {
                     e.printStackTrace()
                 }
             }
-        }
 
         private fun formatTimeElapsed(context: Context, lastTimestamp: Long?): String {
             if (lastTimestamp == null) return context.getString(R.string.widget_no_entries)
