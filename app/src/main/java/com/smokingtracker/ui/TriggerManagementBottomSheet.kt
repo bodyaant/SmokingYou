@@ -1,7 +1,6 @@
 package com.smokingtracker.ui
 
 import androidx.compose.animation.*
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -11,7 +10,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.SentimentDissatisfied
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.LocalBar
@@ -19,15 +18,14 @@ import androidx.compose.material.icons.filled.LocalCafe
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Repeat
-import androidx.compose.material.icons.filled.SmokingRooms
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -58,8 +56,8 @@ fun TriggerManagementBottomSheet(
     vibrationEnabled: Boolean = true
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var showAddDialog by remember { mutableStateOf(false) }
-    var triggerToDelete by remember { mutableStateOf<String?>(null) }
+    var showAddDialog by rememberSaveable { mutableStateOf(false) }
+    var triggerToDelete by rememberSaveable { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
@@ -190,7 +188,7 @@ fun TriggerManagementBottomSheet(
                 if (customTriggers.isNotEmpty()) {
                     Surface(
                         shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                         contentColor = MaterialTheme.colorScheme.primary
                     ) {
                         Text(
@@ -209,7 +207,7 @@ fun TriggerManagementBottomSheet(
                     modifier = Modifier.fillMaxWidth(),
                     shape = containerShape(RoundedCornerShape(20.dp)),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
                     )
                 ) {
                     Row(
@@ -261,7 +259,7 @@ fun TriggerManagementBottomSheet(
 
                         Surface(
                             shape = shape,
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            color = MaterialTheme.colorScheme.surfaceContainer,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
@@ -369,7 +367,7 @@ fun TriggerManagementBottomSheet(
 
                     Surface(
                         shape = shape,
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        color = MaterialTheme.colorScheme.surfaceContainer,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
@@ -429,7 +427,7 @@ fun AddTriggerDialog(
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
-    var nameInput by remember { mutableStateOf("") }
+    var nameInput by rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
@@ -527,7 +525,7 @@ fun AddTriggerDialog(
 
 private fun getStandardTriggerIcon(trigger: TriggerType): ImageVector {
     return when (trigger) {
-        TriggerType.STRESS -> Icons.Filled.Bolt
+        TriggerType.STRESS -> Icons.Filled.SentimentDissatisfied
         TriggerType.BOREDOM -> Icons.Filled.HourglassEmpty
         TriggerType.SOCIAL -> Icons.Filled.People
         TriggerType.ROUTINE -> Icons.Filled.Repeat

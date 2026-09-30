@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,12 +30,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
 import com.smokingtracker.ui.theme.containerShape
+import com.smokingtracker.ui.theme.subContainer
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -57,11 +58,11 @@ fun DailyLimitBottomSheet(
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
-    var limitEnabled by remember { mutableStateOf(dailyLimit > 0) }
-    var limitValue by remember { mutableIntStateOf(if (dailyLimit > 0) dailyLimit else 10) }
-    var taperingEnabled by remember { mutableStateOf(taperingPlanEnabled && dailyLimit > 0) }
-    var taperingInterval by remember { mutableIntStateOf(if (taperingIntervalDays in 3..14) taperingIntervalDays else 7) }
-    var limitOnGraphEnabled by remember { mutableStateOf(showLimitOnGraph) }
+    var limitEnabled by rememberSaveable { mutableStateOf(dailyLimit > 0) }
+    var limitValue by rememberSaveable { mutableIntStateOf(if (dailyLimit > 0) dailyLimit else 10) }
+    var taperingEnabled by rememberSaveable { mutableStateOf(taperingPlanEnabled && dailyLimit > 0) }
+    var taperingInterval by rememberSaveable { mutableIntStateOf(if (taperingIntervalDays in 3..14) taperingIntervalDays else 7) }
+    var limitOnGraphEnabled by rememberSaveable { mutableStateOf(showLimitOnGraph) }
 
     val savedStr = stringResource(R.string.settings_saved)
 
@@ -92,7 +93,7 @@ fun DailyLimitBottomSheet(
                 Surface(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(46.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -176,7 +177,7 @@ fun DailyLimitBottomSheet(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = containerShape(RoundedCornerShape(24.dp)),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                     ) {
                         Column(
                             modifier = Modifier
@@ -236,11 +237,12 @@ fun DailyLimitBottomSheet(
                             }
 
                             Slider(
-                                value = limitValue.toFloat(),
+                                value = limitValue.toFloat().coerceIn(1f, 40f),
                                 onValueChange = {
                                     val rounded = it.roundToInt()
                                     if (rounded != limitValue) {
                                         limitValue = rounded
+                                        HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                                     }
                                 },
                                 valueRange = 1f..40f,
@@ -315,7 +317,7 @@ fun DailyLimitBottomSheet(
                                 Surface(
                                     shape = CircleShape,
                                     color = if (limitOnGraphEnabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
-                                    contentColor = if (limitOnGraphEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    contentColor = if (limitOnGraphEnabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(38.dp)
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
@@ -381,7 +383,7 @@ fun DailyLimitBottomSheet(
                                     Surface(
                                         shape = CircleShape,
                                         color = if (taperingEnabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
-                                        contentColor = if (taperingEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        contentColor = if (taperingEnabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.size(38.dp)
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {
@@ -482,6 +484,7 @@ fun DailyLimitBottomSheet(
                                                 val rounded = it.roundToInt()
                                                 if (rounded != taperingInterval) {
                                                     taperingInterval = rounded
+                                                    HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                                                 }
                                             },
                                             valueRange = 3f..14f,
@@ -503,7 +506,7 @@ fun DailyLimitBottomSheet(
                                     Card(
                                         modifier = Modifier.fillMaxWidth(),
                                         shape = containerShape(RoundedCornerShape(14.dp)),
-                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.subContainer)
                                     ) {
                                         Row(
                                             modifier = Modifier.padding(12.dp),
@@ -544,7 +547,7 @@ fun DailyLimitBottomSheet(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = containerShape(RoundedCornerShape(16.dp)),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                     ) {
                         Row(
                             modifier = Modifier.padding(14.dp),

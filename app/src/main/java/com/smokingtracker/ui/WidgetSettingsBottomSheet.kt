@@ -13,7 +13,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -30,16 +29,17 @@ import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,7 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.toColorInt
+import androidx.core.content.ContextCompat
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
 import com.smokingtracker.ui.theme.containerShape
@@ -73,7 +73,7 @@ fun WidgetSettingsBottomSheet(
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
-    var selectedOption by remember { mutableStateOf(WidgetOption.TIMER_3X1) }
+    var selectedOption by rememberSaveable { mutableStateOf(WidgetOption.TIMER_3X1) }
 
     fun requestPin(providerClass: Class<*>) {
         HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
@@ -117,7 +117,7 @@ fun WidgetSettingsBottomSheet(
                 Surface(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(46.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -253,29 +253,17 @@ fun WidgetSettingsBottomSheet(
                 }
             }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color(0xFF1F2633),
-                                Color(0xFF141923),
-                                Color(0xFF0F121A)
-                            )
-                        )
-                    )
-                    .border(
-                        1.dp,
-                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-                        RoundedCornerShape(24.dp)
-                    )
-                    .padding(horizontal = 16.dp, vertical = 20.dp),
-                contentAlignment = Alignment.Center
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = containerShape(RoundedCornerShape(24.dp)),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                )
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Row(
@@ -293,20 +281,20 @@ fun WidgetSettingsBottomSheet(
                                 modifier = Modifier
                                     .size(6.dp)
                                     .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.5f))
+                                    .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
                             )
                             Text(
                                 text = stringResource(R.string.widget_preview_screen_title),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color.White.copy(alpha = 0.6f),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                 letterSpacing = 0.5.sp
                             )
                         }
 
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = Color.White.copy(alpha = 0.12f),
-                            contentColor = Color.White.copy(alpha = 0.85f)
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                         ) {
                             Text(
                                 text = if (selectedOption == WidgetOption.TIMER_3X1) "3 × 1" else "1 × 1",
@@ -350,7 +338,7 @@ fun WidgetSettingsBottomSheet(
                                     .height(4.dp)
                                     .width(if (active) 14.dp else 4.dp)
                                     .clip(RoundedCornerShape(2.dp))
-                                    .background(if (active) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.25f))
+                                    .background(if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                             )
                         }
                     }
@@ -396,8 +384,8 @@ fun WidgetSettingsBottomSheet(
                         ) {
                             Surface(
                                 shape = CircleShape,
-                                color = if (widgetShowResistButton) Color(0xFFE8F5E9) else MaterialTheme.colorScheme.surfaceVariant,
-                                contentColor = if (widgetShowResistButton) Color(0xFF2E7D32) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = if (widgetShowResistButton) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = if (widgetShowResistButton) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(40.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
@@ -448,7 +436,7 @@ fun WidgetSettingsBottomSheet(
                         Surface(
                             shape = CircleShape,
                             color = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.size(40.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -552,8 +540,14 @@ private fun TimerWidgetPreview(
     dailyLimit: Int
 ) {
     val context = LocalContext.current
-    val pillBgColorInt = "#E1E3EC".toColorInt()
-    val cookieBitmap = remember {
+    val widgetBgColor = colorResource(R.color.widget_bg_color)
+    val widgetPrimaryTextColor = colorResource(R.color.widget_primary_text_color)
+    val widgetSecondaryTextColor = colorResource(R.color.widget_secondary_text_color)
+    val widgetAccentColor = colorResource(R.color.widget_accent_color)
+    val widgetShieldAccentColor = colorResource(R.color.widget_shield_accent_color)
+
+    val pillBgColorInt = ContextCompat.getColor(context, R.color.widget_pill_bg_color)
+    val cookieBitmap = remember(pillBgColorInt) {
         CookieShapeDrawable.createCookieBitmap(context, 48, pillBgColorInt, petals = 12).asImageBitmap()
     }
 
@@ -562,7 +556,7 @@ private fun TimerWidgetPreview(
             .fillMaxWidth()
             .shadow(12.dp, shape = RoundedCornerShape(24.dp), clip = false)
             .clip(RoundedCornerShape(24.dp))
-            .background(Color(0xFFF2F3F8))
+            .background(widgetBgColor)
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(
@@ -578,13 +572,13 @@ private fun TimerWidgetPreview(
                 Text(
                     text = stringResource(R.string.widget_last_smoke),
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF616474),
+                    color = widgetSecondaryTextColor,
                     fontSize = 11.sp
                 )
                 Text(
-                    text = "1ч 25м",
+                    text = "1${stringResource(R.string.widget_unit_h)} 25${stringResource(R.string.widget_unit_m)}",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = Color(0xFF191A23),
+                    color = widgetPrimaryTextColor,
                     fontSize = 19.sp,
                     modifier = Modifier.padding(vertical = 1.dp)
                 )
@@ -596,7 +590,7 @@ private fun TimerWidgetPreview(
                 Text(
                     text = countText,
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = Color(0xFFE65100),
+                    color = widgetAccentColor,
                     fontSize = 11.sp
                 )
             }
@@ -628,7 +622,7 @@ private fun TimerWidgetPreview(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_shield),
                             contentDescription = stringResource(R.string.action_resisted_craving),
-                            tint = Color(0xFF2E7D32),
+                            tint = widgetShieldAccentColor,
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -650,12 +644,12 @@ private fun TimerWidgetPreview(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_cigarettebase),
                             contentDescription = null,
-                            tint = Color(0xFFE65100),
+                            tint = widgetAccentColor,
                             modifier = Modifier.size(18.dp)
                         )
                         Text(
                             text = "+1",
-                            color = Color(0xFFE65100),
+                            color = widgetAccentColor,
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,
                             lineHeight = 10.sp
@@ -670,8 +664,10 @@ private fun TimerWidgetPreview(
 @Composable
 private fun QuickAddWidgetPreview() {
     val context = LocalContext.current
-    val pillBgColorInt = "#E1E3EC".toColorInt()
-    val cookieBitmap = remember {
+    val widgetBgColor = colorResource(R.color.widget_bg_color)
+    val widgetAccentColor = colorResource(R.color.widget_accent_color)
+    val pillBgColorInt = ContextCompat.getColor(context, R.color.widget_pill_bg_color)
+    val cookieBitmap = remember(pillBgColorInt) {
         CookieShapeDrawable.createCookieBitmap(context, 50, pillBgColorInt, petals = 12).asImageBitmap()
     }
 
@@ -687,7 +683,7 @@ private fun QuickAddWidgetPreview() {
                 .size(72.dp)
                 .shadow(12.dp, shape = RoundedCornerShape(22.dp), clip = false)
                 .clip(RoundedCornerShape(22.dp))
-                .background(Color(0xFFF2F3F8))
+                .background(widgetBgColor)
                 .padding(4.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -707,13 +703,13 @@ private fun QuickAddWidgetPreview() {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_cigarettebase),
                         contentDescription = null,
-                        tint = Color(0xFFE65100),
+                        tint = widgetAccentColor,
                         modifier = Modifier.size(20.dp)
                     )
                 }
                 Text(
                     text = "+1",
-                    color = Color(0xFFE65100),
+                    color = widgetAccentColor,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     lineHeight = 12.sp,
@@ -754,7 +750,7 @@ private fun MockLauncherIcon(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = Color.White.copy(alpha = 0.5f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             fontSize = 10.sp
         )
     }

@@ -31,13 +31,12 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.SmokingRooms
-import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.SentimentDissatisfied
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Repeat
@@ -46,7 +45,6 @@ import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.smokingtracker.data.TriggerType
@@ -59,8 +57,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.rotate
-import androidx.compose.material.icons.outlined.SelfImprovement
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -449,7 +445,11 @@ internal fun HomeScreenContent(
                 startInMindfulPause = false
             },
             sheetState = triggerSheetState,
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            containerColor = if (MaterialTheme.colorScheme.surfaceContainerLow == Color.White) {
+                MaterialTheme.colorScheme.surface
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerLow
+            },
             shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
             dragHandle = { BottomSheetDefaults.DragHandle() }
         ) {
@@ -523,7 +523,7 @@ internal fun HomeScreenContent(
                                                 .height(78.dp),
                                             shape = containerShape(RoundedCornerShape(20.dp)),
                                             colors = CardDefaults.cardColors(
-                                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                                                containerColor = MaterialTheme.colorScheme.surfaceContainer,
                                                 contentColor = MaterialTheme.colorScheme.onSurface
                                             )
                                         ) {
@@ -1103,7 +1103,7 @@ internal fun HomeScreenContent(
                         },
                         shape = RoundedCornerShape(24.dp),
                         color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        contentColor = MaterialTheme.colorScheme.primary,
                         interactionSource = datePickerInteractionSource,
                         modifier = Modifier
                             .weight(1f)
@@ -1402,7 +1402,6 @@ internal fun HomeScreenContent(
     }
 }
 
-
 @Composable
 fun StatItem(
     label: String,
@@ -1467,7 +1466,7 @@ private fun getTriggerIcon(triggerKey: String?): ImageVector {
     if (triggerKey == null) return Icons.Filled.SmokingRooms
     val trigger = TriggerType.fromKey(triggerKey)
     return when (trigger) {
-        TriggerType.STRESS -> Icons.Filled.Bolt
+        TriggerType.STRESS -> Icons.Filled.SentimentDissatisfied
         TriggerType.BOREDOM -> Icons.Filled.HourglassEmpty
         TriggerType.SOCIAL -> Icons.Filled.People
         TriggerType.ROUTINE -> Icons.Filled.Repeat
@@ -1944,5 +1943,4 @@ fun EntryItem(
         }
     }
 }
-
 

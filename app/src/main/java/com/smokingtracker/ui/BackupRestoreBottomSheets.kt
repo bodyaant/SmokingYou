@@ -23,9 +23,12 @@ import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -41,6 +44,11 @@ enum class BackupRestoreState {
     DONE
 }
 
+private val UriSaver = Saver<Uri?, String>(
+    save = { it?.toString() },
+    restore = { Uri.parse(it) }
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackupBottomSheet(
@@ -48,8 +56,8 @@ fun BackupBottomSheet(
     onBackupData: (Uri, onSuccess: () -> Unit, onError: () -> Unit) -> Unit
 ) {
     val context = LocalContext.current
-    var selectedUri by remember { mutableStateOf<Uri?>(null) }
-    var backupState by remember { mutableStateOf(BackupRestoreState.CHOOSE_FILE) }
+    var selectedUri by rememberSaveable(stateSaver = UriSaver) { mutableStateOf<Uri?>(null) }
+    var backupState by rememberSaveable { mutableStateOf(BackupRestoreState.CHOOSE_FILE) }
 
     val backupLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
@@ -101,8 +109,8 @@ fun RestoreBottomSheet(
     onRestoreData: (Uri, onSuccess: () -> Unit, onError: () -> Unit) -> Unit
 ) {
     val context = LocalContext.current
-    var selectedUri by remember { mutableStateOf<Uri?>(null) }
-    var restoreState by remember { mutableStateOf(BackupRestoreState.CHOOSE_FILE) }
+    var selectedUri by rememberSaveable(stateSaver = UriSaver) { mutableStateOf<Uri?>(null) }
+    var restoreState by rememberSaveable { mutableStateOf(BackupRestoreState.CHOOSE_FILE) }
 
     val restoreLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -167,7 +175,7 @@ private fun BackupRestoreBottomSheetTemplate(
     val animatedCardBg by animateColorAsState(
         targetValue = when (state) {
             BackupRestoreState.DONE -> MaterialTheme.colorScheme.primaryContainer
-            else -> MaterialTheme.colorScheme.surfaceContainerHighest
+            else -> MaterialTheme.colorScheme.surfaceContainer
         },
         label = "cardBgColor"
     )
@@ -175,7 +183,11 @@ private fun BackupRestoreBottomSheetTemplate(
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = if (MaterialTheme.colorScheme.surfaceContainerLow == Color.White) {
+            MaterialTheme.colorScheme.surface
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerLow
+        },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
         Column(

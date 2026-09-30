@@ -540,11 +540,7 @@ private fun AchievementGridTile(
         },
         interactionSource = interactionSource,
         shape = gridCardShape,
-        color = if (isUnlocked) {
-            MaterialTheme.colorScheme.surfaceContainer
-        } else {
-            MaterialTheme.colorScheme.surfaceContainerLowest
-        },
+        color = MaterialTheme.colorScheme.surfaceContainer,
         modifier = modifier
             .bouncyPress(bouncyState)
             .fillMaxWidth()
@@ -666,11 +662,7 @@ private fun AchievementBentoCard(
         },
         interactionSource = interactionSource,
         shape = bentoCardShape,
-        color = if (isUnlocked) {
-            MaterialTheme.colorScheme.surfaceContainer
-        } else {
-            MaterialTheme.colorScheme.surfaceContainerLowest
-        },
+        color = MaterialTheme.colorScheme.surfaceContainer,
         modifier = modifier
             .bouncyPress(bouncyState)
             .fillMaxWidth()

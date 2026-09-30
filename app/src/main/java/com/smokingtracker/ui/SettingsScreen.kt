@@ -4,33 +4,26 @@ import android.app.LocaleManager
 import android.os.Build
 import android.os.LocaleList
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Restore
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.History
+import androidx.compose.ui.text.style.TextAlign
 import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.containerPadding
 import com.smokingtracker.ui.theme.containerGroupGap
@@ -39,23 +32,13 @@ import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.NotificationsActive
-import androidx.compose.material.icons.filled.NotificationsOff
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import kotlin.math.roundToInt
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -64,14 +47,12 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.smokingtracker.MainViewModel
 import com.smokingtracker.UpdateCheckState
 import com.smokingtracker.R
 import com.smokingtracker.data.FontPreset
 import com.smokingtracker.data.ThemePreference
-import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.SystemUpdate
 import java.util.Locale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -162,7 +143,8 @@ fun PersonalScreen(
         historicalStartDate = historicalStartDate,
         historicalDailyAvg = historicalDailyAvg,
         onSaveBaseline = viewModel::saveBaseline,
-        onClearBaseline = viewModel::clearHistoricalBaseline
+        onClearBaseline = viewModel::clearHistoricalBaseline,
+        onResetAllData = viewModel::resetAllSmokingData
     )
 }
 
@@ -220,7 +202,8 @@ fun PersonalScreenContent(
     historicalStartDate: Long = 0L,
     historicalDailyAvg: Int = 0,
     onSaveBaseline: (Long, Int) -> Unit = { _, _ -> },
-    onClearBaseline: () -> Unit = {}
+    onClearBaseline: () -> Unit = {},
+    onResetAllData: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -291,11 +274,11 @@ fun PersonalScreenContent(
             historicalStartDate = historicalStartDate,
             historicalDailyAvg = historicalDailyAvg,
             onSaveBaseline = onSaveBaseline,
-            onClearBaseline = onClearBaseline
+            onClearBaseline = onClearBaseline,
+            onResetAllData = onResetAllData
         )
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -352,7 +335,8 @@ fun SettingsTab(
     onNavigateToStatistics: () -> Unit,
     onNavigateToAppearance: () -> Unit,
     onSaveBaseline: (Long, Int) -> Unit = { _, _ -> },
-    onClearBaseline: () -> Unit = {}
+    onClearBaseline: () -> Unit = {},
+    onResetAllData: () -> Unit = {}
 ) {
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showLimitDialog by remember { mutableStateOf(false) }
@@ -363,6 +347,7 @@ fun SettingsTab(
     var showRestoreSheet by remember { mutableStateOf(false) }
     var showTriggerManagementSheet by remember { mutableStateOf(false) }
     var showNotificationSettingsSheet by remember { mutableStateOf(false) }
+    var showResetDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -521,7 +506,7 @@ fun SettingsTab(
                         modifier = Modifier.fillMaxWidth(),
                         shape = shape,
                         color = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                else MaterialTheme.colorScheme.surfaceContainer
                     ) {
                         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                             Text(
@@ -532,7 +517,7 @@ fun SettingsTab(
                                         else MaterialTheme.colorScheme.onSurface
                             )
                             if (isSelected) {
-                                Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
                             }
                         }
                     }
@@ -593,6 +578,64 @@ fun SettingsTab(
             dailyLimit = dailyLimit,
             vibrationEnabled = vibrationEnabled,
             onDismissRequest = { showWidgetDialog = false }
+        )
+    }
+
+    if (showResetDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetDialog = false },
+            shape = containerShape(RoundedCornerShape(28.dp)),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            icon = {
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.size(52.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Filled.RestartAlt,
+                            contentDescription = null,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                }
+            },
+            title = {
+                Text(
+                    text = stringResource(R.string.reset_data_dialog_title),
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    textAlign = TextAlign.Center
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.reset_data_dialog_message),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showResetDialog = false
+                        onResetAllData()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    )
+                ) {
+                    Text(stringResource(R.string.reset_data_dialog_confirm), fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetDialog = false }) {
+                    Text(stringResource(R.string.dialog_cancel), fontWeight = FontWeight.Bold)
+                }
+            }
         )
     }
 
@@ -773,9 +816,19 @@ fun SettingsTab(
                 icon = Icons.Filled.Restore,
                 title = stringResource(R.string.settings_restore),
                 subtitle = stringResource(R.string.restore_desc),
+                shape = RoundedCornerShape(8.dp),
+                groupPosition = ContainerGroupPosition.MIDDLE,
+                onClick = { showRestoreSheet = true }
+            )
+        }
+        item {
+            SettingItem(
+                icon = Icons.Filled.RestartAlt,
+                title = stringResource(R.string.settings_reset_data),
+                subtitle = stringResource(R.string.settings_reset_data_desc),
                 shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
                 groupPosition = ContainerGroupPosition.LAST,
-                onClick = { showRestoreSheet = true }
+                onClick = { showResetDialog = true }
             )
         }
 
@@ -970,6 +1023,4 @@ fun changeLanguage(context: android.content.Context, languageTag: String) {
         activity?.recreate()
     }
 }
-
-
 

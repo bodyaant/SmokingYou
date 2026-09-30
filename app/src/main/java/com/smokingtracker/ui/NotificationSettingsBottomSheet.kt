@@ -8,9 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -37,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
+import com.smokingtracker.ui.theme.subContainer
 import com.smokingtracker.ui.theme.containerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -140,7 +139,7 @@ fun NotificationSettingsBottomSheet(
                         Surface(
                             shape = CircleShape,
                             color = if (enabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                            contentColor = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            contentColor = if (enabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(42.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -254,7 +253,7 @@ fun NotificationSettingsBottomSheet(
                                         .weight(animatedWeight)
                                         .height(46.dp),
                                     shape = RoundedCornerShape(topStart = startR, bottomStart = startR, topEnd = endR, bottomEnd = endR),
-                                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer,
                                     contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                                 ) {
                                     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
@@ -280,7 +279,7 @@ fun NotificationSettingsBottomSheet(
 
                     Surface(
                         shape = containerShape(RoundedCornerShape(20.dp)),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh
+                        color = MaterialTheme.colorScheme.surfaceContainer
                     ) {
                         Column(
                             modifier = Modifier
@@ -379,7 +378,7 @@ private fun NotificationLivePreviewCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
         )
     ) {
         Column(
@@ -464,7 +463,7 @@ private fun NotificationLivePreviewCard(
                     if (showAddButton) {
                         Surface(
                             shape = RoundedCornerShape(10.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            color = MaterialTheme.colorScheme.subContainer,
                             contentColor = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.height(34.dp)
                         ) {
@@ -490,7 +489,7 @@ private fun NotificationLivePreviewCard(
                     if (showResistButton) {
                         Surface(
                             shape = RoundedCornerShape(10.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            color = MaterialTheme.colorScheme.subContainer,
                             contentColor = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.height(34.dp)
                         ) {

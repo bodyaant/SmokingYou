@@ -20,7 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Alarm
 import androidx.compose.material.icons.rounded.Archive
 import androidx.compose.material.icons.rounded.Bedtime
-import androidx.compose.material.icons.rounded.Bolt
+import androidx.compose.material.icons.rounded.SentimentDissatisfied
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.automirrored.rounded.DirectionsWalk
 import androidx.compose.material.icons.automirrored.rounded.HelpOutline
@@ -49,6 +49,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.toShape
+import com.smokingtracker.ui.theme.subContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -117,7 +118,7 @@ fun badgeIcon(id: String, isSecret: Boolean, isUnlocked: Boolean): ImageVector {
         "secret_explorer" -> Icons.Rounded.Palette
         "secret_archivist" -> Icons.Rounded.Archive
         "secret_analytics_collector" -> Icons.Rounded.Insights
-        "secret_double_damage" -> Icons.Rounded.Bolt
+        "secret_double_damage" -> Icons.Rounded.SentimentDissatisfied
         "secret_inflation" -> Icons.AutoMirrored.Rounded.TrendingUp
         "secret_crisis" -> Icons.Rounded.Psychology
         "secret_blind_eye" -> Icons.Rounded.VisibilityOff
@@ -129,7 +130,7 @@ fun badgeIcon(id: String, isSecret: Boolean, isUnlocked: Boolean): ImageVector {
 @Composable
 fun badgeGradient(category: AchievementCategory, isUnlocked: Boolean): Brush {
     val darkBg = MaterialTheme.colorScheme.surfaceContainerHighest
-    val lightBg = MaterialTheme.colorScheme.surfaceContainerHigh
+    val lightBg = MaterialTheme.colorScheme.subContainer
     val primary = MaterialTheme.colorScheme.primary
     val tertiary = MaterialTheme.colorScheme.tertiary
     return remember(category, isUnlocked, darkBg, lightBg, primary, tertiary) {

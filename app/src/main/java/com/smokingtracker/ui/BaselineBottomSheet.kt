@@ -1,9 +1,5 @@
 package com.smokingtracker.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -15,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,10 +20,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
 import com.smokingtracker.ui.theme.containerShape
+import com.smokingtracker.ui.theme.subContainer
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -64,16 +61,16 @@ fun BaselineBottomSheet(
         }
     }
 
-    val defaultStartDate = remember {
+    val defaultStartDate = remember(historicalStartDate) {
         if (historicalStartDate > 0L) historicalStartDate else {
             Calendar.getInstance().apply { add(Calendar.YEAR, -3) }.timeInMillis
         }
     }
 
-    var selectedStartDate by remember { mutableLongStateOf(defaultStartDate) }
-    var dailyAvg by remember { mutableIntStateOf(if (historicalDailyAvg > 0) historicalDailyAvg.coerceIn(1, 50) else 20) }
-    var showDatePickerDialog by remember { mutableStateOf(false) }
-    var showResetConfirmation by remember { mutableStateOf(false) }
+    var selectedStartDate by rememberSaveable { mutableLongStateOf(defaultStartDate) }
+    var dailyAvg by rememberSaveable { mutableIntStateOf(if (historicalDailyAvg > 0) historicalDailyAvg.coerceIn(1, 50) else 20) }
+    var showDatePickerDialog by rememberSaveable { mutableStateOf(false) }
+    var showResetConfirmation by rememberSaveable { mutableStateOf(false) }
 
     val now = remember { System.currentTimeMillis() }
     val totalDays = remember(selectedStartDate, now) {
@@ -129,7 +126,7 @@ fun BaselineBottomSheet(
                 Surface(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(46.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -156,7 +153,7 @@ fun BaselineBottomSheet(
 
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
                 ),
                 shape = containerShape(RoundedCornerShape(18.dp)),
                 modifier = Modifier.fillMaxWidth()
@@ -201,7 +198,7 @@ fun BaselineBottomSheet(
                         Surface(
                             shape = CircleShape,
                             color = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.primary
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         ) {
                             Text(
                                 text = stringResource(R.string.history_daily_avg_unit, dailyAvg),
@@ -233,7 +230,7 @@ fun BaselineBottomSheet(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(quickPicks) { pick ->
+                        items(quickPicks, key = { it }) { pick ->
                             val isSelected = dailyAvg == pick
                             FilterChip(
                                 selected = isSelected,
@@ -275,7 +272,7 @@ fun BaselineBottomSheet(
                         Surface(
                             onClick = { showDatePickerDialog = true },
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh
+                            color = MaterialTheme.colorScheme.subContainer
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
@@ -370,7 +367,7 @@ fun BaselineBottomSheet(
 
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
                 ),
                 shape = containerShape(RoundedCornerShape(20.dp)),
                 modifier = Modifier.fillMaxWidth()

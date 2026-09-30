@@ -65,7 +65,7 @@ fun TaperingCheckInBottomSheet(
             Surface(
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 modifier = Modifier.size(56.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -197,7 +197,7 @@ fun TaperingCheckInBottomSheet(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 32.sp
                                 ),
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                             Text(
                                 text = stringResource(R.string.tapering_checkin_cigs_per_day_unit),
@@ -212,7 +212,7 @@ fun TaperingCheckInBottomSheet(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = containerShape(RoundedCornerShape(14.dp)),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
             ) {
                 Row(
                     modifier = Modifier.padding(14.dp),

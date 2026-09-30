@@ -2,16 +2,12 @@ package com.smokingtracker.ui
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Close
@@ -24,8 +20,6 @@ import androidx.compose.material.icons.filled.SmokingRooms
 import androidx.compose.material.icons.outlined.SelfImprovement
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialShapes
-import androidx.compose.material3.toShape
 import androidx.compose.material3.NavigationItemIconPosition
 import androidx.compose.runtime.*
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,7 +29,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.TransformOrigin
@@ -70,7 +63,6 @@ sealed class Screen(val route: String, val titleResId: Int, val icon: ImageVecto
     data object Statistics : Screen("statistics", R.string.settings_statistics, Icons.Filled.BarChart)
     data object AppearanceSettings : Screen("appearance_settings", R.string.settings_appearance, Icons.Filled.Brightness4)
 }
-
 
 @Composable
 fun MainApp(viewModel: MainViewModel) {
@@ -209,6 +201,18 @@ fun MainApp(viewModel: MainViewModel) {
     }
 
     val startDest = if (isRegistered == true) Screen.Home.route else Screen.Registration.route
+
+    LaunchedEffect(isRegistered, currentRoute) {
+        if (isRegistered == false && currentRoute != null && currentRoute != Screen.Registration.route) {
+            navController.navigate(Screen.Registration.route) {
+                popUpTo(0) { inclusive = true }
+            }
+        } else if (isRegistered == true && currentRoute == Screen.Registration.route) {
+            navController.navigate(Screen.Home.route) {
+                popUpTo(Screen.Registration.route) { inclusive = true }
+            }
+        }
+    }
 
     val pendingAchievementPopup by viewModel.pendingAchievementPopup.collectAsStateWithLifecycle()
 
@@ -511,10 +515,16 @@ fun MainApp(viewModel: MainViewModel) {
                     AnimatedVisibility(
                         visible = isHomeScreen,
                         enter = scaleIn(spring(dampingRatio = 0.55f, stiffness = Spring.StiffnessMediumLow)) +
-                                expandHorizontally(spring(dampingRatio = 0.65f, stiffness = Spring.StiffnessMediumLow)) +
+                                expandHorizontally(
+                                    animationSpec = spring(dampingRatio = 0.65f, stiffness = Spring.StiffnessMediumLow),
+                                    clip = false
+                                ) +
                                 fadeIn(tween(150)),
                         exit = scaleOut(spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMedium)) +
-                               shrinkHorizontally(spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMedium)) +
+                               shrinkHorizontally(
+                                    animationSpec = spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMedium),
+                                    clip = false
+                               ) +
                                fadeOut(tween(150))
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -556,7 +566,7 @@ fun BottomNavigationBar(
             .animateContentSize()
             .height(68.dp),
         shape = RoundedCornerShape(100),
-        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 3.dp),
         colors = FloatingToolbarDefaults.standardFloatingToolbarColors(
             toolbarContainerColor = MaterialTheme.colorScheme.primaryContainer
         )
@@ -576,7 +586,7 @@ fun BottomNavigationBar(
                 },
                 icon = {
                     val extraHeight by animateDpAsState(
-                        targetValue = if (selected) 16.dp else 0.dp,
+                        targetValue = if (selected) 12.dp else 0.dp,
                         animationSpec = spring(
                             dampingRatio = Spring.DampingRatioLowBouncy,
                             stiffness = Spring.StiffnessLow
@@ -584,7 +594,7 @@ fun BottomNavigationBar(
                         label = "indicatorHeight"
                     )
                     Box(
-                        modifier = Modifier.height(26.dp + extraHeight),
+                        modifier = Modifier.height(24.dp + extraHeight),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -603,10 +613,16 @@ fun BottomNavigationBar(
                                 dampingRatio = Spring.DampingRatioLowBouncy,
                                 stiffness = Spring.StiffnessLow
                             )
-                        ) + expandHorizontally(expandFrom = Alignment.Start),
+                        ) + expandHorizontally(
+                            expandFrom = Alignment.Start,
+                            clip = false
+                        ),
                         exit = fadeOut() + slideOutHorizontally(
                             targetOffsetX = { -15 }
-                        ) + shrinkHorizontally(shrinkTowards = Alignment.Start)
+                        ) + shrinkHorizontally(
+                            shrinkTowards = Alignment.Start,
+                            clip = false
+                        )
                     ) {
                         Text(
                             text = stringResource(screen.titleResId),
@@ -675,7 +691,7 @@ fun HomeFabButton(
             },
         containerColor = ToggleFloatingActionButtonDefaults.containerColor(
             MaterialTheme.colorScheme.primaryContainer,
-            MaterialTheme.colorScheme.onPrimaryContainer
+            MaterialTheme.colorScheme.primary
         ),
         containerCornerRadius = ToggleFloatingActionButtonDefaults.containerCornerRadius(
             24.dp,
@@ -702,7 +718,7 @@ fun HomeFabButton(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = stringResource(R.string.close_menu),
-                        tint = MaterialTheme.colorScheme.primaryContainer,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(28.dp)
                     )
                 } else {

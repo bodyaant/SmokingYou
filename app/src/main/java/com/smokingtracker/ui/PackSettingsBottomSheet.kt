@@ -6,7 +6,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -17,12 +16,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,7 +30,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
 import com.smokingtracker.ui.theme.containerShape
@@ -72,13 +69,13 @@ fun PackSettingsBottomSheet(
         } else ""
     }
 
-    var priceInput by remember { mutableStateOf(initialPriceStr) }
-    var selectedCurrency by remember { mutableStateOf(currency) }
+    var priceInput by rememberSaveable { mutableStateOf(initialPriceStr) }
+    var selectedCurrency by rememberSaveable { mutableStateOf(currency) }
 
     val standardSizes = listOf(20, 25, 30)
-    var isCustomSize by remember { mutableStateOf(packSize !in standardSizes) }
-    var selectedStandardSize by remember { mutableIntStateOf(if (packSize in standardSizes) packSize else 20) }
-    var customSizeInput by remember { mutableStateOf(if (packSize !in standardSizes) packSize.toString() else "") }
+    var isCustomSize by rememberSaveable { mutableStateOf(packSize !in standardSizes) }
+    var selectedStandardSize by rememberSaveable { mutableIntStateOf(if (packSize in standardSizes) packSize else 20) }
+    var customSizeInput by rememberSaveable { mutableStateOf(if (packSize !in standardSizes) packSize.toString() else "") }
 
     val priceVal = priceInput.toFloatOrNull() ?: 0f
     val currentSizeVal = if (isCustomSize) {
@@ -127,7 +124,7 @@ fun PackSettingsBottomSheet(
                 Surface(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(46.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -156,7 +153,7 @@ fun PackSettingsBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 shape = containerShape(RoundedCornerShape(20.dp)),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
                 )
             ) {
                 Column(
@@ -360,7 +357,7 @@ fun PackSettingsBottomSheet(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(AVAILABLE_CURRENCIES) { curr ->
+                    items(AVAILABLE_CURRENCIES, key = { it.code }) { curr ->
                         val isSelected = selectedCurrency == curr.code
                         Surface(
                             onClick = {
