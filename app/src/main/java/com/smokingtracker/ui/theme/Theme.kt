@@ -3,21 +3,19 @@ package com.smokingtracker.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
@@ -33,7 +31,6 @@ import androidx.core.view.WindowCompat
 import androidx.compose.ui.tooling.preview.Preview
 import com.smokingtracker.data.ColorPreset
 import com.smokingtracker.data.FontPreset
-
 
 private val LightColors = lightColorScheme(
     primary = md_theme_light_primary,
@@ -597,7 +594,8 @@ fun AppTheme(
         ColorPreset.SLATE_MONO -> if (useDarkTheme) SlateDarkColors else SlateLightColors
         ColorPreset.SYSTEM -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (useDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+                val dynamic = if (useDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+                dynamic.ensureDynamicContrast()
             } else {
                 if (useDarkTheme) DarkColors else LightColors
             }
@@ -658,5 +656,53 @@ fun AppTheme(
         colorScheme = finalColors,
         typography = typography,
         content = content
+    )
+}
+
+val ColorScheme.subContainer: Color
+    get() = if (surface.luminance() < 0.5f) {
+        surfaceContainerHighest
+    } else {
+        surfaceVariant.copy(alpha = 0.45f)
+    }
+
+private fun Color.contrastRatio(other: Color): Float {
+    val l1 = this.luminance()
+    val l2 = other.luminance()
+    val maxL = maxOf(l1, l2)
+    val minL = minOf(l1, l2)
+    return (maxL + 0.05f) / (minL + 0.05f)
+}
+
+private fun ensureRoleContrast(
+    container: Color,
+    content: Color,
+    preferredDark: Color = Color(0xFF1D1B20),
+    preferredLight: Color = Color(0xFFF4EFF4),
+    minRatio: Float = 3.5f
+): Color {
+    if (container.contrastRatio(content) >= minRatio) return content
+    return if (container.luminance() > 0.4f) preferredDark else preferredLight
+}
+
+fun ColorScheme.ensureDynamicContrast(): ColorScheme {
+    val fixedOnPrimary = ensureRoleContrast(primary, onPrimary)
+    val fixedOnPrimaryContainer = ensureRoleContrast(primaryContainer, onPrimaryContainer)
+    val fixedOnSecondary = ensureRoleContrast(secondary, onSecondary)
+    val fixedOnSecondaryContainer = ensureRoleContrast(secondaryContainer, onSecondaryContainer)
+    val fixedOnTertiary = ensureRoleContrast(tertiary, onTertiary)
+    val fixedOnTertiaryContainer = ensureRoleContrast(tertiaryContainer, onTertiaryContainer)
+    val fixedOnSurface = ensureRoleContrast(surface, onSurface)
+    val fixedOnSurfaceVariant = ensureRoleContrast(surface, onSurfaceVariant, minRatio = 3.0f)
+
+    return copy(
+        onPrimary = fixedOnPrimary,
+        onPrimaryContainer = fixedOnPrimaryContainer,
+        onSecondary = fixedOnSecondary,
+        onSecondaryContainer = fixedOnSecondaryContainer,
+        onTertiary = fixedOnTertiary,
+        onTertiaryContainer = fixedOnTertiaryContainer,
+        onSurface = fixedOnSurface,
+        onSurfaceVariant = fixedOnSurfaceVariant
     )
 }
