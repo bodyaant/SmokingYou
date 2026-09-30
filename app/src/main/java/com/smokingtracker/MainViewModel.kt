@@ -159,6 +159,18 @@ class MainViewModel(
         initialValue = AppIconPreset.DEFAULT
     )
 
+    val savingsGoalTitle: StateFlow<String> = dataStoreManager.savingsGoalTitle.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ""
+    )
+
+    val savingsGoalAmount: StateFlow<Float> = dataStoreManager.savingsGoalAmount.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = 0f
+    )
+
     val useCustomVariableFont: StateFlow<Boolean> = dataStoreManager.useCustomVariableFont.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -601,6 +613,22 @@ class MainViewModel(
     fun clearHistoricalBaseline() {
         viewModelScope.launch {
             dataStoreManager.clearHistoricalBaseline()
+        }
+    }
+
+    fun saveSavingsGoal(title: String, amount: Float) {
+        viewModelScope.launch {
+            dataStoreManager.saveSavingsGoal(title, amount)
+        }
+    }
+
+    fun resetAllSmokingData() {
+        viewModelScope.launch {
+            repository.clearAllEntries()
+            dataStoreManager.resetAllSmokingData()
+            _achievementPopupQueue.value = emptyList()
+            com.smokingtracker.notification.OngoingNotificationManager.updateSuspend(getApplication())
+            WidgetUpdateManager.updateAll(getApplication())
         }
     }
 }

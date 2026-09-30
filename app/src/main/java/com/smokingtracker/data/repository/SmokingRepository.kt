@@ -57,4 +57,8 @@ class SmokingRepository(
         smokingDao.clearAllEntries()
         smokingDao.insertEntries(entities)
     }
+
+    suspend fun clearAllEntries() {
+        smokingDao.clearAllEntries()
+    }
 }

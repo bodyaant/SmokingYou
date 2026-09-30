@@ -72,6 +72,8 @@ class DataStoreManager(private val context: Context) {
         val NOTIFICATION_SHOW_RESIST_BUTTON = booleanPreferencesKey("notification_show_resist_button")
         val WIDGET_SHOW_RESIST_BUTTON = booleanPreferencesKey("widget_show_resist_button")
         val SHOW_LIMIT_ON_GRAPH = booleanPreferencesKey("show_limit_on_graph")
+        val SAVINGS_GOAL_TITLE = stringPreferencesKey("savings_goal_title")
+        val SAVINGS_GOAL_AMOUNT = floatPreferencesKey("savings_goal_amount")
     }
 
     val isRegistered: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -696,6 +698,21 @@ class DataStoreManager(private val context: Context) {
         }
     }
 
+    val savingsGoalTitle: Flow<String> = context.dataStore.data.map { preferences ->
+        preferences[SAVINGS_GOAL_TITLE] ?: ""
+    }
+
+    val savingsGoalAmount: Flow<Float> = context.dataStore.data.map { preferences ->
+        preferences[SAVINGS_GOAL_AMOUNT] ?: 0f
+    }
+
+    suspend fun saveSavingsGoal(title: String, amount: Float) {
+        context.dataStore.edit { preferences ->
+            preferences[SAVINGS_GOAL_TITLE] = title
+            preferences[SAVINGS_GOAL_AMOUNT] = amount
+        }
+    }
+
     private fun getStartOfToday(): Long {
         val cal = java.util.Calendar.getInstance().apply {
             set(java.util.Calendar.HOUR_OF_DAY, 0)
@@ -704,5 +721,41 @@ class DataStoreManager(private val context: Context) {
             set(java.util.Calendar.MILLISECOND, 0)
         }
         return cal.timeInMillis
+    }
+
+    suspend fun resetAllSmokingData() {
+        context.dataStore.edit { preferences ->
+            preferences[IS_REGISTERED] = false
+            preferences.remove(UNLOCKED_ACHIEVEMENTS)
+            preferences.remove(UNLOCKED_ACHIEVEMENTS_SET)
+            preferences.remove(ACHIEVEMENT_UNLOCK_DATES)
+            preferences.remove(DAILY_LIMIT)
+            preferences.remove(TAPERING_PLAN_ENABLED)
+            preferences.remove(TAPERING_INTERVAL_DAYS)
+            preferences.remove(LAST_TAPERING_CHECKIN_DATE)
+            preferences.remove(HAS_HISTORICAL_BASELINE)
+            preferences.remove(HISTORICAL_START_DATE)
+            preferences.remove(HISTORICAL_DAILY_AVG)
+            preferences.remove(HISTORICAL_PACK_PRICE)
+            preferences.remove(HISTORICAL_PACK_SIZE)
+            preferences.remove(HISTORICAL_TRIGGER_PRIORITIES)
+            preferences.remove(SAVINGS_GOAL_TITLE)
+            preferences.remove(SAVINGS_GOAL_AMOUNT)
+            preferences.remove(PACK_PRICE)
+            preferences.remove(PACK_SIZE)
+            preferences.remove(CURRENCY)
+            preferences.remove(APP_LAUNCH_DATES)
+            preferences.remove(HAS_CHANGED_PACK_PRICE)
+            preferences.remove(HAS_CANCELLED_WITHIN_10S)
+            preferences.remove(THEME_LANG_CHANGE_COUNT)
+            preferences.remove(THEME_LANG_CHANGE_DATE)
+            preferences.remove(ANALYTICS_VISIT_COUNT)
+            preferences.remove(ANALYTICS_VISIT_DATE)
+            preferences.remove(CUSTOM_TRIGGERS)
+            preferences.remove(DISABLED_DEFAULT_TRIGGERS)
+            preferences.remove(ENTRY_TRIGGERS)
+            preferences.remove(SMOKING_ENTRIES)
+            preferences[NOTIFICATION_ENABLED] = false
+        }
     }
 }

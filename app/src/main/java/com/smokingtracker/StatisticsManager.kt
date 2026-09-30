@@ -470,21 +470,34 @@ class StatisticsManager {
         val lastWeekCount: Int,
         val difference: Int,
         val percentChange: Int,
-        val trend: ComparisonTrend
+        val trend: ComparisonTrend,
+        val thisWeekDailyAvg: Float,
+        val lastWeekDailyAvg: Float,
+        val diffDailyAvg: Float,
+        val isCurrentWeek: Boolean,
+        val daysElapsedThisWeek: Int
     )
 
-    fun calculateWeeklyComparison(entries: List<Long>, referenceDate: Calendar = Calendar.getInstance()): WeeklyComparisonData {
+    fun calculateWeeklyComparison(
+        entries: List<Long>,
+        referenceDate: Calendar = Calendar.getInstance(),
+        now: Calendar = Calendar.getInstance()
+    ): WeeklyComparisonData {
         val cal = referenceDate.clone() as Calendar
+        cal.firstDayOfWeek = Calendar.MONDAY
         cal.set(Calendar.HOUR_OF_DAY, 0)
         cal.set(Calendar.MINUTE, 0)
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
 
-        val firstDay = Calendar.MONDAY
-        while (cal.get(Calendar.DAY_OF_WEEK) != firstDay) {
+        while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
             cal.add(Calendar.DAY_OF_YEAR, -1)
         }
         val thisWeekStart = cal.timeInMillis
+
+        val thisWeekEndCal = cal.clone() as Calendar
+        thisWeekEndCal.add(Calendar.DAY_OF_YEAR, 7)
+        val thisWeekEnd = thisWeekEndCal.timeInMillis
 
         val prevWeekStartCal = cal.clone() as Calendar
         prevWeekStartCal.add(Calendar.DAY_OF_YEAR, -7)
@@ -492,22 +505,38 @@ class StatisticsManager {
 
         val prevWeekEnd = thisWeekStart
 
-        val thisWeekEntries = entries.filter { it >= thisWeekStart }
+        val thisWeekEntries = entries.filter { it >= thisWeekStart && it < thisWeekEnd }
         val prevWeekEntries = entries.filter { it >= prevWeekStart && it < prevWeekEnd }
 
         val thisWeekCount = thisWeekEntries.size
         val lastWeekCount = prevWeekEntries.size
         val diff = thisWeekCount - lastWeekCount
 
-        val percentChange = if (lastWeekCount == 0) {
-            if (thisWeekCount > 0) 100 else 0
+        val nowMs = now.timeInMillis
+        val isCurrentWeek = nowMs in thisWeekStart until thisWeekEnd
+        val daysElapsedThisWeek = if (isCurrentWeek) {
+            ((now.get(Calendar.DAY_OF_WEEK) + 5) % 7 + 1).coerceIn(1, 7)
         } else {
-            Math.round(Math.abs(diff.toDouble()) * 100.0 / lastWeekCount).toInt()
+            7
+        }
+
+        val thisWeekDailyAvg = if (daysElapsedThisWeek > 0) {
+            thisWeekCount.toFloat() / daysElapsedThisWeek
+        } else {
+            0f
+        }
+        val lastWeekDailyAvg = lastWeekCount.toFloat() / 7f
+        val diffDailyAvg = thisWeekDailyAvg - lastWeekDailyAvg
+
+        val percentChange = if (lastWeekDailyAvg == 0f) {
+            if (thisWeekDailyAvg > 0f) 100 else 0
+        } else {
+            Math.round(Math.abs(diffDailyAvg.toDouble()) * 100.0 / lastWeekDailyAvg).toInt()
         }
 
         val trend = when {
-            diff < 0 -> ComparisonTrend.DECREASED
-            diff > 0 -> ComparisonTrend.INCREASED
+            diffDailyAvg < -0.01f -> ComparisonTrend.DECREASED
+            diffDailyAvg > 0.01f -> ComparisonTrend.INCREASED
             else -> ComparisonTrend.NO_CHANGE
         }
 
@@ -516,7 +545,12 @@ class StatisticsManager {
             lastWeekCount = lastWeekCount,
             difference = diff,
             percentChange = percentChange,
-            trend = trend
+            trend = trend,
+            thisWeekDailyAvg = thisWeekDailyAvg,
+            lastWeekDailyAvg = lastWeekDailyAvg,
+            diffDailyAvg = diffDailyAvg,
+            isCurrentWeek = isCurrentWeek,
+            daysElapsedThisWeek = daysElapsedThisWeek
         )
     }
 
@@ -562,6 +596,88 @@ class StatisticsManager {
             peakHourCount = peakHourCount,
             peakPeriodNameResId = bestPeriod.second,
             peakPeriodPercent = peakPeriodPercent
+        )
+    }
+
+    data class SmokingIntervalData(
+        val avgIntervalMinutes: Int,
+        val minIntervalMinutes: Int,
+        val maxIntervalMinutes: Int,
+        val todayAvgMinutes: Int?,
+        val totalIntervalsCount: Int
+    )
+
+    fun calculateSmokingIntervals(entries: List<Long>): SmokingIntervalData {
+        if (entries.size < 2) {
+            return SmokingIntervalData(0, 0, 0, null, 0)
+        }
+
+        val sorted = entries.sorted()
+        val cal1 = Calendar.getInstance()
+        val cal2 = Calendar.getInstance()
+
+        val todayCal = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val todayStartMs = todayCal.timeInMillis
+        val todayEndMs = todayStartMs + 24L * 60 * 60 * 1000L
+
+        val allIntervals = mutableListOf<Int>()
+        val todayIntervals = mutableListOf<Int>()
+
+        for (i in 0 until sorted.size - 1) {
+            val t1 = sorted[i]
+            val t2 = sorted[i + 1]
+            val diffMs = t2 - t1
+            if (diffMs <= 0) continue
+
+            cal1.timeInMillis = t1
+            cal2.timeInMillis = t2
+
+            val sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                    cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+
+            val isOvernight = !sameDay && diffMs > 4 * 60 * 60 * 1000L
+
+            if (!isOvernight) {
+                val minutes = (diffMs / (60 * 1000L)).toInt()
+                allIntervals.add(minutes)
+
+                if (t2 in todayStartMs until todayEndMs) {
+                    todayIntervals.add(minutes)
+                }
+            }
+        }
+
+        if (allIntervals.isEmpty()) {
+            val totalDiffMs = sorted.last() - sorted.first()
+            val count = sorted.size - 1
+            val fallbackMins = if (count > 0) (totalDiffMs / (count * 60 * 1000L)).toInt() else 0
+            return SmokingIntervalData(
+                avgIntervalMinutes = fallbackMins,
+                minIntervalMinutes = fallbackMins,
+                maxIntervalMinutes = fallbackMins,
+                todayAvgMinutes = null,
+                totalIntervalsCount = 0
+            )
+        }
+
+        val avgMinutes = (allIntervals.sum().toDouble() / allIntervals.size).roundToInt()
+        val minMinutes = allIntervals.minOrNull() ?: 0
+        val maxMinutes = allIntervals.maxOrNull() ?: 0
+        val todayAvg = if (todayIntervals.isNotEmpty()) {
+            (todayIntervals.sum().toDouble() / todayIntervals.size).roundToInt()
+        } else null
+
+        return SmokingIntervalData(
+            avgIntervalMinutes = avgMinutes,
+            minIntervalMinutes = minMinutes,
+            maxIntervalMinutes = maxMinutes,
+            todayAvgMinutes = todayAvg,
+            totalIntervalsCount = allIntervals.size
         )
     }
 }
