@@ -1,6 +1,5 @@
 package com.smokingtracker.ui.components
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
@@ -12,16 +11,11 @@ import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,7 +27,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -59,19 +52,16 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -79,9 +69,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -108,6 +96,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
+import com.smokingtracker.ui.theme.subContainer
 import com.smokingtracker.ui.theme.bouncyPress
 import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.rememberBouncyPress
@@ -116,7 +105,6 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
-import java.time.LocalDate
 import java.time.format.TextStyle as JavaTextStyle
 import java.util.Calendar
 import java.util.Locale
@@ -142,7 +130,8 @@ data class ChartColorPalette(
     val outlineVariant: Color,
     val onSurfaceVariant: Color,
     val surfaceContainerHighest: Color,
-    val tertiary: Color = cleanDay
+    val tertiary: Color = cleanDay,
+    val subContainer: Color = surfaceContainerHighest
 )
 
 @Composable
@@ -159,6 +148,7 @@ fun rememberChartColorPalette(): ChartColorPalette {
     val outlineVariant = MaterialTheme.colorScheme.outlineVariant
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
     val surfaceContainerHighest = MaterialTheme.colorScheme.surfaceContainerHighest
+    val subContainer = MaterialTheme.colorScheme.subContainer
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
 
     return remember(primary, error, tertiary, isDark) {
@@ -206,7 +196,8 @@ fun rememberChartColorPalette(): ChartColorPalette {
             outlineVariant = outlineVariant,
             onSurfaceVariant = onSurfaceVariant,
             surfaceContainerHighest = surfaceContainerHighest,
-            tertiary = tertiary
+            tertiary = tertiary,
+            subContainer = subContainer
         )
     }
 }
@@ -217,7 +208,7 @@ fun SealBadge(
     modifier: Modifier = Modifier,
     size: Dp = 22.dp,
     background: Color = MaterialTheme.colorScheme.primaryContainer,
-    iconTint: Color = MaterialTheme.colorScheme.primary
+    iconTint: Color = MaterialTheme.colorScheme.onPrimaryContainer
 ) {
     Surface(
         modifier = modifier.size(size),
@@ -261,7 +252,7 @@ fun ChartStyleSelector(
     Surface(
         modifier = modifier.height(38.dp),
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh
+        color = MaterialTheme.colorScheme.subContainer
     ) {
         val buttonWidth = 36.dp
         Box(
@@ -657,6 +648,7 @@ fun PillBarChart(
                                     },
                                     maxLines = 1,
                                     softWrap = false,
+                                    overflow = TextOverflow.Clip,
                                     textAlign = TextAlign.Center
                                 )
 
@@ -719,17 +711,16 @@ fun PillBarChart(
                                 )
                             }
                     ) {
+                        val barWidth = when {
+                            dataPoints.size <= 7 -> 22.dp
+                            dataPoints.size <= 12 -> 14.dp
+                            else -> 8.dp
+                        }
+
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(barAreaHeight),
-                            horizontalArrangement = Arrangement.spacedBy(
-                                when {
-                                    dataPoints.size <= 7 -> 10.dp
-                                    dataPoints.size <= 12 -> 6.dp
-                                    else -> 2.dp
-                                }
-                            ),
                             verticalAlignment = Alignment.Bottom
                         ) {
                             dataPoints.forEachIndexed { index, count ->
@@ -769,25 +760,31 @@ fun PillBarChart(
                                         val baseHeight = (limitHeight - gap / 2).coerceAtLeast(6.dp)
                                         val excessHeight = (animatedHeight - limitHeight - gap / 2).coerceAtLeast(4.dp)
 
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(excessHeight)
-                                                .clip(RoundedCornerShape(50))
-                                                .background(excessColor)
-                                        )
-                                        Spacer(modifier = Modifier.height(gap))
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(baseHeight)
-                                                .clip(RoundedCornerShape(50))
-                                                .background(baseColor)
-                                        )
+                                        Column(
+                                            modifier = Modifier.width(barWidth),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Bottom
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(excessHeight)
+                                                    .clip(RoundedCornerShape(50))
+                                                    .background(excessColor)
+                                            )
+                                            Spacer(modifier = Modifier.height(gap))
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(baseHeight)
+                                                    .clip(RoundedCornerShape(50))
+                                                    .background(baseColor)
+                                            )
+                                        }
                                     } else {
                                         Box(
                                             modifier = Modifier
-                                                .fillMaxWidth()
+                                                .width(barWidth)
                                                 .height(animatedHeight.coerceAtLeast(4.dp))
                                                 .clip(RoundedCornerShape(50))
                                                 .background(baseColor)
@@ -817,6 +814,8 @@ fun PillBarChart(
                                         Text(
                                             text = label,
                                             style = MaterialTheme.typography.labelSmall.copy(
+                                                fontSize = if (xAxisLabels.size > 7) 10.sp else 11.sp,
+                                                letterSpacing = if (xAxisLabels.size > 7) (-0.3).sp else 0.sp,
                                                 fontWeight = if (isHighlighted || isToday) FontWeight.ExtraBold else FontWeight.Medium
                                             ),
                                             color = when {
@@ -827,6 +826,7 @@ fun PillBarChart(
                                             },
                                             maxLines = 1,
                                             softWrap = false,
+                                            overflow = TextOverflow.Clip,
                                             textAlign = TextAlign.Center
                                         )
                                         Box(
@@ -1142,7 +1142,8 @@ fun SmoothSplineLineChart(
                                         },
                                         textAlign = TextAlign.Center,
                                         maxLines = 1,
-                                        softWrap = false
+                                        softWrap = false,
+                                        overflow = TextOverflow.Clip
                                     )
                                     Box(
                                         modifier = Modifier
@@ -1324,6 +1325,8 @@ fun SmoothSplineLineChart(
                                         Text(
                                             text = label,
                                             style = MaterialTheme.typography.labelSmall.copy(
+                                                fontSize = if (xAxisLabels.size > 7) 10.sp else 11.sp,
+                                                letterSpacing = if (xAxisLabels.size > 7) (-0.3).sp else 0.sp,
                                                 fontWeight = if (isHighlighted || isToday) FontWeight.ExtraBold else FontWeight.Medium
                                             ),
                                             color = when {
@@ -1332,6 +1335,9 @@ fun SmoothSplineLineChart(
                                                 isFuture -> onSurfaceVariant.copy(alpha = 0.3f)
                                                 else -> onSurfaceVariant.copy(alpha = 0.7f)
                                             },
+                                            maxLines = 1,
+                                            softWrap = false,
+                                            overflow = TextOverflow.Clip,
                                             textAlign = TextAlign.Center
                                         )
                                         Box(
@@ -1736,6 +1742,7 @@ fun DayDetailCard(
     currency: String = "",
     avgIntervalMinutes: Int? = null,
     topTrigger: String? = null,
+    title: String = stringResource(R.string.chart_selected_day),
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -1747,8 +1754,7 @@ fun DayDetailCard(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = containerShape(RoundedCornerShape(22.dp)),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shadowElevation = 2.dp
+        color = MaterialTheme.colorScheme.subContainer
     ) {
         Column(
             modifier = Modifier
@@ -1763,7 +1769,7 @@ fun DayDetailCard(
             ) {
                 Column {
                     Text(
-                        text = stringResource(R.string.chart_selected_day),
+                        text = title,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
@@ -1838,151 +1844,137 @@ fun DayDetailCard(
                 }
             }
 
+            val currencySymbol = remember(currency) {
+                when (currency) {
+                    "RUB" -> "₽"
+                    "USD" -> "$"
+                    "EUR" -> "€"
+                    "GBP" -> "£"
+                    "TRY" -> "₺"
+                    "KZT" -> "₸"
+                    "UAH" -> "₴"
+                    "BYN" -> "Br"
+                    else -> currency
+                }
+            }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    shape = RoundedCornerShape(14.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(10.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.Top,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AttachMoney,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(14.dp)
-                                    .padding(top = 1.dp),
-                                tint = MaterialTheme.colorScheme.secondary
-                            )
-                            Text(
-                                text = stringResource(R.string.day_detail_cost),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Icon(
+                            imageVector = Icons.Default.AttachMoney,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
                         Text(
-                            text = if (cost > 0f) String.format(Locale.getDefault(), "%.1f %s", cost, currency).trim() else "0 $currency".trim(),
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurface,
+                            text = stringResource(R.string.day_detail_cost),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
+                    Text(
+                        text = if (cost > 0f) String.format(Locale.getDefault(), "%.1f %s", cost, currencySymbol).trim() else "0 $currencySymbol".trim(),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
 
-                Surface(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    shape = RoundedCornerShape(14.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow
+                VerticalDivider(
+                    modifier = Modifier.height(28.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+                )
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(10.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.Top,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AccessTime,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(14.dp)
-                                    .padding(top = 1.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                text = stringResource(R.string.day_detail_interval),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        val intervalText = if (avgIntervalMinutes != null && avgIntervalMinutes > 0) {
-                            val h = avgIntervalMinutes / 60
-                            val m = avgIntervalMinutes % 60
-                            if (h > 0) {
-                                stringResource(R.string.format_hours_minutes, h, m)
-                            } else {
-                                stringResource(R.string.format_minutes_only, m)
-                            }
-                        } else "–"
+                        Icon(
+                            imageVector = Icons.Default.AccessTime,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                         Text(
-                            text = intervalText,
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurface,
+                            text = stringResource(R.string.day_detail_interval),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
+                    val intervalText = if (avgIntervalMinutes != null && avgIntervalMinutes > 0) {
+                        val h = avgIntervalMinutes / 60
+                        val m = avgIntervalMinutes % 60
+                        if (h > 0) {
+                            stringResource(R.string.format_hours_minutes, h, m)
+                        } else {
+                            stringResource(R.string.format_minutes_only, m)
+                        }
+                    } else "–"
+                    Text(
+                        text = intervalText,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
 
-                Surface(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    shape = RoundedCornerShape(14.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow
+                VerticalDivider(
+                    modifier = Modifier.height(28.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+                )
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(10.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.Top,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Psychology,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(14.dp)
-                                    .padding(top = 1.dp),
-                                tint = MaterialTheme.colorScheme.tertiary
-                            )
-                            Text(
-                                text = stringResource(R.string.day_detail_triggers),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Icon(
+                            imageVector = Icons.Default.Psychology,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.tertiary
+                        )
                         Text(
-                            text = topTrigger ?: stringResource(R.string.day_detail_no_triggers),
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurface,
+                            text = stringResource(R.string.day_detail_triggers),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
+                    Text(
+                        text = topTrigger ?: stringResource(R.string.day_detail_no_triggers),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         }
