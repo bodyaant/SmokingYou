@@ -44,7 +44,8 @@
     <string name="graph_metric_in_limit">Limit içi</string>
     <string name="graph_metric_peak">Zirve</string>
     <string name="weekly_comparison_this_week_label">Bu hafta</string>
-    <string name="weekly_comparison_last_week_label">Geçen hafta</string>
+    <string name="weekly_comparison_selected_week_label">Seçilen hafta</string>
+    <string name="weekly_comparison_last_week_label">Önceki hafta</string>
     <string name="graph_setting_show_limit">Grafiklerde limit çizgisi</string>
     <string name="graph_setting_show_limit_desc">Günlük hedef çizgisini göster ve aşılan sigaraları kırmızıyla vurgula</string>
     <string name="chart_view_bars">Çubuklar</string>
@@ -53,6 +54,8 @@
     <string name="chart_clean_day">Sigarasız gün</string>
     <string name="chart_clean_day_desc">0 sigara — tebrikler!</string>
     <string name="chart_selected_day">Seçilen gün</string>
+    <string name="chart_selected_month">Seçilen ay</string>
+    <string name="chart_selected_hour">Seçilen saat</string>
     <string name="day_part_night">Gece (00:00–06:00)</string>
     <string name="day_part_morning">Sabah (06:00–12:00)</string>
     <string name="day_part_afternoon">Öğleden sonra (12:00–18:00)</string>
@@ -99,7 +102,7 @@
     <string name="stats_min_per_day">Günlük min.</string>
     <string name="stats_avg_per_day">Günlük ortalama</string>
     <string name="stats_total_count">Toplam sigara</string>
-    <string name="stats_tracking_since">Takip başlangıcı</string>
+    <string name="stats_tracking_since">Takip başlangıcı: %1$s</string>
     <string name="stats_max_smoke_free_streak">En uzun sigarasız süre</string>
     <string name="stats_days_unit">%d gün</string>
     <string name="stats_no_data">Veri yok</string>
@@ -300,6 +303,19 @@
     <string name="trigger_tip_custom">İsteği yargılamadan fark edin, üç derin nefes alın ve istek dalgasının geçmesini bekleyin.</string>
     <string name="trigger_manage_title">Tetikleyicileri Yönet</string>
     <string name="trigger_manage_desc">Özel tetikleyiciler ekleyin veya standart olanları düzenleyin</string>
+    <string name="trigger_time_patterns_title">Günün Saatlerine Göre Dağılım</string>
+    <string name="trigger_time_patterns_desc">Günün her diliminde en sık görülen tetikleyici</string>
+    <string name="trigger_dominant_format">%1$s (%%%2$d)</string>
+    <string name="trigger_no_activity_period">İstek yok</string>
+    <string name="trigger_trend_increase">+%1$d</string>
+    <string name="trigger_trend_decrease">-%1$d</string>
+    <string name="trigger_trend_new">Yeni</string>
+    <string name="trigger_detail_sheet_title">Tetikleyici Analizi</string>
+    <string name="trigger_detail_share_format">%1$d kez • tüm isteklerin %%%2$d\'si</string>
+    <string name="trigger_hourly_distribution_title">Saatlik Yoğunluk</string>
+    <string name="trigger_detail_peak_hour_format">Zirve: %1$02d:00–%2$02d:00 (%3$d kez)</string>
+    <string name="trigger_detail_no_peak">Gün içine dengeli dağılmış</string>
+    <string name="trigger_hero_badge_main">Ana Faktör</string>
 
     <string name="settings_pack_params">Paket Ayarları</string>
     <string name="settings_pack_price">Paket Fiyatı</string>
@@ -548,14 +564,12 @@
     <string name="weekly_comparison_title">Haftalık Karşılaştırma</string>
     <string name="weekly_comparison_decrease">%%%1$d azaldı</string>
     <string name="weekly_comparison_increase">%%%1$d arttı</string>
-    <string name="weekly_comparison_no_change">Geçen haftaya göre değişim yok</string>
-    <string name="weekly_comparison_desc_decrease">Tebrikler! Geçen haftaya göre %1$d daha az sigara
-        içtiniz.</string>
-    <string name="weekly_comparison_desc_increase">Geçen haftaya göre %1$d daha fazla sigara
-        içtiniz.</string>
-    <string name="weekly_comparison_desc_no_change">Geçen haftayla tam olarak aynı miktarda içtiniz.</string>
-    <string name="weekly_comparison_this_week">Bu hafta: %1$d</string>
-    <string name="weekly_comparison_last_week">Geçen hafta: %1$d</string>
+    <string name="weekly_comparison_no_change">Önceki haftaya göre değişiklik yok</string>
+    <string name="weekly_comparison_desc_decrease">Harika iş! Önceki haftaya göre günde ortalama %1$s daha az sigara.</string>
+    <string name="weekly_comparison_desc_increase">Sigara hızı arttı: önceki haftaya göre günde ortalama %1$s daha fazla.</string>
+    <string name="weekly_comparison_desc_no_change">Sigara içme hızı önceki haftayla aynı seviyede kaldı.</string>
+    <string name="weekly_comparison_per_day_unit">dal/gün</string>
+    <string name="weekly_comparison_total_summary">Toplam: %2$d günde %1$d adet</string>
 
     <string name="peak_hours_title">En Yoğun İçim Saatleri</string>
     <string name="peak_hours_subtitle">Gün içindeki saatlik dağılım</string>
@@ -629,4 +643,97 @@
     <string name="ach_progress_remaining">Kalan: %1$s</string>
     <string name="ach_unlocked_date">%1$s tarihinde açıldı</string>
     <string name="ach_close">Kapat</string>
+
+    <string name="stats_sheet_life_title">Geri Kazanılan Yaşam Süresi</string>
+    <string name="stats_sheet_life_fact_title">BMJ Klinik Araştırması</string>
+    <string name="stats_sheet_life_fact_desc">İçilmeyen her sigara yaklaşık 11 dakikalık ömür kazandırır. Vücut anında hücresel yenilenmeyi başlatır ve kandaki oksijen oranını dengeler.</string>
+    <string name="stats_sheet_life_milestones_title">İyileşme Aşamaları</string>
+    <string name="stats_sheet_life_milestone_1">20 dakika: Nabız ve kan basıncı normale döner</string>
+    <string name="stats_sheet_life_milestone_2">8 saat: Kandaki oksijen seviyesi ideal düzeye ulaşır</string>
+    <string name="stats_sheet_life_milestone_3">24 saat: Akciğerler mukus ve katran kalıntılarını temizlemeye başlar</string>
+
+    <string name="stats_sheet_money_title">Finansal Özgürlük</string>
+    <string name="stats_sheet_money_current">Mevcut Tasarruf</string>
+    <string name="stats_sheet_money_projections_title">Mevcut Hıza Göre Tahmin</string>
+    <string name="stats_sheet_money_month">1 ayda: %1$s</string>
+    <string name="stats_sheet_money_half_year">6 ayda: %1$s</string>
+    <string name="stats_sheet_money_year">1 yılda: %1$s</string>
+    <string name="stats_sheet_money_tip_title">Bu parayla neler yapabilirsiniz?</string>
+    <string name="stats_sheet_money_tip_desc">Günde sadece bir paket bırakmak bile yılda ciddi bir birikim sağlar — yeni bir akıllı telefon, yıllık spor salonu üyeliği veya tatil için yeterlidir.</string>
+
+    <string name="stats_sheet_streak_title">Sigarasız Seriler</string>
+    <string name="stats_sheet_streak_current_label">Mevcut Seri</string>
+    <string name="stats_sheet_streak_longest_label">Kişisel Rekor</string>
+    <string name="stats_sheet_streak_science_title">Alışkanlığın Nörobiyolojisi</string>
+    <string name="stats_sheet_streak_science_desc">İlk 72 saat fiziksel nikotin arınmasının zirvesidir. 2–3 hafta sonra dopamin reseptörleri dengelenir ve istek belirgin şekilde azalır.</string>
+    <string name="stats_sheet_streak_next_milestone">Sonraki hedef: %1$s</string>
+
+    <string name="stats_sheet_who_title">DSÖ İyileşme Yol Haritası</string>
+    <string name="stats_sheet_who_subtitle">Dünya Sağlık Örgütü standartlarına dayanan 12 aşama</string>
+    <string name="stats_sheet_who_completed">Tamamlandı</string>
+    <string name="stats_sheet_who_in_progress">Devam ediyor</string>
+    <string name="stats_sheet_who_remaining">Kalan: %1$s</string>
+
+    <string name="stats_sheet_consumption_title">Tüketim Yoğunluğu</string>
+    <string name="stats_sheet_consumption_avg_label">Günlük Ortalama</string>
+    <string name="stats_sheet_consumption_total_label">Toplam Sigara</string>
+    <string name="stats_sheet_consumption_range_label">Günlük Aralık</string>
+    <string name="stats_sheet_consumption_range_val">%1$d - %2$d adet</string>
+    <string name="stats_sheet_consumption_tracking_days">Takip süresi: %1$d gün</string>
+
+    <string name="stats_sheet_resisted_title">Bilinçli Kontrol</string>
+    <string name="stats_sheet_resisted_count_label">Direnilen İstekler</string>
+    <string name="stats_sheet_resisted_technique_title">«İstek Sörfü» Tekniği</string>
+    <string name="stats_sheet_resisted_technique_desc">Şiddetli krizler bir dalga gibi gelir ve 15–30 saniye içinde zirveye ulaşıp geçer. Bilinçli bir mola vermek bu dalgayı aşmanıza ve beyninizin otomatik döngüsünü kırmanıza yardımcı olur.</string>
+
+    <string name="stats_sheet_pack_years_title">Paket-Yıl Endeksi</string>
+    <string name="stats_sheet_pack_years_calc_title">Klinik Standart</string>
+    <string name="stats_sheet_pack_years_calc_desc">Formül: (Günlük içilen sigara / 20) × Sigara içilen yıl. Göğüs hastalıklarında kümülatif maruziyeti ölçmek için kullanılan küresel standarttır.</string>
+
+    <string name="stats_financial_goal_title">Finansal hedef</string>
+    <string name="stats_financial_goal_subtitle">Sizi gerçekten motive eden şeyler için biriktirin</string>
+    <string name="stats_set_goal_cta">Hedef belirle</string>
+    <string name="stats_goal_name_label">Hedef adı</string>
+    <string name="stats_goal_name_hint">Örn: Seyahat, Spor ayakkabı, Cihaz...</string>
+    <string name="stats_goal_amount_label">Hedef tutar</string>
+    <string name="stats_save_goal">Hedefi kaydet</string>
+    <string name="stats_clear_goal">Hedefi temizle</string>
+    <string name="stats_goal_progress">Hedefin %%%1$d\'i</string>
+    <string name="stats_streak_tier_format">Hedef: %1$d gün</string>
+    <string name="stats_goal_remaining_format">%1$s kaldı</string>
+    <string name="stats_goal_reached">Hedefe ulaşıldı!</string>
+
+    <string name="stats_avg_interval_label">Ortalama aralık</string>
+    <string name="stats_sheet_interval_title">Sigara Aralıkları</string>
+    <string name="stats_sheet_interval_overall_avg">Genel ortalama</string>
+    <string name="stats_sheet_interval_today_avg">Bugün</string>
+    <string name="stats_sheet_interval_min_label">En kısa ara</string>
+    <string name="stats_sheet_interval_max_label">En uzun ara</string>
+    <string name="stats_sheet_interval_total_measured">Kaydedilen aralık: %1$d</string>
+    <string name="stats_sheet_interval_tip_title">+15 Dakika Stratejisi</string>
+    <string name="stats_sheet_interval_tip_desc">Sigaralar arasındaki süreyi kademeli olarak sadece 15 dakika uzatmak, psikolojik bağımlılığı zayıflatır ve tüketimi stressiz bir şekilde azaltır.</string>
+
+    <string name="btn_back">Geri</string>
+    <string name="baseline_edit">Başlangıç geçmişini düzenle</string>
+    <string name="stats_sheet_life_cigs_not_smoked">%1$d içilmeyen sigara</string>
+    <string name="stats_sheet_who_progress_format">%1$d / %2$d tamamlandı</string>
+
+    <string name="month_jan_short">Oca</string>
+    <string name="month_feb_short">Şub</string>
+    <string name="month_mar_short">Mar</string>
+    <string name="month_apr_short">Nis</string>
+    <string name="month_may_short">May</string>
+    <string name="month_jun_short">Haz</string>
+    <string name="month_jul_short">Tem</string>
+    <string name="month_aug_short">Ağu</string>
+    <string name="month_sep_short">Eyl</string>
+    <string name="month_oct_short">Eki</string>
+    <string name="month_nov_short">Kas</string>
+    <string name="month_dec_short">Ara</string>
+
+    <string name="settings_reset_data">Tüm sigara verilerini sıfırla</string>
+    <string name="settings_reset_data_desc">İstatistikleri temizleyin ve karşılama ekranına dönün</string>
+    <string name="reset_data_dialog_title">Tüm veriler sıfırlansın mı?</string>
+    <string name="reset_data_dialog_message">Tüm sigara geçmişi, istatistikler, hedefler ve başarılar kalıcı olarak silinecektir. Karşılama ekranına yönlendirileceksiniz.</string>
+    <string name="reset_data_dialog_confirm">Sıfırla</string>
 </resources>

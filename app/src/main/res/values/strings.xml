@@ -44,7 +44,8 @@
     <string name="graph_metric_in_limit">Within limit</string>
     <string name="graph_metric_peak">Peak</string>
     <string name="weekly_comparison_this_week_label">This week</string>
-    <string name="weekly_comparison_last_week_label">Last week</string>
+    <string name="weekly_comparison_selected_week_label">Selected week</string>
+    <string name="weekly_comparison_last_week_label">Previous week</string>
     <string name="graph_setting_show_limit">Limit line on charts</string>
     <string name="graph_setting_show_limit_desc">Display daily target line and mark exceeded cigarettes in red</string>
     <string name="chart_view_bars">Bars</string>
@@ -53,6 +54,8 @@
     <string name="chart_clean_day">Smoke-free day</string>
     <string name="chart_clean_day_desc">0 cigarettes — great work!</string>
     <string name="chart_selected_day">Selected day</string>
+    <string name="chart_selected_month">Selected month</string>
+    <string name="chart_selected_hour">Selected hour</string>
     <string name="day_part_night">Night (00:00–06:00)</string>
     <string name="day_part_morning">Morning (06:00–12:00)</string>
     <string name="day_part_afternoon">Afternoon (12:00–18:00)</string>
@@ -99,7 +102,7 @@
     <string name="stats_min_per_day">Min per day</string>
     <string name="stats_avg_per_day">Average per day</string>
     <string name="stats_total_count">Total cigarettes</string>
-    <string name="stats_tracking_since">Tracking since</string>
+    <string name="stats_tracking_since">Tracking since: %1$s</string>
     <string name="stats_max_smoke_free_streak">Longest smoke-free streak</string>
     <string name="stats_days_unit">%d days</string>
     <string name="stats_no_data">No data available</string>
@@ -301,6 +304,19 @@
     <string name="trigger_tip_custom">Notice the craving without judgment, take three deep breaths, and let the wave pass.</string>
     <string name="trigger_manage_title">Manage Triggers</string>
     <string name="trigger_manage_desc">Add custom triggers or customize standard ones</string>
+    <string name="trigger_time_patterns_title">Time of Day Patterns</string>
+    <string name="trigger_time_patterns_desc">Dominant trigger for each part of the day</string>
+    <string name="trigger_dominant_format">%1$s (%2$d%%)</string>
+    <string name="trigger_no_activity_period">No cravings</string>
+    <string name="trigger_trend_increase">+%1$d</string>
+    <string name="trigger_trend_decrease">-%1$d</string>
+    <string name="trigger_trend_new">New</string>
+    <string name="trigger_detail_sheet_title">Trigger Analysis</string>
+    <string name="trigger_detail_share_format">%1$d times • %2$d%% of all cravings</string>
+    <string name="trigger_hourly_distribution_title">Hourly Intensity</string>
+    <string name="trigger_detail_peak_hour_format">Peak: %1$02d:00–%2$02d:00 (%3$d times)</string>
+    <string name="trigger_detail_no_peak">Evenly distributed</string>
+    <string name="trigger_hero_badge_main">Primary Factor</string>
 
     <string name="settings_pack_params">Pack Settings</string>
     <string name="settings_pack_price">Pack Price</string>
@@ -550,13 +566,12 @@
     <string name="weekly_comparison_title">Weekly Comparison</string>
     <string name="weekly_comparison_decrease">Decreased by %1$d%%</string>
     <string name="weekly_comparison_increase">Increased by %1$d%%</string>
-    <string name="weekly_comparison_no_change">No change vs last week</string>
-    <string name="weekly_comparison_desc_decrease">Great job! You smoked %1$d fewer cigarettes than
-        last week.</string>
-    <string name="weekly_comparison_desc_increase">You smoked %1$d more cigarettes than last week.</string>
-    <string name="weekly_comparison_desc_no_change">You smoked the exact same amount as last week.</string>
-    <string name="weekly_comparison_this_week">This week: %1$d</string>
-    <string name="weekly_comparison_last_week">Last week: %1$d</string>
+    <string name="weekly_comparison_no_change">No change vs previous week</string>
+    <string name="weekly_comparison_desc_decrease">Great job! On average %1$s fewer cigs/day than the previous week.</string>
+    <string name="weekly_comparison_desc_increase">Smoking pace increased: on average %1$s more cigs/day than the previous week.</string>
+    <string name="weekly_comparison_desc_no_change">Smoking pace remains the same as the previous week.</string>
+    <string name="weekly_comparison_per_day_unit">cigs/day</string>
+    <string name="weekly_comparison_total_summary">Total: %1$d pcs across %2$d d.</string>
 
     <string name="peak_hours_title">Peak Smoking Hours</string>
     <string name="peak_hours_subtitle">Hourly distribution throughout the day</string>
@@ -629,4 +644,97 @@
     <string name="ach_progress_remaining">Remaining: %1$s</string>
     <string name="ach_unlocked_date">Unlocked on %1$s</string>
     <string name="ach_close">Close</string>
+
+    <string name="stats_sheet_life_title">Life Reclaimed</string>
+    <string name="stats_sheet_life_fact_title">BMJ Clinical Research</string>
+    <string name="stats_sheet_life_fact_desc">Every avoided cigarette prevents approximately 11 minutes of life loss. Your body immediately triggers cellular repair and restores normal arterial oxygenation.</string>
+    <string name="stats_sheet_life_milestones_title">Restoration Timeline</string>
+    <string name="stats_sheet_life_milestone_1">20 minutes: Blood pressure and pulse stabilize</string>
+    <string name="stats_sheet_life_milestone_2">8 hours: Blood oxygen returns to optimal levels</string>
+    <string name="stats_sheet_life_milestone_3">24 hours: Lungs begin clearing mucus and toxic residues</string>
+
+    <string name="stats_sheet_money_title">Financial Freedom</string>
+    <string name="stats_sheet_money_current">Current Savings</string>
+    <string name="stats_sheet_money_projections_title">Forecast at Current Pace</string>
+    <string name="stats_sheet_money_month">In 1 month: %1$s</string>
+    <string name="stats_sheet_money_half_year">In 6 months: %1$s</string>
+    <string name="stats_sheet_money_year">In 1 year: %1$s</string>
+    <string name="stats_sheet_money_tip_title">What can you afford?</string>
+    <string name="stats_sheet_money_tip_desc">Saving even one pack a day adds up to substantial savings over time — equivalent to a new smartphone, fitness memberships, or an overseas vacation.</string>
+
+    <string name="stats_sheet_streak_title">Smoke-Free Streaks</string>
+    <string name="stats_sheet_streak_current_label">Current Streak</string>
+    <string name="stats_sheet_streak_longest_label">Personal Record</string>
+    <string name="stats_sheet_streak_science_title">Neurobiology of Freedom</string>
+    <string name="stats_sheet_streak_science_desc">The first 72 hours represent the peak of physical nicotine detox. After 2–3 weeks, dopamine receptor density normalizes and psychological cravings drop drastically.</string>
+    <string name="stats_sheet_streak_next_milestone">Next milestone: %1$s</string>
+
+    <string name="stats_sheet_who_title">WHO Recovery Roadmap</string>
+    <string name="stats_sheet_who_subtitle">12 stages based on World Health Organization standards</string>
+    <string name="stats_sheet_who_completed">Achieved</string>
+    <string name="stats_sheet_who_in_progress">In Progress</string>
+    <string name="stats_sheet_who_remaining">%1$s remaining</string>
+
+    <string name="stats_sheet_consumption_title">Consumption Analytics</string>
+    <string name="stats_sheet_consumption_avg_label">Daily Average</string>
+    <string name="stats_sheet_consumption_total_label">Total Cigarettes</string>
+    <string name="stats_sheet_consumption_range_label">Daily Range</string>
+    <string name="stats_sheet_consumption_range_val">From %1$d to %2$d cigs</string>
+    <string name="stats_sheet_consumption_tracking_days">Tracked across %1$d days</string>
+
+    <string name="stats_sheet_resisted_title">Mindful Control</string>
+    <string name="stats_sheet_resisted_count_label">Cravings Resisted</string>
+    <string name="stats_sheet_resisted_technique_title">The «Urge Surfing» Technique</string>
+    <string name="stats_sheet_resisted_technique_desc">Acute cravings surge like ocean waves, peaking for 15–30 seconds before subsiding. Taking a mindful pause rewires your automatic habit loops.</string>
+
+    <string name="stats_sheet_pack_years_title">Pack-Years Index</string>
+    <string name="stats_sheet_pack_years_calc_title">Clinical Standard</string>
+    <string name="stats_sheet_pack_years_calc_desc">Formula: (Cigarettes per day / 20) × Years of smoking. An evidence-based pulmonology standard used worldwide to quantify cumulative exposure.</string>
+
+    <string name="stats_financial_goal_title">Financial Goal</string>
+    <string name="stats_financial_goal_subtitle">Save for what truly inspires you</string>
+    <string name="stats_set_goal_cta">Set a savings goal</string>
+    <string name="stats_goal_name_label">Goal Name</string>
+    <string name="stats_goal_name_hint">e.g. Trip, New sneakers, Gadget...</string>
+    <string name="stats_goal_amount_label">Target Amount</string>
+    <string name="stats_save_goal">Save Goal</string>
+    <string name="stats_clear_goal">Clear Goal</string>
+    <string name="stats_goal_progress">%1$d%% of goal</string>
+    <string name="stats_streak_tier_format">Tier: %1$d days</string>
+    <string name="stats_goal_remaining_format">%1$s remaining</string>
+    <string name="stats_goal_reached">Goal reached!</string>
+
+    <string name="stats_avg_interval_label">Average interval</string>
+    <string name="stats_sheet_interval_title">Smoking Interval</string>
+    <string name="stats_sheet_interval_overall_avg">All-time average</string>
+    <string name="stats_sheet_interval_today_avg">Today\'s average</string>
+    <string name="stats_sheet_interval_min_label">Shortest break</string>
+    <string name="stats_sheet_interval_max_label">Longest break</string>
+    <string name="stats_sheet_interval_total_measured">Total intervals measured: %1$d</string>
+    <string name="stats_sheet_interval_tip_title">The +15 Minute Strategy</string>
+    <string name="stats_sheet_interval_tip_desc">Gradually increasing the gap between cigarettes by just 15 minutes weakens psychological dependence and naturally lowers daily intake without sudden cravings.</string>
+
+    <string name="btn_back">Back</string>
+    <string name="baseline_edit">Edit baseline</string>
+    <string name="stats_sheet_life_cigs_not_smoked">%1$d cigarettes not smoked</string>
+    <string name="stats_sheet_who_progress_format">%1$d of %2$d completed</string>
+
+    <string name="month_jan_short">Jan</string>
+    <string name="month_feb_short">Feb</string>
+    <string name="month_mar_short">Mar</string>
+    <string name="month_apr_short">Apr</string>
+    <string name="month_may_short">May</string>
+    <string name="month_jun_short">Jun</string>
+    <string name="month_jul_short">Jul</string>
+    <string name="month_aug_short">Aug</string>
+    <string name="month_sep_short">Sep</string>
+    <string name="month_oct_short">Oct</string>
+    <string name="month_nov_short">Nov</string>
+    <string name="month_dec_short">Dec</string>
+
+    <string name="settings_reset_data">Reset all smoking data</string>
+    <string name="settings_reset_data_desc">Clear statistics and return to the welcome screen</string>
+    <string name="reset_data_dialog_title">Reset all data?</string>
+    <string name="reset_data_dialog_message">All smoking history, statistics, goals, and achievements will be permanently deleted. You will return to the welcome screen.</string>
+    <string name="reset_data_dialog_confirm">Reset</string>
 </resources>

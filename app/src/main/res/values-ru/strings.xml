@@ -44,7 +44,8 @@
     <string name="graph_metric_in_limit">В норме</string>
     <string name="graph_metric_peak">Пик</string>
     <string name="weekly_comparison_this_week_label">Текущая неделя</string>
-    <string name="weekly_comparison_last_week_label">Прошлая неделя</string>
+    <string name="weekly_comparison_selected_week_label">Выбранная неделя</string>
+    <string name="weekly_comparison_last_week_label">Предыдущая неделя</string>
     <string name="graph_setting_show_limit">Линия лимита на графиках</string>
     <string name="graph_setting_show_limit_desc">Отображать пунктирную отметку лимита и выделять превышения красным цветом</string>
     <string name="chart_view_bars">Столбцы</string>
@@ -53,6 +54,8 @@
     <string name="chart_clean_day">Чистый день</string>
     <string name="chart_clean_day_desc">0 сигарет — отличная работа!</string>
     <string name="chart_selected_day">Выбранный день</string>
+    <string name="chart_selected_month">Выбранный месяц</string>
+    <string name="chart_selected_hour">Выбранный час</string>
     <string name="day_part_night">Ночь (00:00–06:00)</string>
     <string name="day_part_morning">Утро (06:00–12:00)</string>
     <string name="day_part_afternoon">День (12:00–18:00)</string>
@@ -99,7 +102,7 @@
     <string name="stats_min_per_day">Минимум за день</string>
     <string name="stats_avg_per_day">В среднем за день</string>
     <string name="stats_total_count">Всего выкурено</string>
-    <string name="stats_tracking_since">Отслеживание с</string>
+    <string name="stats_tracking_since">Отслеживание с: %1$s</string>
     <string name="stats_max_smoke_free_streak">Макс. дней без курения</string>
     <string name="stats_days_unit">%d дн.</string>
     <string name="stats_no_data">Нет данных</string>
@@ -301,6 +304,19 @@
     <string name="trigger_tip_custom">Осознайте желание без самокритики, сделайте три глубоких вдоха и дайте волне тяги утихнуть.</string>
     <string name="trigger_manage_title">Настроить причины</string>
     <string name="trigger_manage_desc">Добавить свои или скрыть стандартные</string>
+    <string name="trigger_time_patterns_title">Паттерны по времени суток</string>
+    <string name="trigger_time_patterns_desc">Преобладающий триггер для каждого времени дня</string>
+    <string name="trigger_dominant_format">%1$s (%2$d%%)</string>
+    <string name="trigger_no_activity_period">Нет тяги</string>
+    <string name="trigger_trend_increase">+%1$d</string>
+    <string name="trigger_trend_decrease">-%1$d</string>
+    <string name="trigger_trend_new">Новый</string>
+    <string name="trigger_detail_sheet_title">Анализ триггера</string>
+    <string name="trigger_detail_share_format">%1$d раз • %2$d%% от всех перекуров</string>
+    <string name="trigger_hourly_distribution_title">Почасовая интенсивность</string>
+    <string name="trigger_detail_peak_hour_format">Пик: %1$02d:00–%2$02d:00 (%3$d раз)</string>
+    <string name="trigger_detail_no_peak">Равномерно в течение дня</string>
+    <string name="trigger_hero_badge_main">Основной фактор</string>
 
     <string name="settings_pack_params">Параметры пачки</string>
     <string name="settings_pack_price">Стоимость пачки</string>
@@ -546,15 +562,12 @@
     <string name="weekly_comparison_title">Динамика недели</string>
     <string name="weekly_comparison_decrease">Снижение на %1$d%%</string>
     <string name="weekly_comparison_increase">Увеличение на %1$d%%</string>
-    <string name="weekly_comparison_no_change">Без изменений</string>
-    <string name="weekly_comparison_desc_decrease">Отличная работа! Вы выкурили на %1$d сигарет
-        меньше, чем на прошлой неделе.</string>
-    <string name="weekly_comparison_desc_increase">Вы выкурили на %1$d сигарет больше, чем на
-        прошлой неделе.</string>
-    <string name="weekly_comparison_desc_no_change">Вы выкурили то же количество сигарет, что и на
-        прошлой неделе.</string>
-    <string name="weekly_comparison_this_week">На этой неделе: %1$d</string>
-    <string name="weekly_comparison_last_week">На прошлой неделе: %1$d</string>
+    <string name="weekly_comparison_no_change">Без изменений к пред. неделе</string>
+    <string name="weekly_comparison_desc_decrease">Отличная работа! В среднем на %1$s сиг/день меньше, чем на предыдущей неделе.</string>
+    <string name="weekly_comparison_desc_increase">Темп курения вырос: в среднем на %1$s сиг/день больше, чем на предыдущей неделе.</string>
+    <string name="weekly_comparison_desc_no_change">Темп курения остался на уровне предыдущей недели.</string>
+    <string name="weekly_comparison_per_day_unit">сиг/день</string>
+    <string name="weekly_comparison_total_summary">Всего: %1$d шт. за %2$d дн.</string>
 
     <string name="peak_hours_title">Пиковые часы курения</string>
     <string name="peak_hours_subtitle">Распределение выкуренных сигарет по часам</string>
@@ -627,4 +640,97 @@
     <string name="ach_progress_remaining">Осталось: %1$s</string>
     <string name="ach_unlocked_date">Получено %1$s</string>
     <string name="ach_close">Закрыть</string>
+
+    <string name="stats_sheet_life_title">Сохранено времени жизни</string>
+    <string name="stats_sheet_life_fact_title">Клиническое исследование BMJ</string>
+    <string name="stats_sheet_life_fact_desc">Каждая невыкуренная сигарета возвращает около 11 минут полноценной жизни. В этот период организм сразу запускает регенерацию клеток и восстанавливает нормальное насыщение крови кислородом.</string>
+    <string name="stats_sheet_life_milestones_title">Стадии очищения организма</string>
+    <string name="stats_sheet_life_milestone_1">20 минут: Пульс и артериальное давление приходят в норму</string>
+    <string name="stats_sheet_life_milestone_2">8 часов: Кислород в крови восстанавливается до нормы</string>
+    <string name="stats_sheet_life_milestone_3">24 часа: Легкие начинают очищаться от токсинов и слизи</string>
+
+    <string name="stats_sheet_money_title">Финансовая свобода</string>
+    <string name="stats_sheet_money_current">Текущая экономия</string>
+    <string name="stats_sheet_money_projections_title">Прогноз при текущем темпе</string>
+    <string name="stats_sheet_money_month">Через 1 месяц: %1$s</string>
+    <string name="stats_sheet_money_half_year">Через 6 месяцев: %1$s</string>
+    <string name="stats_sheet_money_year">Через 1 год: %1$s</string>
+    <string name="stats_sheet_money_tip_title">Что можно приобрести?</string>
+    <string name="stats_sheet_money_tip_desc">Отказ даже от одной пачки в день за год дает внушительную сумму — эквивалент нового флагманского смартфона, годового абонемента в спортзал или поездки на море.</string>
+
+    <string name="stats_sheet_streak_title">Серии без курения</string>
+    <string name="stats_sheet_streak_current_label">Текущая серия</string>
+    <string name="stats_sheet_streak_longest_label">Личный рекорд</string>
+    <string name="stats_sheet_streak_science_title">Нейробиология привычки</string>
+    <string name="stats_sheet_streak_science_desc">Первые 72 часа — пик физического очищения от никотина. Через 2–3 недели плотность дофаминовых рецепторов нормализуется, а психологическая тяга уменьшается в разы.</string>
+    <string name="stats_sheet_streak_next_milestone">Следующая цель: %1$s</string>
+
+    <string name="stats_sheet_who_title">Дорожная карта ВОЗ</string>
+    <string name="stats_sheet_who_subtitle">12 этапов по стандартам Всемирной организации здравоохранения</string>
+    <string name="stats_sheet_who_completed">Достигнуто</string>
+    <string name="stats_sheet_who_in_progress">В процессе</string>
+    <string name="stats_sheet_who_remaining">Осталось %1$s</string>
+
+    <string name="stats_sheet_consumption_title">Интенсивность курения</string>
+    <string name="stats_sheet_consumption_avg_label">В среднем за день</string>
+    <string name="stats_sheet_consumption_total_label">Всего выкурено</string>
+    <string name="stats_sheet_consumption_range_label">Диапазон в день</string>
+    <string name="stats_sheet_consumption_range_val">От %1$d до %2$d шт.</string>
+    <string name="stats_sheet_consumption_tracking_days">Период отслеживания: %1$d дн.</string>
+
+    <string name="stats_sheet_resisted_title">Осознанный контроль</string>
+    <string name="stats_sheet_resisted_count_label">Успешно удержано</string>
+    <string name="stats_sheet_resisted_technique_title">Метод «Сёрфинга тяги»</string>
+    <string name="stats_sheet_resisted_technique_desc">Острая тяга накатывает волной: её пик длится всего 15–30 секунд. Осознанная пауза позволяет пережить пик и постепенно перестроить нейронные связи привычки.</string>
+
+    <string name="stats_sheet_pack_years_title">Индекс пачка-лет</string>
+    <string name="stats_sheet_pack_years_calc_title">Клиническая методика</string>
+    <string name="stats_sheet_pack_years_calc_desc">Формула: (Количество сигарет в день / 20) × Стаж курения в годах. Международный стандарт доказательной медицины для оценки кумулятивной нагрузки на легкие и сосуды.</string>
+
+    <string name="stats_financial_goal_title">Финансовая цель</string>
+    <string name="stats_financial_goal_subtitle">Копите на то, что вас вдохновляет</string>
+    <string name="stats_set_goal_cta">Поставить цель</string>
+    <string name="stats_goal_name_label">Название цели</string>
+    <string name="stats_goal_name_hint">Например: Поездка, Кроссовки, Гаджет...</string>
+    <string name="stats_goal_amount_label">Сумма цели</string>
+    <string name="stats_save_goal">Сохранить цель</string>
+    <string name="stats_clear_goal">Удалить цель</string>
+    <string name="stats_goal_progress">%1$d%% от цели</string>
+    <string name="stats_streak_tier_format">Цель: %1$d дн</string>
+    <string name="stats_goal_remaining_format">Осталось: %1$s</string>
+    <string name="stats_goal_reached">Цель достигнута!</string>
+
+    <string name="stats_avg_interval_label">Средний интервал</string>
+    <string name="stats_sheet_interval_title">Интервалы перекуров</string>
+    <string name="stats_sheet_interval_overall_avg">За всё время</string>
+    <string name="stats_sheet_interval_today_avg">Сегодня</string>
+    <string name="stats_sheet_interval_min_label">Минимальный перерыв</string>
+    <string name="stats_sheet_interval_max_label">Максимальный перерыв</string>
+    <string name="stats_sheet_interval_total_measured">Зафиксировано перерывов: %1$d</string>
+    <string name="stats_sheet_interval_tip_title">Стратегия +15 минут</string>
+    <string name="stats_sheet_interval_tip_desc">Постепенное увеличение перерыва между перекурами всего на 15 минут ослабляет психологическую тягу и плавно снижает дневное количество без стресса.</string>
+
+    <string name="btn_back">Назад</string>
+    <string name="baseline_edit">Изменить базовую норму</string>
+    <string name="stats_sheet_life_cigs_not_smoked">%1$d не выкуренных сигарет</string>
+    <string name="stats_sheet_who_progress_format">Выполнено %1$d из %2$d</string>
+
+    <string name="month_jan_short">Янв</string>
+    <string name="month_feb_short">Фев</string>
+    <string name="month_mar_short">Мар</string>
+    <string name="month_apr_short">Апр</string>
+    <string name="month_may_short">Май</string>
+    <string name="month_jun_short">Июн</string>
+    <string name="month_jul_short">Июл</string>
+    <string name="month_aug_short">Авг</string>
+    <string name="month_sep_short">Сен</string>
+    <string name="month_oct_short">Окт</string>
+    <string name="month_nov_short">Ноя</string>
+    <string name="month_dec_short">Дек</string>
+
+    <string name="settings_reset_data">Полный сброс данных курения</string>
+    <string name="settings_reset_data_desc">Очистить статистику и вернуться на начальный экран</string>
+    <string name="reset_data_dialog_title">Сбросить все данные?</string>
+    <string name="reset_data_dialog_message">Вся история курения, статистика, цели и достижения будут безвозвратно удалены. Вы вернётесь на начальный экран.</string>
+    <string name="reset_data_dialog_confirm">Сбросить</string>
 </resources>

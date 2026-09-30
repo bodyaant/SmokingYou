@@ -44,7 +44,8 @@
     <string name="graph_metric_in_limit">No limite</string>
     <string name="graph_metric_peak">Pico</string>
     <string name="weekly_comparison_this_week_label">Esta semana</string>
-    <string name="weekly_comparison_last_week_label">Semana passada</string>
+    <string name="weekly_comparison_selected_week_label">Semana selecionada</string>
+    <string name="weekly_comparison_last_week_label">Semana anterior</string>
     <string name="graph_setting_show_limit">Linha de limite nos gráficos</string>
     <string name="graph_setting_show_limit_desc">Exibir a linha da meta diária e destacar os excessos em vermelho</string>
     <string name="chart_view_bars">Barras</string>
@@ -53,6 +54,8 @@
     <string name="chart_clean_day">Dia sem fumar</string>
     <string name="chart_clean_day_desc">0 cigarros — ótimo trabalho!</string>
     <string name="chart_selected_day">Dia selecionado</string>
+    <string name="chart_selected_month">Mês selecionado</string>
+    <string name="chart_selected_hour">Hora selecionada</string>
     <string name="day_part_night">Noite (00:00–06:00)</string>
     <string name="day_part_morning">Manhã (06:00–12:00)</string>
     <string name="day_part_afternoon">Tarde (12:00–18:00)</string>
@@ -99,7 +102,7 @@
     <string name="stats_min_per_day">Mín. por dia</string>
     <string name="stats_avg_per_day">Média por dia</string>
     <string name="stats_total_count">Total de cigarros</string>
-    <string name="stats_tracking_since">Monitorando desde</string>
+    <string name="stats_tracking_since">Monitorando desde: %1$s</string>
     <string name="stats_max_smoke_free_streak">Maior período sem fumar</string>
     <string name="stats_days_unit">%d dias</string>
     <string name="stats_no_data">Nenhum dado disponível</string>
@@ -301,6 +304,19 @@
     <string name="trigger_tip_custom">Observe a vontade sem se julgar, respire fundo três vezes e deixe a onda passar.</string>
     <string name="trigger_manage_title">Gerenciar gatilhos</string>
     <string name="trigger_manage_desc">Adicionar personalizados ou ajustar os padrões</string>
+    <string name="trigger_time_patterns_title">Padrões por período do dia</string>
+    <string name="trigger_time_patterns_desc">Gatilho dominante em cada parte do dia</string>
+    <string name="trigger_dominant_format">%1$s (%2$d%%)</string>
+    <string name="trigger_no_activity_period">Sem vontade</string>
+    <string name="trigger_trend_increase">+%1$d</string>
+    <string name="trigger_trend_decrease">-%1$d</string>
+    <string name="trigger_trend_new">Novo</string>
+    <string name="trigger_detail_sheet_title">Análise do gatilho</string>
+    <string name="trigger_detail_share_format">%1$d vezes • %2$d%% de todas as vontades</string>
+    <string name="trigger_hourly_distribution_title">Intensidade por hora</string>
+    <string name="trigger_detail_peak_hour_format">Pico: %1$02d:00–%2$02d:00 (%3$d vezes)</string>
+    <string name="trigger_detail_no_peak">Distribuído uniformemente</string>
+    <string name="trigger_hero_badge_main">Fator principal</string>
 
     <string name="settings_pack_params">Configurações do maço</string>
     <string name="settings_pack_price">Preço do maço</string>
@@ -551,15 +567,12 @@
     <string name="weekly_comparison_title">Comparativo semanal</string>
     <string name="weekly_comparison_decrease">Redução de %1$d%%</string>
     <string name="weekly_comparison_increase">Aumento de %1$d%%</string>
-    <string name="weekly_comparison_no_change">Sem alteração em relação à semana passada</string>
-    <string name="weekly_comparison_desc_decrease">Bom trabalho! Você fumou %1$d cigarros a menos
-        que na semana passada.</string>
-    <string name="weekly_comparison_desc_increase">Você fumou %1$d cigarros a mais que na semana
-        passada.</string>
-    <string name="weekly_comparison_desc_no_change">Você fumou exatamente a mesma quantidade da
-        semana passada.</string>
-    <string name="weekly_comparison_this_week">Esta semana: %1$d</string>
-    <string name="weekly_comparison_last_week">Semana passada: %1$d</string>
+    <string name="weekly_comparison_no_change">Sem alterações vs semana anterior</string>
+    <string name="weekly_comparison_desc_decrease">Ótimo trabalho! Em média %1$s cigarros/dia a menos do que na semana anterior.</string>
+    <string name="weekly_comparison_desc_increase">Ritmo aumentado: em média %1$s cigarros/dia a mais do que na semana anterior.</string>
+    <string name="weekly_comparison_desc_no_change">O ritmo de fumar permanece o mesmo da semana anterior.</string>
+    <string name="weekly_comparison_per_day_unit">cig./dia</string>
+    <string name="weekly_comparison_total_summary">Total: %1$d un em %2$d d.</string>
 
     <string name="peak_hours_title">Horários de pico de consumo</string>
     <string name="peak_hours_subtitle">Distribuição horária ao longo do dia</string>
@@ -633,4 +646,97 @@
     <string name="ach_progress_remaining">Restante: %1$s</string>
     <string name="ach_unlocked_date">Desbloqueado em %1$s</string>
     <string name="ach_close">Fechar</string>
+
+    <string name="stats_sheet_life_title">Tempo de vida recuperado</string>
+    <string name="stats_sheet_life_fact_title">Estudo clínico do BMJ</string>
+    <string name="stats_sheet_life_fact_desc">Cada cigarro evitado devolve cerca de 11 minutos de vida. O organismo ativa imediatamente a regeneração celular e normaliza a oxigenação sanguínea.</string>
+    <string name="stats_sheet_life_milestones_title">Fases de recuperação</string>
+    <string name="stats_sheet_life_milestone_1">20 minutos: Frequência cardíaca e pressão arterial se normalizam</string>
+    <string name="stats_sheet_life_milestone_2">8 horas: O nível de oxigênio no sangue volta ao normal</string>
+    <string name="stats_sheet_life_milestone_3">24 horas: Os pulmões começam a eliminar o muco e os resíduos tóxicos</string>
+
+    <string name="stats_sheet_money_title">Liberdade financeira</string>
+    <string name="stats_sheet_money_current">Economia atual</string>
+    <string name="stats_sheet_money_projections_title">Projeção no ritmo atual</string>
+    <string name="stats_sheet_money_month">Em 1 mês: %1$s</string>
+    <string name="stats_sheet_money_half_year">Em 6 meses: %1$s</string>
+    <string name="stats_sheet_money_year">Em 1 ano: %1$s</string>
+    <string name="stats_sheet_money_tip_title">O que você poderia comprar?</string>
+    <string name="stats_sheet_money_tip_desc">Deixar de fumar apenas um maço por dia gera uma economia expressiva em um ano — o suficiente para um novo smartphone, uma assinatura de academia ou uma viagem.</string>
+
+    <string name="stats_sheet_streak_title">Sequências sem fumar</string>
+    <string name="stats_sheet_streak_current_label">Sequência atual</string>
+    <string name="stats_sheet_streak_longest_label">Recorde pessoal</string>
+    <string name="stats_sheet_streak_science_title">Neurobiologia do hábito</string>
+    <string name="stats_sheet_streak_science_desc">As primeiras 72 horas são o pico da desintoxicação física da nicotina. Após 2 a 3 semanas, a densidade dos receptores de dopamina se normaliza e as crises de abstinência caem drasticamente.</string>
+    <string name="stats_sheet_streak_next_milestone">Próxima meta: %1$s</string>
+
+    <string name="stats_sheet_who_title">Plano de recuperação da OMS</string>
+    <string name="stats_sheet_who_subtitle">12 etapas baseadas nos padrões da Organização Mundial da Saúde</string>
+    <string name="stats_sheet_who_completed">Alcançado</string>
+    <string name="stats_sheet_who_in_progress">Em andamento</string>
+    <string name="stats_sheet_who_remaining">Restante: %1$s</string>
+
+    <string name="stats_sheet_consumption_title">Intensidade de consumo</string>
+    <string name="stats_sheet_consumption_avg_label">Média diária</string>
+    <string name="stats_sheet_consumption_total_label">Total de cigarros</string>
+    <string name="stats_sheet_consumption_range_label">Intervalo diário</string>
+    <string name="stats_sheet_consumption_range_val">De %1$d a %2$d cig.</string>
+    <string name="stats_sheet_consumption_tracking_days">Dias monitorados: %1$d</string>
+
+    <string name="stats_sheet_resisted_title">Controle consciente</string>
+    <string name="stats_sheet_resisted_count_label">Vontades superadas</string>
+    <string name="stats_sheet_resisted_technique_title">Técnica «Urge Surfing»</string>
+    <string name="stats_sheet_resisted_technique_desc">A fissura aguda vem como uma onda, atingindo o pico em 15–30 segundos antes de passar. Fazer uma pausa consciente ajuda você a surfar essa onda e reprogramar seus gatilhos automáticos.</string>
+
+    <string name="stats_sheet_pack_years_title">Índice de maços-ano</string>
+    <string name="stats_sheet_pack_years_calc_title">Padrão clínico</string>
+    <string name="stats_sheet_pack_years_calc_desc">Fórmula: (Cigarros por dia / 20) × Anos de tabagismo. O padrão internacional em pneumologia para mensurar a exposição acumulada.</string>
+
+    <string name="stats_financial_goal_title">Meta financeira</string>
+    <string name="stats_financial_goal_subtitle">Economize para o que realmente te inspira</string>
+    <string name="stats_set_goal_cta">Definir meta</string>
+    <string name="stats_goal_name_label">Nome da meta</string>
+    <string name="stats_goal_name_hint">ex.: Viagem, Tênis novo, Gadget...</string>
+    <string name="stats_goal_amount_label">Valor da meta</string>
+    <string name="stats_save_goal">Salvar meta</string>
+    <string name="stats_clear_goal">Limpar meta</string>
+    <string name="stats_goal_progress">%1$d%% da meta</string>
+    <string name="stats_streak_tier_format">Nível: %1$d dias</string>
+    <string name="stats_goal_remaining_format">Restam %1$s</string>
+    <string name="stats_goal_reached">Meta alcançada!</string>
+
+    <string name="stats_avg_interval_label">Intervalo médio</string>
+    <string name="stats_sheet_interval_title">Intervalos entre cigarros</string>
+    <string name="stats_sheet_interval_overall_avg">Média geral</string>
+    <string name="stats_sheet_interval_today_avg">Hoje</string>
+    <string name="stats_sheet_interval_min_label">Menor pausa</string>
+    <string name="stats_sheet_interval_max_label">Maior pausa</string>
+    <string name="stats_sheet_interval_total_measured">Intervalos medidos: %1$d</string>
+    <string name="stats_sheet_interval_tip_title">Estratégia dos +15 minutos</string>
+    <string name="stats_sheet_interval_tip_desc">Aumentar gradualmente o intervalo entre os cigarros em apenas 15 minutos enfraquece a dependência psicológica e reduz o consumo sem estresse.</string>
+
+    <string name="btn_back">Voltar</string>
+    <string name="baseline_edit">Editar histórico base</string>
+    <string name="stats_sheet_life_cigs_not_smoked">%1$d cigarros não fumados</string>
+    <string name="stats_sheet_who_progress_format">%1$d de %2$d concluídos</string>
+
+    <string name="month_jan_short">Jan</string>
+    <string name="month_feb_short">Fev</string>
+    <string name="month_mar_short">Mar</string>
+    <string name="month_apr_short">Abr</string>
+    <string name="month_may_short">Mai</string>
+    <string name="month_jun_short">Jun</string>
+    <string name="month_jul_short">Jul</string>
+    <string name="month_aug_short">Ago</string>
+    <string name="month_sep_short">Set</string>
+    <string name="month_oct_short">Out</string>
+    <string name="month_nov_short">Nov</string>
+    <string name="month_dec_short">Dez</string>
+
+    <string name="settings_reset_data">Redefinir todos os dados de fumo</string>
+    <string name="settings_reset_data_desc">Limpar estatísticas e voltar para a tela inicial</string>
+    <string name="reset_data_dialog_title">Redefinir todos os dados?</string>
+    <string name="reset_data_dialog_message">Todo o histórico de fumo, estatísticas, metas e conquistas serão excluídos permanentemente. Você retornará à tela de boas-vindas.</string>
+    <string name="reset_data_dialog_confirm">Redefinir</string>
 </resources>

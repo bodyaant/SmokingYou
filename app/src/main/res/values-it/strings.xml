@@ -44,7 +44,8 @@
     <string name="graph_metric_in_limit">Nel limite</string>
     <string name="graph_metric_peak">Picco</string>
     <string name="weekly_comparison_this_week_label">Questa settimana</string>
-    <string name="weekly_comparison_last_week_label">Settimana scorsa</string>
+    <string name="weekly_comparison_selected_week_label">Settimana selezionata</string>
+    <string name="weekly_comparison_last_week_label">Settimana precedente</string>
     <string name="graph_setting_show_limit">Linea del limite sui grafici</string>
     <string name="graph_setting_show_limit_desc">Mostra la riga dell\'obiettivo giornaliero ed evidenzia i superamenti in rosso</string>
     <string name="chart_view_bars">Barre</string>
@@ -53,6 +54,8 @@
     <string name="chart_clean_day">Giorno senza fumo</string>
     <string name="chart_clean_day_desc">0 sigarette — ottimo lavoro!</string>
     <string name="chart_selected_day">Giorno selezionato</string>
+    <string name="chart_selected_month">Mese selezionato</string>
+    <string name="chart_selected_hour">Ora selezionata</string>
     <string name="day_part_night">Notte (00:00–06:00)</string>
     <string name="day_part_morning">Mattina (06:00–12:00)</string>
     <string name="day_part_afternoon">Pomeriggio (12:00–18:00)</string>
@@ -99,7 +102,7 @@
     <string name="stats_min_per_day">Min al giorno</string>
     <string name="stats_avg_per_day">Media al giorno</string>
     <string name="stats_total_count">Sigarette totali</string>
-    <string name="stats_tracking_since">Monitoraggio da</string>
+    <string name="stats_tracking_since">Monitoraggio da: %1$s</string>
     <string name="stats_max_smoke_free_streak">Serie più lunga senza fumo</string>
     <string name="stats_days_unit">%d giorni</string>
     <string name="stats_no_data">Nessun dato disponibile</string>
@@ -305,6 +308,19 @@
     <string name="trigger_tip_custom">Accogli il desiderio senza giudicarti, fai tre respiri profondi e lascia che l\'ondata si plachi.</string>
     <string name="trigger_manage_title">Gestisci fattori scatenanti</string>
     <string name="trigger_manage_desc">Aggiungi motivi personalizzati o modifica quelli standard</string>
+    <string name="trigger_time_patterns_title">Abitudini per fascia oraria</string>
+    <string name="trigger_time_patterns_desc">Fattore scatenante principale per ogni momento del giorno</string>
+    <string name="trigger_dominant_format">%1$s (%2$d%%)</string>
+    <string name="trigger_no_activity_period">Nessuna voglia</string>
+    <string name="trigger_trend_increase">+%1$d</string>
+    <string name="trigger_trend_decrease">-%1$d</string>
+    <string name="trigger_trend_new">Nuovo</string>
+    <string name="trigger_detail_sheet_title">Analisi trigger</string>
+    <string name="trigger_detail_share_format">%1$d volte • %2$d%% di tutte le voglie</string>
+    <string name="trigger_hourly_distribution_title">Intensità oraria</string>
+    <string name="trigger_detail_peak_hour_format">Picco: %1$02d:00–%2$02d:00 (%3$d volte)</string>
+    <string name="trigger_detail_no_peak">Distribuito uniformemente</string>
+    <string name="trigger_hero_badge_main">Fattore primario</string>
 
     <string name="settings_pack_params">Impostazioni pacchetto</string>
     <string name="settings_pack_price">Prezzo pacchetto</string>
@@ -556,15 +572,12 @@
     <string name="weekly_comparison_title">Confronto settimanale</string>
     <string name="weekly_comparison_decrease">Riduzione del %1$d%%</string>
     <string name="weekly_comparison_increase">Aumento del %1$d%%</string>
-    <string name="weekly_comparison_no_change">Nessuna variazione rispetto alla settimana scorsa</string>
-    <string name="weekly_comparison_desc_decrease">Ottimo lavoro! Hai fumato %1$d sigarette in meno
-        rispetto alla settimana scorsa.</string>
-    <string name="weekly_comparison_desc_increase">Hai fumato %1$d sigarette in più rispetto alla
-        settimana scorsa.</string>
-    <string name="weekly_comparison_desc_no_change">Hai fumato esattamente la stessa quantità della
-        settimana scorsa.</string>
-    <string name="weekly_comparison_this_week">Questa settimana: %1$d</string>
-    <string name="weekly_comparison_last_week">Settimana scorsa: %1$d</string>
+    <string name="weekly_comparison_no_change">Nessuna variazione vs settimana precedente</string>
+    <string name="weekly_comparison_desc_decrease">Ottimo lavoro! In media %1$s sigarette/giorno in meno rispetto alla settimana precedente.</string>
+    <string name="weekly_comparison_desc_increase">Ritmo in aumento: in media %1$s sigarette/giorno in più rispetto alla settimana precedente.</string>
+    <string name="weekly_comparison_desc_no_change">Il ritmo del fumo rimane invariato rispetto alla settimana precedente.</string>
+    <string name="weekly_comparison_per_day_unit">sig./giorno</string>
+    <string name="weekly_comparison_total_summary">Totale: %1$d pz in %2$d gg.</string>
 
     <string name="peak_hours_title">Ore di picco di fumo</string>
     <string name="peak_hours_subtitle">Distribuzione oraria durante il giorno</string>
@@ -638,4 +651,97 @@
     <string name="ach_progress_remaining">Rimanenti: %1$s</string>
     <string name="ach_unlocked_date">Sbloccato il %1$s</string>
     <string name="ach_close">Chiudi</string>
+
+    <string name="stats_sheet_life_title">Tempo di vita recuperato</string>
+    <string name="stats_sheet_life_fact_title">Studio clinico del BMJ</string>
+    <string name="stats_sheet_life_fact_desc">Ogni sigaretta evitata restituisce circa 11 minuti di vita. L\'organismo attiva subito la rigenerazione cellulare e normalizza l\'ossigenazione del sangue.</string>
+    <string name="stats_sheet_life_milestones_title">Fasi di recupero</string>
+    <string name="stats_sheet_life_milestone_1">20 minuti: Battito cardiaco e pressione sanguigna si stabilizzano</string>
+    <string name="stats_sheet_life_milestone_2">8 ore: Il livello di ossigeno nel sangue torna ottimale</string>
+    <string name="stats_sheet_life_milestone_3">24 ore: I polmoni iniziano a espellere muco e residui tossici</string>
+
+    <string name="stats_sheet_money_title">Libertà finanziaria</string>
+    <string name="stats_sheet_money_current">Risparmio attuale</string>
+    <string name="stats_sheet_money_projections_title">Proiezione al ritmo attuale</string>
+    <string name="stats_sheet_money_month">In 1 mese: %1$s</string>
+    <string name="stats_sheet_money_half_year">In 6 mesi: %1$s</string>
+    <string name="stats_sheet_money_year">In 1 anno: %1$s</string>
+    <string name="stats_sheet_money_tip_title">Cosa potresti concederti?</string>
+    <string name="stats_sheet_money_tip_desc">Rinunciare anche a un solo pacchetto al giorno genera un risparmio notevole in un anno: l\'equivalente di uno smartphone top di gamma, un abbonamento in palestra o una vacanza.</string>
+
+    <string name="stats_sheet_streak_title">Serie senza fumo</string>
+    <string name="stats_sheet_streak_current_label">Serie attuale</string>
+    <string name="stats_sheet_streak_longest_label">Record personale</string>
+    <string name="stats_sheet_streak_science_title">Neurobiologia dell\'abitudine</string>
+    <string name="stats_sheet_streak_science_desc">Le prime 72 ore sono il picco dell\'astinenza fisica da nicotina. Dopo 2–3 settimane, la densità dei recettori della dopamina si normalizza e la dipendenza psicologica cala drasticamente.</string>
+    <string name="stats_sheet_streak_next_milestone">Prossimo traguardo: %1$s</string>
+
+    <string name="stats_sheet_who_title">Piano di recupero dell\'OMS</string>
+    <string name="stats_sheet_who_subtitle">12 fasi stabilite secondo gli standard dell\'Organizzazione Mondiale della Sanità</string>
+    <string name="stats_sheet_who_completed">Raggiunto</string>
+    <string name="stats_sheet_who_in_progress">In corso</string>
+    <string name="stats_sheet_who_remaining">Rimanenti: %1$s</string>
+
+    <string name="stats_sheet_consumption_title">Intensità di consumo</string>
+    <string name="stats_sheet_consumption_avg_label">Media giornaliera</string>
+    <string name="stats_sheet_consumption_total_label">Totale sigarette</string>
+    <string name="stats_sheet_consumption_range_label">Intervallo giornaliero</string>
+    <string name="stats_sheet_consumption_range_val">Da %1$d a %2$d sig.</string>
+    <string name="stats_sheet_consumption_tracking_days">Giorni monitorati: %1$d</string>
+
+    <string name="stats_sheet_resisted_title">Controllo consapevole</string>
+    <string name="stats_sheet_resisted_count_label">Tentazioni superate</string>
+    <string name="stats_sheet_resisted_technique_title">Tecnica «Urge Surfing»</string>
+    <string name="stats_sheet_resisted_technique_desc">La voglia acuta arriva come un\'onda, raggiungendo il picco in 15–30 secondi prima di svanire. Una pausa consapevole ti permette di cavalcare quest\'onda e riprogrammare i tuoi automatismi.</string>
+
+    <string name="stats_sheet_pack_years_title">Indice pacchetti-anno</string>
+    <string name="stats_sheet_pack_years_calc_title">Standard clinico</string>
+    <string name="stats_sheet_pack_years_calc_desc">Formula: (Sigarette al giorno / 20) × Anni di fumo. Standard internazionale in pneumologia per valutare il carico cumulativo sulle vie respiratorie.</string>
+
+    <string name="stats_financial_goal_title">Obiettivo finanziario</string>
+    <string name="stats_financial_goal_subtitle">Risparmia per ciò che ti ispira</string>
+    <string name="stats_set_goal_cta">Imposta obiettivo</string>
+    <string name="stats_goal_name_label">Nome obiettivo</string>
+    <string name="stats_goal_name_hint">es. Viaggio, Scarpe, Gadget...</string>
+    <string name="stats_goal_amount_label">Importo obiettivo</string>
+    <string name="stats_save_goal">Salva obiettivo</string>
+    <string name="stats_clear_goal">Rimuovi obiettivo</string>
+    <string name="stats_goal_progress">%1$d%% dell\'obiettivo</string>
+    <string name="stats_streak_tier_format">Livello: %1$d giorni</string>
+    <string name="stats_goal_remaining_format">Mancano %1$s</string>
+    <string name="stats_goal_reached">Obiettivo raggiunto!</string>
+
+    <string name="stats_avg_interval_label">Intervallo medio</string>
+    <string name="stats_sheet_interval_title">Intervallo tra sigarette</string>
+    <string name="stats_sheet_interval_overall_avg">Media complessiva</string>
+    <string name="stats_sheet_interval_today_avg">Oggi</string>
+    <string name="stats_sheet_interval_min_label">Pausa più breve</string>
+    <string name="stats_sheet_interval_max_label">Pausa più lunga</string>
+    <string name="stats_sheet_interval_total_measured">Intervalli misurati: %1$d</string>
+    <string name="stats_sheet_interval_tip_title">La strategia dei +15 minuti</string>
+    <string name="stats_sheet_interval_tip_desc">Aumentare gradualmente l\'intervallo tra le sigarette di soli 15 minuti indebolisce la dipendenza psicologica e riduce il consumo senza stress.</string>
+
+    <string name="btn_back">Indietro</string>
+    <string name="baseline_edit">Modifica linea base</string>
+    <string name="stats_sheet_life_cigs_not_smoked">%1$d sigarette non fumate</string>
+    <string name="stats_sheet_who_progress_format">%1$d di %2$d completati</string>
+
+    <string name="month_jan_short">Gen</string>
+    <string name="month_feb_short">Feb</string>
+    <string name="month_mar_short">Mar</string>
+    <string name="month_apr_short">Apr</string>
+    <string name="month_may_short">Mag</string>
+    <string name="month_jun_short">Giu</string>
+    <string name="month_jul_short">Lug</string>
+    <string name="month_aug_short">Ago</string>
+    <string name="month_sep_short">Set</string>
+    <string name="month_oct_short">Ott</string>
+    <string name="month_nov_short">Nov</string>
+    <string name="month_dec_short">Dic</string>
+
+    <string name="settings_reset_data">Reimposta tutti i dati sul fumo</string>
+    <string name="settings_reset_data_desc">Cancella le statistiche e torna alla schermata di benvenuto</string>
+    <string name="reset_data_dialog_title">Reimpostare tutti i dati?</string>
+    <string name="reset_data_dialog_message">Tutta la cronologia del fumo, le statistiche, gli obiettivi e i traguardi verranno eliminati definitivamente. Tornerai alla schermata di benvenuto.</string>
+    <string name="reset_data_dialog_confirm">Reimposta</string>
 </resources>
