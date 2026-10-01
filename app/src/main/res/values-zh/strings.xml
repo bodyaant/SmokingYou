@@ -701,6 +701,8 @@
     <string name="stats_sheet_interval_tip_desc">每次逐步将两支烟的间隔延长仅 15 分钟，能有效削弱心理依赖，无压力地平稳减少每日吸烟量。</string>
 
     <string name="btn_back">返回</string>
+    <string name="btn_previous">上一个</string>
+    <string name="btn_next">下一个</string>
     <string name="baseline_edit">编辑吸烟基准</string>
     <string name="stats_sheet_life_cigs_not_smoked">少抽了 %1$d 支香烟</string>
     <string name="stats_sheet_who_progress_format">已达成 %1$d / %2$d 个阶段</string>

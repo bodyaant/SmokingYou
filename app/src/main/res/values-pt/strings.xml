@@ -717,6 +717,8 @@
     <string name="stats_sheet_interval_tip_desc">Aumentar gradualmente o intervalo entre os cigarros em apenas 15 minutos enfraquece a dependência psicológica e reduz o consumo sem estresse.</string>
 
     <string name="btn_back">Voltar</string>
+    <string name="btn_previous">Anterior</string>
+    <string name="btn_next">Seguinte</string>
     <string name="baseline_edit">Editar histórico base</string>
     <string name="stats_sheet_life_cigs_not_smoked">%1$d cigarros não fumados</string>
     <string name="stats_sheet_who_progress_format">%1$d de %2$d concluídos</string>

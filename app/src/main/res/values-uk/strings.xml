@@ -708,6 +708,8 @@
     <string name="stats_sheet_interval_tip_desc">Поступове збільшення перерви між перекурами всього на 15 хвилин послаблює психологічну тягу та плавно знижує денну кількість без стресу.</string>
 
     <string name="btn_back">Назад</string>
+    <string name="btn_previous">Назад</string>
+    <string name="btn_next">Вперед</string>
     <string name="baseline_edit">Змінити базову норму</string>
     <string name="stats_sheet_life_cigs_not_smoked">%1$d не викурених сигарет</string>
     <string name="stats_sheet_who_progress_format">Виконано %1$d з %2$d</string>

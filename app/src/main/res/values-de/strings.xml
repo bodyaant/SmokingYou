@@ -715,6 +715,8 @@
     <string name="stats_sheet_interval_tip_desc">Wenn Sie den Abstand zwischen den Zigaretten schrittweise um nur 15 Minuten verlängern, verringern Sie die psychische Abhängigkeit und senken den Konsum stressfrei.</string>
 
     <string name="btn_back">Zurück</string>
+    <string name="btn_previous">Vorherige</string>
+    <string name="btn_next">Nächste</string>
     <string name="baseline_edit">Basisdaten bearbeiten</string>
     <string name="stats_sheet_life_cigs_not_smoked">%1$d nicht gerauchte Zigaretten</string>
     <string name="stats_sheet_who_progress_format">%1$d von %2$d abgeschlossen</string>

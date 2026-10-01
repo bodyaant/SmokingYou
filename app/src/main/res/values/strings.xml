@@ -715,6 +715,8 @@
     <string name="stats_sheet_interval_tip_desc">Gradually increasing the gap between cigarettes by just 15 minutes weakens psychological dependence and naturally lowers daily intake without sudden cravings.</string>
 
     <string name="btn_back">Back</string>
+    <string name="btn_previous">Previous</string>
+    <string name="btn_next">Next</string>
     <string name="baseline_edit">Edit baseline</string>
     <string name="stats_sheet_life_cigs_not_smoked">%1$d cigarettes not smoked</string>
     <string name="stats_sheet_who_progress_format">%1$d of %2$d completed</string>

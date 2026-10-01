@@ -725,6 +725,8 @@
     <string name="stats_sheet_interval_tip_desc">Espacer progressivement chaque cigarette de seulement 15 minutes affaiblit la dépendance psychologique et réduit la consommation en douceur.</string>
 
     <string name="btn_back">Retour</string>
+    <string name="btn_previous">Précédent</string>
+    <string name="btn_next">Suivant</string>
     <string name="baseline_edit">Modifier les données de base</string>
     <string name="stats_sheet_life_cigs_not_smoked">%1$d cigarettes non fumées</string>
     <string name="stats_sheet_who_progress_format">%1$d sur %2$d franchies</string>

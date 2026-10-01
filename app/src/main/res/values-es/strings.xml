@@ -719,6 +719,8 @@
     <string name="stats_sheet_interval_tip_desc">Aumentar gradualmente el tiempo entre cigarrillos en solo 15 minutos debilita la dependencia psicológica y reduce el consumo sin estrés.</string>
 
     <string name="btn_back">Atrás</string>
+    <string name="btn_previous">Anterior</string>
+    <string name="btn_next">Siguiente</string>
     <string name="baseline_edit">Editar línea base</string>
     <string name="stats_sheet_life_cigs_not_smoked">%1$d cigarrillos no fumados</string>
     <string name="stats_sheet_who_progress_format">%1$d de %2$d completados</string>

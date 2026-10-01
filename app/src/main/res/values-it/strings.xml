@@ -722,6 +722,8 @@
     <string name="stats_sheet_interval_tip_desc">Aumentare gradualmente l\'intervallo tra le sigarette di soli 15 minuti indebolisce la dipendenza psicologica e riduce il consumo senza stress.</string>
 
     <string name="btn_back">Indietro</string>
+    <string name="btn_previous">Precedente</string>
+    <string name="btn_next">Successivo</string>
     <string name="baseline_edit">Modifica linea base</string>
     <string name="stats_sheet_life_cigs_not_smoked">%1$d sigarette non fumate</string>
     <string name="stats_sheet_who_progress_format">%1$d di %2$d completati</string>

@@ -714,6 +714,8 @@
     <string name="stats_sheet_interval_tip_desc">Sigaralar arasındaki süreyi kademeli olarak sadece 15 dakika uzatmak, psikolojik bağımlılığı zayıflatır ve tüketimi stressiz bir şekilde azaltır.</string>
 
     <string name="btn_back">Geri</string>
+    <string name="btn_previous">Önceki</string>
+    <string name="btn_next">Sonraki</string>
     <string name="baseline_edit">Başlangıç geçmişini düzenle</string>
     <string name="stats_sheet_life_cigs_not_smoked">%1$d içilmeyen sigara</string>
     <string name="stats_sheet_who_progress_format">%1$d / %2$d tamamlandı</string>
