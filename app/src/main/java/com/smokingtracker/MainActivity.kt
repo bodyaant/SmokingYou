@@ -15,7 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
-import com.smokingtracker.data.DataStoreManager
+import com.smokingtracker.data.preferences.ThemePreferences
 import com.smokingtracker.data.ThemePreference
 import com.smokingtracker.ui.MainApp
 import com.smokingtracker.ui.theme.AppTheme
@@ -29,11 +29,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 class MainActivity : ComponentActivity() {
 
-    private val dataStoreManager: DataStoreManager by inject()
+    private val themePreferences: ThemePreferences by inject()
 
     override fun attachBaseContext(base: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            val languageTag = runBlocking { dataStoreManager.appLanguageTag.first() }
+            val languageTag = runBlocking { themePreferences.appLanguageTag.first() }
             if (languageTag != null) {
                 val locale = java.util.Locale.forLanguageTag(languageTag)
                 java.util.Locale.setDefault(locale)
@@ -55,7 +55,7 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { !initialThemeLoaded }
 
         lifecycleScope.launch {
-            dataStoreManager.appTheme.first() 
+            themePreferences.appTheme.first()
             initialThemeLoaded = true
         }
 

@@ -434,7 +434,10 @@ internal fun HomeScreenContent(
     }
 
     if (showTriggerDialog) {
-        val triggerSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        val triggerSheetState = rememberBottomSheetState(
+            initialValue = SheetValue.Hidden,
+            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+        )
         var isMindfulPauseActive by remember(showTriggerDialog) { mutableStateOf(startInMindfulPause) }
 
         ModalBottomSheet(
@@ -861,7 +864,7 @@ internal fun HomeScreenContent(
                         }
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
                 ),
             )

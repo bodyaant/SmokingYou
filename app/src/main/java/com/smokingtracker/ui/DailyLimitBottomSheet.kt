@@ -54,7 +54,10 @@ fun DailyLimitBottomSheet(
     onDismissRequest: () -> Unit,
     vibrationEnabled: Boolean = true
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
@@ -236,8 +239,14 @@ fun DailyLimitBottomSheet(
                                 }
                             }
 
-                            Slider(
+                            val limitSliderState = rememberSliderState(
                                 value = limitValue.toFloat().coerceIn(1f, 40f),
+                                steps = 38,
+                                trackRange = 1f..40f
+                            ).also { it.value = limitValue.toFloat().coerceIn(1f, 40f) }
+
+                            Slider(
+                                state = limitSliderState,
                                 onValueChange = {
                                     val rounded = it.roundToInt()
                                     if (rounded != limitValue) {
@@ -245,8 +254,6 @@ fun DailyLimitBottomSheet(
                                         HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                                     }
                                 },
-                                valueRange = 1f..40f,
-                                steps = 38,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
@@ -478,8 +485,14 @@ fun DailyLimitBottomSheet(
                                             }
                                         }
 
-                                        Slider(
+                                        val taperingIntervalSliderState = rememberSliderState(
                                             value = taperingInterval.toFloat(),
+                                            steps = 10,
+                                            trackRange = 3f..14f
+                                        ).also { it.value = taperingInterval.toFloat() }
+
+                                        Slider(
+                                            state = taperingIntervalSliderState,
                                             onValueChange = {
                                                 val rounded = it.roundToInt()
                                                 if (rounded != taperingInterval) {
@@ -487,8 +500,6 @@ fun DailyLimitBottomSheet(
                                                     HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                                                 }
                                             },
-                                            valueRange = 3f..14f,
-                                            steps = 10,
                                             modifier = Modifier.fillMaxWidth()
                                         )
                                     }

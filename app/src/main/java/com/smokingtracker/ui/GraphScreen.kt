@@ -82,7 +82,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.smokingtracker.MainViewModel
+import com.smokingtracker.StatisticsViewModel
 import com.smokingtracker.R
 import com.smokingtracker.StatisticsManager
 import java.text.SimpleDateFormat
@@ -106,11 +106,12 @@ import com.smokingtracker.ui.components.TriggerTrendType
 import com.smokingtracker.ui.components.calculatePeakPeriodForTrigger
 import com.smokingtracker.ui.components.calculateTriggerTrend
 import com.smokingtracker.ui.components.getTriggerIcon
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GraphScreen(
-    viewModel: MainViewModel,
+    viewModel: StatisticsViewModel = koinViewModel(),
     initialTarget: String? = null,
     onNavigateToSettings: (() -> Unit)? = null
 ) {
@@ -349,7 +350,7 @@ fun GraphScreenContent(
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent
                     ),
                 )
@@ -917,7 +918,7 @@ fun HeroAnalyticsCard(
                         ) {
                             Icon(
                                 Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                                contentDescription = "Previous",
+                                contentDescription = stringResource(R.string.btn_previous),
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -971,7 +972,7 @@ fun HeroAnalyticsCard(
                         ) {
                             Icon(
                                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                contentDescription = "Next",
+                                contentDescription = stringResource(R.string.btn_next),
                                 modifier = Modifier.size(18.dp),
                                 tint = if (canGoNext) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                             )
@@ -2553,7 +2554,10 @@ private fun WeeklyComparisonBottomSheet(
     val chartPalette = rememberChartColorPalette()
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     val context = androidx.compose.ui.platform.LocalContext.current
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
 
     val (thisWeekDateRange, prevWeekDateRange) = remember(weeklyDate) {
         val fmt = SimpleDateFormat("d MMM", Locale.getDefault())
@@ -2983,7 +2987,10 @@ private fun PeakSmokingHoursBottomSheet(
     val chartPalette = rememberChartColorPalette()
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     val context = androidx.compose.ui.platform.LocalContext.current
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
 
     var selectedHour by remember { mutableStateOf<Int?>(null) }
     var selectedQuadrant by remember { mutableStateOf<Int?>(null) }

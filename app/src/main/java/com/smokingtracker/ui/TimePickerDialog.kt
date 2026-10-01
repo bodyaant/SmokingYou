@@ -12,9 +12,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.tooling.preview.Preview
+import com.smokingtracker.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,21 +71,19 @@ fun TimePickerDialog(
 fun TimePickerDialogPreview() {
     MaterialTheme {
         TimePickerDialog(
-            title = "Select Time",
+            title = "",
             onDismissRequest = {},
             confirmButton = {
                 TextButton(onClick = {}) {
-                    Text("OK")
+                    Text(stringResource(R.string.dialog_ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = {}) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.dialog_cancel))
                 }
             },
-            content = {
-                Text("Content goes here")
-            }
+            content = {}
         )
     }
 }

@@ -48,7 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.smokingtracker.MainViewModel
+import com.smokingtracker.SettingsViewModel
 import com.smokingtracker.UpdateCheckState
 import com.smokingtracker.R
 import com.smokingtracker.data.FontPreset
@@ -56,11 +56,12 @@ import com.smokingtracker.data.ThemePreference
 import androidx.compose.material.icons.filled.SystemUpdate
 import java.util.Locale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PersonalScreen(
-    viewModel: MainViewModel,
+    viewModel: SettingsViewModel = koinViewModel(),
     onNavigateToAbout: () -> Unit,
     onNavigateToAchievements: () -> Unit,
     onNavigateToStatistics: () -> Unit,

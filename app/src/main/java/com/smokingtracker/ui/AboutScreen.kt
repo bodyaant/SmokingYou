@@ -92,10 +92,10 @@ fun AboutScreen(onBack: () -> Unit) {
                             contentColor = MaterialTheme.colorScheme.onSurface
                         )
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.btn_back))
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
                 ),
             )
@@ -157,7 +157,7 @@ fun AboutScreen(onBack: () -> Unit) {
                             Box(contentAlignment = Alignment.Center) {
                                 Image(
                                     painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                                    contentDescription = "App Icon",
+                                    contentDescription = null,
                                     modifier = Modifier.size(72.dp)
                                 )
                             }

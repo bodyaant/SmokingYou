@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -66,7 +65,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -1211,7 +1211,10 @@ fun LifeReclaimedBottomSheet(
     avoidedCigarettes: Int,
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
     val context = LocalContext.current
     val formattedTime = formatMinutesShort(lifeMinutes, context)
 
@@ -1341,7 +1344,10 @@ fun MoneySavedBottomSheet(
     onSaveSavingsGoal: (String, Float) -> Unit = { _, _ -> },
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
     val pricePerCig = if (packSize > 0) packPrice / packSize.toFloat() else 0f
     val dailyExpense = dailyAvg * pricePerCig
     val monthlyProj = dailyExpense * 30f
@@ -1586,7 +1592,10 @@ fun StreakDetailBottomSheet(
     longestStreakDays: Int,
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
 
     val milestones = listOf(1, 3, 7, 14, 30, 90, 365)
     val nextMilestone = milestones.firstOrNull { it > currentStreakDays } ?: (currentStreakDays + 30)
@@ -1721,7 +1730,10 @@ fun WhoRecoveryBottomSheet(
     timeElapsedMinutes: Float,
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
     val completedCount = milestones.count { timeElapsedMinutes >= it.targetMinutes }
     val percent = if (milestones.isNotEmpty()) (completedCount * 100) / milestones.size else 0
     val activeIndex = milestones.indexOfFirst { timeElapsedMinutes < it.targetMinutes }
@@ -1910,7 +1922,10 @@ fun ConsumptionDetailBottomSheet(
     totalTrackingDays: Int,
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -2033,7 +2048,10 @@ fun ResistedCravingsBottomSheet(
     currencySymbol: String,
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -2115,7 +2133,10 @@ fun AverageIntervalBottomSheet(
     onDismissRequest: () -> Unit
 ) {
     val context = LocalContext.current
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -2276,7 +2297,10 @@ fun PackYearsBottomSheet(
     riskLevel: StatisticsManager.PackYearsRiskLevel,
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
 
     val (riskColor, riskTitleRes, riskDescRes) = when (riskLevel) {
         StatisticsManager.PackYearsRiskLevel.LOW -> Triple(

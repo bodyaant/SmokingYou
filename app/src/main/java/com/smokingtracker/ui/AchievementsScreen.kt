@@ -46,7 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.smokingtracker.Achievement
 import com.smokingtracker.AchievementCategory
 import com.smokingtracker.AchievementsManager
-import com.smokingtracker.MainViewModel
+import com.smokingtracker.AchievementsViewModel
 import com.smokingtracker.R
 import com.smokingtracker.StatisticsManager
 import com.smokingtracker.ui.components.BadgeMedallion
@@ -57,6 +57,7 @@ import com.smokingtracker.ui.theme.bouncyPress
 import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.rememberBouncyPress
 import kotlinx.coroutines.delay
+import org.koin.androidx.compose.koinViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -64,7 +65,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AchievementsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
+fun AchievementsScreen(viewModel: AchievementsViewModel = koinViewModel(), onBack: () -> Unit) {
     val entries by viewModel.smokingEntries.collectAsStateWithLifecycle()
     val launches by viewModel.appLaunchDates.collectAsStateWithLifecycle()
     val unlockedAchievements by viewModel.unlockedAchievements.collectAsStateWithLifecycle()
@@ -91,7 +92,7 @@ fun AchievementsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                             contentColor = MaterialTheme.colorScheme.onSurface
                         )
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.btn_back))
                     }
                 },
                 actions = {
@@ -118,7 +119,7 @@ fun AchievementsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                         }
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             )
         }
     ) { paddingValues ->
@@ -799,7 +800,10 @@ private fun AchievementDetailBottomSheet(
     unlockTimestamp: Long? = null,
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
     var confettiKey by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(achievement.id, isUnlocked) {

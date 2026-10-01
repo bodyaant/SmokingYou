@@ -170,7 +170,10 @@ private fun BackupRestoreBottomSheetTemplate(
     selectedFileName: String?,
     pickerIcon: ImageVector
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
 
     val animatedCardBg by animateColorAsState(
         targetValue = when (state) {

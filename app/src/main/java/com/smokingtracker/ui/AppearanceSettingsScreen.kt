@@ -40,7 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.smokingtracker.MainViewModel
+import com.smokingtracker.AppearanceViewModel
 import com.smokingtracker.R
 import com.smokingtracker.data.AppIconPreset
 import com.smokingtracker.data.ColorPreset
@@ -56,13 +56,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import org.koin.androidx.compose.koinViewModel
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AppearanceSettingsScreen(
-    viewModel: MainViewModel,
+    viewModel: AppearanceViewModel = koinViewModel(),
     onBack: () -> Unit
 ) {
     val themePreference by viewModel.themePreference.collectAsStateWithLifecycle()
@@ -102,10 +103,10 @@ fun AppearanceSettingsScreen(
                             contentColor = MaterialTheme.colorScheme.onSurface
                         )
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.btn_back))
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
                 ),
             )
@@ -825,11 +826,15 @@ fun FontSelectionSection(
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                 }
-                                Slider(
+                                val fontWeightSliderState = rememberSliderState(
                                     value = customFontWeight.toFloat(),
-                                    onValueChange = { onCustomFontWeightChange(it.toInt()) },
-                                    valueRange = 100f..1000f,
-                                    steps = 17
+                                    steps = 17,
+                                    trackRange = 100f..1000f
+                                ).also { it.value = customFontWeight.toFloat() }
+
+                                Slider(
+                                    state = fontWeightSliderState,
+                                    onValueChange = { onCustomFontWeightChange(it.toInt()) }
                                 )
                             }
 
@@ -850,11 +855,15 @@ fun FontSelectionSection(
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                 }
-                                Slider(
+                                val fontWidthSliderState = rememberSliderState(
                                     value = customFontWidth,
-                                    onValueChange = { onCustomFontWidthChange(it) },
-                                    valueRange = 25f..150f,
-                                    steps = 24
+                                    steps = 24,
+                                    trackRange = 25f..150f
+                                ).also { it.value = customFontWidth }
+
+                                Slider(
+                                    state = fontWidthSliderState,
+                                    onValueChange = { onCustomFontWidthChange(it) }
                                 )
                             }
 
@@ -875,11 +884,15 @@ fun FontSelectionSection(
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                 }
-                                Slider(
+                                val fontRoundnessSliderState = rememberSliderState(
                                     value = customFontRoundness,
-                                    onValueChange = { onCustomFontRoundnessChange(it) },
-                                    valueRange = 0f..100f,
-                                    steps = 19
+                                    steps = 19,
+                                    trackRange = 0f..100f
+                                ).also { it.value = customFontRoundness }
+
+                                Slider(
+                                    state = fontRoundnessSliderState,
+                                    onValueChange = { onCustomFontRoundnessChange(it) }
                                 )
                             }
                         }

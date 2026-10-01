@@ -28,17 +28,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import com.smokingtracker.MainViewModel
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.containerShape
 
 @Composable
-fun RegistrationScreen(viewModel: MainViewModel, navController: NavHostController) {
+fun RegistrationScreen(onRegister: () -> Unit) {
     RegistrationScreenContent(
-        onRegister = {
-            viewModel.registerUser()
-        }
+        onRegister = onRegister
     )
 }
 

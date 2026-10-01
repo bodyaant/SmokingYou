@@ -43,7 +43,10 @@ fun BaselineBottomSheet(
     onDismissRequest: () -> Unit,
     vibrationEnabled: Boolean = true
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
 
@@ -210,17 +213,21 @@ fun BaselineBottomSheet(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    Slider(
+                    val dailyAvgSliderState = rememberSliderState(
                         value = dailyAvg.toFloat(),
+                        steps = 38,
+                        trackRange = 1f..40f
+                    ).also { it.value = dailyAvg.toFloat() }
+
+                    Slider(
+                        state = dailyAvgSliderState,
                         onValueChange = {
                             val newVal = it.roundToInt().coerceIn(1, 40)
                             if (newVal != dailyAvg) {
                                 dailyAvg = newVal
                                 HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                             }
-                        },
-                        valueRange = 1f..40f,
-                        steps = 38
+                        }
                     )
 
                     Spacer(modifier = Modifier.height(6.dp))
@@ -323,8 +330,14 @@ fun BaselineBottomSheet(
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Slider(
+                    val yearsSmokedSliderState = rememberSliderState(
                         value = yearsSmokedInt.toFloat().coerceIn(1f, 30f),
+                        steps = 28,
+                        trackRange = 1f..30f
+                    ).also { it.value = yearsSmokedInt.toFloat().coerceIn(1f, 30f) }
+
+                    Slider(
+                        state = yearsSmokedSliderState,
                         onValueChange = { newYears ->
                             val y = newYears.roundToInt().coerceIn(1, 30)
                             if (y != yearsSmokedInt) {
@@ -332,9 +345,7 @@ fun BaselineBottomSheet(
                                 selectedStartDate = cal.timeInMillis
                                 HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                             }
-                        },
-                        valueRange = 1f..30f,
-                        steps = 28
+                        }
                     )
                 }
             }

@@ -61,10 +61,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.smokingtracker.MainViewModel
 import com.smokingtracker.R
 import com.smokingtracker.StatisticsData
 import com.smokingtracker.StatisticsManager
+import com.smokingtracker.StatisticsViewModel
+import org.koin.androidx.compose.koinViewModel
 import com.smokingtracker.ui.components.AverageIntervalBentoCard
 import com.smokingtracker.ui.components.AverageIntervalBottomSheet
 import com.smokingtracker.ui.components.ConsumptionDetailBottomSheet
@@ -93,7 +94,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StatisticsScreen(viewModel: MainViewModel, onBack: () -> Unit, onNavigateToSettings: (() -> Unit)? = null) {
+fun StatisticsScreen(viewModel: StatisticsViewModel = koinViewModel(), onBack: () -> Unit, onNavigateToSettings: (() -> Unit)? = null) {
     val entries by viewModel.smokingEntries.collectAsStateWithLifecycle()
     val resistedEntries by viewModel.resistedEntries.collectAsStateWithLifecycle()
     val dailyLimit by viewModel.dailyLimit.collectAsStateWithLifecycle()

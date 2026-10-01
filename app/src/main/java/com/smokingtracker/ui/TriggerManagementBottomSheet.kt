@@ -55,7 +55,10 @@ fun TriggerManagementBottomSheet(
     onDismissRequest: () -> Unit,
     vibrationEnabled: Boolean = true
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
     var triggerToDelete by rememberSaveable { mutableStateOf<String?>(null) }
 

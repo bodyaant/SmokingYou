@@ -38,7 +38,10 @@ fun TaperingCheckInBottomSheet(
     vibrationEnabled: Boolean = true
 ) {
     val newLimit = (currentLimit - 1).coerceAtLeast(0)
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 

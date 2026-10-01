@@ -69,7 +69,10 @@ fun WidgetSettingsBottomSheet(
     vibrationEnabled: Boolean = true,
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 

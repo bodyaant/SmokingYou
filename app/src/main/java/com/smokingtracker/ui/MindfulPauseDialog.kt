@@ -35,7 +35,10 @@ fun MindfulPauseDialog(
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = rememberBottomSheetState(
+            initialValue = SheetValue.Hidden,
+            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+        ),
         containerColor = if (MaterialTheme.colorScheme.surfaceContainerLow == Color.White) {
             MaterialTheme.colorScheme.surface
         } else {
