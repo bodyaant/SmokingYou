@@ -1,6 +1,10 @@
 package com.smokingtracker
 
-import java.util.*
+import java.time.DayOfWeek
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
@@ -25,38 +29,20 @@ class StatisticsManager {
         val totalCount = entries.size
         val trackingSince = sortedEntries.first()
 
-        val dailyCounts = mutableMapOf<String, Int>()
-
-        entries.forEach { timestamp ->
-            val cal = Calendar.getInstance()
-            cal.timeInMillis = timestamp
-            val dayKey = "${cal.get(Calendar.YEAR)}-${cal.get(Calendar.DAY_OF_YEAR)}"
-            dailyCounts[dayKey] = (dailyCounts[dayKey] ?: 0) + 1
-        }
+        val zoneId = ZoneId.systemDefault()
+        val dailyCounts = groupCountByDay(entries, zoneId)
 
         val maxPerDay = dailyCounts.values.maxOrNull() ?: 0
         val minPerDay = dailyCounts.values.minOrNull() ?: 0
 
-        val today = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
+        val firstDate = toLocalDate(trackingSince, zoneId)
+        val today = LocalDate.now(zoneId)
 
-        val firstDay = Calendar.getInstance().apply {
-            timeInMillis = trackingSince
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-
-        val totalTrackingDays = (daysBetween(firstDay.timeInMillis, today.timeInMillis) + 1).toInt()
+        val totalTrackingDays = (daysBetween(firstDate, today) + 1).toInt()
 
         val avgPerDay = totalCount.toFloat() / totalTrackingDays.coerceAtLeast(1)
 
-        val longestStreak = calculateLongestStreak(sortedEntries)
+        val longestStreak = calculateLongestStreak(sortedEntries, zoneId)
 
         val effectiveMinPerDay = if (totalTrackingDays > dailyCounts.size) 0 else minPerDay
 
@@ -71,35 +57,22 @@ class StatisticsManager {
         )
     }
 
-    private fun calculateLongestStreak(sortedEntries: List<Long>): Int {
+    private fun calculateLongestStreak(sortedEntries: List<Long>, zoneId: ZoneId = ZoneId.systemDefault()): Int {
         if (sortedEntries.isEmpty()) return 0
 
-        val entryDays = sortedEntries.map { ts ->
-            Calendar.getInstance().apply {
-                timeInMillis = ts
-                set(Calendar.HOUR_OF_DAY, 0)
-                set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-            }.timeInMillis
-        }.distinct().sorted()
+        val entryDates = sortedEntries.map { toLocalDate(it, zoneId) }.distinct().sorted()
 
         var maxStreak = 0
 
-        for (i in 0 until entryDays.size - 1) {
-            val gapDays = daysBetween(entryDays[i], entryDays[i + 1]).toInt() - 1
+        for (i in 0 until entryDates.size - 1) {
+            val gapDays = daysBetween(entryDates[i], entryDates[i + 1]).toInt() - 1
             if (gapDays > maxStreak) {
                 maxStreak = gapDays
             }
         }
 
-        val lastEntry = entryDays.last()
-        val today = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
+        val lastEntry = entryDates.last()
+        val today = LocalDate.now(zoneId)
 
         val currentGap = daysBetween(lastEntry, today).toInt()
         if (currentGap > maxStreak) {
@@ -109,124 +82,77 @@ class StatisticsManager {
         return maxStreak
     }
 
-    fun currentSmokeFreeStreakDays(entries: List<Long>): Int {
+    fun currentSmokeFreeStreakDays(entries: List<Long>, zoneId: ZoneId = ZoneId.systemDefault()): Int {
         if (entries.isEmpty()) return 0
         val lastEntryMs = entries.maxOrNull() ?: return 0
-
-        val lastDay = Calendar.getInstance().apply {
-            timeInMillis = lastEntryMs
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
-
-        val today = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
-
+        val lastDay = toLocalDate(lastEntryMs, zoneId)
+        val today = LocalDate.now(zoneId)
         return daysBetween(lastDay, today).toInt()
     }
 
     fun getWeeklyCount(entries: List<Long>, date: Calendar): Int {
-        val weekStart = date.clone() as Calendar
-        weekStart.firstDayOfWeek = Calendar.MONDAY
-        while (weekStart.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
-            weekStart.add(Calendar.DAY_OF_YEAR, -1)
-        }
-        weekStart.set(Calendar.HOUR_OF_DAY, 0)
-        weekStart.set(Calendar.MINUTE, 0)
-        weekStart.set(Calendar.SECOND, 0)
-        weekStart.set(Calendar.MILLISECOND, 0)
-        val weekEnd = weekStart.clone() as Calendar
-        weekEnd.add(Calendar.DAY_OF_YEAR, 7)
-        return entries.count { it >= weekStart.timeInMillis && it < weekEnd.timeInMillis }
+        val zoneId = date.timeZone.toZoneId()
+        val localDate = Instant.ofEpochMilli(date.timeInMillis).atZone(zoneId).toLocalDate()
+        val monday = localDate.with(DayOfWeek.MONDAY)
+        val weekStartMillis = monday.atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val weekEndMillis = monday.plusDays(7).atStartOfDay(zoneId).toInstant().toEpochMilli()
+        return entries.count { it >= weekStartMillis && it < weekEndMillis }
     }
 
     fun getMonthlyCount(entries: List<Long>, date: Calendar): Int {
-        val monthStart = date.clone() as Calendar
-        monthStart.set(Calendar.DAY_OF_MONTH, 1)
-        monthStart.set(Calendar.HOUR_OF_DAY, 0)
-        monthStart.set(Calendar.MINUTE, 0)
-        monthStart.set(Calendar.SECOND, 0)
-        monthStart.set(Calendar.MILLISECOND, 0)
-        val monthEnd = monthStart.clone() as Calendar
-        monthEnd.add(Calendar.MONTH, 1)
-        return entries.count { it >= monthStart.timeInMillis && it < monthEnd.timeInMillis }
+        val zoneId = date.timeZone.toZoneId()
+        val localDate = Instant.ofEpochMilli(date.timeInMillis).atZone(zoneId).toLocalDate()
+        val monthStart = localDate.withDayOfMonth(1)
+        val monthStartMillis = monthStart.atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val monthEndMillis = monthStart.plusMonths(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
+        return entries.count { it >= monthStartMillis && it < monthEndMillis }
     }
 
     fun generateDailyData(entries: List<Long>, date: Calendar): List<Int> {
-        val dayStart = date.clone() as Calendar
-        dayStart.set(Calendar.HOUR_OF_DAY, 0)
-        dayStart.set(Calendar.MINUTE, 0)
-        dayStart.set(Calendar.SECOND, 0)
-        dayStart.set(Calendar.MILLISECOND, 0)
-        val dayStartMillis = dayStart.timeInMillis
-        val dayEnd = dayStart.clone() as Calendar
-        dayEnd.add(Calendar.DAY_OF_YEAR, 1)
-        val dayEndMillis = dayEnd.timeInMillis
-        val dayEntries = entries.filter { it >= dayStartMillis && it < dayEndMillis }
+        val zoneId = date.timeZone.toZoneId()
+        val localDate = Instant.ofEpochMilli(date.timeInMillis).atZone(zoneId).toLocalDate()
+        val dayStartMillis = localDate.atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val dayEndMillis = localDate.plusDays(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
         val hourlyCounts = IntArray(24) { 0 }
-        val cal = Calendar.getInstance()
-        dayEntries.forEach { time ->
-            cal.timeInMillis = time
-            val hour = cal.get(Calendar.HOUR_OF_DAY)
-            if (hour in 0..23) hourlyCounts[hour]++
+        entries.forEach { time ->
+            if (time >= dayStartMillis && time < dayEndMillis) {
+                val hour = hourOfDay(time, zoneId)
+                if (hour in 0..23) hourlyCounts[hour]++
+            }
         }
         return hourlyCounts.toList()
     }
 
     fun generateWeeklyData(entries: List<Long>, date: Calendar): List<Int> {
-        val weekStart = date.clone() as Calendar
-        weekStart.firstDayOfWeek = Calendar.MONDAY
-        while (weekStart.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
-            weekStart.add(Calendar.DAY_OF_YEAR, -1)
-        }
-        weekStart.set(Calendar.HOUR_OF_DAY, 0)
-        weekStart.set(Calendar.MINUTE, 0)
-        weekStart.set(Calendar.SECOND, 0)
-        weekStart.set(Calendar.MILLISECOND, 0)
-        val weekStartMillis = weekStart.timeInMillis
-        val weekEnd = weekStart.clone() as Calendar
-        weekEnd.add(Calendar.DAY_OF_YEAR, 7)
-        val weekEndMillis = weekEnd.timeInMillis
-        val weekEntries = entries.filter { it >= weekStartMillis && it < weekEndMillis }
+        val zoneId = date.timeZone.toZoneId()
+        val localDate = Instant.ofEpochMilli(date.timeInMillis).atZone(zoneId).toLocalDate()
+        val monday = localDate.with(DayOfWeek.MONDAY)
+        val weekStartMillis = monday.atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val weekEndMillis = monday.plusDays(7).atStartOfDay(zoneId).toInstant().toEpochMilli()
         val dailyCounts = IntArray(7) { 0 }
-        val cal = Calendar.getInstance()
-        weekEntries.forEach { time ->
-            cal.timeInMillis = time
-            cal.set(Calendar.HOUR_OF_DAY, 0)
-            cal.set(Calendar.MINUTE, 0)
-            cal.set(Calendar.SECOND, 0)
-            cal.set(Calendar.MILLISECOND, 0)
-            val diffDays = ((cal.timeInMillis - weekStartMillis) / (24 * 60 * 60 * 1000L)).toInt().coerceIn(0, 6)
-            dailyCounts[diffDays]++
+        entries.forEach { time ->
+            if (time >= weekStartMillis && time < weekEndMillis) {
+                val entryDate = toLocalDate(time, zoneId)
+                val diffDays = daysBetween(monday, entryDate).toInt().coerceIn(0, 6)
+                dailyCounts[diffDays]++
+            }
         }
         return dailyCounts.toList()
     }
 
     fun generateMonthlyData(entries: List<Long>, date: Calendar): List<Int> {
-        val monthStart = date.clone() as Calendar
-        monthStart.set(Calendar.DAY_OF_MONTH, 1)
-        monthStart.set(Calendar.HOUR_OF_DAY, 0)
-        monthStart.set(Calendar.MINUTE, 0)
-        monthStart.set(Calendar.SECOND, 0)
-        monthStart.set(Calendar.MILLISECOND, 0)
-        val monthStartMillis = monthStart.timeInMillis
-        val monthEnd = monthStart.clone() as Calendar
-        monthEnd.add(Calendar.MONTH, 1)
-        val monthEndMillis = monthEnd.timeInMillis
-        val monthEntries = entries.filter { it >= monthStartMillis && it < monthEndMillis }
-        val daysInMonth = monthStart.getActualMaximum(Calendar.DAY_OF_MONTH)
+        val zoneId = date.timeZone.toZoneId()
+        val localDate = Instant.ofEpochMilli(date.timeInMillis).atZone(zoneId).toLocalDate()
+        val monthStart = localDate.withDayOfMonth(1)
+        val monthStartMillis = monthStart.atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val monthEndMillis = monthStart.plusMonths(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val daysInMonth = monthStart.lengthOfMonth()
         val dailyCounts = IntArray(daysInMonth) { 0 }
-        val cal = Calendar.getInstance()
-        monthEntries.forEach { time ->
-            cal.timeInMillis = time
-            val dayIndex = cal.get(Calendar.DAY_OF_MONTH) - 1
-            if (dayIndex in 0 until daysInMonth) dailyCounts[dayIndex]++
+        entries.forEach { time ->
+            if (time >= monthStartMillis && time < monthEndMillis) {
+                val dayIndex = toLocalDate(time, zoneId).dayOfMonth - 1
+                if (dayIndex in 0 until daysInMonth) dailyCounts[dayIndex]++
+            }
         }
         val chunkSize = kotlin.math.ceil(daysInMonth / 4.0).toInt()
         val weeklyChunks = mutableListOf<Int>()
@@ -242,46 +168,34 @@ class StatisticsManager {
     }
 
     fun generateMonthlyDailyData(entries: List<Long>, date: Calendar): List<Int> {
-        val monthStart = date.clone() as Calendar
-        monthStart.set(Calendar.DAY_OF_MONTH, 1)
-        monthStart.set(Calendar.HOUR_OF_DAY, 0)
-        monthStart.set(Calendar.MINUTE, 0)
-        monthStart.set(Calendar.SECOND, 0)
-        monthStart.set(Calendar.MILLISECOND, 0)
-        val monthStartMillis = monthStart.timeInMillis
-        val monthEnd = monthStart.clone() as Calendar
-        monthEnd.add(Calendar.MONTH, 1)
-        val monthEndMillis = monthEnd.timeInMillis
-        val monthEntries = entries.filter { it >= monthStartMillis && it < monthEndMillis }
-        val daysInMonth = monthStart.getActualMaximum(Calendar.DAY_OF_MONTH)
+        val zoneId = date.timeZone.toZoneId()
+        val localDate = Instant.ofEpochMilli(date.timeInMillis).atZone(zoneId).toLocalDate()
+        val monthStart = localDate.withDayOfMonth(1)
+        val monthStartMillis = monthStart.atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val monthEndMillis = monthStart.plusMonths(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val daysInMonth = monthStart.lengthOfMonth()
         val dailyCounts = IntArray(daysInMonth) { 0 }
-        val cal = Calendar.getInstance()
-        monthEntries.forEach { time ->
-            cal.timeInMillis = time
-            val dayIndex = cal.get(Calendar.DAY_OF_MONTH) - 1
-            if (dayIndex in 0 until daysInMonth) dailyCounts[dayIndex]++
+        entries.forEach { time ->
+            if (time >= monthStartMillis && time < monthEndMillis) {
+                val dayIndex = toLocalDate(time, zoneId).dayOfMonth - 1
+                if (dayIndex in 0 until daysInMonth) dailyCounts[dayIndex]++
+            }
         }
         return dailyCounts.toList()
     }
 
     fun generateYearlyData(entries: List<Long>, date: Calendar): List<Int> {
-        val yearStart = date.clone() as Calendar
-        yearStart.set(Calendar.DAY_OF_YEAR, 1)
-        yearStart.set(Calendar.HOUR_OF_DAY, 0)
-        yearStart.set(Calendar.MINUTE, 0)
-        yearStart.set(Calendar.SECOND, 0)
-        yearStart.set(Calendar.MILLISECOND, 0)
-        val yearStartMillis = yearStart.timeInMillis
-        val yearEnd = yearStart.clone() as Calendar
-        yearEnd.add(Calendar.YEAR, 1)
-        val yearEndMillis = yearEnd.timeInMillis
-        val yearEntries = entries.filter { it >= yearStartMillis && it < yearEndMillis }
+        val zoneId = date.timeZone.toZoneId()
+        val localDate = Instant.ofEpochMilli(date.timeInMillis).atZone(zoneId).toLocalDate()
+        val yearStart = localDate.withDayOfYear(1)
+        val yearStartMillis = yearStart.atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val yearEndMillis = yearStart.plusYears(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
         val monthlyCounts = IntArray(12) { 0 }
-        val cal = Calendar.getInstance()
-        yearEntries.forEach { time ->
-            cal.timeInMillis = time
-            val monthIndex = cal.get(Calendar.MONTH)
-            if (monthIndex in 0..11) monthlyCounts[monthIndex]++
+        entries.forEach { time ->
+            if (time >= yearStartMillis && time < yearEndMillis) {
+                val monthIndex = toLocalDate(time, zoneId).monthValue - 1
+                if (monthIndex in 0..11) monthlyCounts[monthIndex]++
+            }
         }
         return monthlyCounts.toList()
     }
@@ -358,40 +272,17 @@ class StatisticsManager {
 
         var avoidedSum = 0
         if (entries.isNotEmpty()) {
-            val cal = Calendar.getInstance()
-            val countsByDay = mutableMapOf<Long, Int>()
-            entries.forEach { timestamp ->
-                cal.timeInMillis = timestamp
-                cal.set(Calendar.HOUR_OF_DAY, 0)
-                cal.set(Calendar.MINUTE, 0)
-                cal.set(Calendar.SECOND, 0)
-                cal.set(Calendar.MILLISECOND, 0)
-                val dayKey = cal.timeInMillis
-                countsByDay[dayKey] = (countsByDay[dayKey] ?: 0) + 1
-            }
+            val zoneId = ZoneId.systemDefault()
+            val countsByDay = groupCountByDay(entries, zoneId)
+            var currentDay = toLocalDate(firstEntryTime, zoneId)
+            val today = LocalDate.now(zoneId)
 
-            cal.timeInMillis = firstEntryTime
-            cal.set(Calendar.HOUR_OF_DAY, 0)
-            cal.set(Calendar.MINUTE, 0)
-            cal.set(Calendar.SECOND, 0)
-            cal.set(Calendar.MILLISECOND, 0)
-            var currentDay = cal.timeInMillis
-
-            val todayCal = Calendar.getInstance()
-            todayCal.set(Calendar.HOUR_OF_DAY, 0)
-            todayCal.set(Calendar.MINUTE, 0)
-            todayCal.set(Calendar.SECOND, 0)
-            todayCal.set(Calendar.MILLISECOND, 0)
-            val todayMidnight = todayCal.timeInMillis
-
-            while (currentDay <= todayMidnight) {
+            while (!currentDay.isAfter(today)) {
                 val actual = countsByDay[currentDay] ?: 0
                 if (actual < dailyAvg) {
                     avoidedSum += (dailyAvg - actual)
                 }
-                cal.timeInMillis = currentDay
-                cal.add(Calendar.DAY_OF_YEAR, 1)
-                currentDay = cal.timeInMillis
+                currentDay = currentDay.plusDays(1)
             }
         }
         val totalAvoidedCigarettes = avoidedSum
@@ -483,26 +374,13 @@ class StatisticsManager {
         referenceDate: Calendar = Calendar.getInstance(),
         now: Calendar = Calendar.getInstance()
     ): WeeklyComparisonData {
-        val cal = referenceDate.clone() as Calendar
-        cal.firstDayOfWeek = Calendar.MONDAY
-        cal.set(Calendar.HOUR_OF_DAY, 0)
-        cal.set(Calendar.MINUTE, 0)
-        cal.set(Calendar.SECOND, 0)
-        cal.set(Calendar.MILLISECOND, 0)
+        val zoneId = referenceDate.timeZone.toZoneId()
+        val refDate = Instant.ofEpochMilli(referenceDate.timeInMillis).atZone(zoneId).toLocalDate()
+        val thisWeekMonday = refDate.with(DayOfWeek.MONDAY)
+        val thisWeekStart = thisWeekMonday.atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val thisWeekEnd = thisWeekMonday.plusDays(7).atStartOfDay(zoneId).toInstant().toEpochMilli()
 
-        while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
-            cal.add(Calendar.DAY_OF_YEAR, -1)
-        }
-        val thisWeekStart = cal.timeInMillis
-
-        val thisWeekEndCal = cal.clone() as Calendar
-        thisWeekEndCal.add(Calendar.DAY_OF_YEAR, 7)
-        val thisWeekEnd = thisWeekEndCal.timeInMillis
-
-        val prevWeekStartCal = cal.clone() as Calendar
-        prevWeekStartCal.add(Calendar.DAY_OF_YEAR, -7)
-        val prevWeekStart = prevWeekStartCal.timeInMillis
-
+        val prevWeekStart = thisWeekMonday.minusDays(7).atStartOfDay(zoneId).toInstant().toEpochMilli()
         val prevWeekEnd = thisWeekStart
 
         val thisWeekEntries = entries.filter { it >= thisWeekStart && it < thisWeekEnd }
@@ -515,7 +393,9 @@ class StatisticsManager {
         val nowMs = now.timeInMillis
         val isCurrentWeek = nowMs in thisWeekStart until thisWeekEnd
         val daysElapsedThisWeek = if (isCurrentWeek) {
-            ((now.get(Calendar.DAY_OF_WEEK) + 5) % 7 + 1).coerceIn(1, 7)
+            val nowZoneId = now.timeZone.toZoneId()
+            val nowLocalDate = Instant.ofEpochMilli(nowMs).atZone(nowZoneId).toLocalDate()
+            nowLocalDate.dayOfWeek.value.coerceIn(1, 7)
         } else {
             7
         }
@@ -564,10 +444,9 @@ class StatisticsManager {
 
     fun calculateHourlyDistribution(entries: List<Long>): HourlyDistributionData {
         val hourly = IntArray(24) { 0 }
-        val cal = Calendar.getInstance()
+        val zoneId = ZoneId.systemDefault()
         entries.forEach { ts ->
-            cal.timeInMillis = ts
-            val hour = cal.get(Calendar.HOUR_OF_DAY)
+            val hour = hourOfDay(ts, zoneId)
             if (hour in 0..23) hourly[hour]++
         }
 
@@ -613,17 +492,10 @@ class StatisticsManager {
         }
 
         val sorted = entries.sorted()
-        val cal1 = Calendar.getInstance()
-        val cal2 = Calendar.getInstance()
-
-        val todayCal = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        val todayStartMs = todayCal.timeInMillis
-        val todayEndMs = todayStartMs + 24L * 60 * 60 * 1000L
+        val zoneId = ZoneId.systemDefault()
+        val today = LocalDate.now(zoneId)
+        val todayStartMs = today.atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val todayEndMs = today.plusDays(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
 
         val allIntervals = mutableListOf<Int>()
         val todayIntervals = mutableListOf<Int>()
@@ -634,12 +506,7 @@ class StatisticsManager {
             val diffMs = t2 - t1
             if (diffMs <= 0) continue
 
-            cal1.timeInMillis = t1
-            cal2.timeInMillis = t2
-
-            val sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                    cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
-
+            val sameDay = toLocalDate(t1, zoneId) == toLocalDate(t2, zoneId)
             val isOvernight = !sameDay && diffMs > 4 * 60 * 60 * 1000L
 
             if (!isOvernight) {

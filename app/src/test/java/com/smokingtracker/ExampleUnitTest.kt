@@ -139,4 +139,110 @@ class ExampleUnitTest {
         assertEquals(50, resultHigher.percentChange)
         assertEquals(StatisticsManager.ComparisonTrend.INCREASED, resultHigher.trend)
     }
+
+    @Test
+    fun testDateUtils_conversionsAndGrouping() {
+        val zone = java.time.ZoneId.systemDefault()
+        val localDate = java.time.LocalDate.of(2026, 9, 15)
+        val millis = localDate.atStartOfDay(zone).toInstant().toEpochMilli()
+
+        assertEquals(localDate, toLocalDate(millis, zone))
+        assertEquals(millis, startOfDayMillis(localDate, zone))
+        assertEquals(millis, startOfDayMillis(millis + 3600000L, zone))
+        assertEquals(1, hourOfDay(millis + 3600000L, zone))
+
+        val nextDay = localDate.plusDays(3)
+        assertEquals(3L, daysBetween(localDate, nextDay))
+        assertEquals(3L, daysBetween(millis, nextDay.atStartOfDay(zone).toInstant().toEpochMilli()))
+
+        val entries = listOf(
+            millis + 1000L,
+            millis + 2000L,
+            nextDay.atStartOfDay(zone).toInstant().toEpochMilli() + 500L
+        )
+        val counts = groupCountByDay(entries, zone)
+        assertEquals(2, counts.size)
+        assertEquals(2, counts[localDate])
+        assertEquals(1, counts[nextDay])
+    }
+
+    @Test
+    fun testStatisticsManager_calculateStats_empty() {
+        val manager = StatisticsManager()
+        val stats = manager.calculateStats(emptyList())
+        assertEquals(0, stats.totalCount)
+        assertEquals(0, stats.maxPerDay)
+        assertEquals(0, stats.minPerDay)
+        assertEquals(0f, stats.avgPerDay, 0.001f)
+        assertNull(stats.trackingSince)
+        assertEquals(0, stats.longestStreakDays)
+        assertEquals(0, stats.totalTrackingDays)
+    }
+
+    @Test
+    fun testStatisticsManager_calculateStats_singleDay() {
+        val manager = StatisticsManager()
+        val now = System.currentTimeMillis()
+        val stats = manager.calculateStats(listOf(now, now + 1000L, now + 2000L))
+        assertEquals(3, stats.totalCount)
+        assertEquals(3, stats.maxPerDay)
+        assertEquals(3, stats.minPerDay)
+        assertEquals(3.0f, stats.avgPerDay, 0.001f)
+        assertEquals(1, stats.totalTrackingDays)
+        assertEquals(0, stats.longestStreakDays)
+    }
+
+    @Test
+    fun testStatisticsManager_calculateStats_multipleDaysWithGap() {
+        val manager = StatisticsManager()
+        val zone = java.time.ZoneId.systemDefault()
+        val today = java.time.LocalDate.now(zone)
+        val day0 = today.minusDays(5)
+        val day1 = today.minusDays(4)
+        val day4 = today.minusDays(1)
+
+        val t0 = day0.atStartOfDay(zone).toInstant().toEpochMilli() + 3600000L
+        val t1 = day1.atStartOfDay(zone).toInstant().toEpochMilli() + 3600000L
+        val t4 = day4.atStartOfDay(zone).toInstant().toEpochMilli() + 3600000L
+
+        val stats = manager.calculateStats(listOf(t0, t0 + 1000L, t1, t4))
+        assertEquals(4, stats.totalCount)
+        assertEquals(2, stats.maxPerDay)
+        assertEquals(0, stats.minPerDay)
+        assertEquals(6, stats.totalTrackingDays)
+        assertEquals(4f / 6f, stats.avgPerDay, 0.001f)
+        assertEquals(2, stats.longestStreakDays)
+    }
+
+    @Test
+    fun testStatisticsManager_currentSmokeFreeStreakDays() {
+        val manager = StatisticsManager()
+        val zone = java.time.ZoneId.systemDefault()
+        val today = java.time.LocalDate.now(zone)
+        val day2Ago = today.minusDays(2)
+        val ts = day2Ago.atStartOfDay(zone).toInstant().toEpochMilli() + 7200000L
+
+        assertEquals(2, manager.currentSmokeFreeStreakDays(listOf(ts), zone))
+        assertEquals(0, manager.currentSmokeFreeStreakDays(emptyList(), zone))
+    }
+
+    @Test
+    fun testStatisticsManager_generateDailyData() {
+        val manager = StatisticsManager()
+        val cal = java.util.Calendar.getInstance().apply {
+            set(2026, java.util.Calendar.SEPTEMBER, 16, 12, 0, 0)
+        }
+        val zone = cal.timeZone.toZoneId()
+        val baseDate = java.time.LocalDate.of(2026, 9, 16)
+        val h1 = baseDate.atTime(1, 15).atZone(zone).toInstant().toEpochMilli()
+        val h1_2 = baseDate.atTime(1, 45).atZone(zone).toInstant().toEpochMilli()
+        val h10 = baseDate.atTime(10, 0).atZone(zone).toInstant().toEpochMilli()
+        val otherDay = baseDate.plusDays(1).atTime(1, 0).atZone(zone).toInstant().toEpochMilli()
+
+        val daily = manager.generateDailyData(listOf(h1, h1_2, h10, otherDay), cal)
+        assertEquals(24, daily.size)
+        assertEquals(2, daily[1])
+        assertEquals(1, daily[10])
+        assertEquals(0, daily[0])
+    }
 }
