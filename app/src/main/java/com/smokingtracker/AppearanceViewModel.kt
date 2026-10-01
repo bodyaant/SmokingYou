@@ -2,31 +2,23 @@ package com.smokingtracker
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.smokingtracker.data.AppIconPreset
 import com.smokingtracker.data.ColorPreset
 import com.smokingtracker.data.FontPreset
 import com.smokingtracker.data.ThemePreference
-import com.smokingtracker.data.manager.GitHubUpdateManager
 import com.smokingtracker.data.preferences.AppMetaPreferences
 import com.smokingtracker.data.preferences.ThemePreferences
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
-class MainViewModel(
+class AppearanceViewModel(
     private val themePreferences: ThemePreferences,
     private val appMetaPreferences: AppMetaPreferences,
-    private val updateManager: GitHubUpdateManager,
-    private val achievementsCoordinator: AchievementsCoordinator
+    private val achievementsCoordinator: AchievementsCoordinator,
+    private val appIconManager: AppIconManager
 ) : ViewModel() {
-
-    val isRegistered: StateFlow<Boolean?> = appMetaPreferences.isRegistered.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = null
-    )
 
     val themePreference: StateFlow<ThemePreference> = themePreferences.appTheme.stateIn(
         scope = viewModelScope,
@@ -58,6 +50,12 @@ class MainViewModel(
         initialValue = ColorPreset.SYSTEM
     )
 
+    val appIcon: StateFlow<AppIconPreset> = themePreferences.appIcon.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = AppIconPreset.DEFAULT
+    )
+
     val useCustomVariableFont: StateFlow<Boolean> = themePreferences.useCustomVariableFont.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -82,50 +80,66 @@ class MainViewModel(
         initialValue = 0f
     )
 
-    val checkUpdatesOnStart: StateFlow<Boolean> = appMetaPreferences.checkUpdatesOnStart.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = false
-    )
-
-    val updateCheckState: StateFlow<UpdateCheckState> = updateManager.updateCheckState
-
-    init {
+    fun updateThemePreference(theme: ThemePreference) {
         viewModelScope.launch {
-            val now = System.currentTimeMillis()
-            val launches = appMetaPreferences.appLaunchDates.first()
-            val cal = Calendar.getInstance().apply { timeInMillis = now }
-            val todayYear = cal.get(Calendar.YEAR)
-            val todayDay = cal.get(Calendar.DAY_OF_YEAR)
-
-            val checkCal = Calendar.getInstance()
-            val alreadyLoggedToday = launches.any {
-                checkCal.timeInMillis = it
-                checkCal.get(Calendar.YEAR) == todayYear && checkCal.get(Calendar.DAY_OF_YEAR) == todayDay
-            }
-
-            if (!alreadyLoggedToday) {
-                appMetaPreferences.recordAppLaunch(now)
-            }
-            val isReg = appMetaPreferences.isRegistered.first()
-            if (isReg) {
-                achievementsCoordinator.checkAndUpdate()
-            }
-        }
-    }
-
-    fun registerUser() {
-        viewModelScope.launch {
-            appMetaPreferences.saveUserProfile()
+            themePreferences.saveThemePreference(theme)
+            appMetaPreferences.recordThemeOrLangChange()
             achievementsCoordinator.checkAndUpdate()
         }
     }
 
-    fun checkForUpdates(isManual: Boolean) {
-        viewModelScope.launch { updateManager.checkForUpdatesWithState(isManual) }
+    fun updateAmoledTheme(enabled: Boolean) {
+        viewModelScope.launch {
+            themePreferences.saveAmoledTheme(enabled)
+        }
     }
 
-    fun resetUpdateCheckState() {
-        updateManager.resetUpdateCheckState()
+    fun updateVibrationEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            themePreferences.saveVibrationEnabled(enabled)
+        }
+    }
+
+    fun updateColorPreset(preset: ColorPreset) {
+        viewModelScope.launch {
+            themePreferences.saveColorPreset(preset)
+        }
+    }
+
+    fun updateAppIcon(preset: AppIconPreset) {
+        viewModelScope.launch {
+            themePreferences.saveAppIcon(preset)
+            appIconManager.applyIcon(preset)
+        }
+    }
+
+    fun updateFontPreset(preset: FontPreset) {
+        viewModelScope.launch {
+            themePreferences.saveFontPreset(preset)
+        }
+    }
+
+    fun updateUseCustomVariableFont(enabled: Boolean) {
+        viewModelScope.launch {
+            themePreferences.saveUseCustomVariableFont(enabled)
+        }
+    }
+
+    fun updateCustomFontWeight(weight: Int) {
+        viewModelScope.launch {
+            themePreferences.saveCustomFontWeight(weight)
+        }
+    }
+
+    fun updateCustomFontWidth(width: Float) {
+        viewModelScope.launch {
+            themePreferences.saveCustomFontWidth(width)
+        }
+    }
+
+    fun updateCustomFontRoundness(roundness: Float) {
+        viewModelScope.launch {
+            themePreferences.saveCustomFontRoundness(roundness)
+        }
     }
 }

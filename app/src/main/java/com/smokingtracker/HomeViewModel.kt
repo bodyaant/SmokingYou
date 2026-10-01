@@ -3,18 +3,21 @@ package com.smokingtracker
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.smokingtracker.data.DataStoreManager
+import com.smokingtracker.data.TriggerItem
+import com.smokingtracker.data.TriggerType
 import com.smokingtracker.data.local.SmokingEntryEntity
+import com.smokingtracker.data.preferences.AppMetaPreferences
+import com.smokingtracker.data.preferences.UserPreferences
 import com.smokingtracker.data.repository.SmokingRepository
+import com.smokingtracker.data.repository.TriggerRepository
 import com.smokingtracker.widget.WidgetUpdateManager
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -26,7 +29,9 @@ sealed interface HomeFabUiAction {
 
 class HomeViewModel(
     private val repository: SmokingRepository,
-    private val dataStoreManager: DataStoreManager,
+    private val triggerRepository: TriggerRepository,
+    private val userPreferences: UserPreferences,
+    private val appMetaPreferences: AppMetaPreferences,
     private val achievementsCoordinator: AchievementsCoordinator,
     application: Application
 ) : AndroidViewModel(application) {
@@ -52,66 +57,56 @@ class HomeViewModel(
         }
     }
 
-    val smokingEntries: StateFlow<List<Long>> = repository.smokingEntries
-        .map { entities -> entities.filter { !it.isResisted }.map { it.timestamp } }
+    val smokingEntries: StateFlow<List<Long>> = repository.nonResistedTimestamps
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val allSmokingEntities: StateFlow<List<SmokingEntryEntity>> = repository.smokingEntries
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val resistedEntries: StateFlow<List<SmokingEntryEntity>> = repository.smokingEntries
-        .map { entities -> entities.filter { it.isResisted } }
+    val resistedEntries: StateFlow<List<SmokingEntryEntity>> = repository.resistedEntries
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val dailyLimit: StateFlow<Int> = dataStoreManager.dailyLimit
+    val dailyLimit: StateFlow<Int> = userPreferences.dailyLimit
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
-    val unlockedAchievements: StateFlow<Set<String>> = dataStoreManager.unlockedAchievements
+    val unlockedAchievements: StateFlow<Set<String>> = appMetaPreferences.unlockedAchievements
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
 
-    val customTriggers: StateFlow<List<String>> = dataStoreManager.customTriggers
+    val customTriggers: StateFlow<List<String>> = triggerRepository.customTriggers
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val disabledDefaultTriggers: StateFlow<Set<String>> = dataStoreManager.disabledDefaultTriggers
+    val disabledDefaultTriggers: StateFlow<Set<String>> = triggerRepository.disabledDefaultTriggers
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
 
-    val activeTriggers: StateFlow<List<com.smokingtracker.data.TriggerItem>> = kotlinx.coroutines.flow.combine(
-        dataStoreManager.customTriggers,
-        dataStoreManager.disabledDefaultTriggers
-    ) { customList, disabledDefaults ->
-        val builtIn = com.smokingtracker.data.TriggerType.allEntries()
-            .filter { !disabledDefaults.contains(it.key) }
-            .map { com.smokingtracker.data.TriggerItem.fromBuiltIn(it, isEnabled = true) }
-        val custom = customList.map { com.smokingtracker.data.TriggerItem.fromCustom(it) }
-        builtIn + custom
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        com.smokingtracker.data.TriggerType.allEntries().map { com.smokingtracker.data.TriggerItem.fromBuiltIn(it) }
-    )
+    val activeTriggers: StateFlow<List<TriggerItem>> = triggerRepository.activeTriggers
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            TriggerType.allEntries().map { TriggerItem.fromBuiltIn(it) }
+        )
 
     private val _showTaperingCheckIn = MutableStateFlow(false)
     val showTaperingCheckIn: StateFlow<Boolean> = _showTaperingCheckIn.asStateFlow()
 
-    val taperingIntervalDays: StateFlow<Int> = dataStoreManager.taperingIntervalDays
+    val taperingIntervalDays: StateFlow<Int> = userPreferences.taperingIntervalDays
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 7)
 
     fun addCustomTrigger(name: String, onResult: (String?) -> Unit = {}) {
         viewModelScope.launch {
-            val added = dataStoreManager.addCustomTrigger(name)
+            val added = triggerRepository.addCustomTrigger(name)
             onResult(added)
         }
     }
 
     fun removeCustomTrigger(name: String) {
         viewModelScope.launch {
-            dataStoreManager.removeCustomTrigger(name)
+            triggerRepository.removeCustomTrigger(name)
         }
     }
 
     fun toggleDefaultTrigger(key: String, isEnabled: Boolean) {
         viewModelScope.launch {
-            dataStoreManager.toggleDefaultTrigger(key, isEnabled)
+            triggerRepository.toggleDefaultTrigger(key, isEnabled)
         }
     }
 
@@ -148,7 +143,7 @@ class HomeViewModel(
         viewModelScope.launch {
             val now = System.currentTimeMillis()
             if (now - timestamp <= 10_000L) {
-                dataStoreManager.setHasCancelledWithin10s(true)
+                appMetaPreferences.setHasCancelledWithin10s(true)
             }
             repository.removeEntryById(id)
             val updated = smokingEntries.value.toMutableList().apply {
@@ -181,12 +176,12 @@ class HomeViewModel(
 
     fun checkTaperingPlanEligibility() {
         viewModelScope.launch {
-            val enabled = dataStoreManager.taperingPlanEnabled.first()
+            val enabled = userPreferences.taperingPlanEnabled.first()
             if (!enabled) return@launch
-            val intervalDays = dataStoreManager.taperingIntervalDays.first()
-            val lastCheckin = dataStoreManager.lastTaperingCheckinDate.first()
+            val intervalDays = userPreferences.taperingIntervalDays.first()
+            val lastCheckin = userPreferences.lastTaperingCheckinDate.first()
             val now = System.currentTimeMillis()
-            val limit = dataStoreManager.dailyLimit.first()
+            val limit = userPreferences.dailyLimit.first()
             if (limit <= 0) return@launch
 
             val daysPassed = if (lastCheckin > 0) {
@@ -207,17 +202,17 @@ class HomeViewModel(
 
     fun acceptTaperingReduction() {
         viewModelScope.launch {
-            val currentLimit = dataStoreManager.dailyLimit.first()
+            val currentLimit = userPreferences.dailyLimit.first()
             val newLimit = (currentLimit - 1).coerceAtLeast(0)
-            dataStoreManager.setDailyLimit(newLimit)
-            dataStoreManager.updateLastTaperingCheckinDate(System.currentTimeMillis())
+            userPreferences.setDailyLimit(newLimit)
+            userPreferences.updateLastTaperingCheckinDate(System.currentTimeMillis())
             _showTaperingCheckIn.value = false
         }
     }
 
     fun keepTaperingLimit() {
         viewModelScope.launch {
-            dataStoreManager.updateLastTaperingCheckinDate(System.currentTimeMillis())
+            userPreferences.updateLastTaperingCheckinDate(System.currentTimeMillis())
             _showTaperingCheckIn.value = false
         }
     }
@@ -225,9 +220,9 @@ class HomeViewModel(
     fun snoozeTaperingCheckIn() {
         viewModelScope.launch {
             val now = System.currentTimeMillis()
-            val intervalMs = dataStoreManager.taperingIntervalDays.first() * 24L * 60L * 60L * 1000L
+            val intervalMs = userPreferences.taperingIntervalDays.first() * 24L * 60L * 60L * 1000L
             val snoozeMs = 3L * 24L * 60L * 60L * 1000L
-            dataStoreManager.updateLastTaperingCheckinDate(now - intervalMs + snoozeMs)
+            userPreferences.updateLastTaperingCheckinDate(now - intervalMs + snoozeMs)
             _showTaperingCheckIn.value = false
         }
     }
