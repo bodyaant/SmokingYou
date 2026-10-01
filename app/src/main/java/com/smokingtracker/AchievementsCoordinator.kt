@@ -1,7 +1,8 @@
 package com.smokingtracker
 
 import android.app.Application
-import com.smokingtracker.data.DataStoreManager
+import com.smokingtracker.data.preferences.AppMetaPreferences
+import com.smokingtracker.data.preferences.UserPreferences
 import com.smokingtracker.data.repository.SmokingRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +14,8 @@ import kotlinx.coroutines.launch
 
 class AchievementsCoordinator(
     private val repository: SmokingRepository,
-    private val dataStoreManager: DataStoreManager,
+    private val appMetaPreferences: AppMetaPreferences,
+    private val userPreferences: UserPreferences,
     private val achievementsManager: AchievementsManager,
     private val application: Application,
     private val applicationScope: CoroutineScope
@@ -24,18 +26,18 @@ class AchievementsCoordinator(
 
     fun checkAndUpdate(updatedEntries: List<Long>? = null, wasEntryRemoved: Boolean = false) {
         applicationScope.launch(Dispatchers.Default) {
-            val isReg = dataStoreManager.isRegistered.first()
+            val isReg = appMetaPreferences.isRegistered.first()
             if (!isReg) return@launch
 
             val entries = updatedEntries
-                ?: repository.smokingEntries.first().filter { !it.isResisted }.map { it.timestamp }
-            val launches = dataStoreManager.appLaunchDates.first()
-            val dailyLimit = dataStoreManager.dailyLimit.first()
-            val hasBackup = dataStoreManager.hasMadeBackup.first()
-            val hasPriceChanged = dataStoreManager.hasChangedPackPrice.first()
-            val hasCancelled10s = dataStoreManager.hasCancelledWithin10s.first()
-            val themeLangCount = dataStoreManager.themeLangChangeCount.first()
-            val analyticsCount = dataStoreManager.analyticsVisitCount.first()
+                ?: repository.nonResistedTimestamps.first()
+            val launches = appMetaPreferences.appLaunchDates.first()
+            val dailyLimit = userPreferences.dailyLimit.first()
+            val hasBackup = appMetaPreferences.hasMadeBackup.first()
+            val hasPriceChanged = appMetaPreferences.hasChangedPackPrice.first()
+            val hasCancelled10s = appMetaPreferences.hasCancelledWithin10s.first()
+            val themeLangCount = appMetaPreferences.themeLangChangeCount.first()
+            val analyticsCount = appMetaPreferences.analyticsVisitCount.first()
 
             val lastEntry = entries.maxOrNull()
             val now = System.currentTimeMillis()
@@ -53,8 +55,8 @@ class AchievementsCoordinator(
                 analyticsVisitsToday = analyticsCount
             )
 
-            val previouslyUnlocked = dataStoreManager.unlockedAchievements.first()
-            val existingDates = dataStoreManager.achievementUnlockDates.first().toMutableMap()
+            val previouslyUnlocked = appMetaPreferences.unlockedAchievements.first()
+            val existingDates = appMetaPreferences.achievementUnlockDates.first().toMutableMap()
             val newUnlockedSet = achievementsManager.calculateUnlockedAchievements(ctx)
 
             val noSmokeIds = achievementsManager.achievementsList
@@ -91,8 +93,8 @@ class AchievementsCoordinator(
                 }
             }
 
-            dataStoreManager.setUnlockedAchievements(effectiveUnlockedSet)
-            dataStoreManager.saveAchievementUnlockDates(existingDates)
+            appMetaPreferences.setUnlockedAchievements(effectiveUnlockedSet)
+            appMetaPreferences.saveAchievementUnlockDates(existingDates)
         }
     }
 }

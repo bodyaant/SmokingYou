@@ -6,9 +6,13 @@ import androidx.annotation.Keep
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.smokingtracker.data.AppIconPreset
-import com.smokingtracker.data.DataStoreManager
 import com.smokingtracker.data.local.SmokingEntryEntity
+import com.smokingtracker.data.preferences.AppMetaPreferences
+import com.smokingtracker.data.preferences.NotificationPreferences
+import com.smokingtracker.data.preferences.ThemePreferences
+import com.smokingtracker.data.preferences.UserPreferences
 import com.smokingtracker.data.repository.SmokingRepository
+import com.smokingtracker.data.repository.TriggerRepository
 import com.smokingtracker.widget.WidgetUpdateManager
 import kotlinx.coroutines.flow.first
 import java.io.InputStreamReader
@@ -16,7 +20,11 @@ import java.io.OutputStreamWriter
 
 class BackupManager(
     private val application: Application,
-    private val dataStoreManager: DataStoreManager,
+    private val themePreferences: ThemePreferences,
+    private val userPreferences: UserPreferences,
+    private val notificationPreferences: NotificationPreferences,
+    private val appMetaPreferences: AppMetaPreferences,
+    private val triggerRepository: TriggerRepository,
     private val repository: SmokingRepository,
     private val achievementsCoordinator: AchievementsCoordinator,
     private val appIconManager: AppIconManager
@@ -26,48 +34,48 @@ class BackupManager(
     suspend fun backup(uri: Uri) {
         val currentEntries = repository.smokingEntries.first()
         val data = BackupData(
-            isRegistered = dataStoreManager.isRegistered.first(),
+            isRegistered = appMetaPreferences.isRegistered.first(),
             entries = currentEntries.map {
                 BackupEntry(timestamp = it.timestamp, trigger = it.trigger, isResisted = it.isResisted)
             },
-            appTheme = dataStoreManager.appTheme.first().name,
-            unlockedAchievements = dataStoreManager.unlockedAchievements.first(),
-            achievementUnlockDates = dataStoreManager.achievementUnlockDates.first(),
-            dailyLimit = dataStoreManager.dailyLimit.first(),
-            packPrice = dataStoreManager.packPrice.first(),
-            packSize = dataStoreManager.packSize.first(),
-            currency = dataStoreManager.currency.first(),
-            colorPreset = dataStoreManager.colorPreset.first().name,
-            fontPreset = dataStoreManager.fontPreset.first().name,
-            amoledTheme = dataStoreManager.amoledTheme.first(),
-            vibrationEnabled = dataStoreManager.vibrationEnabled.first(),
-            hasMadeBackup = dataStoreManager.hasMadeBackup.first(),
-            hasChangedPackPrice = dataStoreManager.hasChangedPackPrice.first(),
-            hasCancelledWithin10s = dataStoreManager.hasCancelledWithin10s.first(),
-            appLaunchDates = dataStoreManager.appLaunchDates.first(),
-            useCustomVariableFont = dataStoreManager.useCustomVariableFont.first(),
-            customFontWeight = dataStoreManager.customFontWeight.first(),
-            customFontWidth = dataStoreManager.customFontWidth.first(),
-            customFontRoundness = dataStoreManager.customFontRoundness.first(),
-            taperingPlanEnabled = dataStoreManager.taperingPlanEnabled.first(),
-            taperingIntervalDays = dataStoreManager.taperingIntervalDays.first(),
-            lastTaperingCheckinDate = dataStoreManager.lastTaperingCheckinDate.first(),
-            hasHistoricalBaseline = dataStoreManager.hasHistoricalBaseline.first(),
-            historicalStartDate = dataStoreManager.historicalStartDate.first(),
-            historicalDailyAvg = dataStoreManager.historicalDailyAvg.first(),
-            historicalPackPrice = dataStoreManager.historicalPackPrice.first(),
-            historicalPackSize = dataStoreManager.historicalPackSize.first(),
-            historicalTriggerPriorities = dataStoreManager.historicalTriggerPriorities.first(),
-            appIcon = dataStoreManager.appIcon.first().name,
-            checkUpdatesOnStart = dataStoreManager.checkUpdatesOnStart.first(),
-            customTriggers = dataStoreManager.customTriggers.first(),
-            disabledDefaultTriggers = dataStoreManager.disabledDefaultTriggers.first(),
-            notificationEnabled = dataStoreManager.ongoingNotificationEnabled.first(),
-            notificationLowPriority = dataStoreManager.notificationLowPriority.first(),
-            notificationShowTimer = dataStoreManager.notificationShowTimer.first(),
-            notificationShowProgress = dataStoreManager.notificationShowProgress.first(),
-            notificationShowAddButton = dataStoreManager.notificationShowAddButton.first(),
-            notificationShowResistButton = dataStoreManager.notificationShowResistButton.first()
+            appTheme = themePreferences.appTheme.first().name,
+            unlockedAchievements = appMetaPreferences.unlockedAchievements.first(),
+            achievementUnlockDates = appMetaPreferences.achievementUnlockDates.first(),
+            dailyLimit = userPreferences.dailyLimit.first(),
+            packPrice = userPreferences.packPrice.first(),
+            packSize = userPreferences.packSize.first(),
+            currency = userPreferences.currency.first(),
+            colorPreset = themePreferences.colorPreset.first().name,
+            fontPreset = themePreferences.fontPreset.first().name,
+            amoledTheme = themePreferences.amoledTheme.first(),
+            vibrationEnabled = themePreferences.vibrationEnabled.first(),
+            hasMadeBackup = appMetaPreferences.hasMadeBackup.first(),
+            hasChangedPackPrice = appMetaPreferences.hasChangedPackPrice.first(),
+            hasCancelledWithin10s = appMetaPreferences.hasCancelledWithin10s.first(),
+            appLaunchDates = appMetaPreferences.appLaunchDates.first(),
+            useCustomVariableFont = themePreferences.useCustomVariableFont.first(),
+            customFontWeight = themePreferences.customFontWeight.first(),
+            customFontWidth = themePreferences.customFontWidth.first(),
+            customFontRoundness = themePreferences.customFontRoundness.first(),
+            taperingPlanEnabled = userPreferences.taperingPlanEnabled.first(),
+            taperingIntervalDays = userPreferences.taperingIntervalDays.first(),
+            lastTaperingCheckinDate = userPreferences.lastTaperingCheckinDate.first(),
+            hasHistoricalBaseline = userPreferences.hasHistoricalBaseline.first(),
+            historicalStartDate = userPreferences.historicalStartDate.first(),
+            historicalDailyAvg = userPreferences.historicalDailyAvg.first(),
+            historicalPackPrice = userPreferences.historicalPackPrice.first(),
+            historicalPackSize = userPreferences.historicalPackSize.first(),
+            historicalTriggerPriorities = userPreferences.historicalTriggerPriorities.first(),
+            appIcon = themePreferences.appIcon.first().name,
+            checkUpdatesOnStart = appMetaPreferences.checkUpdatesOnStart.first(),
+            customTriggers = triggerRepository.customTriggers.first(),
+            disabledDefaultTriggers = triggerRepository.disabledDefaultTriggers.first(),
+            notificationEnabled = notificationPreferences.ongoingNotificationEnabled.first(),
+            notificationLowPriority = notificationPreferences.notificationLowPriority.first(),
+            notificationShowTimer = notificationPreferences.notificationShowTimer.first(),
+            notificationShowProgress = notificationPreferences.notificationShowProgress.first(),
+            notificationShowAddButton = notificationPreferences.notificationShowAddButton.first(),
+            notificationShowResistButton = notificationPreferences.notificationShowResistButton.first()
         )
 
         application.contentResolver.openOutputStream(uri)?.use { outputStream ->
@@ -76,7 +84,7 @@ class BackupManager(
             }
         } ?: throw IllegalStateException("Failed to open OutputStream for URI: $uri")
 
-        dataStoreManager.setHasMadeBackup(true)
+        appMetaPreferences.setHasMadeBackup(true)
         achievementsCoordinator.checkAndUpdate()
     }
 
@@ -90,26 +98,24 @@ class BackupManager(
                 val fontPresetVal = data.fontPreset ?: "SYSTEM"
                 val appIconVal = data.appIcon ?: AppIconPreset.DEFAULT.name
 
-                dataStoreManager.restoreFromBackup(
-                    isReg = data.isRegistered,
+                themePreferences.restoreThemePreferences(
                     theme = data.appTheme,
-                    achievements = data.unlockedAchievements,
-                    limit = data.dailyLimit ?: 0,
-                    price = data.packPrice ?: 0.0f,
-                    size = data.packSize ?: 20,
-                    curr = data.currency ?: "USD",
                     colorPresetVal = colorPresetVal,
                     fontPresetVal = fontPresetVal,
                     amoledThemeVal = data.amoledTheme ?: false,
                     vibrationEnabledVal = data.vibrationEnabled ?: true,
-                    hasBackupVal = data.hasMadeBackup ?: false,
-                    hasPriceChangedVal = data.hasChangedPackPrice ?: false,
-                    hasCancelled10sVal = data.hasCancelledWithin10s ?: false,
-                    launchesVal = data.appLaunchDates ?: emptyList(),
                     useCustomVariableFontVal = data.useCustomVariableFont ?: false,
                     customFontWeightVal = data.customFontWeight ?: 500,
                     customFontWidthVal = data.customFontWidth ?: 100f,
                     customFontRoundnessVal = data.customFontRoundness ?: 0f,
+                    appIconVal = appIconVal
+                )
+
+                userPreferences.restoreUserPreferences(
+                    limit = data.dailyLimit ?: 0,
+                    price = data.packPrice ?: 0.0f,
+                    size = data.packSize ?: 20,
+                    curr = data.currency ?: "USD",
                     taperingPlanEnabledVal = data.taperingPlanEnabled ?: false,
                     taperingIntervalDaysVal = data.taperingIntervalDays ?: 7,
                     lastTaperingCheckinDateVal = data.lastTaperingCheckinDate ?: 0L,
@@ -118,18 +124,32 @@ class BackupManager(
                     historicalDailyAvgVal = data.historicalDailyAvg ?: 0,
                     historicalPackPriceVal = data.historicalPackPrice ?: 0f,
                     historicalPackSizeVal = data.historicalPackSize ?: 20,
-                    historicalTriggerPrioritiesVal = data.historicalTriggerPriorities ?: emptyList(),
-                    appIconVal = appIconVal,
-                    checkUpdatesOnStartVal = data.checkUpdatesOnStart ?: false,
-                    customTriggersVal = data.customTriggers ?: emptyList(),
-                    disabledDefaultTriggersVal = data.disabledDefaultTriggers ?: emptySet(),
+                    historicalTriggerPrioritiesVal = data.historicalTriggerPriorities ?: emptyList()
+                )
+
+                notificationPreferences.restoreNotificationPreferences(
                     notificationEnabledVal = data.notificationEnabled ?: false,
                     notificationLowPriorityVal = data.notificationLowPriority ?: true,
                     notificationShowTimerVal = data.notificationShowTimer ?: true,
                     notificationShowProgressVal = data.notificationShowProgress ?: true,
                     notificationShowAddButtonVal = data.notificationShowAddButton ?: true,
-                    notificationShowResistButtonVal = data.notificationShowResistButton ?: false,
-                    achievementUnlockDatesVal = data.achievementUnlockDates ?: emptyMap()
+                    notificationShowResistButtonVal = data.notificationShowResistButton ?: false
+                )
+
+                appMetaPreferences.restoreAppMetaPreferences(
+                    isReg = data.isRegistered,
+                    achievements = data.unlockedAchievements,
+                    achievementUnlockDatesVal = data.achievementUnlockDates ?: emptyMap(),
+                    hasBackupVal = data.hasMadeBackup ?: false,
+                    hasPriceChangedVal = data.hasChangedPackPrice ?: false,
+                    hasCancelled10sVal = data.hasCancelledWithin10s ?: false,
+                    launchesVal = data.appLaunchDates ?: emptyList(),
+                    checkUpdatesOnStartVal = data.checkUpdatesOnStart ?: false
+                )
+
+                triggerRepository.restoreTriggers(
+                    customTriggersVal = data.customTriggers ?: emptyList(),
+                    disabledDefaultTriggersVal = data.disabledDefaultTriggers ?: emptySet()
                 )
 
                 val backupEntries = data.entries ?: data.smokingEntries?.map { ts ->

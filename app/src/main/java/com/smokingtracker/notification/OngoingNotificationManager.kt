@@ -9,7 +9,8 @@ import androidx.core.app.NotificationManagerCompat
 import com.smokingtracker.MainActivity
 import com.smokingtracker.R
 import com.smokingtracker.SmokingTrackerApp
-import com.smokingtracker.data.DataStoreManager
+import com.smokingtracker.data.preferences.NotificationPreferences
+import com.smokingtracker.data.preferences.UserPreferences
 import com.smokingtracker.data.repository.SmokingRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
@@ -38,10 +39,11 @@ object OngoingNotificationManager : KoinComponent {
     }
 
     private suspend fun updateInternal(context: Context) {
-        val dataStoreManager: DataStoreManager = get()
+        val notificationPreferences: NotificationPreferences = get()
+        val userPreferences: UserPreferences = get()
         val repository: SmokingRepository = get()
 
-        val isEnabled = dataStoreManager.ongoingNotificationEnabled.first()
+        val isEnabled = notificationPreferences.ongoingNotificationEnabled.first()
         val notificationManager = NotificationManagerCompat.from(context)
 
         if (!isEnabled) {
@@ -57,12 +59,12 @@ object OngoingNotificationManager : KoinComponent {
             if (!hasPermission) return
         }
 
-        val isLowPriority = dataStoreManager.notificationLowPriority.first()
-        val showTimer = dataStoreManager.notificationShowTimer.first()
-        val showProgress = dataStoreManager.notificationShowProgress.first()
-        val showAddButton = dataStoreManager.notificationShowAddButton.first()
-        val showResistButton = dataStoreManager.notificationShowResistButton.first()
-        val dailyLimit = dataStoreManager.dailyLimit.first()
+        val isLowPriority = notificationPreferences.notificationLowPriority.first()
+        val showTimer = notificationPreferences.notificationShowTimer.first()
+        val showProgress = notificationPreferences.notificationShowProgress.first()
+        val showAddButton = notificationPreferences.notificationShowAddButton.first()
+        val showResistButton = notificationPreferences.notificationShowResistButton.first()
+        val dailyLimit = userPreferences.dailyLimit.first()
 
         val channelId = if (isLowPriority) {
             SmokingTrackerApp.CHANNEL_ONGOING_LOW

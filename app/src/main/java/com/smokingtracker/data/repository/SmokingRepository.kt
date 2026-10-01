@@ -1,24 +1,34 @@
 package com.smokingtracker.data.repository
 
-import com.smokingtracker.data.DataStoreManager
 import com.smokingtracker.data.local.SmokingDao
 import com.smokingtracker.data.local.SmokingEntryEntity
+import com.smokingtracker.data.preferences.AppMetaPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class SmokingRepository(
     private val smokingDao: SmokingDao,
-    private val dataStoreManager: DataStoreManager,
+    private val appMetaPreferences: AppMetaPreferences,
     private val applicationScope: CoroutineScope
 ) {
     val smokingEntries: Flow<List<SmokingEntryEntity>> = smokingDao.getAllEntriesFlow()
 
+    val nonResistedEntries: Flow<List<SmokingEntryEntity>> = smokingEntries
+        .map { entities -> entities.filter { !it.isResisted } }
+
+    val nonResistedTimestamps: Flow<List<Long>> = nonResistedEntries
+        .map { entities -> entities.map { it.timestamp } }
+
+    val resistedEntries: Flow<List<SmokingEntryEntity>> = smokingEntries
+        .map { entities -> entities.filter { it.isResisted } }
+
     init {
         applicationScope.launch {
-            if (dataStoreManager.hasOldData.first()) {
-                val (oldEntries, oldTriggers) = dataStoreManager.getOldEntriesAndClear()
+            if (appMetaPreferences.hasOldData.first()) {
+                val (oldEntries, oldTriggers) = appMetaPreferences.getOldEntriesAndClear()
                 if (oldEntries.isNotEmpty()) {
                     val entities = oldEntries.map { ts ->
                         SmokingEntryEntity(timestamp = ts, trigger = oldTriggers[ts])

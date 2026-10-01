@@ -13,7 +13,8 @@ import androidx.annotation.Keep
 import com.smokingtracker.AchievementsCoordinator
 import com.smokingtracker.MainActivity
 import com.smokingtracker.R
-import com.smokingtracker.data.DataStoreManager
+import com.smokingtracker.data.preferences.NotificationPreferences
+import com.smokingtracker.data.preferences.UserPreferences
 import com.smokingtracker.data.repository.SmokingRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
@@ -123,11 +124,12 @@ class TimerWidgetProvider : AppWidgetProvider(), KoinComponent {
         ) {
             try {
                     val repository: SmokingRepository = get()
-                    val dataStoreManager: DataStoreManager = get()
+                    val userPreferences: UserPreferences = get()
+                    val notificationPreferences: NotificationPreferences = get()
 
                     val entries = repository.getAllEntries()
-                    val dailyLimit = dataStoreManager.dailyLimit.first()
-                    val showResistButton = dataStoreManager.widgetShowResistButton.first()
+                    val dailyLimit = userPreferences.dailyLimit.first()
+                    val showResistButton = notificationPreferences.widgetShowResistButton.first()
 
                     val nonResistedEntries = entries.filter { !it.isResisted }.map { it.timestamp }
                     val lastTimestamp = nonResistedEntries.maxOrNull()
