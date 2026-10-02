@@ -1,7 +1,5 @@
 package com.smokingtracker.di
 
-import androidx.lifecycle.ProcessLifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
 import com.smokingtracker.AchievementsCoordinator
 import com.smokingtracker.AchievementsManager
@@ -23,13 +21,16 @@ import com.smokingtracker.data.preferences.ThemePreferences
 import com.smokingtracker.data.preferences.UserPreferences
 import com.smokingtracker.data.repository.SmokingRepository
 import com.smokingtracker.data.repository.TriggerRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
-    single { ProcessLifecycleOwner.get().lifecycleScope }
+    single<CoroutineScope> { CoroutineScope(SupervisorJob() + Dispatchers.IO) }
     single { AchievementsManager() }
     single { StatisticsManager() }
     single { ThemePreferences(androidContext()) }

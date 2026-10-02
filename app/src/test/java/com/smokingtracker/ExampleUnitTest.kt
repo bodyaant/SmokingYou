@@ -286,4 +286,13 @@ class ExampleUnitTest {
         assertTrue(unlocked.contains("nosmoke_1d"))
         assertFalse(unlocked.contains("nosmoke_3d"))
     }
+
+    @Test
+    fun testAppModuleContainsCoroutineScope() {
+        val app = org.koin.dsl.koinApplication {
+            modules(com.smokingtracker.di.appModule)
+        }
+        val scope: kotlinx.coroutines.CoroutineScope? = app.koin.getOrNull()
+        assertNotNull(scope)
+    }
 }
