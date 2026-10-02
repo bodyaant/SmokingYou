@@ -7,6 +7,7 @@ import androidx.annotation.Keep
 import com.smokingtracker.widget.WidgetUpdateManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
@@ -25,7 +26,9 @@ class BootReceiver : BroadcastReceiver(), KoinComponent {
                 val pendingResult = goAsync()
                 get<CoroutineScope>().launch {
                     try {
-                        WidgetUpdateManager.updateAll(context)
+                        withTimeout(10_000L) {
+                            WidgetUpdateManager.updateAll(context)
+                        }
                     } catch (e: Exception) {
                         e.printStackTrace()
                     } finally {

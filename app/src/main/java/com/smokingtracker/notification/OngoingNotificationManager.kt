@@ -72,7 +72,7 @@ object OngoingNotificationManager : KoinComponent {
             SmokingTrackerApp.CHANNEL_ONGOING_DEFAULT
         }
 
-        val allEntities = repository.getAllEntries()
+        val allEntities = repository.smokingEntries.first()
         val todayStart = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 0)
             set(Calendar.MINUTE, 0)
