@@ -22,24 +22,14 @@
     <string name="dialog_ok">ОК</string>
     <string name="dialog_cancel">Скасувати</string>
     <string name="nav_home">Головна</string>
-    <string name="nav_graph">Графіки</string>
     <string name="nav_personal">Налаштування</string>
     <string name="analytics_title">Аналітика</string>
-    <string name="daily_overview">Щоденний огляд</string>
-    <string name="weekly_overview">Щотижневий огляд</string>
-    <string name="monthly_overview">Щомісячний огляд</string>
-    <string name="yearly_overview">Щорічний огляд</string>
     <string name="graph_period_day">День</string>
     <string name="graph_period_week">Тиждень</string>
     <string name="graph_period_month">Місяць</string>
     <string name="graph_period_year">Рік</string>
-    <string name="graph_limit_line">Ліміт: %1$d</string>
     <string name="graph_over_limit_badge">+%1$d понад ліміт</string>
     <string name="graph_within_limit_badge">У межах ліміту</string>
-    <string name="graph_avg_label">У середньому: %1$s</string>
-    <string name="graph_peak_label">Пік: %1$d</string>
-    <string name="graph_total_label">Всього: %1$d</string>
-    <string name="graph_in_limit_days">%1$d/%2$d у нормі</string>
     <string name="graph_metric_avg">У середньому</string>
     <string name="graph_metric_in_limit">У нормі</string>
     <string name="graph_metric_peak">Пік</string>
@@ -52,7 +42,6 @@
     <string name="chart_view_line">Тренд</string>
     <string name="chart_view_calendar">Календар</string>
     <string name="chart_clean_day">Чистий день</string>
-    <string name="chart_clean_day_desc">0 сигарет — чудова робота!</string>
     <string name="chart_selected_day">Вибраний день</string>
     <string name="chart_selected_month">Вибраний місяць</string>
     <string name="chart_selected_hour">Вибрана година</string>
@@ -64,47 +53,34 @@
     <string name="day_detail_interval">Сер. інтервал</string>
     <string name="day_detail_triggers">Головний тригер</string>
     <string name="day_detail_no_triggers">Немає</string>
-    <string name="day_parts_breakdown_title">За частинами доби</string>
-    <string name="day_parts_breakdown_desc">Розподіл викурених сигарет за часом доби</string>
     <string name="btn_close">Закрити</string>
     <string name="format_hours_minutes">%1$d год %2$d хв</string>
     <string name="format_minutes_only">%1$d хв</string>
     <string name="peak_hours_quadrant_format">%1$s • %2$s (%3$d%%)</string>
     <string name="personal_title">Налаштування</string>
-    <string name="tab_settings">Налаштування</string>
-    <string name="tab_achievements">Досягнення</string>
     <string name="settings_appearance">Зовнішній вигляд</string>
     <string name="settings_theme">Тема</string>
     <string name="settings_theme_desc">Налаштування зовнішнього вигляду додатку</string>
     <string name="settings_vibration">Вібровідгук</string>
     <string name="settings_vibration_desc">Вібрація при натисканнях та діях</string>
-    <string name="limit_dialog_helper">Вкажіть 0 для куріння без щоденного ліміту</string>
     <string name="theme_system">Системна</string>
     <string name="theme_light">Світла</string>
     <string name="theme_dark">Темна</string>
     <string name="settings_section_interface">Інтерфейс та зовнішній вигляд</string>
     <string name="settings_section_goals">Цілі та економія</string>
     <string name="settings_language">Мова</string>
-    <string name="language_value">Українська</string>
     <string name="settings_statistics">Статистика</string>
-    <string name="statistics_desc">Перегляд вашої статистики куріння</string>
     <string name="settings_achievements">Досягнення</string>
     <string name="achievements_desc">Перегляд вашого прогресу та нагород</string>
-    <string name="settings_notifications">Сповіщення</string>
-    <string name="notifications_desc">Керування сповіщеннями</string>
     <string name="settings_data">Дані та резервні копії</string>
     <string name="settings_backup">Резервне копіювання</string>
     <string name="backup_desc">Зберегти резервну копію на пристрій</string>
     <string name="settings_restore">Відновити</string>
     <string name="restore_desc">Відновити дані з пристрою</string>
 
-    <string name="stats_max_per_day">Максимум за день</string>
-    <string name="stats_min_per_day">Мінімум за день</string>
     <string name="stats_avg_per_day">Середнє за день</string>
     <string name="stats_total_count">Всього викурено</string>
     <string name="stats_tracking_since">Відстеження з: %1$s</string>
-    <string name="stats_max_smoke_free_streak">Найдовша серія без куріння</string>
-    <string name="stats_days_unit">%d дн.</string>
     <string name="stats_no_data">Немає даних</string>
     <string name="stats_no_data_desc">Додавайте записи, щоб розрахувати показники та економію</string>
     <string name="triggers_no_data_title">Немає даних про причини</string>
@@ -184,32 +160,26 @@
     <string name="backup_dialog_desc">Ваша статистика, історія та налаштування будуть збережені у файл у вибраній папці. Ви зможете відновити ці дані у будь-який момент.</string>
     <string name="backup_choose_file_location">Виберіть місце збереження</string>
     <string name="backup_start_action">Створити бекап</string>
-    <string name="backup_done_title">Бекап створено</string>
     <string name="restore_dialog_title">Відновлення даних</string>
     <string name="restore_dialog_desc">Ваша поточна статистика, історія та налаштування будуть замінені даними з вибраного файлу резервної копії.</string>
     <string name="restore_choose_file">Виберіть файл бекапу</string>
     <string name="restore_start_action">Відновити</string>
-    <string name="restore_done_title">Дані відновлено</string>
     <string name="backup_restore_cancel">Скасувати</string>
     <string name="backup_restore_close">Закрити</string>
     <string name="language_dialog_title">Виберіть мову</string>
     <string name="settings_daily_limit">Денний ліміт сигарет</string>
     <string name="home_daily_limit">Денний ліміт</string>
 
-    <string name="daily_limit_desc">Попереджати при перевищенні ліміту</string>
     <string name="limit_warning_title">Ліміт перевищено</string>
     <string name="limit_warning_message">Ви досягли денного ліміту сигарет. Все одно хочете додати
         цей запис?</string>
     <string name="add_anyway">Додати все одно</string>
-    <string name="set_limit_title">Встановити ліміт</string>
-    <string name="no_limit">0 (Без ліміту)</string>
     <string name="daily_limit_bottom_sheet_desc">Встановіть максимальну кількість сигарет на день для контролю звички</string>
     <string name="daily_limit_switch_label">Увімкнути денний ліміт</string>
     <string name="daily_limit_cigs_per_day">сигарет на день</string>
     <string name="daily_limit_presets">Швидкий вибір:</string>
     <string name="daily_limit_active_subtitle">%1$d сиг/день • Контроль увімкнено</string>
     <string name="daily_limit_off_subtitle">Без обмежень</string>
-    <string name="daily_limit_tapering_active_hint">Активний автоплан зниження (кожні %1$d дн.). Встановлення ліміту оновить базову планку.</string>
     <string name="daily_limit_info_hint">При перевищенні з\'явиться попередження, а на головному екрані та у сповіщенні відобразиться шкала прогресу.</string>
 
     <string name="settings_info">Про додаток та оновлення</string>
@@ -226,8 +196,6 @@
     <string name="font_preset_neo">Neo</string>
     <string name="font_preset_impact">Impact</string>
     <string name="font_preset_airy">Airy</string>
-    <string name="font_preset_wide">Широкий</string>
-    <string name="font_preset_thin">Тонкий</string>
     <string name="font_preset_system">Системний</string>
     <string name="settings_custom_variable_font">Власний варіативний шрифт</string>
     <string name="settings_custom_variable_font_desc">Ручне налаштування товщини, ширини та скруглення</string>
@@ -238,7 +206,6 @@
     <string name="settings_amoled_theme">AMOLED тема</string>
     <string name="settings_amoled_theme_desc">Повністю чорний фон у темній темі</string>
     <string name="settings_color_preset">Кольорова схема</string>
-    <string name="settings_color_preset_desc">Вибір кольорової палітри інтерфейсу</string>
     <string name="color_preset_system">Системна</string>
     <string name="color_preset_sage">Шавлія</string>
     <string name="color_preset_rose">Троянда</string>
@@ -255,7 +222,6 @@
     <string name="settings_appearance_desc">Налаштування теми, AMOLED режиму та шрифтів</string>
 
     <string name="trigger_dialog_title">Що викликало потяг?</string>
-    <string name="change_trigger_dialog_title">Змінити причину</string>
     <string name="trigger_skip">Пропустити</string>
     <string name="trigger_stress">Стрес</string>
     <string name="trigger_boredom">Нудьга</string>
@@ -274,18 +240,13 @@
     <string name="trigger_custom_empty">Власних причин поки немає</string>
     <string name="trigger_standard_section">Стандартні причини</string>
     <string name="trigger_already_exists">Така причина вже існує</string>
-    <string name="trigger_name_empty">Введіть назву причини</string>
     <string name="trigger_delete_dialog_title">Видалити причину?</string>
     <string name="trigger_delete_dialog_desc">Причина перестане пропонуватися при виборі. Існуючі записи в історії збережуться.</string>
-    <string name="trigger_quick_add_title">Додати та вибрати</string>
     <string name="edit_time_label">Змінити час</string>
     <string name="edit_reason_label">Причина</string>
 
     <string name="tab_graphs">Графіки</string>
     <string name="tab_triggers">Причини</string>
-    <string name="triggers_no_data">Додавайте причини при записі куріння, щоб побачити тут
-        аналітику.</string>
-    <string name="main_trigger">Головний тригер</string>
     <string name="triggers_title">Причини куріння</string>
     <string name="trigger_count_pattern">%1$d разів (%2$d%%)</string>
     <string name="trigger_period_all">Весь час</string>
@@ -305,12 +266,10 @@
     <string name="trigger_manage_desc">Додати власні або приховати стандартні</string>
     <string name="trigger_time_patterns_title">Патерни за часом доби</string>
     <string name="trigger_time_patterns_desc">Переважаючий тригер для кожного періоду доби</string>
-    <string name="trigger_dominant_format">%1$s (%2$d%%)</string>
     <string name="trigger_no_activity_period">Немає потягу</string>
     <string name="trigger_trend_increase">+%1$d</string>
     <string name="trigger_trend_decrease">-%1$d</string>
     <string name="trigger_trend_new">Новий</string>
-    <string name="trigger_detail_sheet_title">Аналіз тригера</string>
     <string name="trigger_detail_share_format">%1$d разів • %2$d%% від усіх перекурів</string>
     <string name="trigger_hourly_distribution_title">Погодинна інтенсивність</string>
     <string name="trigger_detail_peak_hour_format">Пік: %1$02d:00–%2$02d:00 (%3$d разів)</string>
@@ -336,13 +295,9 @@
 
     <string name="stats_money_saved">Заощаджено грошей</string>
     <string name="stats_life_saved">Збережено часу життя</string>
-    <string name="stats_savings_lifetime">Економія за весь час</string>
-    <string name="stats_savings_current_streak">Економія за поточний період без куріння</string>
     <string name="stats_savings_setup_warning">Налаштуйте ліміт куріння та параметри пачки в
         налаштуваннях, щоб почати відстежувати заощаджені гроші та час життя.</string>
     <string name="stats_body_recovery_who">Відновлення організму (ВООЗ)</string>
-    <string name="stats_recovery_no_data">Додайте запис про куріння, щоб побачити прогрес
-        відновлення здоров\'я.</string>
 
     <string name="who_bp_desc">Пульс та артеріальний тиск повертаються до норми</string>
     <string name="who_bp_time">20 хвилин</string>
@@ -375,9 +330,6 @@
     <string name="minutes_format_min">%1$dхв</string>
 
     <string name="stats_go_to_settings">Перейти до налаштувань</string>
-    <string name="stats_days_saved">Днів життя заощаджено</string>
-    <string name="stats_current_streak_days">Поточна серія без куріння</string>
-    <string name="stats_days_unit_short">%d дн.</string>
 
     <string name="notif_permission_rationale">Увімкніть сповіщення, щоб отримувати сповіщення про
         досягнення.</string>
@@ -423,7 +375,6 @@
 
     <string name="mindful_pause_button">Подолати тягу</string>
     <string name="mindful_pause_header">Подолання тяги</string>
-    <string name="mindful_pause_or_resist">Або якщо намагаєтеся стриматися:</string>
     <string name="mindful_pause_resisted">Подолано</string>
     <string name="mindful_pause_add_15s">+15 сек</string>
     <string name="mindful_pause_already_held">Потяг уже минув</string>
@@ -440,10 +391,7 @@
     <string name="mindful_pause_tip_5">Ваші легені починають очищатися вже через 20 хвилин без
         куріння.</string>
 
-    <string name="tapering_plan_title">План зниження ліміту</string>
     <string name="tapering_plan_dialog_title">План поступового зниження</string>
-    <string name="tapering_plan_switch_label">Щотижневе зниження</string>
-    <string name="tapering_plan_slider_label">Пропонувати знизити ліміт кожні %1$d дн.</string>
     <string name="tapering_plan_subtitle_active">Зниження на 1 шт. кожні %1$d дн.</string>
     <string name="tapering_plan_subtitle_off">Вимкнено</string>
     <string name="daily_limit_subtitle_with_tapering">%1$d шт./день • Зниження кожні %2$d дн.</string>
@@ -453,7 +401,6 @@
     <string name="tapering_plan_forecast_desc">Повна відмова через ~%1$d дн. (%2$s)</string>
     <string name="tapering_plan_step_info">Кожні %1$d дн. додаток запропонує зробити крок і зменшити ліміт на 1 сигарету.</string>
 
-    <string name="tapering_checkin_title">План поступового зниження</string>
     <string name="tapering_checkin_celebration_title">Нова сходинка!</string>
     <string name="tapering_checkin_new_goal">Нова мета</string>
     <string name="tapering_checkin_cigs_per_day_unit">шт./день</string>
@@ -461,37 +408,16 @@
     <string name="tapering_checkin_desc">Минув рівно тиждень з вашого минулого кроку! Ви чудово
         впоралися з лімітом у %1$d сигарет.</string>
     <string name="tapering_checkin_was">Було</string>
-    <string name="tapering_checkin_will_be">Стане</string>
     <string name="tapering_checkin_reduce_to">Знизити ліміт до %1$d шт./день</string>
     <string name="tapering_checkin_keep_limit">Залишити ліміт %1$d сигарет</string>
     <string name="tapering_checkin_snooze">Нагадати через 3 дні</string>
 
     <string name="stats_resisted_cravings">Подоланий потяг</string>
-    <string name="stats_resisted_cravings_desc">Ви встояли %1$d разів і заощадили %2$s</string>
-    <string name="stats_resisted_badge">%1$d подолано</string>
-    <string name="stats_resisted_avoided_cigs">Не викурено сигарет</string>
-    <string name="stats_resisted_life_saved_note">+%1$s життя врятовано завдяки паузам усвідомленості</string>
-    <string name="stats_resisted_motivational_note">Усвідомлені паузи допомогли успішно впоратися з потягом</string>
 
-    <string name="history_generator_title">Точка відліку та стаж</string>
-    <string name="history_generator_description">Приблизний розрахунок вашого стажу куріння до встановлення додатку, щоб дізнатися загальну кількість викурених цигарок та витрат за минулі роки.</string>
-    <string name="history_start_date_label">Дата початку куріння</string>
-    <string name="history_daily_avg_label">Середня кількість цигарок на день</string>
     <string name="history_daily_avg_unit">%1$d шт./день</string>
-    <string name="history_pack_details_title">Ціна та об\'єм пачки</string>
-    <string name="history_pack_price_label">Ціна пачки</string>
-    <string name="history_pack_size_label">Цигарок у пачці</string>
-    <string name="history_trigger_ranking_title">Причини тяги (Пріоритет)</string>
-    <string name="history_trigger_ranking_hint">Розставити від найчастішої причини (#1) до найрідшої</string>
-    <string name="history_preview_title">Розрахункова оцінка минулих років</string>
     <string name="history_preview_total_cigs">Викурено до додатка</string>
     <string name="history_preview_total_cost">Витрачено за стаж</string>
-    <string name="history_save_button">Зберегти минулий досвід</string>
     <string name="history_reset_button">Скинути минулий досвід</string>
-    <string name="history_reset_dialog_title">Скинути минулий досвід?</string>
-    <string name="history_reset_dialog_desc">Це скине збережений розрахунок минулого стажу куріння.</string>
-    <string name="history_banner_title">У вас вже є стаж куріння?</string>
-    <string name="history_banner_desc">Оцінка приблизної кількості цигарок та витрат за минулий період куріння.</string>
     <string name="registration_history_note">Ви зможете налаштувати точку відліку та стаж у будь-який момент у Налаштуваннях!</string>
     <string name="onboarding_feat_timer_title">Розумний таймер</string>
     <string name="onboarding_feat_timer_desc">Точний інтервал і час між перекурами</string>
@@ -500,7 +426,6 @@
     <string name="onboarding_feat_mindful_title">Усвідомленість</string>
     <string name="onboarding_feat_mindful_desc">Паузи для зниження потягу крок за кроком</string>
     <string name="history_cigs_count_format">%1$s шт.</string>
-    <string name="history_duration_days_y_m">%1$d дн. (%2$dр %3$dм)</string>
 
     <string name="settings_baseline_title">Точка відліку та стаж</string>
     <string name="settings_baseline_subtitle_active">База: %1$d шт./день • %2$s</string>
@@ -552,8 +477,6 @@
 
     <string name="settings_widgets_title">Віджети робочого столу</string>
     <string name="settings_widgets_desc">Швидкий вивід таймера та кнопки на екран</string>
-    <string name="widget_pin_button_1x1">Додати 1x1</string>
-    <string name="widget_pin_button_3x1">Додати 3x1</string>
     <string name="widget_pin_unsupported_toast">Затисніть робочий стіл для додавання віджета</string>
 
     <string name="weekly_comparison_title">Динаміка тижня</string>
@@ -567,7 +490,6 @@
     <string name="weekly_comparison_total_summary">Всього: %1$d шт. за %2$d дн.</string>
 
     <string name="peak_hours_title">Пікові години куріння</string>
-    <string name="peak_hours_subtitle">Розподіл сигарет за годинами доби</string>
     <string name="peak_hours_summary">Пік активності: %1$s (%2$d%% усіх сигарет)</string>
     <string name="peak_period_morning">Вранці (06:00 - 12:00)</string>
     <string name="peak_period_afternoon">Вдень (12:00 - 18:00)</string>
@@ -599,7 +521,6 @@
     <string name="notification_channel_ongoing_low_name">Постійний статус (Тихий)</string>
     <string name="notification_channel_ongoing_default_name">Постійний статус</string>
     <string name="notification_channel_ongoing_desc">Відображає час з останньої сигарети та денний прогрес</string>
-    <string name="notification_title_smoke_free">Не курите: %1$s</string>
     <string name="notification_title_app_name">SmokingYou</string>
     <string name="notification_content_with_limit">Сьогодні: %1$d з %2$d (%3$d%%)</string>
     <string name="notification_content_no_limit">Сьогодні викурено: %1$d</string>
@@ -665,8 +586,6 @@
     <string name="stats_sheet_who_title">Відновлення за шкалою ВООЗ</string>
     <string name="stats_sheet_who_subtitle">12 ключових етапів за стандартами Всесвітньої організації охорони здоров\'я</string>
     <string name="stats_sheet_who_completed">Досягнуто</string>
-    <string name="stats_sheet_who_in_progress">У процесі</string>
-    <string name="stats_sheet_who_remaining">Залишилося: %1$s</string>
 
     <string name="stats_sheet_consumption_title">Інтенсивність куріння</string>
     <string name="stats_sheet_consumption_avg_label">У середньому за день</string>
@@ -686,14 +605,12 @@
 
     <string name="stats_financial_goal_title">Фінансова ціль</string>
     <string name="stats_financial_goal_subtitle">Збирайте на те, що вас надихає</string>
-    <string name="stats_set_goal_cta">Встановити ціль</string>
     <string name="stats_goal_name_label">Назва цілі</string>
     <string name="stats_goal_name_hint">Наприклад: Подорож, Кросівки, Гаджет...</string>
     <string name="stats_goal_amount_label">Сума цілі</string>
     <string name="stats_save_goal">Зберегти ціль</string>
     <string name="stats_clear_goal">Видалити ціль</string>
     <string name="stats_goal_progress">%1$d%% від цілі</string>
-    <string name="stats_streak_tier_format">Ціль: %1$d дн</string>
     <string name="stats_goal_remaining_format">Залишилося: %1$s</string>
     <string name="stats_goal_reached">Ціль досягнута!</string>
 

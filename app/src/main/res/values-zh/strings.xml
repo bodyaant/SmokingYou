@@ -23,24 +23,14 @@
     <string name="dialog_ok">确定</string>
     <string name="dialog_cancel">取消</string>
     <string name="nav_home">首页</string>
-    <string name="nav_graph">图表</string>
     <string name="nav_personal">设置</string>
     <string name="analytics_title">数据分析</string>
-    <string name="daily_overview">每日概览</string>
-    <string name="weekly_overview">每周概览</string>
-    <string name="monthly_overview">每月概览</string>
-    <string name="yearly_overview">年度概览</string>
     <string name="graph_period_day">日</string>
     <string name="graph_period_week">周</string>
     <string name="graph_period_month">月</string>
     <string name="graph_period_year">年</string>
-    <string name="graph_limit_line">限额：%1$d</string>
     <string name="graph_over_limit_badge">超出 %1$d 支</string>
     <string name="graph_within_limit_badge">限额内</string>
-    <string name="graph_avg_label">平均：%1$s</string>
-    <string name="graph_peak_label">峰值：%1$d</string>
-    <string name="graph_total_label">总计：%1$d</string>
-    <string name="graph_in_limit_days">%1$d/%2$d 天达标</string>
     <string name="graph_metric_avg">平均</string>
     <string name="graph_metric_in_limit">达标</string>
     <string name="graph_metric_peak">峰值</string>
@@ -53,7 +43,6 @@
     <string name="chart_view_line">趋势</string>
     <string name="chart_view_calendar">日历</string>
     <string name="chart_clean_day">无烟日</string>
-    <string name="chart_clean_day_desc">0 支香烟 — 做得好！</string>
     <string name="chart_selected_day">所选日期</string>
     <string name="chart_selected_month">所选月份</string>
     <string name="chart_selected_hour">所选时段</string>
@@ -65,47 +54,34 @@
     <string name="day_detail_interval">平均间隔</string>
     <string name="day_detail_triggers">主要诱因</string>
     <string name="day_detail_no_triggers">无</string>
-    <string name="day_parts_breakdown_title">时段分布</string>
-    <string name="day_parts_breakdown_desc">一天中各时段的吸烟分布</string>
     <string name="btn_close">关闭</string>
     <string name="format_hours_minutes">%1$d小时%2$d分</string>
     <string name="format_minutes_only">%1$d分钟</string>
     <string name="peak_hours_quadrant_format">%1$s • %2$s (%3$d%%)</string>
     <string name="personal_title">设置</string>
-    <string name="tab_settings">设置</string>
-    <string name="tab_achievements">成就</string>
     <string name="settings_appearance">外观</string>
     <string name="settings_theme">主题</string>
     <string name="settings_theme_desc">自定义应用外观</string>
     <string name="settings_vibration">触觉反馈</string>
     <string name="settings_vibration_desc">点击与交互时震动</string>
-    <string name="limit_dialog_helper">设为 0 表示不限制每日吸烟量</string>
     <string name="theme_system">跟随系统</string>
     <string name="theme_light">浅色</string>
     <string name="theme_dark">深色</string>
     <string name="settings_section_interface">界面与外观</string>
     <string name="settings_section_goals">目标与开销</string>
     <string name="settings_language">语言</string>
-    <string name="language_value">中文</string>
     <string name="settings_statistics">统计数据</string>
-    <string name="statistics_desc">查看你的吸烟统计</string>
     <string name="settings_achievements">成就</string>
     <string name="achievements_desc">查看你的进度与成就勋章</string>
-    <string name="settings_notifications">通知</string>
-    <string name="notifications_desc">管理提醒与通知</string>
     <string name="settings_data">数据与备份</string>
     <string name="settings_backup">备份</string>
     <string name="backup_desc">备份数据到设备</string>
     <string name="settings_restore">恢复</string>
     <string name="restore_desc">从设备恢复数据</string>
 
-    <string name="stats_max_per_day">单日最多</string>
-    <string name="stats_min_per_day">单日最少</string>
     <string name="stats_avg_per_day">每日平均</string>
     <string name="stats_total_count">吸烟总数</string>
     <string name="stats_tracking_since">开始记录时间：%1$s</string>
-    <string name="stats_max_smoke_free_streak">最长无烟时长</string>
-    <string name="stats_days_unit">%d 天</string>
     <string name="stats_no_data">暂无数据</string>
     <string name="stats_no_data_desc">添加记录后即可计算统计数据与节省开销</string>
     <string name="triggers_no_data_title">暂无诱因数据</string>
@@ -184,31 +160,25 @@
     <string name="backup_dialog_desc">你的统计数据、历史记录和设置将保存到所选位置的文件中。你可以随时恢复这些数据。</string>
     <string name="backup_choose_file_location">选择保存位置</string>
     <string name="backup_start_action">创建备份</string>
-    <string name="backup_done_title">备份完成</string>
     <string name="restore_dialog_title">恢复数据</string>
     <string name="restore_dialog_desc">你当前的统计数据、历史记录和设置将被备份文件中的数据覆盖。</string>
     <string name="restore_choose_file">选择备份文件</string>
     <string name="restore_start_action">恢复数据</string>
-    <string name="restore_done_title">数据已恢复</string>
     <string name="backup_restore_cancel">取消</string>
     <string name="backup_restore_close">关闭</string>
     <string name="language_dialog_title">选择语言</string>
     <string name="settings_daily_limit">每日吸烟限额</string>
     <string name="home_daily_limit">每日限制</string>
 
-    <string name="daily_limit_desc">超过限额时发出提醒</string>
     <string name="limit_warning_title">超出限额</string>
     <string name="limit_warning_message">你已达到每日吸烟限额。仍要添加此条记录吗？</string>
     <string name="add_anyway">仍然添加</string>
-    <string name="set_limit_title">设置每日限额</string>
-    <string name="no_limit">0 (不设限制)</string>
     <string name="daily_limit_bottom_sheet_desc">设置每日最多吸烟支数，逐步掌控烟瘾</string>
     <string name="daily_limit_switch_label">启用每日限额</string>
     <string name="daily_limit_cigs_per_day">支 / 天</string>
     <string name="daily_limit_presets">快速选择：</string>
     <string name="daily_limit_active_subtitle">%1$d 支/天 • 限额生效中</string>
     <string name="daily_limit_off_subtitle">未设置限额</string>
-    <string name="daily_limit_tapering_active_hint">减量计划生效中（每 %1$d 天）。设置新限额将更新你的基准值。</string>
     <string name="daily_limit_info_hint">超出此限额时会收到警告提醒，进度将在首页和常驻通知栏中显示。</string>
 
     <string name="settings_info">关于与更新</string>
@@ -225,8 +195,6 @@
     <string name="font_preset_neo">新潮 (Neo)</string>
     <string name="font_preset_impact">醒目 (Impact)</string>
     <string name="font_preset_airy">轻盈 (Airy)</string>
-    <string name="font_preset_wide">宽体 (Wide)</string>
-    <string name="font_preset_thin">细体 (Thin)</string>
     <string name="font_preset_system">系统字体</string>
     <string name="settings_custom_variable_font">自定义可变字体</string>
     <string name="settings_custom_variable_font_desc">手动调整字重、字宽和圆角</string>
@@ -237,7 +205,6 @@
     <string name="settings_amoled_theme">纯黑模式 (AMOLED)</string>
     <string name="settings_amoled_theme_desc">深色模式下采用完全纯黑背景</string>
     <string name="settings_color_preset">配色方案</string>
-    <string name="settings_color_preset_desc">选择界面的强调色调</string>
     <string name="color_preset_system">系统</string>
     <string name="color_preset_sage">鼠尾草绿</string>
     <string name="color_preset_rose">玫瑰粉</string>
@@ -254,7 +221,6 @@
     <string name="settings_appearance_desc">主题、纯黑模式与字体设置</string>
 
     <string name="trigger_dialog_title">是什么诱发了吸烟冲动？</string>
-    <string name="change_trigger_dialog_title">修改诱因</string>
     <string name="trigger_skip">跳过</string>
     <string name="trigger_stress">压力</string>
     <string name="trigger_boredom">无聊</string>
@@ -273,17 +239,13 @@
     <string name="trigger_custom_empty">尚未添加自定义诱因</string>
     <string name="trigger_standard_section">常用诱因</string>
     <string name="trigger_already_exists">该诱因已存在</string>
-    <string name="trigger_name_empty">请输入诱因名称</string>
     <string name="trigger_delete_dialog_title">删除诱因？</string>
     <string name="trigger_delete_dialog_desc">删除后该诱因将不会出现在后续选项中。已有历史记录仍将保留。</string>
-    <string name="trigger_quick_add_title">添加并记录</string>
     <string name="edit_time_label">修改时间</string>
     <string name="edit_reason_label">诱因</string>
 
     <string name="tab_graphs">图表</string>
     <string name="tab_triggers">诱因</string>
-    <string name="triggers_no_data">记录吸烟时选择诱因，即可在此查看分析数据。</string>
-    <string name="main_trigger">主要诱因</string>
     <string name="triggers_title">吸烟诱因分布</string>
     <string name="trigger_count_pattern">%1$d 次 (%2$d%%)</string>
     <string name="trigger_period_all">全部时间</string>
@@ -303,12 +265,10 @@
     <string name="trigger_manage_desc">添加自定义诱因或调整默认选项</string>
     <string name="trigger_time_patterns_title">时段特征</string>
     <string name="trigger_time_patterns_desc">各个时段最主要的触发诱因</string>
-    <string name="trigger_dominant_format">%1$s (%2$d%%)</string>
     <string name="trigger_no_activity_period">无烟瘾</string>
     <string name="trigger_trend_increase">+%1$d</string>
     <string name="trigger_trend_decrease">-%1$d</string>
     <string name="trigger_trend_new">新</string>
-    <string name="trigger_detail_sheet_title">触发因素分析</string>
     <string name="trigger_detail_share_format">%1$d 次 • 占全部渴望的 %2$d%%</string>
     <string name="trigger_hourly_distribution_title">每小时强度</string>
     <string name="trigger_detail_peak_hour_format">高峰：%1$02d:00–%2$02d:00（%3$d 次）</string>
@@ -334,11 +294,8 @@
 
     <string name="stats_money_saved">节省开销</string>
     <string name="stats_life_saved">挽回生命时长</string>
-    <string name="stats_savings_lifetime">累计节省开销</string>
-    <string name="stats_savings_current_streak">当前控烟期节省</string>
     <string name="stats_savings_setup_warning">在设置中配置每日限额和香烟参数，开始追踪节省的开销与挽回的生命时光。</string>
     <string name="stats_body_recovery_who">身体机能恢复 (WHO 标准)</string>
-    <string name="stats_recovery_no_data">添加吸烟记录即可查看身体恢复进度。</string>
 
     <string name="who_bp_desc">心率与血压恢复正常</string>
     <string name="who_bp_time">20 分钟</string>
@@ -371,9 +328,6 @@
     <string name="minutes_format_min">%1$d分</string>
 
     <string name="stats_go_to_settings">前往设置</string>
-    <string name="stats_days_saved">挽回的生命天数</string>
-    <string name="stats_current_streak_days">当前未吸烟天数</string>
-    <string name="stats_days_unit_short">%d 天</string>
 
     <string name="notif_permission_rationale">请允许发送通知，以便及时接收成就解锁提醒。</string>
     <string name="undo_delete">记录已删除</string>
@@ -417,7 +371,6 @@
 
     <string name="mindful_pause_button">克制烟瘾</string>
     <string name="mindful_pause_header">正念暂停</string>
-    <string name="mindful_pause_or_resist">或者尝试克制冲动：</string>
     <string name="mindful_pause_resisted">挺过去了</string>
     <string name="mindful_pause_add_15s">+15 秒</string>
     <string name="mindful_pause_already_held">冲动已过</string>
@@ -433,10 +386,7 @@
     <string name="mindful_pause_tip_4">每一次成功克服烟瘾，都会让你的意志力更加强大。</string>
     <string name="mindful_pause_tip_5">掐灭最后一支烟仅 20 分钟后，肺部就会开始自我清理与修复。</string>
 
-    <string name="tapering_plan_title">阶梯减量计划</string>
     <string name="tapering_plan_dialog_title">循序渐进减量计划</string>
-    <string name="tapering_plan_switch_label">周期性减量</string>
-    <string name="tapering_plan_slider_label">建议每 %1$d 天降低一次限额</string>
     <string name="tapering_plan_subtitle_active">每 %1$d 天减少 1 支</string>
     <string name="tapering_plan_subtitle_off">已关闭</string>
     <string name="daily_limit_subtitle_with_tapering">%1$d 支/天 • 每 %2$d 天递减</string>
@@ -446,44 +396,22 @@
     <string name="tapering_plan_forecast_desc">预计 ~%1$d 天后彻底戒烟 (%2$s)</string>
     <string name="tapering_plan_step_info">每隔 %1$d 天，应用将提醒你将每日限额减少 1 支。</string>
 
-    <string name="tapering_checkin_title">循序渐进减量计划</string>
     <string name="tapering_checkin_celebration_title">达成新阶段！</string>
     <string name="tapering_checkin_new_goal">新目标</string>
     <string name="tapering_checkin_cigs_per_day_unit">支/天</string>
     <string name="tapering_checkin_savings_hint">每日减少 1 支，下个月将少抽约 30 支香烟！</string>
     <string name="tapering_checkin_desc">距离上次减量已过去一周！你很好地保持了 %1$d 支的限额。</string>
     <string name="tapering_checkin_was">原限额</string>
-    <string name="tapering_checkin_will_be">新限额</string>
     <string name="tapering_checkin_reduce_to">将限额降至 %1$d 支/天</string>
     <string name="tapering_checkin_keep_limit">保持当前 %1$d 支限额</string>
     <string name="tapering_checkin_snooze">3 天后提醒</string>
 
     <string name="stats_resisted_cravings">克制烟瘾次数</string>
-    <string name="stats_resisted_cravings_desc">你已成功克服烟瘾 %1$d 次，节省开销 %2$s</string>
-    <string name="stats_resisted_badge">成功克服 %1$d 次</string>
-    <string name="stats_resisted_avoided_cigs">少吸香烟</string>
-    <string name="stats_resisted_life_saved_note">通过正念暂停挽回生命时长 +%1$s</string>
-    <string name="stats_resisted_motivational_note">正念暂停有效帮助你克服了吸烟冲动</string>
 
-    <string name="history_generator_title">吸烟史与基准</string>
-    <string name="history_generator_description">估算你在使用本应用前的吸烟历史，以计算你过去的累计吸烟总数与开销。</string>
-    <string name="history_start_date_label">开始吸烟日期</string>
-    <string name="history_daily_avg_label">日均吸烟支数</string>
     <string name="history_daily_avg_unit">%1$d 支/天</string>
-    <string name="history_pack_details_title">香烟价格与包装规格</string>
-    <string name="history_pack_price_label">每包价格</string>
-    <string name="history_pack_size_label">每包支数</string>
-    <string name="history_trigger_ranking_title">诱因排序</string>
-    <string name="history_trigger_ranking_hint">从最常诱发烟瘾的原因 (#1) 到最少见的进行排序</string>
-    <string name="history_preview_title">既往历史估算</string>
     <string name="history_preview_total_cigs">以往吸烟总量</string>
     <string name="history_preview_total_cost">以往累计花费</string>
-    <string name="history_save_button">保存吸烟史</string>
     <string name="history_reset_button">重置吸烟史</string>
-    <string name="history_reset_dialog_title">重置吸烟史？</string>
-    <string name="history_reset_dialog_desc">这将清空你之前估算的吸烟历史数据。</string>
-    <string name="history_banner_title">有既往吸烟史？</string>
-    <string name="history_banner_desc">估算使用本应用前的吸烟总数与开销。</string>
     <string name="registration_history_note">你可以随时在“设置”中配置初始吸烟基准！</string>
     <string name="onboarding_feat_timer_title">智能计时</string>
     <string name="onboarding_feat_timer_desc">精确追踪吸烟间隔与无烟时长</string>
@@ -492,7 +420,6 @@
     <string name="onboarding_feat_mindful_title">正念控烟</string>
     <string name="onboarding_feat_mindful_desc">稍作暂停，一步步战胜烟瘾</string>
     <string name="history_cigs_count_format">%1$s 支</string>
-    <string name="history_duration_days_y_m">%1$d 天 (%2$d年 %3$d个月)</string>
 
     <string name="settings_baseline_title">初始吸烟基准</string>
     <string name="settings_baseline_subtitle_active">基准：%1$d 支/天 • %2$s</string>
@@ -544,8 +471,6 @@
 
     <string name="settings_widgets_title">桌面小组件</string>
     <string name="settings_widgets_desc">在主屏幕上添加计时器与快捷记录按钮</string>
-    <string name="widget_pin_button_1x1">添加 1x1</string>
-    <string name="widget_pin_button_3x1">添加 3x1</string>
     <string name="widget_pin_unsupported_toast">请长按桌面空白处手动添加小组件</string>
 
     <string name="weekly_comparison_title">周度对比</string>
@@ -559,7 +484,6 @@
     <string name="weekly_comparison_total_summary">共 %1$d 支（%2$d 天）</string>
 
     <string name="peak_hours_title">吸烟高峰时段</string>
-    <string name="peak_hours_subtitle">全天各时段吸烟分布</string>
     <string name="peak_hours_summary">最高峰时段：%1$s (占全天 %2$d%%)</string>
     <string name="peak_period_morning">早晨 (06:00 - 12:00)</string>
     <string name="peak_period_afternoon">下午 (12:00 - 18:00)</string>
@@ -591,7 +515,6 @@
     <string name="notification_channel_ongoing_low_name">常驻状态（静音）</string>
     <string name="notification_channel_ongoing_default_name">常驻状态</string>
     <string name="notification_channel_ongoing_desc">显示控烟计时器与每日吸烟进度</string>
-    <string name="notification_title_smoke_free">无烟时长：%1$s</string>
     <string name="notification_title_app_name">SmokingYou</string>
     <string name="notification_content_with_limit">今日：%1$d / %2$d (%3$d%%)</string>
     <string name="notification_content_no_limit">今日已吸：%1$d 支</string>
@@ -658,8 +581,6 @@
     <string name="stats_sheet_who_title">世卫组织 (WHO) 康复路线图</string>
     <string name="stats_sheet_who_subtitle">依据世界卫生组织标准的 12 个关键康复阶段</string>
     <string name="stats_sheet_who_completed">已达成</string>
-    <string name="stats_sheet_who_in_progress">进行中</string>
-    <string name="stats_sheet_who_remaining">剩余：%1$s</string>
 
     <string name="stats_sheet_consumption_title">吸烟强度分析</string>
     <string name="stats_sheet_consumption_avg_label">每日平均</string>
@@ -679,14 +600,12 @@
 
     <string name="stats_financial_goal_title">财务目标</string>
     <string name="stats_financial_goal_subtitle">为真正激励你的梦想存钱</string>
-    <string name="stats_set_goal_cta">设定目标</string>
     <string name="stats_goal_name_label">目标名称</string>
     <string name="stats_goal_name_hint">例如：旅行、新球鞋、数码产品...</string>
     <string name="stats_goal_amount_label">目标金额</string>
     <string name="stats_save_goal">保存目标</string>
     <string name="stats_clear_goal">清除目标</string>
     <string name="stats_goal_progress">已达成目标的 %1$d%%</string>
-    <string name="stats_streak_tier_format">阶段目标：%1$d 天</string>
     <string name="stats_goal_remaining_format">还剩 %1$s</string>
     <string name="stats_goal_reached">目标达成！</string>
 

@@ -22,24 +22,14 @@
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="nav_home">Home</string>
-    <string name="nav_graph">Graph</string>
     <string name="nav_personal">Settings</string>
     <string name="analytics_title">Analytics</string>
-    <string name="daily_overview">Daily Overview</string>
-    <string name="weekly_overview">Weekly Overview</string>
-    <string name="monthly_overview">Monthly Overview</string>
-    <string name="yearly_overview">Yearly Overview</string>
     <string name="graph_period_day">Day</string>
     <string name="graph_period_week">Week</string>
     <string name="graph_period_month">Month</string>
     <string name="graph_period_year">Year</string>
-    <string name="graph_limit_line">Limit: %1$d</string>
     <string name="graph_over_limit_badge">+%1$d over limit</string>
     <string name="graph_within_limit_badge">Within limit</string>
-    <string name="graph_avg_label">Avg: %1$s</string>
-    <string name="graph_peak_label">Peak: %1$d</string>
-    <string name="graph_total_label">Total: %1$d</string>
-    <string name="graph_in_limit_days">%1$d/%2$d in limit</string>
     <string name="graph_metric_avg">Average</string>
     <string name="graph_metric_in_limit">Within limit</string>
     <string name="graph_metric_peak">Peak</string>
@@ -52,7 +42,6 @@
     <string name="chart_view_line">Trend</string>
     <string name="chart_view_calendar">Calendar</string>
     <string name="chart_clean_day">Smoke-free day</string>
-    <string name="chart_clean_day_desc">0 cigarettes — great work!</string>
     <string name="chart_selected_day">Selected day</string>
     <string name="chart_selected_month">Selected month</string>
     <string name="chart_selected_hour">Selected hour</string>
@@ -64,47 +53,34 @@
     <string name="day_detail_interval">Avg interval</string>
     <string name="day_detail_triggers">Top trigger</string>
     <string name="day_detail_no_triggers">None</string>
-    <string name="day_parts_breakdown_title">Time of day breakdown</string>
-    <string name="day_parts_breakdown_desc">Distribution of cigarettes by time of day</string>
     <string name="btn_close">Close</string>
     <string name="format_hours_minutes">%1$d h %2$d m</string>
     <string name="format_minutes_only">%1$d m</string>
     <string name="peak_hours_quadrant_format">%1$s • %2$s (%3$d%%)</string>
     <string name="personal_title">Settings</string>
-    <string name="tab_settings">Settings</string>
-    <string name="tab_achievements">Achievements</string>
     <string name="settings_appearance">Appearance</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_desc">Customize application appearance</string>
     <string name="settings_vibration">Haptic feedback</string>
     <string name="settings_vibration_desc">Vibrate on touches and interactions</string>
-    <string name="limit_dialog_helper">Set to 0 for unlimited daily cigarettes</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="settings_section_interface">Interface &amp; Appearance</string>
     <string name="settings_section_goals">Goals &amp; Economy</string>
     <string name="settings_language">Language</string>
-    <string name="language_value">English</string>
     <string name="settings_statistics">Statistics</string>
-    <string name="statistics_desc">View your smoking statistics</string>
     <string name="settings_achievements">Achievements</string>
     <string name="achievements_desc">View your progress and rewards</string>
-    <string name="settings_notifications">Notifications</string>
-    <string name="notifications_desc">Manage alerts</string>
     <string name="settings_data">Data &amp; Backup</string>
     <string name="settings_backup">Backup</string>
     <string name="backup_desc">Backup data to device</string>
     <string name="settings_restore">Restore</string>
     <string name="restore_desc">Restore data from device</string>
 
-    <string name="stats_max_per_day">Max per day</string>
-    <string name="stats_min_per_day">Min per day</string>
     <string name="stats_avg_per_day">Average per day</string>
     <string name="stats_total_count">Total cigarettes</string>
     <string name="stats_tracking_since">Tracking since: %1$s</string>
-    <string name="stats_max_smoke_free_streak">Longest smoke-free streak</string>
-    <string name="stats_days_unit">%d days</string>
     <string name="stats_no_data">No data available</string>
     <string name="stats_no_data_desc">Log entries to calculate statistics &amp; savings</string>
     <string name="triggers_no_data_title">No trigger data</string>
@@ -186,32 +162,26 @@
     <string name="backup_dialog_desc">Your statistics, history, and settings will be saved into a file in your chosen location. You can restore this data anytime.</string>
     <string name="backup_choose_file_location">Choose folder or location</string>
     <string name="backup_start_action">Create Backup</string>
-    <string name="backup_done_title">Backup Completed</string>
     <string name="restore_dialog_title">Restore Data</string>
     <string name="restore_dialog_desc">Your current statistics, history, and settings will be replaced by the data from your backup file.</string>
     <string name="restore_choose_file">Choose backup file</string>
     <string name="restore_start_action">Restore Data</string>
-    <string name="restore_done_title">Data Restored</string>
     <string name="backup_restore_cancel">Cancel</string>
     <string name="backup_restore_close">Close</string>
     <string name="language_dialog_title">Select Language</string>
     <string name="settings_daily_limit">Daily Cigarette Limit</string>
     <string name="home_daily_limit">Daily limit</string>
 
-    <string name="daily_limit_desc">Warn if you exceed this limit</string>
     <string name="limit_warning_title">Limit Exceeded</string>
     <string name="limit_warning_message">You have reached your daily cigarette limit. Do you still
         want to add this entry?</string>
     <string name="add_anyway">Add Anyway</string>
-    <string name="set_limit_title">Set Daily Limit</string>
-    <string name="no_limit">0 (No limit)</string>
     <string name="daily_limit_bottom_sheet_desc">Set the maximum number of cigarettes per day to control your habit</string>
     <string name="daily_limit_switch_label">Daily limit active</string>
     <string name="daily_limit_cigs_per_day">cigarettes per day</string>
     <string name="daily_limit_presets">Quick select:</string>
     <string name="daily_limit_active_subtitle">%1$d cig/day • Limit active</string>
     <string name="daily_limit_off_subtitle">No limit set</string>
-    <string name="daily_limit_tapering_active_hint">Reduction plan is active (every %1$d days). Setting a new limit will update your baseline.</string>
     <string name="daily_limit_info_hint">You will receive a warning when exceeding this limit, and progress will be displayed on the home screen and ongoing notification.</string>
 
     <string name="settings_info">About &amp; Updates</string>
@@ -228,8 +198,6 @@
     <string name="font_preset_neo">Neo</string>
     <string name="font_preset_impact">Impact</string>
     <string name="font_preset_airy">Airy</string>
-    <string name="font_preset_wide">Wide</string>
-    <string name="font_preset_thin">Thin</string>
     <string name="font_preset_system">System</string>
     <string name="settings_custom_variable_font">Custom Variable Font</string>
     <string name="settings_custom_variable_font_desc">Manually adjust weight, width and roundness</string>
@@ -240,7 +208,6 @@
     <string name="settings_amoled_theme">AMOLED Theme</string>
     <string name="settings_amoled_theme_desc">Fully black background in dark mode</string>
     <string name="settings_color_preset">Color Scheme</string>
-    <string name="settings_color_preset_desc">Choose accent color palette for the interface</string>
     <string name="color_preset_system">System</string>
     <string name="color_preset_sage">Sage</string>
     <string name="color_preset_rose">Rose</string>
@@ -257,7 +224,6 @@
     <string name="settings_appearance_desc">Theme, AMOLED mode, and font settings</string>
 
     <string name="trigger_dialog_title">What caused the craving?</string>
-    <string name="change_trigger_dialog_title">Change reason</string>
     <string name="trigger_skip">Skip</string>
     <string name="trigger_stress">Stress</string>
     <string name="trigger_boredom">Boredom</string>
@@ -276,17 +242,13 @@
     <string name="trigger_custom_empty">No custom reasons added yet</string>
     <string name="trigger_standard_section">Standard reasons</string>
     <string name="trigger_already_exists">This reason already exists</string>
-    <string name="trigger_name_empty">Enter reason name</string>
     <string name="trigger_delete_dialog_title">Delete Reason?</string>
     <string name="trigger_delete_dialog_desc">This reason will be removed from future selection. Existing history entries will be kept.</string>
-    <string name="trigger_quick_add_title">Add &amp; Log</string>
     <string name="edit_time_label">Change time</string>
     <string name="edit_reason_label">Reason</string>
 
     <string name="tab_graphs">Charts</string>
     <string name="tab_triggers">Triggers</string>
-    <string name="triggers_no_data">Add triggers when logging smoking to see analytics here.</string>
-    <string name="main_trigger">Main trigger</string>
     <string name="triggers_title">Smoking Triggers</string>
     <string name="trigger_count_pattern">%1$d times (%2$d%%)</string>
     <string name="trigger_period_all">All time</string>
@@ -306,12 +268,10 @@
     <string name="trigger_manage_desc">Add custom triggers or customize standard ones</string>
     <string name="trigger_time_patterns_title">Time of Day Patterns</string>
     <string name="trigger_time_patterns_desc">Dominant trigger for each part of the day</string>
-    <string name="trigger_dominant_format">%1$s (%2$d%%)</string>
     <string name="trigger_no_activity_period">No cravings</string>
     <string name="trigger_trend_increase">+%1$d</string>
     <string name="trigger_trend_decrease">-%1$d</string>
     <string name="trigger_trend_new">New</string>
-    <string name="trigger_detail_sheet_title">Trigger Analysis</string>
     <string name="trigger_detail_share_format">%1$d times • %2$d%% of all cravings</string>
     <string name="trigger_hourly_distribution_title">Hourly Intensity</string>
     <string name="trigger_detail_peak_hour_format">Peak: %1$02d:00–%2$02d:00 (%3$d times)</string>
@@ -337,12 +297,9 @@
 
     <string name="stats_money_saved">Money Saved</string>
     <string name="stats_life_saved">Life Reclaimed</string>
-    <string name="stats_savings_lifetime">Lifetime Savings</string>
-    <string name="stats_savings_current_streak">Current Streak Savings</string>
     <string name="stats_savings_setup_warning">Configure daily limit and pack details in Settings to
         start tracking money and life saved.</string>
     <string name="stats_body_recovery_who">Body Recovery (WHO)</string>
-    <string name="stats_recovery_no_data">Add a smoking record to see health recovery progress.</string>
 
     <string name="who_bp_desc">Pulse and blood pressure return to normal</string>
     <string name="who_bp_time">20 minutes</string>
@@ -375,9 +332,6 @@
     <string name="minutes_format_min">%1$dm</string>
 
     <string name="stats_go_to_settings">Go to Settings</string>
-    <string name="stats_days_saved">Days of Life Saved</string>
-    <string name="stats_current_streak_days">Current Smoke-Free Streak</string>
-    <string name="stats_days_unit_short">%d d</string>
 
     <string name="notif_permission_rationale">Enable notifications to receive achievement alerts.</string>
     <string name="undo_delete">Entry deleted</string>
@@ -424,7 +378,6 @@
 
     <string name="mindful_pause_button">Overcome Craving</string>
     <string name="mindful_pause_header">Mindful Pause</string>
-    <string name="mindful_pause_or_resist">Or if you try to hold back:</string>
     <string name="mindful_pause_resisted">Resisted</string>
     <string name="mindful_pause_add_15s">+15 sec</string>
     <string name="mindful_pause_already_held">Already held back</string>
@@ -444,10 +397,7 @@
     <string name="mindful_pause_tip_5">Your lungs start cleaning themselves just 20 minutes after
         your last cigarette.</string>
 
-    <string name="tapering_plan_title">Tapering Plan</string>
     <string name="tapering_plan_dialog_title">Gradual Reduction Plan</string>
-    <string name="tapering_plan_switch_label">Weekly limit reduction</string>
-    <string name="tapering_plan_slider_label">Suggest limit reduction every %1$d days</string>
     <string name="tapering_plan_subtitle_active">Reduce by 1 cig. every %1$d days</string>
     <string name="tapering_plan_subtitle_off">Disabled</string>
     <string name="daily_limit_subtitle_with_tapering">%1$d cig/day • Reduction every %2$d d.</string>
@@ -457,7 +407,6 @@
     <string name="tapering_plan_forecast_desc">Full cessation in ~%1$d days (%2$s)</string>
     <string name="tapering_plan_step_info">Every %1$d days, the app will prompt you to reduce your limit by 1 cigarette.</string>
 
-    <string name="tapering_checkin_title">Gradual Reduction Plan</string>
     <string name="tapering_checkin_celebration_title">Milestone Reached!</string>
     <string name="tapering_checkin_new_goal">New Goal</string>
     <string name="tapering_checkin_cigs_per_day_unit">cig/day</string>
@@ -465,40 +414,16 @@
     <string name="tapering_checkin_desc">A week has passed since your last step! You did great with
         a limit of %1$d cigarettes.</string>
     <string name="tapering_checkin_was">Was</string>
-    <string name="tapering_checkin_will_be">Will be</string>
     <string name="tapering_checkin_reduce_to">Reduce limit to %1$d cig/day</string>
     <string name="tapering_checkin_keep_limit">Keep limit of %1$d cigarettes</string>
     <string name="tapering_checkin_snooze">Remind in 3 days</string>
 
     <string name="stats_resisted_cravings">Resisted Cravings</string>
-    <string name="stats_resisted_cravings_desc">You resisted %1$d times and saved %2$s</string>
-    <string name="stats_resisted_badge">%1$d resisted</string>
-    <string name="stats_resisted_avoided_cigs">Cigarettes Avoided</string>
-    <string name="stats_resisted_life_saved_note">+%1$s of life reclaimed via mindful pauses</string>
-    <string name="stats_resisted_motivational_note">Mindful pauses successfully prevented cravings</string>
 
-    <string name="history_generator_title">Smoking Baseline</string>
-    <string name="history_generator_description">Estimate your past smoking experience prior to using
-        the app to calculate your approximate total cigarettes and money spent in the past.</string>
-    <string name="history_start_date_label">Smoking Start Date</string>
-    <string name="history_daily_avg_label">Average Cigarettes per Day</string>
     <string name="history_daily_avg_unit">%1$d pcs/day</string>
-    <string name="history_pack_details_title">Pack Price &amp; Size</string>
-    <string name="history_pack_price_label">Pack Price</string>
-    <string name="history_pack_size_label">Pcs in Pack</string>
-    <string name="history_trigger_ranking_title">Craving Triggers Priority</string>
-    <string name="history_trigger_ranking_hint">Arrange from most frequent (#1) to least frequent</string>
-    <string name="history_preview_title">Past Baseline Estimation</string>
     <string name="history_preview_total_cigs">Total Smoked Past</string>
     <string name="history_preview_total_cost">Total Spent Past</string>
-    <string name="history_save_button">Save Baseline</string>
     <string name="history_reset_button">Reset Past Experience</string>
-    <string name="history_reset_dialog_title">Reset Past Experience?</string>
-    <string name="history_reset_dialog_desc">This will reset your estimated past smoking experience
-        calculation.</string>
-    <string name="history_banner_title">Have a history of smoking?</string>
-    <string name="history_banner_desc">Estimation of past cigarettes and expenses prior to using the
-        app.</string>
     <string name="registration_history_note">You can set up your smoking baseline anytime in Settings!</string>
     <string name="onboarding_feat_timer_title">Smart Timer</string>
     <string name="onboarding_feat_timer_desc">Track intervals and time between cigarettes</string>
@@ -507,7 +432,6 @@
     <string name="onboarding_feat_mindful_title">Mindful Control</string>
     <string name="onboarding_feat_mindful_desc">Take a pause and overcome cravings step by step</string>
     <string name="history_cigs_count_format">%1$s pcs.</string>
-    <string name="history_duration_days_y_m">%1$d days (%2$dy %3$dm)</string>
 
     <string name="settings_baseline_title">Smoking Baseline</string>
     <string name="settings_baseline_subtitle_active">Base: %1$d pcs/day • %2$s</string>
@@ -559,8 +483,6 @@
 
     <string name="settings_widgets_title">Home Screen Widgets</string>
     <string name="settings_widgets_desc">Quick timer &amp; shortcut button on home screen</string>
-    <string name="widget_pin_button_1x1">Add 1x1</string>
-    <string name="widget_pin_button_3x1">Add 3x1</string>
     <string name="widget_pin_unsupported_toast">Press and hold home screen to add widget</string>
 
     <string name="weekly_comparison_title">Weekly Comparison</string>
@@ -574,7 +496,6 @@
     <string name="weekly_comparison_total_summary">Total: %1$d pcs across %2$d d.</string>
 
     <string name="peak_hours_title">Peak Smoking Hours</string>
-    <string name="peak_hours_subtitle">Hourly distribution throughout the day</string>
     <string name="peak_hours_summary">Peak intensity: %1$s (%2$d%% of all cigarettes)</string>
     <string name="peak_period_morning">Morning (06:00 - 12:00)</string>
     <string name="peak_period_afternoon">Afternoon (12:00 - 18:00)</string>
@@ -606,7 +527,6 @@
     <string name="notification_channel_ongoing_low_name">Ongoing Status (Silent)</string>
     <string name="notification_channel_ongoing_default_name">Ongoing Status</string>
     <string name="notification_channel_ongoing_desc">Displays abstinence timer and daily smoking progress</string>
-    <string name="notification_title_smoke_free">Smoke-free: %1$s</string>
     <string name="notification_title_app_name">SmokingYou</string>
     <string name="notification_content_with_limit">Today: %1$d of %2$d (%3$d%%)</string>
     <string name="notification_content_no_limit">Today smoked: %1$d</string>
@@ -672,8 +592,6 @@
     <string name="stats_sheet_who_title">WHO Recovery Roadmap</string>
     <string name="stats_sheet_who_subtitle">12 stages based on World Health Organization standards</string>
     <string name="stats_sheet_who_completed">Achieved</string>
-    <string name="stats_sheet_who_in_progress">In Progress</string>
-    <string name="stats_sheet_who_remaining">%1$s remaining</string>
 
     <string name="stats_sheet_consumption_title">Consumption Analytics</string>
     <string name="stats_sheet_consumption_avg_label">Daily Average</string>
@@ -693,14 +611,12 @@
 
     <string name="stats_financial_goal_title">Financial Goal</string>
     <string name="stats_financial_goal_subtitle">Save for what truly inspires you</string>
-    <string name="stats_set_goal_cta">Set a savings goal</string>
     <string name="stats_goal_name_label">Goal Name</string>
     <string name="stats_goal_name_hint">e.g. Trip, New sneakers, Gadget...</string>
     <string name="stats_goal_amount_label">Target Amount</string>
     <string name="stats_save_goal">Save Goal</string>
     <string name="stats_clear_goal">Clear Goal</string>
     <string name="stats_goal_progress">%1$d%% of goal</string>
-    <string name="stats_streak_tier_format">Tier: %1$d days</string>
     <string name="stats_goal_remaining_format">%1$s remaining</string>
     <string name="stats_goal_reached">Goal reached!</string>
 

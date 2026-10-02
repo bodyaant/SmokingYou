@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">SmokingYou</string>
     <string name="registration_title">SmokingYou\'a Hoş Geldiniz</string>
     <string name="registration_subtitle">Kişisel sigara takipçiniz</string>
@@ -22,24 +22,14 @@
     <string name="dialog_ok">Tamam</string>
     <string name="dialog_cancel">İptal</string>
     <string name="nav_home">Ana Sayfa</string>
-    <string name="nav_graph">Grafik</string>
     <string name="nav_personal">Ayarlar</string>
     <string name="analytics_title">Analiz</string>
-    <string name="daily_overview">Günlük Genel Bakış</string>
-    <string name="weekly_overview">Haftalık Genel Bakış</string>
-    <string name="monthly_overview">Aylık Genel Bakış</string>
-    <string name="yearly_overview">Yıllık Genel Bakış</string>
     <string name="graph_period_day">Gün</string>
     <string name="graph_period_week">Hafta</string>
     <string name="graph_period_month">Ay</string>
     <string name="graph_period_year">Yıl</string>
-    <string name="graph_limit_line">Limit: %1$d</string>
     <string name="graph_over_limit_badge">+%1$d limit aşımı</string>
     <string name="graph_within_limit_badge">Limit dahilinde</string>
-    <string name="graph_avg_label">Ort.: %1$s</string>
-    <string name="graph_peak_label">Zirve: %1$d</string>
-    <string name="graph_total_label">Toplam: %1$d</string>
-    <string name="graph_in_limit_days">%1$d/%2$d limit dahilinde</string>
     <string name="graph_metric_avg">Ortalama</string>
     <string name="graph_metric_in_limit">Limit içi</string>
     <string name="graph_metric_peak">Zirve</string>
@@ -52,7 +42,6 @@
     <string name="chart_view_line">Trend</string>
     <string name="chart_view_calendar">Takvim</string>
     <string name="chart_clean_day">Sigarasız gün</string>
-    <string name="chart_clean_day_desc">0 sigara — tebrikler!</string>
     <string name="chart_selected_day">Seçilen gün</string>
     <string name="chart_selected_month">Seçilen ay</string>
     <string name="chart_selected_hour">Seçilen saat</string>
@@ -64,47 +53,34 @@
     <string name="day_detail_interval">Ort. aralık</string>
     <string name="day_detail_triggers">Ana tetikleyici</string>
     <string name="day_detail_no_triggers">Yok</string>
-    <string name="day_parts_breakdown_title">Günün saatlerine göre</string>
-    <string name="day_parts_breakdown_desc">Gün içindeki sigara dağılımı</string>
     <string name="btn_close">Kapat</string>
     <string name="format_hours_minutes">%1$d sa %2$d dk</string>
     <string name="format_minutes_only">%1$d dk</string>
     <string name="peak_hours_quadrant_format">%1$s • %2$s (%%%3$d)</string>
     <string name="personal_title">Ayarlar</string>
-    <string name="tab_settings">Ayarlar</string>
-    <string name="tab_achievements">Başarılar</string>
     <string name="settings_appearance">Görünüm</string>
     <string name="settings_theme">Tema</string>
     <string name="settings_theme_desc">Uygulama görünümünü özelleştirin</string>
     <string name="settings_vibration">Titreşim geri bildirimi</string>
     <string name="settings_vibration_desc">Dokunma ve işlemlerde titreşim</string>
-    <string name="limit_dialog_helper">Sınırsız günlük sigara için 0 yapın</string>
     <string name="theme_system">Sistem</string>
     <string name="theme_light">Açık</string>
     <string name="theme_dark">Karanlık</string>
     <string name="settings_section_interface">Arayüz ve Görünüm</string>
     <string name="settings_section_goals">Hedefler ve Ekonomi</string>
     <string name="settings_language">Dil</string>
-    <string name="language_value">Türkçe</string>
     <string name="settings_statistics">İstatistikler</string>
-    <string name="statistics_desc">Sigara içme istatistiklerinizi görüntüleyin</string>
     <string name="settings_achievements">Başarılar</string>
     <string name="achievements_desc">İlerlemenizi ve ödüllerinizi görüntüleyin</string>
-    <string name="settings_notifications">Bildirimler</string>
-    <string name="notifications_desc">Bildirimleri yönetin</string>
     <string name="settings_data">Veriler ve Yedekleme</string>
     <string name="settings_backup">Yedekle</string>
     <string name="backup_desc">Verileri cihaza yedekle</string>
     <string name="settings_restore">Geri Yükle</string>
     <string name="restore_desc">Verileri cihazdan geri yükle</string>
 
-    <string name="stats_max_per_day">Günlük maks.</string>
-    <string name="stats_min_per_day">Günlük min.</string>
     <string name="stats_avg_per_day">Günlük ortalama</string>
     <string name="stats_total_count">Toplam sigara</string>
     <string name="stats_tracking_since">Takip başlangıcı: %1$s</string>
-    <string name="stats_max_smoke_free_streak">En uzun sigarasız süre</string>
-    <string name="stats_days_unit">%d gün</string>
     <string name="stats_no_data">Veri yok</string>
     <string name="stats_no_data_desc">İstatistikleri ve tasarrufları hesaplamak için kayıt ekleyin</string>
     <string name="triggers_no_data_title">Tetikleyici verisi yok</string>
@@ -184,32 +160,26 @@
     <string name="backup_dialog_desc">İstatistikleriniz, geçmişiniz ve ayarlarınız seçtiğiniz konumdaki bir dosyaya kaydedilecektir. Bu verileri dilediğiniz zaman geri yükleyebilirsiniz.</string>
     <string name="backup_choose_file_location">Konum seçin</string>
     <string name="backup_start_action">Yedek Oluştur</string>
-    <string name="backup_done_title">Yedek Oluşturuldu</string>
     <string name="restore_dialog_title">Verileri Geri Yükle</string>
     <string name="restore_dialog_desc">Mevcut istatistikleriniz, geçmişiniz ve ayarlarınız yedek dosyasındaki verilerle değiştirilecektir.</string>
     <string name="restore_choose_file">Yedek dosyası seçin</string>
     <string name="restore_start_action">Geri Yükle</string>
-    <string name="restore_done_title">Veriler Geri Yüklendi</string>
     <string name="backup_restore_cancel">İptal</string>
     <string name="backup_restore_close">Kapat</string>
     <string name="language_dialog_title">Dil Seçin</string>
     <string name="settings_daily_limit">Günlük Sigara Limiti</string>
     <string name="home_daily_limit">Günlük limit</string>
 
-    <string name="daily_limit_desc">Bu limiti aşarsanız uyar</string>
     <string name="limit_warning_title">Limit Aşıldı</string>
     <string name="limit_warning_message">Günlük sigara limitinize ulaştınız. Yine de bu girişi
         eklemek istiyor musunuz?</string>
     <string name="add_anyway">Yine de Ekle</string>
-    <string name="set_limit_title">Günlük Limit Belirle</string>
-    <string name="no_limit">0 (Limit yok)</string>
     <string name="daily_limit_bottom_sheet_desc">Alışkanlığınızı kontrol altına almak için günlük maksimum sigara sayısını belirleyin</string>
     <string name="daily_limit_switch_label">Günlük limit aktif</string>
     <string name="daily_limit_cigs_per_day">sigara / gün</string>
     <string name="daily_limit_presets">Hızlı seçim:</string>
     <string name="daily_limit_active_subtitle">%1$d sigara/gün • Limit aktif</string>
     <string name="daily_limit_off_subtitle">Limit belirlenmedi</string>
-    <string name="daily_limit_tapering_active_hint">Azaltma planı aktif (her %1$d günde bir). Yeni bir sınır belirlemek temel seviyenizi güncelleyecektir.</string>
     <string name="daily_limit_info_hint">Bu sınırı aştığınızda uyarı alırsınız; ilerleme durumu ana ekranda ve bildirimde görüntülenir.</string>
 
     <string name="settings_info">Hakkında ve Güncellemeler</string>
@@ -226,8 +196,6 @@
     <string name="font_preset_neo">Neo</string>
     <string name="font_preset_impact">Impact</string>
     <string name="font_preset_airy">Airy</string>
-    <string name="font_preset_wide">Geniş</string>
-    <string name="font_preset_thin">İnce</string>
     <string name="font_preset_system">Sistem</string>
     <string name="settings_custom_variable_font">Özel Değişken Yazı Tipi</string>
     <string name="settings_custom_variable_font_desc">Kalınlık, genişlik ve yuvarlaklığı manuel olarak ayarlayın</string>
@@ -238,7 +206,6 @@
     <string name="settings_amoled_theme">AMOLED Teması</string>
     <string name="settings_amoled_theme_desc">Karanlık modda tamamen siyah arka plan</string>
     <string name="settings_color_preset">Renk Düzeni</string>
-    <string name="settings_color_preset_desc">Arayüz renk düzenini seçin</string>
     <string name="color_preset_system">Sistem</string>
     <string name="color_preset_sage">Adaçayı</string>
     <string name="color_preset_rose">Gül</string>
@@ -255,7 +222,6 @@
     <string name="settings_appearance_desc">Tema, AMOLED modu ve yazı tipi ayarları</string>
 
     <string name="trigger_dialog_title">Canınız neden sigara çekiyor?</string>
-    <string name="change_trigger_dialog_title">Nedeni değiştir</string>
     <string name="trigger_skip">Atla</string>
     <string name="trigger_stress">Stres</string>
     <string name="trigger_boredom">Sıkıntı</string>
@@ -274,18 +240,13 @@
     <string name="trigger_custom_empty">Henüz özel neden eklenmedi</string>
     <string name="trigger_standard_section">Standart nedenler</string>
     <string name="trigger_already_exists">Bu neden zaten mevcut</string>
-    <string name="trigger_name_empty">Neden adını girin</string>
     <string name="trigger_delete_dialog_title">Neden silinsin mi?</string>
     <string name="trigger_delete_dialog_desc">Bu neden gelecekteki seçimlerden kaldırılacaktır. Mevcut geçmiş kayıtları korunur.</string>
-    <string name="trigger_quick_add_title">Ekle ve kaydet</string>
     <string name="edit_time_label">Saati değiştir</string>
     <string name="edit_reason_label">Neden</string>
 
     <string name="tab_graphs">Grafikler</string>
     <string name="tab_triggers">Tetikleyiciler</string>
-    <string name="triggers_no_data">Burada analizleri görmek için sigara içerken tetikleyiciler
-        ekleyin.</string>
-    <string name="main_trigger">Ana tetikleyici</string>
     <string name="triggers_title">Sigara Tetikleyicileri</string>
     <string name="trigger_count_pattern">%1$d kez (%2$d%%)</string>
     <string name="trigger_period_all">Tüm zamanlar</string>
@@ -305,12 +266,10 @@
     <string name="trigger_manage_desc">Özel tetikleyiciler ekleyin veya standart olanları düzenleyin</string>
     <string name="trigger_time_patterns_title">Günün Saatlerine Göre Dağılım</string>
     <string name="trigger_time_patterns_desc">Günün her diliminde en sık görülen tetikleyici</string>
-    <string name="trigger_dominant_format">%1$s (%%%2$d)</string>
     <string name="trigger_no_activity_period">İstek yok</string>
     <string name="trigger_trend_increase">+%1$d</string>
     <string name="trigger_trend_decrease">-%1$d</string>
     <string name="trigger_trend_new">Yeni</string>
-    <string name="trigger_detail_sheet_title">Tetikleyici Analizi</string>
     <string name="trigger_detail_share_format">%1$d kez • tüm isteklerin %%%2$d\'si</string>
     <string name="trigger_hourly_distribution_title">Saatlik Yoğunluk</string>
     <string name="trigger_detail_peak_hour_format">Zirve: %1$02d:00–%2$02d:00 (%3$d kez)</string>
@@ -336,13 +295,9 @@
 
     <string name="stats_money_saved">Tasarruf Edilen Para</string>
     <string name="stats_life_saved">Kazanılan Ömür</string>
-    <string name="stats_savings_lifetime">Toplam Tasarruf</string>
-    <string name="stats_savings_current_streak">Mevcut Serideki Tasarruf</string>
     <string name="stats_savings_setup_warning">Tasarruf edilen parayı ve kazanılan ömrü takip etmek
         için Ayarlar\'da günlük limiti ve paket bilgilerini yapılandırın.</string>
     <string name="stats_body_recovery_who">Vücut İyileşmesi (WHO)</string>
-    <string name="stats_recovery_no_data">Sağlık iyileşme sürecini görmek için bir sigara kaydı
-        ekleyin.</string>
 
     <string name="who_bp_desc">Nabız ve kan basıncı normale döner</string>
     <string name="who_bp_time">20 dakika</string>
@@ -375,9 +330,6 @@
     <string name="minutes_format_min">%1$ddk</string>
 
     <string name="stats_go_to_settings">Ayarlar\'a Git</string>
-    <string name="stats_days_saved">Kazanılan Yaşam Günü</string>
-    <string name="stats_current_streak_days">Mevcut Sigarasız Seri</string>
-    <string name="stats_days_unit_short">%d g</string>
 
     <string name="notif_permission_rationale">Başarım uyarıları almak için bildirimleri
         etkinleştirin.</string>
@@ -425,7 +377,6 @@
 
     <string name="mindful_pause_button">İsteği Yen</string>
     <string name="mindful_pause_header">Bilinçli Mola</string>
-    <string name="mindful_pause_or_resist">Veya direnmeye çalışıyorsanız:</string>
     <string name="mindful_pause_resisted">Yenildi</string>
     <string name="mindful_pause_add_15s">+15 sn</string>
     <string name="mindful_pause_already_held">Zaten dayandım</string>
@@ -444,10 +395,7 @@
     <string name="mindful_pause_tip_5">Akciğerleriniz son sigaradan sadece 20 dakika sonra
         temizlenmeye başlar.</string>
 
-    <string name="tapering_plan_title">Azaltma Planı</string>
     <string name="tapering_plan_dialog_title">Kademeli Azaltma Planı</string>
-    <string name="tapering_plan_switch_label">Haftalık azaltma</string>
-    <string name="tapering_plan_slider_label">Her %1$d günde bir azaltma öner</string>
     <string name="tapering_plan_subtitle_active">Her %1$d günde 1 sigara azaltma</string>
     <string name="tapering_plan_subtitle_off">Kapalı</string>
     <string name="daily_limit_subtitle_with_tapering">%1$d sigara/gün • Her %2$d günde azalt</string>
@@ -457,7 +405,6 @@
     <string name="tapering_plan_forecast_desc">~%1$d gün sonra tamamen bırakma (%2$s)</string>
     <string name="tapering_plan_step_info">Uygulama her %1$d günde bir limiti 1 sigara düşürmenizi önerecektir.</string>
 
-    <string name="tapering_checkin_title">Kademeli Azaltma Planı</string>
     <string name="tapering_checkin_celebration_title">Yeni Aşamaya Geçildi!</string>
     <string name="tapering_checkin_new_goal">Yeni Hedef</string>
     <string name="tapering_checkin_cigs_per_day_unit">sigara/gün</string>
@@ -465,47 +412,24 @@
     <string name="tapering_checkin_desc">Son adımınızdan bu yana tam bir hafta geçti! %1$d sigaralık
         limitle harika gittiniz.</string>
     <string name="tapering_checkin_was">Önceki</string>
-    <string name="tapering_checkin_will_be">Yeni</string>
     <string name="tapering_checkin_reduce_to">Limiti günde %1$d sigaraya düşür</string>
     <string name="tapering_checkin_keep_limit">%1$d sigaralık limiti koru</string>
     <string name="tapering_checkin_snooze">3 gün sonra hatırlat</string>
 
     <string name="stats_resisted_cravings">Yenilen İstekler</string>
-    <string name="stats_resisted_cravings_desc">%1$d kez direndiniz ve %2$s tasarruf ettiniz</string>
-    <string name="stats_resisted_badge">%1$d yenildi</string>
-    <string name="stats_resisted_avoided_cigs">İçilmeyen Sigara</string>
-    <string name="stats_resisted_life_saved_note">Bilinçli molalar sayesinde +%1$s ömür kazanıldı</string>
-    <string name="stats_resisted_motivational_note">Bilinçli molalar sigara isteklerini yenmeye yardımcı oldu</string>
 
-    <string name="history_generator_title">Önceki Sigara Geçmişi</string>
-    <string name="history_generator_description">Uygulamadan önceki sigara geçmişinizi tahmin ederek geçmiş sigara ve harcama toplamınızı hesaplayın.</string>
-    <string name="history_start_date_label">Sigaraya Başlama Tarihi</string>
-    <string name="history_daily_avg_label">Günlük Ortalama Sigara</string>
     <string name="history_daily_avg_unit">%1$d adet/gün</string>
-    <string name="history_pack_details_title">Paket Fiyatı ve Boyutu</string>
-    <string name="history_pack_price_label">Paket Fiyatı</string>
-    <string name="history_pack_size_label">Paketteki Adet</string>
-    <string name="history_trigger_ranking_title">İstek Tetikleyicileri Önceliği</string>
-    <string name="history_trigger_ranking_hint">En sık nedenden (#1) en seyrek nedene doğru
-        sıralayın</string>
-    <string name="history_preview_title">Geçmiş Veri Tahmini</string>
     <string name="history_preview_total_cigs">Önceden İçilen Toplam</string>
     <string name="history_preview_total_cost">Önceden Harcanan Toplam</string>
-    <string name="history_save_button">Geçmişi Kaydet</string>
     <string name="history_reset_button">Sigara Geçmişini Sıfırla</string>
-    <string name="history_reset_dialog_title">Sigara Geçmişi Sıfırlansın mı?</string>
-    <string name="history_reset_dialog_desc">Bu işlem tahmini geçmiş hesaplamanızı sıfırlayacaktır.</string>
-    <string name="history_banner_title">Sigara geçmişiniz var mı?</string>
-    <string name="history_banner_desc">Uygulamadan önceki sigara ve harcamalarınızın tahmini.</string>
     <string name="registration_history_note">Başlangıç noktanızı istediğiniz zaman Ayarlar\'dan ayarlayabilirsiniz!</string>
     <string name="onboarding_feat_timer_title">Akıllı Zamanlayıcı</string>
     <string name="onboarding_feat_timer_desc">Sigaralar arasındaki aralıkları ve zamanı takip edin</string>
     <string name="onboarding_feat_analytics_title">Tetikleyici Analizi</string>
     <string name="onboarding_feat_analytics_desc">Alışkanlıkları, eğilimleri ve tasarrufları anlayın</string>
     <string name="onboarding_feat_mindful_title">Bilinçli Kontrol</string>
-    <string name="onboarding_feat_mindful_desc">Mola verin ve istekleri adım adım azaltın</string>
+    <string name="onboarding_feat_mindful_desc" tools:ignore="Typos">Mola verin ve istekleri adım adım azaltın</string>
     <string name="history_cigs_count_format">%1$s adet</string>
-    <string name="history_duration_days_y_m">%1$d gün (%2$dy %3$da)</string>
 
     <string name="settings_baseline_title">Başlangıç Noktası ve Geçmiş</string>
     <string name="settings_baseline_subtitle_active">Temel: %1$d adet/gün • %2$s</string>
@@ -557,8 +481,6 @@
 
     <string name="settings_widgets_title">Ana Ekran Araç Takımları</string>
     <string name="settings_widgets_desc">Ana ekranda hızlı zamanlayıcı ve düğme</string>
-    <string name="widget_pin_button_1x1">1x1 Ekle</string>
-    <string name="widget_pin_button_3x1">3x1 Ekle</string>
     <string name="widget_pin_unsupported_toast">Araç takımı eklemek için ana ekrana basılı tutun</string>
 
     <string name="weekly_comparison_title">Haftalık Karşılaştırma</string>
@@ -572,7 +494,6 @@
     <string name="weekly_comparison_total_summary">Toplam: %2$d günde %1$d adet</string>
 
     <string name="peak_hours_title">En Yoğun İçim Saatleri</string>
-    <string name="peak_hours_subtitle">Gün içindeki saatlik dağılım</string>
     <string name="peak_hours_summary">En yoğun dönem: %1$s (Sigaraların %%%2$d\'si)</string>
     <string name="peak_period_morning">Sabah (06:00 - 12:00)</string>
     <string name="peak_period_afternoon">Öğleden sonra (12:00 - 18:00)</string>
@@ -604,7 +525,6 @@
     <string name="notification_channel_ongoing_low_name">Kalıcı Durum (Sessiz)</string>
     <string name="notification_channel_ongoing_default_name">Kalıcı Durum</string>
     <string name="notification_channel_ongoing_desc">Sigarasızlık sayacını ve günlük içim ilerlemesini gösterir</string>
-    <string name="notification_title_smoke_free">Sigarasız: %1$s</string>
     <string name="notification_title_app_name">SmokingYou</string>
     <string name="notification_content_with_limit">Bugün: %1$d / %2$d (%%%3$d)</string>
     <string name="notification_content_no_limit">Bugün içilen: %1$d</string>
@@ -671,8 +591,6 @@
     <string name="stats_sheet_who_title">DSÖ İyileşme Yol Haritası</string>
     <string name="stats_sheet_who_subtitle">Dünya Sağlık Örgütü standartlarına dayanan 12 aşama</string>
     <string name="stats_sheet_who_completed">Tamamlandı</string>
-    <string name="stats_sheet_who_in_progress">Devam ediyor</string>
-    <string name="stats_sheet_who_remaining">Kalan: %1$s</string>
 
     <string name="stats_sheet_consumption_title">Tüketim Yoğunluğu</string>
     <string name="stats_sheet_consumption_avg_label">Günlük Ortalama</string>
@@ -692,14 +610,12 @@
 
     <string name="stats_financial_goal_title">Finansal hedef</string>
     <string name="stats_financial_goal_subtitle">Sizi gerçekten motive eden şeyler için biriktirin</string>
-    <string name="stats_set_goal_cta">Hedef belirle</string>
     <string name="stats_goal_name_label">Hedef adı</string>
     <string name="stats_goal_name_hint">Örn: Seyahat, Spor ayakkabı, Cihaz...</string>
     <string name="stats_goal_amount_label">Hedef tutar</string>
     <string name="stats_save_goal">Hedefi kaydet</string>
     <string name="stats_clear_goal">Hedefi temizle</string>
     <string name="stats_goal_progress">Hedefin %%%1$d\'i</string>
-    <string name="stats_streak_tier_format">Hedef: %1$d gün</string>
     <string name="stats_goal_remaining_format">%1$s kaldı</string>
     <string name="stats_goal_reached">Hedefe ulaşıldı!</string>
 
