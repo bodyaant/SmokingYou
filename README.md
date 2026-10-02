@@ -6,6 +6,27 @@
   Minimalist, data-oriented smoking tracker for Android based on Material 3 Expressive.
 
   <p align="center">
+    <a href="https://android.com">
+      <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Android/android1.svg" alt="Android" height="30">
+    </a>
+    <a href="https://kotlinlang.org">
+      <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Kotlin/kotlin1.svg" alt="Kotlin" height="30">
+    </a>
+    <a href="https://www.sqlite.org">
+      <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/SQLite/sqlite1.svg" alt="SQLite" height="30">
+    </a>
+    <a href="https://developer.android.com/studio">
+      <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/AndroidStudio/androidstudio1.svg" alt="Android Studio" height="30">
+    </a>
+    <a href="LICENSE">
+      <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/LicenceGPLv3/licencegplv31.svg" alt="GNU GPL v3" height="30">
+    </a>
+    <a href="https://github.com/bodyaant/SmokingYou">
+      <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Github/github1.svg" alt="GitHub" height="30">
+    </a>
+  </p>
+
+  <p align="center">
     <a href="https://github.com/bodyaant/SmokingYou/releases/latest">
       <img src="https://img.shields.io/github/v/release/bodyaant/SmokingYou?logo=github&labelColor=1a1a1a&color=6750A4&style=flat-square" alt="Latest Release">
     </a>
@@ -14,9 +35,6 @@
     </a>
     <a href="https://github.com/bodyaant/SmokingYou/stargazers">
       <img src="https://img.shields.io/github/stars/bodyaant/SmokingYou?logo=github&labelColor=1a1a1a&color=E0B6FF&style=flat-square" alt="Stars">
-    </a>
-    <a href="LICENSE">
-      <img src="https://img.shields.io/github/license/bodyaant/SmokingYou?logo=gnu&labelColor=1a1a1a&color=blue&style=flat-square" alt="License">
     </a>
     <img src="https://img.shields.io/badge/Android-8.0%2B_(API_26%2B)-3DDC84?logo=android&logoColor=white&labelColor=1a1a1a&style=flat-square" alt="Android 8.0+">
   </p>
@@ -35,7 +53,7 @@
 
 ---
 
-SmokingYou is designed to help you track and manage your smoking habits. By offering clear statistics, dynamic charts, home screen widgets, and motivational achievements, the app provides the insights needed to cut down or quit entirely.
+SmokingYou is a private, modern, data-oriented smoking tracker designed to help you regain control over your habits. Built around the principles of Material 3 Expressive, the application provides live smoke-free timers, interactive speed dial logging, home screen widgets, ongoing status bar notifications, craving reduction techniques, trigger analytics, and comprehensive WHO health milestones — all completely offline with zero tracking.
 
 ## Screenshots
 
@@ -46,49 +64,68 @@ SmokingYou is designed to help you track and manage your smoking habits. By offe
 
 ## Features
 
-- **Habit Tracking:** Log entries with a single tap. A real-time timer displays the duration elapsed since your last cigarette.
+- **Habit Tracking:**
+  - One-tap cigarette logging with a live timer showing elapsed time since your last smoke.
+  - Multi-action Speed Dial FAB: quickly log a smoke with triggers, record a resisted craving, or launch a mindful pause.
+  - Editable daily log history.
 - **Home Screen Widgets:**
   - **Quick Add Widget (1x1):** One-tap instant cigarette logging from your home screen.
-  - **Timer & Counter Widget (3x1):** Displays live smoke-free timer, daily cigarette counter, and quick add action.
-  - Includes widget placement setup with Android 12+ dynamic widget pinning support.
-- **Mindful Craving Pause:** Take a mindful pause with breathing guidance to resist cravings and track successfully resisted attempts.
-- **Tapering Reduction Plan:** Set gradual reduction goals, track daily limits, and complete check-ins to cut down smoking at your own pace.
-- **Historical Baseline Generator:** Analyze past smoking habits, compute baseline statistics, and track projected money and health savings.
-- **Detailed Analytics & History:** Interactive daily/weekly charts, craving trigger distributions (including alcohol, stress, coffee, etc.), and editable logs.
-- **WHO Health & Financial Stats:** Track total count, averages, daily extremes, longest smoke-free streak, financial savings, and WHO health recovery milestones.
-- **Achievements System:** Unlock milestone badges and secret achievements for consistency and smoke-free intervals with local notifications.
-- **Data Portability:** Local backup and restore (JSON export/import) to secure your logs.
-- **Highly Customizable Themes:**
-  - Standard Light, Dark, and System themes.
-  - **AMOLED Dark Mode** for extra power saving.
-  - **Dynamic Colors (Material You)** matching system wallpaper on Android 12+.
-  - Curated color presets (Classic, Sage, Rose, Ocean, Lavender, Purple, Amber, Crimson, Slate).
-  - Custom font presets.
-  - **Dynamic App Icons** (change the app icon directly from settings).
+  - **Timer & Counter Widget (3x1):** Displays live smoke-free timer, daily count, limit status, and an optional quick-resist action button.
+  - In-app widget setup with real-time previews and home screen pinning (Android 12+).
+- **Ongoing Status Bar Notification:**
+  - Persistent notification with an active smoke-free chronometer, daily limit progress, and today's resisted cravings count.
+  - Quick action buttons to log a smoke or record a resisted craving directly from the notification shade.
+- **Mindful Craving Pause:**
+  - Guided breathing exercise to help ride out acute cravings.
+  - Dedicated log for resisted cravings to track your willpower over time.
+- **Trigger Management:**
+  - Track common triggers (Stress, Coffee, Alcohol, Meals, Social, etc.) and create custom ones.
+  - Actionable coping advice for each trigger and visual trigger distribution charts.
+- **Smoking Baseline & Pack-Years:**
+  - Compute your baseline smoking habit prior to using the app.
+  - Pack-Years index calculation, past cigarette count, and estimated historical money spent.
+- **Tapering Reduction Plan:**
+  - Gradual reduction goals with customizable pace (Gentle, Moderate, Intensive).
+  - Target cessation forecast projecting your quit date, with celebratory check-ins when staying within limits.
+- **Detailed Analytics & Charts:**
+  - Interactive Day, Week, Month, and Year views with rounded bars or smooth spline lines.
+  - Target daily limit indicators and peak smoking hour distributions.
+  - Monthly day-by-day table breakdown and average smoking intervals tracking.
+- **WHO Health & Financial Stats:**
+  - **12 WHO Recovery Milestones:** Detailed progress bars tracking health restoration based on WHO data.
+  - **Savings Tracker & Goals:** Track money saved and set tangible goals with live progress bars.
+  - Reclaimed life expectancy counter and smoke-free streak records.
+- **Achievements System 2.0:**
+  - Milestone and secret achievements with live progress bars, unlock dates, and switchable grid/list views.
+- **Material 3 Expressive Design:**
+  - Fluid spring animations (Bouncy Press) and rich tactile haptic feedback.
+  - AMOLED True Dark Mode, Dynamic Colors (Material You) on Android 12+, 9 color presets, custom fonts, and dynamic app icons.
+- **100% Private & Offline:**
+  - No accounts, no cloud sync, no telemetry, no ads.
+  - Fast local JSON backup and restore anytime.
 
 ## Tech Stack
 
-- **Language:** [Kotlin](https://kotlinlang.org/) (Coroutines, Flow)
+- **Language:** [Kotlin](https://kotlinlang.org/) (Coroutines, Flow, StateFlow)
 - **UI Framework:** [Jetpack Compose](https://developer.android.com/jetpack/compose) with Material 3 Expressive
-- **Widgets:** [Jetpack Glance](https://developer.android.com/jetpack/compose/glance) — modern declarative home screen widgets.
-- **Data Persistence:** 
-  - [Room Database](https://developer.android.com/training/data-storage/room) — local storage with automated schema migrations.
-  - [Jetpack DataStore](https://developer.android.com/topic/libraries/architecture/datastore) — settings, tapering preferences, and baseline stats.
-  - GSON — data backup serialization.
-- **Dependency Injection:** [Koin](https://insert-koin.io/) — lightweight dependency injection framework.
+- **Architecture:** Clean Architecture with screen-scoped ViewModels
+- **Widgets:** Native Android AppWidget Framework (`AppWidgetProvider`, `RemoteViews`)
+- **Data Persistence:** [Room Database](https://developer.android.com/training/data-storage/room) & [Jetpack DataStore](https://developer.android.com/topic/libraries/architecture/datastore)
+- **Dependency Injection:** [Koin](https://insert-koin.io/)
 
 ## Localization
 
-Currently supported languages:
+Currently supported languages (10):
 - English
-- Russian
-- German
-- Spanish
-- French
-- Italian
-- Portuguese
-- Turkish
-- Ukrainian
+- Russian (Русский)
+- German (Deutsch)
+- Spanish (Español)
+- French (Français)
+- Italian (Italiano)
+- Portuguese (Português)
+- Turkish (Türkçe)
+- Ukrainian (Українська)
+- Chinese Simplified (中文)
 
 ## Installation
 
@@ -99,7 +136,7 @@ Currently supported languages:
 ## Special Thanks
 
 Special thanks to the following projects for design ideas and inspiration:
-- **[Tomato](https://github.com/nsh07/Tomato)** and **[Zenith](https://github.com/1372Slash/Zenith)** - For beautiful interface concepts and inspiration, Material 3 Expressive guidelines implementation ideas and design inspiration.
+- **[Tomato](https://github.com/nsh07/Tomato)** and **[Zenith](https://github.com/1372Slash/Zenith)** - For beautiful interface concepts, Material 3 Expressive guideline implementation ideas, and design inspiration.
 
 ## Contributing
 
