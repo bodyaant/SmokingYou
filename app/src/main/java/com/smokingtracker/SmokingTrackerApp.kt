@@ -4,11 +4,21 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import com.smokingtracker.data.preferences.AppMetaPreferences
+import com.smokingtracker.data.repository.SmokingRepository
 import com.smokingtracker.di.appModule
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
 class SmokingTrackerApp : Application() {
+
+    private val repository: SmokingRepository by inject()
+    private val appMetaPreferences: AppMetaPreferences by inject()
 
     override fun onCreate() {
         super.onCreate()
@@ -18,6 +28,21 @@ class SmokingTrackerApp : Application() {
         }
         createNotificationChannel()
         com.smokingtracker.notification.OngoingNotificationManager.update(this)
+
+        ProcessLifecycleOwner.get().lifecycleScope.launch {
+            if (appMetaPreferences.hasOldData.first()) {
+                val (oldEntries, oldTriggers) = appMetaPreferences.getOldEntriesAndClear()
+                if (oldEntries.isNotEmpty()) {
+                    val entities = oldEntries.map { ts ->
+                        com.smokingtracker.data.local.SmokingEntryEntity(timestamp = ts, trigger = oldTriggers[ts])
+                    }
+                    repository.clearAllEntries()
+                    oldEntries.forEach { ts ->
+                        repository.addEntry(ts, oldTriggers[ts])
+                    }
+                }
+            }
+        }
     }
 
     private fun createNotificationChannel() {

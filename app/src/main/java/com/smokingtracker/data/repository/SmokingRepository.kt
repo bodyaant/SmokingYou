@@ -2,17 +2,11 @@ package com.smokingtracker.data.repository
 
 import com.smokingtracker.data.local.SmokingDao
 import com.smokingtracker.data.local.SmokingEntryEntity
-import com.smokingtracker.data.preferences.AppMetaPreferences
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 class SmokingRepository(
-    private val smokingDao: SmokingDao,
-    private val appMetaPreferences: AppMetaPreferences,
-    private val applicationScope: CoroutineScope
+    private val smokingDao: SmokingDao
 ) {
     val smokingEntries: Flow<List<SmokingEntryEntity>> = smokingDao.getAllEntriesFlow()
 
@@ -24,20 +18,6 @@ class SmokingRepository(
 
     val resistedEntries: Flow<List<SmokingEntryEntity>> = smokingEntries
         .map { entities -> entities.filter { it.isResisted } }
-
-    init {
-        applicationScope.launch {
-            if (appMetaPreferences.hasOldData.first()) {
-                val (oldEntries, oldTriggers) = appMetaPreferences.getOldEntriesAndClear()
-                if (oldEntries.isNotEmpty()) {
-                    val entities = oldEntries.map { ts ->
-                        SmokingEntryEntity(timestamp = ts, trigger = oldTriggers[ts])
-                    }
-                    smokingDao.insertEntries(entities)
-                }
-            }
-        }
-    }
 
     suspend fun getAllEntries(): List<SmokingEntryEntity> {
         return smokingDao.getAllEntriesList()

@@ -22,7 +22,6 @@ import com.smokingtracker.ui.theme.AppTheme
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -32,18 +31,6 @@ class MainActivity : ComponentActivity() {
     private val themePreferences: ThemePreferences by inject()
 
     override fun attachBaseContext(base: Context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            val languageTag = runBlocking { themePreferences.appLanguageTag.first() }
-            if (languageTag != null) {
-                val locale = java.util.Locale.forLanguageTag(languageTag)
-                java.util.Locale.setDefault(locale)
-                val config = android.content.res.Configuration(base.resources.configuration)
-                config.setLocale(locale)
-                val context = base.createConfigurationContext(config)
-                super.attachBaseContext(context)
-                return
-            }
-        }
         super.attachBaseContext(base)
     }
 
