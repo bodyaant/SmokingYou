@@ -42,8 +42,8 @@ class AchievementsViewModel(
         initialValue = emptyMap()
     )
 
-    private val _achievementPopupQueue = MutableStateFlow<List<Achievement>>(emptyList())
-    val pendingAchievementPopup: StateFlow<Achievement?> = _achievementPopupQueue
+    private val _achievementPopupQueue = MutableStateFlow<List<AchievementData>>(emptyList())
+    val pendingAchievementPopup: StateFlow<AchievementData?> = _achievementPopupQueue
         .map { it.firstOrNull() }
         .stateIn(
             scope = viewModelScope,

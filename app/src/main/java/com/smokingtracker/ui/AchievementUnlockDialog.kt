@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.smokingtracker.Achievement
+import com.smokingtracker.AchievementData
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
 import com.smokingtracker.ui.theme.containerShape
@@ -26,7 +26,7 @@ import com.smokingtracker.ui.theme.containerShape
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AchievementUnlockDialog(
-    achievement: Achievement,
+    achievement: AchievementData,
     vibrationEnabled: Boolean,
     onDismiss: () -> Unit,
     onNavigateToAchievements: () -> Unit

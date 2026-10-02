@@ -245,4 +245,45 @@ class ExampleUnitTest {
         assertEquals(1, daily[10])
         assertEquals(0, daily[0])
     }
+
+    @Test
+    fun testCalculateUnlockedAchievements_historicalInterval() {
+        val manager = AchievementsManager()
+        val day = 86400000L
+        val now = System.currentTimeMillis()
+        val t0 = now - 8 * day
+        val t1 = t0 + 4 * day
+        val t2 = now - 1000L
+        val entries = listOf(t0, t1, t2)
+
+        val unlocked = manager.calculateUnlockedAchievements(entries, listOf(t0))
+        assertTrue(unlocked.contains("nosmoke_1d"))
+        assertTrue(unlocked.contains("nosmoke_3d"))
+        assertFalse(unlocked.contains("nosmoke_1w"))
+    }
+
+    @Test
+    fun testGetAchievementProgress_resetsOnNewSmokingEntry() {
+        val manager = AchievementsManager()
+        val now = System.currentTimeMillis()
+        val entries = listOf(now - 1000L)
+
+        val progress1m = manager.getAchievementProgress("nosmoke_1m", entries, emptyList())
+        assertEquals(0f, progress1m.fraction, 0.001f)
+        assertEquals("0", progress1m.currentDisplay)
+        assertEquals("30", progress1m.targetDisplay)
+        assertEquals("30", progress1m.remainingDisplay)
+    }
+
+    @Test
+    fun testCalculateUnlockedAchievements_emptyEntriesUsesLaunches() {
+        val manager = AchievementsManager()
+        val day = 86400000L
+        val now = System.currentTimeMillis()
+        val launchTwoDaysAgo = now - 2 * day
+
+        val unlocked = manager.calculateUnlockedAchievements(emptyList(), listOf(launchTwoDaysAgo))
+        assertTrue(unlocked.contains("nosmoke_1d"))
+        assertFalse(unlocked.contains("nosmoke_3d"))
+    }
 }

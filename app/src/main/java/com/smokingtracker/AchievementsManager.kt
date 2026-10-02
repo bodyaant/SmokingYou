@@ -28,74 +28,70 @@ data class AchievementContext(
     val analyticsVisitsToday: Int = 0
 )
 
-data class Achievement(
+data class AchievementData(
     val id: String,
     val titleResId: Int,
     val descResId: Int,
     val category: AchievementCategory,
-    val isSecret: Boolean = false,
-    val condition: (AchievementContext) -> Boolean
+    val isSecret: Boolean = false
 )
 
 class AchievementsManager {
 
-    fun getAchievementById(id: String): Achievement? = achievementsList.find { it.id == id }
+    fun getAchievementById(id: String): AchievementData? = achievementsList.find { it.id == id }
 
     val achievementsList = listOf(
-        Achievement("login_1", R.string.ach_curiosity_title, R.string.ach_curiosity_desc, AchievementCategory.LOGIN) { ctx ->
-            ctx.launches.isNotEmpty()
-        },
-        Achievement("login_3", R.string.ach_interest_title, R.string.ach_interest_desc, AchievementCategory.LOGIN) { ctx ->
-            hasConsecutiveDays(ctx.launches, 3)
-        },
-        Achievement("login_7", R.string.ach_exploration_title, R.string.ach_exploration_desc, AchievementCategory.LOGIN) { ctx ->
-            hasConsecutiveDays(ctx.launches, 7)
-        },
-        Achievement("login_30", R.string.ach_discipline_title, R.string.ach_discipline_desc, AchievementCategory.LOGIN) { ctx ->
-            hasConsecutiveDays(ctx.launches, 30)
-        },
-        Achievement("login_90", R.string.ach_habit_title, R.string.ach_habit_desc, AchievementCategory.LOGIN) { ctx ->
-            hasConsecutiveDays(ctx.launches, 90)
-        },
-        Achievement("login_180", R.string.ach_dedication_title, R.string.ach_dedication_desc, AchievementCategory.LOGIN) { ctx ->
-            hasConsecutiveDays(ctx.launches, 180)
-        },
-        Achievement("login_365", R.string.ach_statistics_title, R.string.ach_statistics_desc, AchievementCategory.LOGIN) { ctx ->
-            hasConsecutiveDays(ctx.launches, 365)
-        },
+        AchievementData("login_1", R.string.ach_curiosity_title, R.string.ach_curiosity_desc, AchievementCategory.LOGIN),
+        AchievementData("login_3", R.string.ach_interest_title, R.string.ach_interest_desc, AchievementCategory.LOGIN),
+        AchievementData("login_7", R.string.ach_exploration_title, R.string.ach_exploration_desc, AchievementCategory.LOGIN),
+        AchievementData("login_30", R.string.ach_discipline_title, R.string.ach_discipline_desc, AchievementCategory.LOGIN),
+        AchievementData("login_90", R.string.ach_habit_title, R.string.ach_habit_desc, AchievementCategory.LOGIN),
+        AchievementData("login_180", R.string.ach_dedication_title, R.string.ach_dedication_desc, AchievementCategory.LOGIN),
+        AchievementData("login_365", R.string.ach_statistics_title, R.string.ach_statistics_desc, AchievementCategory.LOGIN),
+        AchievementData("nosmoke_1d", R.string.ach_nosmoke_1d_title, R.string.ach_nosmoke_1d_desc, AchievementCategory.NO_SMOKE),
+        AchievementData("nosmoke_3d", R.string.ach_nosmoke_3d_title, R.string.ach_nosmoke_3d_desc, AchievementCategory.NO_SMOKE),
+        AchievementData("nosmoke_1w", R.string.ach_nosmoke_1w_title, R.string.ach_nosmoke_1w_desc, AchievementCategory.NO_SMOKE),
+        AchievementData("nosmoke_1m", R.string.ach_nosmoke_1m_title, R.string.ach_nosmoke_1m_desc, AchievementCategory.NO_SMOKE),
+        AchievementData("nosmoke_3m", R.string.ach_nosmoke_3m_title, R.string.ach_nosmoke_3m_desc, AchievementCategory.NO_SMOKE),
+        AchievementData("nosmoke_6m", R.string.ach_nosmoke_6m_title, R.string.ach_nosmoke_6m_desc, AchievementCategory.NO_SMOKE),
+        AchievementData("nosmoke_1y", R.string.ach_nosmoke_1y_title, R.string.ach_nosmoke_1y_desc, AchievementCategory.NO_SMOKE),
+        AchievementData("secret_night_owl", R.string.ach_night_owl_title, R.string.ach_night_owl_desc, AchievementCategory.SECRET, isSecret = true),
+        AchievementData("secret_morning_ritual", R.string.ach_morning_ritual_title, R.string.ach_morning_ritual_desc, AchievementCategory.SECRET, isSecret = true),
+        AchievementData("secret_synchronization", R.string.ach_synchronization_title, R.string.ach_synchronization_desc, AchievementCategory.SECRET, isSecret = true),
+        AchievementData("secret_punctuality", R.string.ach_punctuality_title, R.string.ach_punctuality_desc, AchievementCategory.SECRET, isSecret = true),
+        AchievementData("secret_hesitant", R.string.ach_hesitant_title, R.string.ach_hesitant_desc, AchievementCategory.SECRET, isSecret = true),
+        AchievementData("secret_explorer", R.string.ach_explorer_title, R.string.ach_explorer_desc, AchievementCategory.SECRET, isSecret = true),
+        AchievementData("secret_archivist", R.string.ach_archivist_title, R.string.ach_archivist_desc, AchievementCategory.SECRET, isSecret = true),
+        AchievementData("secret_analytics_collector", R.string.ach_analytics_collector_title, R.string.ach_analytics_collector_desc, AchievementCategory.SECRET, isSecret = true),
+        AchievementData("secret_double_damage", R.string.ach_double_damage_title, R.string.ach_double_damage_desc, AchievementCategory.SECRET, isSecret = true),
+        AchievementData("secret_inflation", R.string.ach_inflation_title, R.string.ach_inflation_desc, AchievementCategory.SECRET, isSecret = true),
+        AchievementData("secret_crisis", R.string.ach_crisis_title, R.string.ach_crisis_desc, AchievementCategory.SECRET, isSecret = true),
+        AchievementData("secret_blind_eye", R.string.ach_blind_eye_title, R.string.ach_blind_eye_desc, AchievementCategory.SECRET, isSecret = true)
+    )
 
-        Achievement("nosmoke_1d", R.string.ach_nosmoke_1d_title, R.string.ach_nosmoke_1d_desc, AchievementCategory.NO_SMOKE) { ctx ->
-            ctx.timeWithoutSmoking >= TimeUnit.DAYS.toMillis(1)
-        },
-        Achievement("nosmoke_3d", R.string.ach_nosmoke_3d_title, R.string.ach_nosmoke_3d_desc, AchievementCategory.NO_SMOKE) { ctx ->
-            ctx.timeWithoutSmoking >= TimeUnit.DAYS.toMillis(3)
-        },
-        Achievement("nosmoke_1w", R.string.ach_nosmoke_1w_title, R.string.ach_nosmoke_1w_desc, AchievementCategory.NO_SMOKE) { ctx ->
-            ctx.timeWithoutSmoking >= TimeUnit.DAYS.toMillis(7)
-        },
-        Achievement("nosmoke_1m", R.string.ach_nosmoke_1m_title, R.string.ach_nosmoke_1m_desc, AchievementCategory.NO_SMOKE) { ctx ->
-            ctx.timeWithoutSmoking >= TimeUnit.DAYS.toMillis(30)
-        },
-        Achievement("nosmoke_3m", R.string.ach_nosmoke_3m_title, R.string.ach_nosmoke_3m_desc, AchievementCategory.NO_SMOKE) { ctx ->
-            ctx.timeWithoutSmoking >= TimeUnit.DAYS.toMillis(90)
-        },
-        Achievement("nosmoke_6m", R.string.ach_nosmoke_6m_title, R.string.ach_nosmoke_6m_desc, AchievementCategory.NO_SMOKE) { ctx ->
-            ctx.timeWithoutSmoking >= TimeUnit.DAYS.toMillis(180)
-        },
-        Achievement("nosmoke_1y", R.string.ach_nosmoke_1y_title, R.string.ach_nosmoke_1y_desc, AchievementCategory.NO_SMOKE) { ctx ->
-            ctx.timeWithoutSmoking >= TimeUnit.DAYS.toMillis(365)
-        },
-
-        Achievement("secret_night_owl", R.string.ach_night_owl_title, R.string.ach_night_owl_desc, AchievementCategory.SECRET, isSecret = true) { ctx ->
+    private val conditions: Map<String, (AchievementContext) -> Boolean> = mapOf(
+        "login_1" to { ctx -> ctx.launches.isNotEmpty() },
+        "login_3" to { ctx -> hasConsecutiveDays(ctx.launches, 3) },
+        "login_7" to { ctx -> hasConsecutiveDays(ctx.launches, 7) },
+        "login_30" to { ctx -> hasConsecutiveDays(ctx.launches, 30) },
+        "login_90" to { ctx -> hasConsecutiveDays(ctx.launches, 90) },
+        "login_180" to { ctx -> hasConsecutiveDays(ctx.launches, 180) },
+        "login_365" to { ctx -> hasConsecutiveDays(ctx.launches, 365) },
+        "nosmoke_1d" to { ctx -> hasSmokeFreeDuration(ctx, TimeUnit.DAYS.toMillis(1)) },
+        "nosmoke_3d" to { ctx -> hasSmokeFreeDuration(ctx, TimeUnit.DAYS.toMillis(3)) },
+        "nosmoke_1w" to { ctx -> hasSmokeFreeDuration(ctx, TimeUnit.DAYS.toMillis(7)) },
+        "nosmoke_1m" to { ctx -> hasSmokeFreeDuration(ctx, TimeUnit.DAYS.toMillis(30)) },
+        "nosmoke_3m" to { ctx -> hasSmokeFreeDuration(ctx, TimeUnit.DAYS.toMillis(90)) },
+        "nosmoke_6m" to { ctx -> hasSmokeFreeDuration(ctx, TimeUnit.DAYS.toMillis(180)) },
+        "nosmoke_1y" to { ctx -> hasSmokeFreeDuration(ctx, TimeUnit.DAYS.toMillis(365)) },
+        "secret_night_owl" to { ctx ->
             ctx.entries.any { timestamp ->
                 val hour = Calendar.getInstance().apply { timeInMillis = timestamp }.get(Calendar.HOUR_OF_DAY)
                 hour in 3..4
             }
         },
-        Achievement("secret_morning_ritual", R.string.ach_morning_ritual_title, R.string.ach_morning_ritual_desc, AchievementCategory.SECRET, isSecret = true) { ctx ->
-            hasMorningRitualStreak(ctx.entries, 5)
-        },
-        Achievement("secret_synchronization", R.string.ach_synchronization_title, R.string.ach_synchronization_desc, AchievementCategory.SECRET, isSecret = true) { ctx ->
+        "secret_morning_ritual" to { ctx -> hasMorningRitualStreak(ctx.entries, 5) },
+        "secret_synchronization" to { ctx ->
             ctx.entries.any { timestamp ->
                 val cal = Calendar.getInstance().apply { timeInMillis = timestamp }
                 val hour = cal.get(Calendar.HOUR_OF_DAY)
@@ -103,29 +99,17 @@ class AchievementsManager {
                 (hour == 0 || hour == 12) && min == 0
             }
         },
-        Achievement("secret_punctuality", R.string.ach_punctuality_title, R.string.ach_punctuality_desc, AchievementCategory.SECRET, isSecret = true) { ctx ->
-            hasPunctualIntervals(ctx.entries)
-        },
-        Achievement("secret_hesitant", R.string.ach_hesitant_title, R.string.ach_hesitant_desc, AchievementCategory.SECRET, isSecret = true) { ctx ->
-            ctx.hasCancelledWithin10s
-        },
-        Achievement("secret_explorer", R.string.ach_explorer_title, R.string.ach_explorer_desc, AchievementCategory.SECRET, isSecret = true) { ctx ->
-            ctx.themeLangChangesToday >= 3
-        },
-        Achievement("secret_archivist", R.string.ach_archivist_title, R.string.ach_archivist_desc, AchievementCategory.SECRET, isSecret = true) { ctx ->
-            ctx.hasMadeBackup
-        },
-        Achievement("secret_analytics_collector", R.string.ach_analytics_collector_title, R.string.ach_analytics_collector_desc, AchievementCategory.SECRET, isSecret = true) { ctx ->
-            ctx.analyticsVisitsToday >= 10
-        },
-        Achievement("secret_double_damage", R.string.ach_double_damage_title, R.string.ach_double_damage_desc, AchievementCategory.SECRET, isSecret = true) { ctx ->
+        "secret_punctuality" to { ctx -> hasPunctualIntervals(ctx.entries) },
+        "secret_hesitant" to { ctx -> ctx.hasCancelledWithin10s },
+        "secret_explorer" to { ctx -> ctx.themeLangChangesToday >= 3 },
+        "secret_archivist" to { ctx -> ctx.hasMadeBackup },
+        "secret_analytics_collector" to { ctx -> ctx.analyticsVisitsToday >= 10 },
+        "secret_double_damage" to { ctx ->
             val sorted = ctx.entries.sorted()
             sorted.zipWithNext().any { (t1, t2) -> (t2 - t1) in 1 until (10 * 60 * 1000L) }
         },
-        Achievement("secret_inflation", R.string.ach_inflation_title, R.string.ach_inflation_desc, AchievementCategory.SECRET, isSecret = true) { ctx ->
-            ctx.hasChangedPackPrice
-        },
-        Achievement("secret_crisis", R.string.ach_crisis_title, R.string.ach_crisis_desc, AchievementCategory.SECRET, isSecret = true) { ctx ->
+        "secret_inflation" to { ctx -> ctx.hasChangedPackPrice },
+        "secret_crisis" to { ctx ->
             if (ctx.dailyLimit <= 0) false
             else {
                 val dayCounts = ctx.entries.groupBy { timestamp ->
@@ -135,7 +119,7 @@ class AchievementsManager {
                 dayCounts.values.any { it == ctx.dailyLimit }
             }
         },
-        Achievement("secret_blind_eye", R.string.ach_blind_eye_title, R.string.ach_blind_eye_desc, AchievementCategory.SECRET, isSecret = true) { ctx ->
+        "secret_blind_eye" to { ctx ->
             if (ctx.dailyLimit <= 0) false
             else {
                 val dayCounts = ctx.entries.groupBy { timestamp ->
@@ -223,10 +207,28 @@ class AchievementsManager {
         return false
     }
 
+    private fun hasSmokeFreeDuration(ctx: AchievementContext, duration: Long): Boolean {
+        if (ctx.timeWithoutSmoking >= duration) return true
+        val sorted = ctx.entries.sorted()
+        if (sorted.isNotEmpty()) {
+            val firstLaunch = ctx.launches.minOrNull()
+            if (firstLaunch != null && sorted.first() - firstLaunch >= duration) {
+                return true
+            }
+            for (i in 0 until sorted.size - 1) {
+                if (sorted[i + 1] - sorted[i] >= duration) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
     fun calculateUnlockedAchievements(ctx: AchievementContext): Set<String> {
         val unlocked = mutableSetOf<String>()
         achievementsList.forEach { achievement ->
-            if (achievement.condition(ctx)) {
+            val condition = conditions[achievement.id]
+            if (condition?.invoke(ctx) == true) {
                 unlocked.add(achievement.id)
             }
         }
@@ -236,7 +238,12 @@ class AchievementsManager {
     fun calculateUnlockedAchievements(entries: List<Long>, launches: List<Long>): Set<String> {
         val lastEntry = entries.maxOrNull()
         val now = System.currentTimeMillis()
-        val timeWithoutSmoking = if (lastEntry != null) (now - lastEntry).coerceAtLeast(0L) else 0L
+        val timeWithoutSmoking = if (lastEntry != null) {
+            (now - lastEntry).coerceAtLeast(0L)
+        } else {
+            val firstLaunch = launches.minOrNull()
+            if (firstLaunch != null) (now - firstLaunch).coerceAtLeast(0L) else 0L
+        }
         val ctx = AchievementContext(
             timeWithoutSmoking = timeWithoutSmoking,
             entries = entries,
@@ -254,7 +261,11 @@ class AchievementsManager {
 
     fun getAchievementProgress(achievementId: String, entries: List<Long>, launches: List<Long>): AchievementProgress {
         val now = System.currentTimeMillis()
-        val timeWithoutSmoking = (entries.maxOrNull()?.let { now - it } ?: 0L).coerceAtLeast(0L)
+        val timeWithoutSmoking = if (entries.isNotEmpty()) {
+            (now - entries.maxOrNull()!!).coerceAtLeast(0L)
+        } else {
+            launches.minOrNull()?.let { (now - it).coerceAtLeast(0L) } ?: 0L
+        }
         val smokeFreeDays = (timeWithoutSmoking / TimeUnit.DAYS.toMillis(1)).toInt()
         val smokeFreeHours = (timeWithoutSmoking / TimeUnit.HOURS.toMillis(1)).toInt()
 
@@ -334,7 +345,11 @@ class AchievementsManager {
 
     fun progressFraction(achievementId: String, entries: List<Long>, launches: List<Long>): Float {
         val now = System.currentTimeMillis()
-        val timeWithoutSmoking = (entries.maxOrNull()?.let { now - it } ?: 0L).coerceAtLeast(0L)
+        val timeWithoutSmoking = if (entries.isNotEmpty()) {
+            (now - entries.maxOrNull()!!).coerceAtLeast(0L)
+        } else {
+            launches.minOrNull()?.let { (now - it).coerceAtLeast(0L) } ?: 0L
+        }
         return when (achievementId) {
             "login_1"   -> if (launches.isNotEmpty()) 1f else 0f
             "login_3"   -> consecutiveDaysFraction(launches, 3)
@@ -498,6 +513,10 @@ class AchievementsManager {
         if (sortedEntries.isEmpty()) {
             val start = sortedLaunches.firstOrNull() ?: (now - duration)
             return (start + duration).coerceAtMost(now)
+        }
+        val firstLaunch = sortedLaunches.firstOrNull()
+        if (firstLaunch != null && sortedEntries.first() - firstLaunch >= duration) {
+            return firstLaunch + duration
         }
         for (i in 0 until sortedEntries.size - 1) {
             val gap = sortedEntries[i + 1] - sortedEntries[i]

@@ -43,7 +43,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.smokingtracker.Achievement
+import com.smokingtracker.AchievementData
 import com.smokingtracker.AchievementCategory
 import com.smokingtracker.AchievementsManager
 import com.smokingtracker.AchievementsViewModel
@@ -152,7 +152,7 @@ fun AchievementsTab(
     }
 
     var selectedCategory by remember { mutableStateOf<AchievementCategory?>(null) }
-    var detailAchievement by remember { mutableStateOf<Achievement?>(null) }
+    var detailAchievement by remember { mutableStateOf<AchievementData?>(null) }
 
     val displayedAchievements = remember(selectedCategory, allAchievements) {
         if (selectedCategory == null) {
@@ -451,7 +451,7 @@ private fun AchievementHeroSection(
 
 @Composable
 private fun CategoryFilterRow(
-    allAchievements: List<Achievement>,
+    allAchievements: List<AchievementData>,
     unlockedAchievements: Set<String>,
     selectedCategory: AchievementCategory?,
     onSelectCategory: (AchievementCategory?) -> Unit,
@@ -524,7 +524,7 @@ private val bentoCardShape = RoundedCornerShape(24.dp)
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun AchievementGridTile(
-    achievement: Achievement,
+    achievement: AchievementData,
     isUnlocked: Boolean,
     progressFraction: Float,
     unlockTimestamp: Long? = null,
@@ -646,7 +646,7 @@ private fun AchievementGridTile(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun AchievementBentoCard(
-    achievement: Achievement,
+    achievement: AchievementData,
     isUnlocked: Boolean,
     progress: AchievementsManager.AchievementProgress,
     unlockTimestamp: Long? = null,
@@ -794,7 +794,7 @@ private fun AchievementBentoCard(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun AchievementDetailBottomSheet(
-    achievement: Achievement,
+    achievement: AchievementData,
     isUnlocked: Boolean,
     progress: AchievementsManager.AchievementProgress,
     unlockTimestamp: Long? = null,

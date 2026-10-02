@@ -123,11 +123,7 @@ class HomeViewModel(
     fun addSmokingEntryWithTrigger(timestamp: Long = System.currentTimeMillis(), trigger: String?) {
         viewModelScope.launch {
             repository.addEntry(timestamp, trigger)
-            val updated = smokingEntries.value.toMutableList().apply {
-                add(timestamp)
-                sort()
-            }
-            achievementsCoordinator.checkAndUpdate(updated)
+            achievementsCoordinator.checkAndUpdate()
             WidgetUpdateManager.updateAllAsync(getApplication())
         }
     }
@@ -146,10 +142,7 @@ class HomeViewModel(
                 appMetaPreferences.setHasCancelledWithin10s(true)
             }
             repository.removeEntryById(id)
-            val updated = smokingEntries.value.toMutableList().apply {
-                remove(timestamp)
-            }
-            achievementsCoordinator.checkAndUpdate(updated, wasEntryRemoved = true)
+            achievementsCoordinator.checkAndUpdate()
             WidgetUpdateManager.updateAllAsync(getApplication())
         }
     }
@@ -157,12 +150,7 @@ class HomeViewModel(
     fun editSmokingEntry(id: Long, oldTimestamp: Long, newTimestamp: Long) {
         viewModelScope.launch {
             repository.updateEntryTimestampById(id, newTimestamp)
-            val updated = smokingEntries.value.toMutableList().apply {
-                remove(oldTimestamp)
-                add(newTimestamp)
-                sort()
-            }
-            achievementsCoordinator.checkAndUpdate(updated)
+            achievementsCoordinator.checkAndUpdate()
             WidgetUpdateManager.updateAllAsync(getApplication())
         }
     }
