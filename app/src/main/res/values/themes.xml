@@ -12,14 +12,4 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
-
-    <style name="Theme.App.Starting.Light" parent="Theme.App.Starting">
-        <item name="windowSplashScreenBackground">#FFFFFBFE</item>
-        <item name="android:windowLightStatusBar">true</item>
-    </style>
-
-    <style name="Theme.App.Starting.Dark" parent="Theme.App.Starting">
-        <item name="windowSplashScreenBackground">#1C1B1F</item>
-        <item name="android:windowLightStatusBar">false</item>
-    </style>
 </resources>
