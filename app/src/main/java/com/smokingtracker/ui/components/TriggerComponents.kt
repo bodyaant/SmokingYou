@@ -73,6 +73,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -184,7 +185,7 @@ fun calculateTriggerTrend(currentCount: Int, previousCount: Int, isPeriodApplica
 }
 
 fun calculateTriggerHourlyDistribution(entities: List<SmokingEntryEntity>, triggerKey: String): List<Int> {
-    val hourly = IntArray(24) { 0 }
+    val hourly = IntArray(24)
     val cal = Calendar.getInstance()
     entities.forEach { entity ->
         if (entity.trigger == triggerKey) {
@@ -659,6 +660,7 @@ fun TriggerDetailBottomSheet(
     val chartPalette = rememberChartColorPalette()
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
+    val locale = LocalLocale.current.platformLocale
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
         enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
@@ -816,7 +818,7 @@ fun TriggerDetailBottomSheet(
                         val sh = selectedHour!!
                         val eh = (sh + 1) % 24
                         val selCount = hourlyCounts[sh]
-                        String.format(Locale.getDefault(), "%02d:00–%02d:00: %d", sh, eh, selCount)
+                        String.format(locale, "%02d:00–%02d:00: %d", sh, eh, selCount)
                     } else if (selectedQuadrant != null) {
                         stringResource(R.string.peak_hours_quadrant_format, qName, qCount.toString(), qPct)
                     } else if (peakHourCount > 0) {

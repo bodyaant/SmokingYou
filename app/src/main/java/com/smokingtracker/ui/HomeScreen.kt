@@ -60,6 +60,8 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -160,6 +162,7 @@ internal fun HomeScreenContent(
 
     val context = androidx.compose.ui.platform.LocalContext.current
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val locale = LocalLocale.current.platformLocale
 
     val resistedSuccessMsg = stringResource(R.string.resisted_craving_success)
     LaunchedEffect(viewModel) {
@@ -260,7 +263,7 @@ internal fun HomeScreenContent(
         if (!isGranted) {
             android.widget.Toast.makeText(
                 context,
-                context.getString(R.string.notif_permission_rationale),
+                R.string.notif_permission_rationale,
                 android.widget.Toast.LENGTH_LONG
             ).show()
         }
@@ -277,7 +280,7 @@ internal fun HomeScreenContent(
         }
     }
 
-    LaunchedEffect(entries, formatHm, formatHms, formatMs) {
+    LaunchedEffect(entries, formatHm, formatHms, formatMs, locale) {
         timePassedText = calculatingText
         while (true) {
             val lastEntry = entries.maxOrNull()
@@ -293,9 +296,9 @@ internal fun HomeScreenContent(
                     val seconds = TimeUnit.MILLISECONDS.toSeconds(diff) % 60
                     
                     timePassedText = when {
-                        hours >= 24 -> String.format(Locale.getDefault(), formatHm, hours, minutes)
-                        hours > 0 -> String.format(Locale.getDefault(), formatHms, hours, minutes, seconds)
-                        else -> String.format(Locale.getDefault(), formatMs, minutes, seconds)
+                        hours >= 24 -> String.format(locale, formatHm, hours, minutes)
+                        hours > 0 -> String.format(locale, formatHms, hours, minutes, seconds)
+                        else -> String.format(locale, formatMs, minutes, seconds)
                     }
                 }
             } else {
@@ -305,7 +308,7 @@ internal fun HomeScreenContent(
         }
     }
 
-    val dateFormat = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
+    val dateFormat = remember(locale) { SimpleDateFormat("d MMMM yyyy", locale) }
     val selectedDateStr = dateFormat.format(currentDate.time)
     
     val isToday = remember(currentDate) {
@@ -1286,11 +1289,12 @@ internal fun HomeScreenContent(
                             key = { _, entity -> entity.id }
                         ) { index, entity ->
                             val prevTime = if (index < selectedDateAllEntities.size - 1) selectedDateAllEntities[index + 1].timestamp else null
-                            val density = LocalDensity.current
-                            val screenWidthPx = remember(density) {
-                                context.resources.displayMetrics.widthPixels.toFloat()
+                            val windowInfo = LocalWindowInfo.current
+                            val screenWidthPx = remember(windowInfo) {
+                                windowInfo.containerSize.width.toFloat()
                             }
                             var latestDismissOffset by remember { mutableFloatStateOf(0f) }
+                            @Suppress("DEPRECATION")
                             val dismissState = rememberSwipeToDismissBoxState(
                                 positionalThreshold = { distance -> distance * 0.85f },
                                 confirmValueChange = { dismissValue ->
@@ -1500,7 +1504,8 @@ fun EntryItem(
     onEdit: (Long) -> Unit = {},
     onUpdateTrigger: (String?) -> Unit = {}
 ) {
-    val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(entryTime))
+    val locale = LocalLocale.current.platformLocale
+    val timeStr = remember(entryTime, locale) { SimpleDateFormat("HH:mm", locale).format(Date(entryTime)) }
     var isExpanded by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -1717,15 +1722,16 @@ fun EntryItem(
 
                 if (!isResisted) {
                     if (prevEntryTime != null) {
-                        val intervalStr = remember(entryTime, prevEntryTime) {
+                        val (hours, minutes) = remember(entryTime, prevEntryTime) {
                             val diffMs = entryTime - prevEntryTime
-                            val hours = TimeUnit.MILLISECONDS.toHours(diffMs)
-                            val minutes = (TimeUnit.MILLISECONDS.toMinutes(diffMs) % 60)
-                            if (hours > 0) {
-                                context.getString(R.string.time_over_limit_hm, hours, minutes)
-                            } else {
-                                context.getString(R.string.time_over_limit_m, minutes)
-                            }
+                            val h = TimeUnit.MILLISECONDS.toHours(diffMs)
+                            val m = (TimeUnit.MILLISECONDS.toMinutes(diffMs) % 60)
+                            h to m
+                        }
+                        val intervalStr = if (hours > 0) {
+                            stringResource(R.string.time_over_limit_hm, hours, minutes)
+                        } else {
+                            stringResource(R.string.time_over_limit_m, minutes)
                         }
                         Text(
                             text = intervalStr,

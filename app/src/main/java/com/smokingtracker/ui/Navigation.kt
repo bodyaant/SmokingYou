@@ -424,8 +424,8 @@ fun MainApp(viewModel: MainViewModel) {
 @Composable
 fun BottomNavigationBar(
     navController: NavHostController,
-    vibrationEnabled: Boolean = true,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    vibrationEnabled: Boolean = true
 ) {
     val items = listOf(Screen.Home, Screen.Graph, Screen.Personal)
     val navBackStackEntry by navController.currentBackStackEntryAsState()

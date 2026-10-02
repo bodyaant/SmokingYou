@@ -3,6 +3,7 @@ package com.smokingtracker.ui
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import androidx.core.net.toUri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
@@ -46,7 +47,7 @@ enum class BackupRestoreState {
 
 private val UriSaver = Saver<Uri?, String>(
     save = { it?.toString() },
-    restore = { Uri.parse(it) }
+    restore = { it.toUri() }
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

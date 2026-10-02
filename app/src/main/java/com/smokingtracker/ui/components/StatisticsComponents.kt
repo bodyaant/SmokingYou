@@ -84,6 +84,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -462,11 +463,11 @@ fun MoneySavedBentoCard(
     moneySaved: Float,
     currencySymbol: String,
     packPrice: Float,
-    savingsGoalTitle: String = "",
-    savingsGoalAmount: Float = 0f,
     onClick: () -> Unit,
     vibrationEnabled: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    savingsGoalTitle: String = "",
+    savingsGoalAmount: Float = 0f
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -617,8 +618,9 @@ fun MoneySavedBentoCard(
                             text = if (moneySaved >= savingsGoalAmount) {
                                 stringResource(R.string.stats_goal_reached)
                             } else {
+                                val locale = LocalLocale.current.platformLocale
                                 val remaining = (savingsGoalAmount - moneySaved).coerceAtLeast(0f)
-                                val formattedRemaining = "${String.format(Locale.getDefault(), "%.2f", remaining)} $currencySymbol"
+                                val formattedRemaining = "${String.format(locale, "%.2f", remaining)} $currencySymbol"
                                 stringResource(R.string.stats_goal_remaining_format, formattedRemaining)
                             },
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
@@ -805,6 +807,7 @@ fun WhoRecoveryBentoCard(
     val inactiveDotColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.22f)
     val progress = if (totalCount > 0) (completedCount.toFloat() / totalCount.toFloat()).coerceIn(0f, 1f) else 0f
     val percent = (progress * 100).toInt()
+    val recoveryWhoDesc = stringResource(R.string.stats_body_recovery_who)
 
     Card(
         modifier = modifier
@@ -815,7 +818,7 @@ fun WhoRecoveryBentoCard(
                 onClick()
             }
             .semantics {
-                contentDescription = context.getString(R.string.stats_body_recovery_who)
+                contentDescription = recoveryWhoDesc
             },
         shape = MaterialShapes.Cookie12Sided.toShape(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
@@ -1016,9 +1019,10 @@ fun AverageIntervalBentoCard(
     val bouncy = rememberBouncyPress(interactionSource = interactionSource, targetScale = 0.95f)
 
     val primaryColor = MaterialTheme.colorScheme.primary
-    val avgIntervalText = remember(intervalData.avgIntervalMinutes) {
+    val noDataStr = stringResource(R.string.stats_no_data)
+    val avgIntervalText = remember(intervalData.avgIntervalMinutes, noDataStr) {
         if (intervalData.avgIntervalMinutes > 0) formatMinutesShort(intervalData.avgIntervalMinutes, context)
-        else context.getString(R.string.stats_no_data)
+        else noDataStr
     }
 
     Card(
@@ -1374,6 +1378,7 @@ fun MoneySavedBottomSheet(
         },
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
+        val locale = LocalLocale.current.platformLocale
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1406,7 +1411,7 @@ fun MoneySavedBottomSheet(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "${String.format(Locale.getDefault(), "%.2f", moneySaved)} $currencySymbol",
+                        text = "${String.format(locale, "%.2f", moneySaved)} $currencySymbol",
                         style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Black),
                         color = MaterialTheme.colorScheme.secondary
                     )
@@ -1547,19 +1552,19 @@ fun MoneySavedBottomSheet(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Text(
-                            text = stringResource(R.string.stats_sheet_money_month, String.format(Locale.getDefault(), "%.1f %s", monthlyProj, currencySymbol)),
+                            text = stringResource(R.string.stats_sheet_money_month, String.format(locale, "%.1f %s", monthlyProj, currencySymbol)),
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
                         Text(
-                            text = stringResource(R.string.stats_sheet_money_half_year, String.format(Locale.getDefault(), "%.1f %s", halfYearProj, currencySymbol)),
+                            text = stringResource(R.string.stats_sheet_money_half_year, String.format(locale, "%.1f %s", halfYearProj, currencySymbol)),
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
                         Text(
-                            text = stringResource(R.string.stats_sheet_money_year, String.format(Locale.getDefault(), "%.1f %s", yearProj, currencySymbol)),
+                            text = stringResource(R.string.stats_sheet_money_year, String.format(locale, "%.1f %s", yearProj, currencySymbol)),
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = MaterialTheme.colorScheme.secondary
                         )
@@ -1938,6 +1943,7 @@ fun ConsumptionDetailBottomSheet(
         },
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
+        val locale = LocalLocale.current.platformLocale
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1974,7 +1980,7 @@ fun ConsumptionDetailBottomSheet(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = String.format(Locale.getDefault(), "%.1f", avgPerDay),
+                            text = String.format(locale, "%.1f", avgPerDay),
                             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -2331,6 +2337,7 @@ fun PackYearsBottomSheet(
         },
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
+        val locale = LocalLocale.current.platformLocale
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -2363,7 +2370,7 @@ fun PackYearsBottomSheet(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = String.format(Locale.getDefault(), "%.1f", packYears),
+                        text = String.format(locale, "%.1f", packYears),
                         style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Black),
                         color = riskColor
                     )

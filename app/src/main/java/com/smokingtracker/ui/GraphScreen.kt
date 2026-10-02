@@ -78,9 +78,11 @@ import com.smokingtracker.ui.theme.bouncyPress
 import com.smokingtracker.ui.theme.subContainer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.smokingtracker.StatisticsViewModel
 import com.smokingtracker.R
@@ -652,7 +654,24 @@ fun HeroAnalyticsCard(
 ) {
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     val context = androidx.compose.ui.platform.LocalContext.current
+    val locale = LocalLocale.current.platformLocale
     val chartPalette = rememberChartColorPalette()
+
+    val monthJan = stringResource(R.string.month_jan_short)
+    val monthFeb = stringResource(R.string.month_feb_short)
+    val monthMar = stringResource(R.string.month_mar_short)
+    val monthApr = stringResource(R.string.month_apr_short)
+    val monthMay = stringResource(R.string.month_may_short)
+    val monthJun = stringResource(R.string.month_jun_short)
+    val monthJul = stringResource(R.string.month_jul_short)
+    val monthAug = stringResource(R.string.month_aug_short)
+    val monthSep = stringResource(R.string.month_sep_short)
+    val monthOct = stringResource(R.string.month_oct_short)
+    val monthNov = stringResource(R.string.month_nov_short)
+    val monthDec = stringResource(R.string.month_dec_short)
+    val yearMonthLabels = remember(monthJan, monthFeb, monthMar, monthApr, monthMay, monthJun, monthJul, monthAug, monthSep, monthOct, monthNov, monthDec) {
+        listOf(monthJan, monthFeb, monthMar, monthApr, monthMay, monthJun, monthJul, monthAug, monthSep, monthOct, monthNov, monthDec)
+    }
 
     var chartViewStyle by rememberSaveable(selectedPeriod) { mutableStateOf(ChartViewStyle.BARS) }
 
@@ -717,40 +736,27 @@ fun HeroAnalyticsCard(
         } else emptySet()
     }
 
-    val xAxisLabels = remember(selectedPeriod, weeklyDate, monthlyData.size) {
+    val xAxisLabels = remember(selectedPeriod, weeklyDate, monthlyData.size, locale, yearMonthLabels) {
         when (selectedPeriod) {
-            ChartPeriod.DAY -> (0..23).map { String.format(Locale.getDefault(), "%02d:00", it) }
+            ChartPeriod.DAY -> (0..23).map { String.format(locale, "%02d:00", it) }
             ChartPeriod.WEEK -> {
                 val cal = weeklyDate.clone() as Calendar
                 cal.firstDayOfWeek = Calendar.MONDAY
                 while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
                     cal.add(Calendar.DAY_OF_YEAR, -1)
                 }
-                val dayFormat = SimpleDateFormat("EE", Locale.getDefault())
+                val dayFormat = SimpleDateFormat("EE", locale)
                 (0..6).map {
                     val name = dayFormat.format(cal.time)
                     cal.add(Calendar.DAY_OF_YEAR, 1)
-                    name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                    name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
                 }
             }
             ChartPeriod.MONTH -> {
                 val daysInMonth = monthlyData.size.coerceAtLeast(1)
                 (1..daysInMonth).map { "$it" }
             }
-            ChartPeriod.YEAR -> listOf(
-                context.getString(R.string.month_jan_short),
-                context.getString(R.string.month_feb_short),
-                context.getString(R.string.month_mar_short),
-                context.getString(R.string.month_apr_short),
-                context.getString(R.string.month_may_short),
-                context.getString(R.string.month_jun_short),
-                context.getString(R.string.month_jul_short),
-                context.getString(R.string.month_aug_short),
-                context.getString(R.string.month_sep_short),
-                context.getString(R.string.month_oct_short),
-                context.getString(R.string.month_nov_short),
-                context.getString(R.string.month_dec_short)
-            )
+            ChartPeriod.YEAR -> yearMonthLabels
         }
     }
 
@@ -1141,7 +1147,7 @@ fun HeroAnalyticsCard(
                             val bouncy = rememberBouncyPress(interactionSource = interactionSource, targetScale = 0.90f)
                             val startH = hourlyDistribution!!.peakHour
                             val endH = (startH + 1) % 24
-                            val peakTimeStr = String.format(Locale.getDefault(), "%02d:00–%02d:00", startH, endH)
+                            val peakTimeStr = String.format(locale, "%02d:00–%02d:00", startH, endH)
                             Surface(
                                 shape = containerShape(CircleShape),
                                 color = chartPalette.primaryContainer,
@@ -1349,7 +1355,7 @@ fun HeroAnalyticsCard(
                 MetricKpiCard(
                     modifier = Modifier.weight(1f),
                     title = stringResource(R.string.graph_metric_avg),
-                    value = String.format(Locale.getDefault(), "%.1f", avgPerUnit),
+                    value = String.format(locale, "%.1f", avgPerUnit),
                     unit = stringResource(R.string.history_cigs_count_format, "").trim(),
                     icon = Icons.AutoMirrored.Filled.TrendingDown,
                     tint = MaterialTheme.colorScheme.secondary
@@ -1420,7 +1426,7 @@ fun HeroPeriodSelector(
                 modifier = Modifier
                     .width(indicatorWidth)
                     .fillMaxHeight()
-                    .offset(x = indicatorWidth * animatedSelectedTab)
+                    .offset { IntOffset((indicatorWidth * animatedSelectedTab).roundToPx(), 0) }
                     .clip(CircleShape)
                     .background(
                         brush = Brush.horizontalGradient(
@@ -1476,13 +1482,13 @@ fun HeroPeriodSelector(
 fun InteractiveAnalyticsChart(
     dataPoints: List<Int>,
     selectedPeriod: ChartPeriod,
-    dateKey: String = "",
     dailyLimit: Int,
     showLimitOnGraph: Boolean,
     vibrationEnabled: Boolean,
     xAxisLabels: List<String>,
     tooltipDateFormatter: (Int) -> String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    dateKey: String = ""
 ) {
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -1915,7 +1921,7 @@ fun TriggerPeriodSelector(
                 modifier = Modifier
                     .width(indicatorWidth)
                     .fillMaxHeight()
-                    .offset(x = indicatorWidth * animatedSelectedTab)
+                    .offset { IntOffset((indicatorWidth * animatedSelectedTab).roundToPx(), 0) }
                     .clip(CircleShape)
                     .background(
                         brush = Brush.horizontalGradient(
@@ -2434,7 +2440,7 @@ fun ExpressiveTabSelector(
                 modifier = Modifier
                     .width(indicatorWidth)
                     .fillMaxHeight()
-                    .offset(x = indicatorWidth * animatedSelectedTab)
+                    .offset { IntOffset(x = (indicatorWidth * animatedSelectedTab).roundToPx(), y = 0) }
                     .clip(CircleShape)
                     .background(
                         brush = Brush.horizontalGradient(
@@ -2592,6 +2598,7 @@ private fun WeeklyComparisonBottomSheet(
         },
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
+        val locale = LocalLocale.current.platformLocale
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -2665,11 +2672,11 @@ private fun WeeklyComparisonBottomSheet(
                     val desc = when (comparison.trend) {
                         StatisticsManager.ComparisonTrend.DECREASED -> stringResource(
                             R.string.weekly_comparison_desc_decrease,
-                            String.format(Locale.getDefault(), "%.1f", Math.abs(comparison.diffDailyAvg))
+                            String.format(locale, "%.1f", Math.abs(comparison.diffDailyAvg))
                         )
                         StatisticsManager.ComparisonTrend.INCREASED -> stringResource(
                             R.string.weekly_comparison_desc_increase,
-                            String.format(Locale.getDefault(), "%.1f", Math.abs(comparison.diffDailyAvg))
+                            String.format(locale, "%.1f", Math.abs(comparison.diffDailyAvg))
                         )
                         StatisticsManager.ComparisonTrend.NO_CHANGE -> stringResource(R.string.weekly_comparison_desc_no_change)
                     }
@@ -2743,7 +2750,7 @@ private fun WeeklyComparisonBottomSheet(
                             horizontalArrangement = Arrangement.spacedBy(3.dp)
                         ) {
                             Text(
-                                text = String.format(Locale.getDefault(), "%.1f", comparison.thisWeekDailyAvg),
+                                text = String.format(locale, "%.1f", comparison.thisWeekDailyAvg),
                                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
                                 color = if (comparison.trend == StatisticsManager.ComparisonTrend.INCREASED) {
                                     chartPalette.error
@@ -2817,7 +2824,7 @@ private fun WeeklyComparisonBottomSheet(
                             horizontalArrangement = Arrangement.spacedBy(3.dp)
                         ) {
                             Text(
-                                text = String.format(Locale.getDefault(), "%.1f", comparison.lastWeekDailyAvg),
+                                text = String.format(locale, "%.1f", comparison.lastWeekDailyAvg),
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -3015,6 +3022,7 @@ private fun PeakSmokingHoursBottomSheet(
         },
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
+        val locale = LocalLocale.current.platformLocale
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -3053,7 +3061,7 @@ private fun PeakSmokingHoursBottomSheet(
                 val selCount = distribution.hourlyCounts[selectedHour!!]
                 val startH = selectedHour!!
                 val endH = (selectedHour!! + 1) % 24
-                val formatTime = String.format(Locale.getDefault(), "%02d:00–%02d:00", startH, endH)
+                val formatTime = String.format(locale, "%02d:00–%02d:00", startH, endH)
                 val countStr = stringResource(R.string.history_cigs_count_format, selCount.toString())
                 stringResource(R.string.peak_hours_selected_format, formatTime, countStr)
             } else if (selectedQuadrant != null) {

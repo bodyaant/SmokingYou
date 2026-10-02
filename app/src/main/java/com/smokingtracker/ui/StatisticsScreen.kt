@@ -56,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -217,10 +218,12 @@ fun StatisticsList(
 ) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
+    val locale = LocalLocale.current.platformLocale
+    val noDataStr = stringResource(R.string.stats_no_data)
 
-    val dateFormat = remember { SimpleDateFormat("d MMMM yyyy", Locale.getDefault()) }
-    val trackingSinceStr = remember(stats.trackingSince) {
-        stats.trackingSince?.let { dateFormat.format(Date(it)) } ?: context.getString(R.string.stats_no_data)
+    val dateFormat = remember(locale) { SimpleDateFormat("d MMMM yyyy", locale) }
+    val trackingSinceStr = remember(stats.trackingSince, dateFormat, noDataStr) {
+        stats.trackingSince?.let { dateFormat.format(Date(it)) } ?: noDataStr
     }
 
     val lastCigaretteTime = entries.maxOrNull() ?: 0L
@@ -481,7 +484,7 @@ fun StatisticsList(
                                             text = stringResource(
                                                 R.string.baseline_stats_avoided_desc,
                                                 baselineAnalytics.totalAvoidedCigarettes,
-                                                String.format(Locale.getDefault(), "%,.0f %s", baselineAnalytics.totalAvoidedMoney, currencySymbol)
+                                                String.format(locale, "%,.0f %s", baselineAnalytics.totalAvoidedMoney, currencySymbol)
                                             ),
                                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                                             color = MaterialTheme.colorScheme.onSurface
@@ -540,7 +543,7 @@ fun StatisticsList(
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
                                             Text(
-                                                text = "${String.format(Locale.getDefault(), "%.1f", baselineAnalytics.packYears)} • $riskText",
+                                                text = "${String.format(locale, "%.1f", baselineAnalytics.packYears)} • $riskText",
                                                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                                                 color = riskColor
                                             )
@@ -560,8 +563,8 @@ fun StatisticsList(
                                     text = stringResource(
                                         R.string.baseline_stats_past_summary,
                                         stringResource(R.string.baseline_years_format, baselineAnalytics.totalYearsInt),
-                                        String.format(Locale.getDefault(), "%,d", baselineAnalytics.pastCigarettes),
-                                        String.format(Locale.getDefault(), "%,.0f %s", baselineAnalytics.pastMoneySpent, currencySymbol)
+                                        String.format(locale, "%,d", baselineAnalytics.pastCigarettes),
+                                        String.format(locale, "%,.0f %s", baselineAnalytics.pastMoneySpent, currencySymbol)
                                     ),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant

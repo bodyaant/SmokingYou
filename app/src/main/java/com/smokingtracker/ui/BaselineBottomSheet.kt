@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -100,7 +101,8 @@ fun BaselineBottomSheet(
         estimatedPastCigarettes * pricePerCig
     }
 
-    val dateFormatter = remember { SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()) }
+    val locale = LocalLocale.current.platformLocale
+    val dateFormatter = remember(locale) { SimpleDateFormat("dd.MM.yyyy", locale) }
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -449,7 +451,7 @@ fun BaselineBottomSheet(
                             Text(
                                 text = stringResource(
                                     R.string.history_cigs_count_format,
-                                    String.format(Locale.getDefault(), "%,d", estimatedPastCigarettes)
+                                    String.format(locale, "%,d", estimatedPastCigarettes)
                                 ),
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurface
@@ -463,7 +465,7 @@ fun BaselineBottomSheet(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                text = String.format(Locale.getDefault(), "%,.0f %s", estimatedPastCost, currencySymbol),
+                                text = String.format(locale, "%,.0f %s", estimatedPastCost, currencySymbol),
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurface
                             )

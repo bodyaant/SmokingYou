@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -65,6 +66,7 @@ fun PackSettingsBottomSheet(
     )
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
+    val locale = LocalLocale.current.platformLocale
 
     val initialPriceStr = remember(packPrice) {
         if (packPrice > 0f) {
@@ -176,7 +178,7 @@ fun PackSettingsBottomSheet(
                             color = MaterialTheme.colorScheme.primary
                         )
                         if (priceVal > 0f && sizeValid) {
-                            val formattedPricePerCig = String.format(Locale.getDefault(), "%.2f", pricePerCig)
+                            val formattedPricePerCig = String.format(locale, "%.2f", pricePerCig)
                             Text(
                                 text = stringResource(R.string.pack_price_per_piece_format, formattedPricePerCig, currentCurrencySymbol),
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -191,8 +193,8 @@ fun PackSettingsBottomSheet(
                             thickness = 0.8.dp
                         )
                         if (dailyLimit > 0) {
-                            val formattedDayCost = String.format(Locale.getDefault(), "%.1f", dailyCost)
-                            val formattedMonthCost = String.format(Locale.getDefault(), "%.0f", monthlyCost)
+                            val formattedDayCost = String.format(locale, "%.1f", dailyCost)
+                            val formattedMonthCost = String.format(locale, "%.0f", monthlyCost)
                             Text(
                                 text = stringResource(
                                     R.string.pack_daily_monthly_cost,
@@ -206,7 +208,7 @@ fun PackSettingsBottomSheet(
                             )
                         } else {
                             Text(
-                                text = stringResource(R.string.pack_per_cigarette_cost, String.format(Locale.getDefault(), "%.2f", pricePerCig), currentCurrencySymbol),
+                                text = stringResource(R.string.pack_per_cigarette_cost, String.format(locale, "%.2f", pricePerCig), currentCurrencySymbol),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

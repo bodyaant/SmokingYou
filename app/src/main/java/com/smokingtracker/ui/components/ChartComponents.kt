@@ -85,8 +85,10 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -229,9 +231,9 @@ fun SealBadge(
 fun ChartStyleSelector(
     selectedStyle: ChartViewStyle,
     onStyleSelected: (ChartViewStyle) -> Unit,
+    modifier: Modifier = Modifier,
     showCalendarOption: Boolean = false,
-    vibrationEnabled: Boolean = true,
-    modifier: Modifier = Modifier
+    vibrationEnabled: Boolean = true
 ) {
     val activeIndex = when (selectedStyle) {
         ChartViewStyle.BARS -> 0
@@ -263,7 +265,7 @@ fun ChartStyleSelector(
                 modifier = Modifier
                     .width(buttonWidth)
                     .fillMaxHeight()
-                    .offset(x = buttonWidth * animatedTabPosition)
+                    .offset { IntOffset((buttonWidth * animatedTabPosition).roundToPx(), 0) }
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primary)
             )
@@ -404,10 +406,10 @@ fun PillBarChart(
     dailyLimit: Int,
     showLimit: Boolean,
     xAxisLabels: List<String>,
+    modifier: Modifier = Modifier,
     todayIndex: Int? = null,
     cleanDayIndices: Set<Int> = emptySet(),
     vibrationEnabled: Boolean = true,
-    modifier: Modifier = Modifier,
     chartHeight: Dp = 185.dp
 ) {
     val haptic = LocalHapticFeedback.current
@@ -872,9 +874,9 @@ fun SmoothSplineLineChart(
     dailyLimit: Int,
     showLimit: Boolean,
     xAxisLabels: List<String>,
+    modifier: Modifier = Modifier,
     todayIndex: Int? = null,
     vibrationEnabled: Boolean = true,
-    modifier: Modifier = Modifier,
     chartHeight: Dp = 185.dp
 ) {
     val haptic = LocalHapticFeedback.current
@@ -1383,9 +1385,9 @@ fun MonthCalendarHeatmap(
     dailyLimit: Int,
     selectedDay: Int?,
     onSelectDay: (Int) -> Unit,
+    modifier: Modifier = Modifier,
     todayDay: Int? = null,
-    vibrationEnabled: Boolean = true,
-    modifier: Modifier = Modifier
+    vibrationEnabled: Boolean = true
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -1621,10 +1623,10 @@ fun DayPartsStackedBar(
     morningCount: Int,
     afternoonCount: Int,
     eveningCount: Int,
+    modifier: Modifier = Modifier,
     selectedQuadrant: Int? = null,
     onSelectQuadrant: (Int?) -> Unit = {},
-    vibrationEnabled: Boolean = true,
-    modifier: Modifier = Modifier
+    vibrationEnabled: Boolean = true
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -1736,13 +1738,13 @@ fun DayDetailCard(
     dateFormatted: String,
     count: Int,
     dailyLimit: Int,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier,
     cost: Float = 0f,
     currency: String = "",
     avgIntervalMinutes: Int? = null,
     topTrigger: String? = null,
-    title: String = stringResource(R.string.chart_selected_day),
-    onClose: () -> Unit,
-    modifier: Modifier = Modifier
+    title: String = stringResource(R.string.chart_selected_day)
 ) {
     val isCleanDay = count == 0
     val isLimitApplicable = dailyLimit > 0
@@ -1856,6 +1858,7 @@ fun DayDetailCard(
                 }
             }
 
+            val locale = LocalLocale.current.platformLocale
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1886,7 +1889,7 @@ fun DayDetailCard(
                         )
                     }
                     Text(
-                        text = if (cost > 0f) String.format(Locale.getDefault(), "%.1f %s", cost, currencySymbol).trim() else "0 $currencySymbol".trim(),
+                        text = if (cost > 0f) String.format(locale, "%.1f %s", cost, currencySymbol).trim() else "0 $currencySymbol".trim(),
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,

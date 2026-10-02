@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -373,7 +374,8 @@ fun SettingsTab(
         }
     }
 
-    val currentLocale = LocalConfiguration.current.locales.get(0)?.language ?: Locale.getDefault().language
+    val currentPlatformLocale = LocalLocale.current.platformLocale
+    val currentLocale = currentPlatformLocale.language
 
     val backupSuccessStr = stringResource(R.string.backup_success)
     val backupErrorStr = stringResource(R.string.backup_error)
@@ -664,8 +666,7 @@ fun SettingsTab(
             )
         }
         item {
-            val locale = LocalConfiguration.current.locales.get(0) ?: java.util.Locale.getDefault()
-            val langDisplay = locale.getDisplayLanguage(locale).replaceFirstChar { it.uppercase() }
+            val langDisplay = currentPlatformLocale.getDisplayLanguage(currentPlatformLocale).replaceFirstChar { it.uppercase() }
             SettingItem(
                 icon = Icons.Filled.Language,
                 title = stringResource(R.string.settings_language),
@@ -777,7 +778,7 @@ fun SettingsTab(
             val packSubtitle = if (packPrice > 0f) {
                 val formattedPrice = if (packPrice % 1f == 0f) packPrice.toInt().toString() else packPrice.toString()
                 val pricePerCig = if (packSize > 0) packPrice / packSize else 0f
-                val formattedPerCig = String.format(Locale.getDefault(), "%.2f", pricePerCig)
+                val formattedPerCig = String.format(currentPlatformLocale, "%.2f", pricePerCig)
                 val base = stringResource(R.string.settings_pack_subtitle_pattern, formattedPrice, currency, packSize)
                 val rate = stringResource(R.string.pack_subtitle_piece_rate, formattedPerCig, currency)
                 "$base • $rate"

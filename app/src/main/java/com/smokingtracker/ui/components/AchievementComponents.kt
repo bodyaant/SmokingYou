@@ -169,9 +169,9 @@ fun BadgeMedallion(
     id: String,
     category: AchievementCategory,
     isUnlocked: Boolean,
+    modifier: Modifier = Modifier,
     isSecret: Boolean = false,
-    size: Dp = 56.dp,
-    modifier: Modifier = Modifier
+    size: Dp = 56.dp
 ) {
     val shape = badgeShape(id)
     val icon = remember(id, isSecret, isUnlocked) { badgeIcon(id, isSecret, isUnlocked) }
@@ -287,11 +287,11 @@ private data class ConfettiParticle(
 @Composable
 fun ConfettiBurst(
     burstKey: Int,
+    modifier: Modifier = Modifier,
     colors: List<Color> = listOf(
         Color(0xFFFFC107), Color(0xFFFF5722), Color(0xFF4CAF50),
         Color(0xFF00BCD4), Color(0xFFE91E63), Color(0xFF9C27B0)
-    ),
-    modifier: Modifier = Modifier
+    )
 ) {
     if (burstKey <= 0) return
     val progress = remember(burstKey) { Animatable(0f) }

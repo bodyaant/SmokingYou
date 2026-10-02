@@ -1,7 +1,7 @@
 package com.smokingtracker.ui.components
 
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -47,7 +47,7 @@ fun UpdateDialog(
                     val downloadUrl = apkAsset?.browserDownloadUrl ?: release.htmlUrl
                     if (!downloadUrl.isNullOrEmpty()) {
                         try {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
+                            val intent = Intent(Intent.ACTION_VIEW, downloadUrl.toUri())
                             context.startActivity(intent)
                         } catch (e: Exception) {
                             e.printStackTrace()

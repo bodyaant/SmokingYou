@@ -527,9 +527,9 @@ private fun AchievementGridTile(
     achievement: AchievementData,
     isUnlocked: Boolean,
     progressFraction: Float,
-    unlockTimestamp: Long? = null,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    unlockTimestamp: Long? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val bouncyState = rememberBouncyPress(interactionSource = interactionSource, targetScale = 0.88f)
@@ -649,9 +649,9 @@ private fun AchievementBentoCard(
     achievement: AchievementData,
     isUnlocked: Boolean,
     progress: AchievementsManager.AchievementProgress,
-    unlockTimestamp: Long? = null,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    unlockTimestamp: Long? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val bouncyState = rememberBouncyPress(interactionSource = interactionSource, targetScale = 0.90f)
