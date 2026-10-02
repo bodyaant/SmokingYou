@@ -14,6 +14,8 @@ import com.smokingtracker.data.preferences.UserPreferences
 import com.smokingtracker.data.repository.SmokingRepository
 import com.smokingtracker.data.repository.TriggerRepository
 import com.smokingtracker.widget.WidgetUpdateManager
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
@@ -33,56 +35,99 @@ class BackupManager(
 
     suspend fun backup(uri: Uri) {
         val currentEntries = repository.smokingEntries.first()
-        val data = BackupData(
-            isRegistered = appMetaPreferences.isRegistered.first(),
-            entries = currentEntries.map {
-                BackupEntry(timestamp = it.timestamp, trigger = it.trigger, isResisted = it.isResisted)
-            },
-            appTheme = themePreferences.appTheme.first().name,
-            unlockedAchievements = appMetaPreferences.unlockedAchievements.first(),
-            achievementUnlockDates = appMetaPreferences.achievementUnlockDates.first(),
-            dailyLimit = userPreferences.dailyLimit.first(),
-            packPrice = userPreferences.packPrice.first(),
-            packSize = userPreferences.packSize.first(),
-            currency = userPreferences.currency.first(),
-            colorPreset = themePreferences.colorPreset.first().name,
-            fontPreset = themePreferences.fontPreset.first().name,
-            amoledTheme = themePreferences.amoledTheme.first(),
-            vibrationEnabled = themePreferences.vibrationEnabled.first(),
-            hasMadeBackup = appMetaPreferences.hasMadeBackup.first(),
-            hasChangedPackPrice = appMetaPreferences.hasChangedPackPrice.first(),
-            hasCancelledWithin10s = appMetaPreferences.hasCancelledWithin10s.first(),
-            appLaunchDates = appMetaPreferences.appLaunchDates.first(),
-            useCustomVariableFont = themePreferences.useCustomVariableFont.first(),
-            customFontWeight = themePreferences.customFontWeight.first(),
-            customFontWidth = themePreferences.customFontWidth.first(),
-            customFontRoundness = themePreferences.customFontRoundness.first(),
-            taperingPlanEnabled = userPreferences.taperingPlanEnabled.first(),
-            taperingIntervalDays = userPreferences.taperingIntervalDays.first(),
-            lastTaperingCheckinDate = userPreferences.lastTaperingCheckinDate.first(),
-            hasHistoricalBaseline = userPreferences.hasHistoricalBaseline.first(),
-            historicalStartDate = userPreferences.historicalStartDate.first(),
-            historicalDailyAvg = userPreferences.historicalDailyAvg.first(),
-            historicalPackPrice = userPreferences.historicalPackPrice.first(),
-            historicalPackSize = userPreferences.historicalPackSize.first(),
-            historicalTriggerPriorities = userPreferences.historicalTriggerPriorities.first(),
-            appIcon = themePreferences.appIcon.first().name,
-            checkUpdatesOnStart = appMetaPreferences.checkUpdatesOnStart.first(),
-            customTriggers = triggerRepository.customTriggers.first(),
-            disabledDefaultTriggers = triggerRepository.disabledDefaultTriggers.first(),
-            notificationEnabled = notificationPreferences.ongoingNotificationEnabled.first(),
-            notificationLowPriority = notificationPreferences.notificationLowPriority.first(),
-            notificationShowTimer = notificationPreferences.notificationShowTimer.first(),
-            notificationShowProgress = notificationPreferences.notificationShowProgress.first(),
-            notificationShowAddButton = notificationPreferences.notificationShowAddButton.first(),
-            notificationShowResistButton = notificationPreferences.notificationShowResistButton.first()
-        )
 
-        application.contentResolver.openOutputStream(uri)?.use { outputStream ->
-            OutputStreamWriter(outputStream).use { writer ->
-                gson.toJson(data, writer)
-            }
-        } ?: throw IllegalStateException("Failed to open OutputStream for URI: $uri")
+        coroutineScope {
+            val isRegisteredDeferred = async { appMetaPreferences.isRegistered.first() }
+            val appThemeDeferred = async { themePreferences.appTheme.first() }
+            val unlockedAchievementsDeferred = async { appMetaPreferences.unlockedAchievements.first() }
+            val achievementUnlockDatesDeferred = async { appMetaPreferences.achievementUnlockDates.first() }
+            val dailyLimitDeferred = async { userPreferences.dailyLimit.first() }
+            val packPriceDeferred = async { userPreferences.packPrice.first() }
+            val packSizeDeferred = async { userPreferences.packSize.first() }
+            val currencyDeferred = async { userPreferences.currency.first() }
+            val colorPresetDeferred = async { themePreferences.colorPreset.first() }
+            val fontPresetDeferred = async { themePreferences.fontPreset.first() }
+            val amoledThemeDeferred = async { themePreferences.amoledTheme.first() }
+            val vibrationEnabledDeferred = async { themePreferences.vibrationEnabled.first() }
+            val hasMadeBackupDeferred = async { appMetaPreferences.hasMadeBackup.first() }
+            val hasChangedPackPriceDeferred = async { appMetaPreferences.hasChangedPackPrice.first() }
+            val hasCancelledWithin10sDeferred = async { appMetaPreferences.hasCancelledWithin10s.first() }
+            val appLaunchDatesDeferred = async { appMetaPreferences.appLaunchDates.first() }
+            val useCustomVariableFontDeferred = async { themePreferences.useCustomVariableFont.first() }
+            val customFontWeightDeferred = async { themePreferences.customFontWeight.first() }
+            val customFontWidthDeferred = async { themePreferences.customFontWidth.first() }
+            val customFontRoundnessDeferred = async { themePreferences.customFontRoundness.first() }
+            val taperingPlanEnabledDeferred = async { userPreferences.taperingPlanEnabled.first() }
+            val taperingIntervalDaysDeferred = async { userPreferences.taperingIntervalDays.first() }
+            val lastTaperingCheckinDateDeferred = async { userPreferences.lastTaperingCheckinDate.first() }
+            val hasHistoricalBaselineDeferred = async { userPreferences.hasHistoricalBaseline.first() }
+            val historicalStartDateDeferred = async { userPreferences.historicalStartDate.first() }
+            val historicalDailyAvgDeferred = async { userPreferences.historicalDailyAvg.first() }
+            val historicalPackPriceDeferred = async { userPreferences.historicalPackPrice.first() }
+            val historicalPackSizeDeferred = async { userPreferences.historicalPackSize.first() }
+            val historicalTriggerPrioritiesDeferred = async { userPreferences.historicalTriggerPriorities.first() }
+            val appIconDeferred = async { themePreferences.appIcon.first() }
+            val checkUpdatesOnStartDeferred = async { appMetaPreferences.checkUpdatesOnStart.first() }
+            val customTriggersDeferred = async { triggerRepository.customTriggers.first() }
+            val disabledDefaultTriggersDeferred = async { triggerRepository.disabledDefaultTriggers.first() }
+            val notificationEnabledDeferred = async { notificationPreferences.ongoingNotificationEnabled.first() }
+            val notificationLowPriorityDeferred = async { notificationPreferences.notificationLowPriority.first() }
+            val notificationShowTimerDeferred = async { notificationPreferences.notificationShowTimer.first() }
+            val notificationShowProgressDeferred = async { notificationPreferences.notificationShowProgress.first() }
+            val notificationShowAddButtonDeferred = async { notificationPreferences.notificationShowAddButton.first() }
+            val notificationShowResistButtonDeferred = async { notificationPreferences.notificationShowResistButton.first() }
+
+            val data = BackupData(
+                isRegistered = isRegisteredDeferred.await(),
+                entries = currentEntries.map {
+                    BackupEntry(timestamp = it.timestamp, trigger = it.trigger, isResisted = it.isResisted)
+                },
+                appTheme = appThemeDeferred.await().name,
+                unlockedAchievements = unlockedAchievementsDeferred.await(),
+                achievementUnlockDates = achievementUnlockDatesDeferred.await(),
+                dailyLimit = dailyLimitDeferred.await(),
+                packPrice = packPriceDeferred.await(),
+                packSize = packSizeDeferred.await(),
+                currency = currencyDeferred.await(),
+                colorPreset = colorPresetDeferred.await().name,
+                fontPreset = fontPresetDeferred.await().name,
+                amoledTheme = amoledThemeDeferred.await(),
+                vibrationEnabled = vibrationEnabledDeferred.await(),
+                hasMadeBackup = hasMadeBackupDeferred.await(),
+                hasChangedPackPrice = hasChangedPackPriceDeferred.await(),
+                hasCancelledWithin10s = hasCancelledWithin10sDeferred.await(),
+                appLaunchDates = appLaunchDatesDeferred.await(),
+                useCustomVariableFont = useCustomVariableFontDeferred.await(),
+                customFontWeight = customFontWeightDeferred.await(),
+                customFontWidth = customFontWidthDeferred.await(),
+                customFontRoundness = customFontRoundnessDeferred.await(),
+                taperingPlanEnabled = taperingPlanEnabledDeferred.await(),
+                taperingIntervalDays = taperingIntervalDaysDeferred.await(),
+                lastTaperingCheckinDate = lastTaperingCheckinDateDeferred.await(),
+                hasHistoricalBaseline = hasHistoricalBaselineDeferred.await(),
+                historicalStartDate = historicalStartDateDeferred.await(),
+                historicalDailyAvg = historicalDailyAvgDeferred.await(),
+                historicalPackPrice = historicalPackPriceDeferred.await(),
+                historicalPackSize = historicalPackSizeDeferred.await(),
+                historicalTriggerPriorities = historicalTriggerPrioritiesDeferred.await(),
+                appIcon = appIconDeferred.await().name,
+                checkUpdatesOnStart = checkUpdatesOnStartDeferred.await(),
+                customTriggers = customTriggersDeferred.await(),
+                disabledDefaultTriggers = disabledDefaultTriggersDeferred.await(),
+                notificationEnabled = notificationEnabledDeferred.await(),
+                notificationLowPriority = notificationLowPriorityDeferred.await(),
+                notificationShowTimer = notificationShowTimerDeferred.await(),
+                notificationShowProgress = notificationShowProgressDeferred.await(),
+                notificationShowAddButton = notificationShowAddButtonDeferred.await(),
+                notificationShowResistButton = notificationShowResistButtonDeferred.await()
+            )
+
+            application.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                OutputStreamWriter(outputStream).use { writer ->
+                    gson.toJson(data, writer)
+                }
+            } ?: throw IllegalStateException("Failed to open OutputStream for URI: $uri")
+        }
 
         appMetaPreferences.setHasMadeBackup(true)
         achievementsCoordinator.checkAndUpdate()
