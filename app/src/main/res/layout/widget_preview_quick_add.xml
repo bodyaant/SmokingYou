@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_widget_preview_container"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="6dp">
+    android:padding="6dp"
+    tools:ignore="UseAppTint">
 
     <LinearLayout
         android:layout_width="48dp"
@@ -16,7 +18,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:contentDescription="Quick Add Cigarette"
+            android:contentDescription="@null"
             android:src="@drawable/ic_cigarettebase"
             android:tint="#334155" />
     </LinearLayout>
@@ -28,5 +30,6 @@
         android:text="+1"
         android:textColor="#334155"
         android:textSize="12sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        tools:ignore="HardcodedText" />
 </LinearLayout>

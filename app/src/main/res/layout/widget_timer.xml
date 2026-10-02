@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widget_timer_main_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_widget_container"
+    android:baselineAligned="false"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingHorizontal="16dp"
-    android:paddingVertical="12dp">
+    android:paddingVertical="12dp"
+    tools:ignore="UseAppTint">
 
     <LinearLayout
         android:id="@+id/widget_timer_left_section"
@@ -30,20 +33,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="--"
             android:textColor="@color/widget_primary_text_color"
             android:textSize="19sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:text="--" />
 
         <TextView
             android:id="@+id/tv_widget_today_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="--"
             android:textColor="@color/widget_accent_color"
             android:textSize="11sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:text="--" />
     </LinearLayout>
 
     <LinearLayout
@@ -63,7 +66,7 @@
                 android:id="@+id/img_cookie_bg_resist"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:contentDescription="Resist Background" />
+                android:contentDescription="@null" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -90,18 +93,19 @@
                 android:id="@+id/img_cookie_bg"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:contentDescription="Background" />
+                android:contentDescription="@null" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:layout_width="18dp"
                     android:layout_height="18dp"
-                    android:contentDescription="Quick Add"
+                    android:contentDescription="@null"
                     android:src="@drawable/ic_cigarettebase"
                     android:tint="@color/widget_accent_color" />
 
@@ -111,7 +115,8 @@
                     android:text="+1"
                     android:textColor="@color/widget_accent_color"
                     android:textSize="9sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    tools:ignore="SmallSp,HardcodedText" />
             </LinearLayout>
         </FrameLayout>
     </LinearLayout>

@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.LruCache
+import androidx.core.graphics.createBitmap
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -20,7 +21,7 @@ object CookieShapeDrawable {
 
         cache.get(cacheKey)?.let { if (!it.isRecycled) return it }
 
-        val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             this.color = color

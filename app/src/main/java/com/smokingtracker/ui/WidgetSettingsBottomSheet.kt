@@ -2,7 +2,6 @@ package com.smokingtracker.ui
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
-import android.os.Build
 import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.animateColorAsState
@@ -81,13 +80,13 @@ fun WidgetSettingsBottomSheet(
     fun requestPin(providerClass: Class<*>) {
         HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
         val appWidgetManager = AppWidgetManager.getInstance(context)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && appWidgetManager.isRequestPinAppWidgetSupported) {
+        if (appWidgetManager.isRequestPinAppWidgetSupported) {
             val myProvider = ComponentName(context, providerClass)
             appWidgetManager.requestPinAppWidget(myProvider, null, null)
         } else {
             Toast.makeText(
                 context,
-                context.getString(R.string.widget_pin_unsupported_toast),
+                R.string.widget_pin_unsupported_toast,
                 Toast.LENGTH_LONG
             ).show()
         }
