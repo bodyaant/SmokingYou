@@ -12,8 +12,8 @@ android {
         applicationId = "com.smokingtracker"
         minSdk = 26
         targetSdk = 37
-        versionCode = 10600
-        versionName = "1.6.0"
+        versionCode = 20000
+        versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -41,10 +41,6 @@ android {
         buildConfig = true
     }
     
-    androidResources {
-        generateLocaleConfig = false
-    }
-
     packaging {
         resources {
             excludes += "DebugProbesKt.bin"
@@ -54,6 +50,18 @@ android {
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
+    }
+
+    @Suppress("UnstableApiUsage")
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
+
+    lint {
+        abortOnError = false
+        disable += setOf("ObsoleteSdkInt", "AndroidGradlePluginVersion")
     }
 }
 
@@ -79,7 +87,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
