@@ -34,11 +34,8 @@ object HapticFeedbackHelper {
             if (vibrator != null && vibrator.hasVibrator()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(12L, VibrationEffect.DEFAULT_AMPLITUDE))
                 } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(12L)
+                    vibrator.vibrate(VibrationEffect.createOneShot(12L, VibrationEffect.DEFAULT_AMPLITUDE))
                 }
             } else {
                 haptic?.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -55,11 +52,8 @@ object HapticFeedbackHelper {
             if (vibrator != null && vibrator.hasVibrator()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(8L, 100))
                 } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(8L)
+                    vibrator.vibrate(VibrationEffect.createOneShot(8L, 100))
                 }
             } else {
                 haptic?.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -76,11 +70,8 @@ object HapticFeedbackHelper {
             if (vibrator != null && vibrator.hasVibrator()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK))
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(25L, VibrationEffect.DEFAULT_AMPLITUDE))
                 } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(25L)
+                    vibrator.vibrate(VibrationEffect.createOneShot(25L, VibrationEffect.DEFAULT_AMPLITUDE))
                 }
             } else {
                 haptic?.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -95,7 +86,7 @@ object HapticFeedbackHelper {
         try {
             val vibrator = context?.let { getVibrator(it) }
             if (vibrator != null && vibrator.hasVibrator()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
                     vibrator.areAllPrimitivesSupported(
                         VibrationEffect.Composition.PRIMITIVE_CLICK,
                         VibrationEffect.Composition.PRIMITIVE_LOW_TICK
@@ -108,11 +99,8 @@ object HapticFeedbackHelper {
                     vibrator.vibrate(composition)
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK))
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 20, 40, 20), -1))
                 } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(longArrayOf(0, 20, 40, 20), -1)
+                    vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 20, 40, 20), -1))
                 }
             } else {
                 haptic?.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -129,11 +117,8 @@ object HapticFeedbackHelper {
             if (vibrator != null && vibrator.hasVibrator()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK))
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 30, 50, 30), -1))
                 } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(longArrayOf(0, 30, 50, 30), -1)
+                    vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 30, 50, 30), -1))
                 }
             } else {
                 haptic?.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -148,14 +133,9 @@ object HapticFeedbackHelper {
         try {
             val vibrator = getVibrator(context)
             if (vibrator?.hasVibrator() == true) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val timings = longArrayOf(0, 50, 40, 70, 40, 100)
-                    val amplitudes = intArrayOf(0, 150, 0, 200, 0, 255)
-                    vibrator.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1))
-                } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(longArrayOf(0, 50, 40, 70, 40, 100), -1)
-                }
+                val timings = longArrayOf(0, 50, 40, 70, 40, 100)
+                val amplitudes = intArrayOf(0, 150, 0, 200, 0, 255)
+                vibrator.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1))
             }
         } catch (e: Exception) {
             e.printStackTrace()

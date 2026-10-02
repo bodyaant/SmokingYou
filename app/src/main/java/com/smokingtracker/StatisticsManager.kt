@@ -113,7 +113,7 @@ class StatisticsManager {
         val localDate = Instant.ofEpochMilli(date.timeInMillis).atZone(zoneId).toLocalDate()
         val dayStartMillis = localDate.atStartOfDay(zoneId).toInstant().toEpochMilli()
         val dayEndMillis = localDate.plusDays(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
-        val hourlyCounts = IntArray(24) { 0 }
+        val hourlyCounts = IntArray(24)
         entries.forEach { time ->
             if (time >= dayStartMillis && time < dayEndMillis) {
                 val hour = hourOfDay(time, zoneId)
@@ -129,7 +129,7 @@ class StatisticsManager {
         val monday = localDate.with(DayOfWeek.MONDAY)
         val weekStartMillis = monday.atStartOfDay(zoneId).toInstant().toEpochMilli()
         val weekEndMillis = monday.plusDays(7).atStartOfDay(zoneId).toInstant().toEpochMilli()
-        val dailyCounts = IntArray(7) { 0 }
+        val dailyCounts = IntArray(7)
         entries.forEach { time ->
             if (time >= weekStartMillis && time < weekEndMillis) {
                 val entryDate = toLocalDate(time, zoneId)
@@ -147,7 +147,7 @@ class StatisticsManager {
         val monthStartMillis = monthStart.atStartOfDay(zoneId).toInstant().toEpochMilli()
         val monthEndMillis = monthStart.plusMonths(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
         val daysInMonth = monthStart.lengthOfMonth()
-        val dailyCounts = IntArray(daysInMonth) { 0 }
+        val dailyCounts = IntArray(daysInMonth)
         entries.forEach { time ->
             if (time >= monthStartMillis && time < monthEndMillis) {
                 val dayIndex = toLocalDate(time, zoneId).dayOfMonth - 1
@@ -174,7 +174,7 @@ class StatisticsManager {
         val monthStartMillis = monthStart.atStartOfDay(zoneId).toInstant().toEpochMilli()
         val monthEndMillis = monthStart.plusMonths(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
         val daysInMonth = monthStart.lengthOfMonth()
-        val dailyCounts = IntArray(daysInMonth) { 0 }
+        val dailyCounts = IntArray(daysInMonth)
         entries.forEach { time ->
             if (time >= monthStartMillis && time < monthEndMillis) {
                 val dayIndex = toLocalDate(time, zoneId).dayOfMonth - 1
@@ -190,7 +190,7 @@ class StatisticsManager {
         val yearStart = localDate.withDayOfYear(1)
         val yearStartMillis = yearStart.atStartOfDay(zoneId).toInstant().toEpochMilli()
         val yearEndMillis = yearStart.plusYears(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
-        val monthlyCounts = IntArray(12) { 0 }
+        val monthlyCounts = IntArray(12)
         entries.forEach { time ->
             if (time >= yearStartMillis && time < yearEndMillis) {
                 val monthIndex = toLocalDate(time, zoneId).monthValue - 1
@@ -443,7 +443,7 @@ class StatisticsManager {
     )
 
     fun calculateHourlyDistribution(entries: List<Long>): HourlyDistributionData {
-        val hourly = IntArray(24) { 0 }
+        val hourly = IntArray(24)
         val zoneId = ZoneId.systemDefault()
         entries.forEach { ts ->
             val hour = hourOfDay(ts, zoneId)
