@@ -1,12 +1,7 @@
 package com.smokingtracker
 
-import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
-import java.util.Calendar
+import java.time.LocalDate
+import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
@@ -25,8 +20,33 @@ data class AchievementContext(
     val hasChangedPackPrice: Boolean = false,
     val hasCancelledWithin10s: Boolean = false,
     val themeLangChangesToday: Int = 0,
-    val analyticsVisitsToday: Int = 0
-)
+    val analyticsVisitsToday: Int = 0,
+    val nowMillis: Long = System.currentTimeMillis(),
+    val zoneId: ZoneId = ZoneId.systemDefault()
+) {
+    internal val sortedEntries: List<Long> by lazy(LazyThreadSafetyMode.NONE) {
+        if (entries.isAscending()) entries else entries.sorted()
+    }
+
+    internal val sortedLaunches: List<Long> by lazy(LazyThreadSafetyMode.NONE) {
+        if (launches.isAscending()) launches else launches.sorted()
+    }
+
+    internal val maxConsecutiveLaunchDays: Int by lazy(LazyThreadSafetyMode.NONE) {
+        AchievementsManager.calculateMaxConsecutiveDays(sortedLaunches, zoneId)
+    }
+
+    internal val maxSmokeFreeDurationMs: Long by lazy(LazyThreadSafetyMode.NONE) {
+        maxOf(
+            timeWithoutSmoking.coerceAtLeast(0L),
+            AchievementsManager.calculateMaxSmokeFreeDuration(sortedEntries, sortedLaunches, nowMillis)
+        )
+    }
+
+    internal val entriesCountByDay: Map<LocalDate, Int> by lazy(LazyThreadSafetyMode.NONE) {
+        groupCountByDay(sortedEntries, zoneId)
+    }
+}
 
 data class AchievementData(
     val id: String,
@@ -36,9 +56,75 @@ data class AchievementData(
     val isSecret: Boolean = false
 )
 
+internal fun List<Long>.isAscending(): Boolean {
+    for (i in 1 until size) {
+        if (this[i] < this[i - 1]) return false
+    }
+    return true
+}
+
 class AchievementsManager {
 
-    fun getAchievementById(id: String): AchievementData? = achievementsList.find { it.id == id }
+    companion object {
+        private const val NIGHT_OWL_START_MINUTE = 3 * 60 // 03:00
+        private const val NIGHT_OWL_END_MINUTE = 5 * 60   // 05:00
+        private const val MORNING_RITUAL_START_MINUTE = 4 * 60 // 04:00
+        private const val MORNING_RITUAL_END_MINUTE = 7 * 60   // 07:00 (exclusive)
+        private const val DOUBLE_DAMAGE_WINDOW_MS = 10 * 60 * 1000L
+        private const val MIN_PUNCTUAL_INTERVAL_MS = 60 * 1000L
+        private val MAX_PUNCTUAL_INTERVAL_MS = TimeUnit.DAYS.toMillis(1)
+        private const val PUNCTUAL_TOLERANCE_MS = 60 * 1000L
+
+        internal fun calculateMaxConsecutiveDays(
+            dates: List<Long>,
+            zoneId: ZoneId = ZoneId.systemDefault()
+        ): Int {
+            if (dates.isEmpty()) return 0
+            val sorted = if (dates.isAscending()) dates else dates.sorted()
+            var prevDay = toLocalDate(sorted[0], zoneId)
+            var currentStreak = 1
+            var maxStreak = 1
+
+            for (i in 1 until sorted.size) {
+                val day = toLocalDate(sorted[i], zoneId)
+                if (day == prevDay) continue
+                val daysDiff = daysBetween(prevDay, day)
+                if (daysDiff == 1L) {
+                    currentStreak++
+                    if (currentStreak > maxStreak) maxStreak = currentStreak
+                } else if (daysDiff > 1L) {
+                    currentStreak = 1
+                }
+                prevDay = day
+            }
+            return maxStreak
+        }
+
+        internal fun calculateMaxSmokeFreeDuration(
+            sortedEntries: List<Long>,
+            sortedLaunches: List<Long>,
+            nowMillis: Long
+        ): Long {
+            val entries = if (sortedEntries.isAscending()) sortedEntries else sortedEntries.sorted()
+            val launches = if (sortedLaunches.isAscending()) sortedLaunches else sortedLaunches.sorted()
+            val firstLaunch = launches.firstOrNull()
+
+            if (entries.isEmpty()) {
+                return if (firstLaunch != null) (nowMillis - firstLaunch).coerceAtLeast(0L) else 0L
+            }
+
+            var maxDuration = (nowMillis - entries.last()).coerceAtLeast(0L)
+            if (firstLaunch != null) {
+                val initialGap = (entries.first() - firstLaunch).coerceAtLeast(0L)
+                if (initialGap > maxDuration) maxDuration = initialGap
+            }
+            for (i in 0 until entries.size - 1) {
+                val gap = (entries[i + 1] - entries[i]).coerceAtLeast(0L)
+                if (gap > maxDuration) maxDuration = gap
+            }
+            return maxDuration
+        }
+    }
 
     val achievementsList = listOf(
         AchievementData("login_1", R.string.ach_curiosity_title, R.string.ach_curiosity_desc, AchievementCategory.LOGIN),
@@ -69,14 +155,18 @@ class AchievementsManager {
         AchievementData("secret_blind_eye", R.string.ach_blind_eye_title, R.string.ach_blind_eye_desc, AchievementCategory.SECRET, isSecret = true)
     )
 
+    private val achievementsById: Map<String, AchievementData> = achievementsList.associateBy { it.id }
+
+    fun getAchievementById(id: String): AchievementData? = achievementsById[id]
+
     private val conditions: Map<String, (AchievementContext) -> Boolean> = mapOf(
-        "login_1" to { ctx -> ctx.launches.isNotEmpty() },
-        "login_3" to { ctx -> hasConsecutiveDays(ctx.launches, 3) },
-        "login_7" to { ctx -> hasConsecutiveDays(ctx.launches, 7) },
-        "login_30" to { ctx -> hasConsecutiveDays(ctx.launches, 30) },
-        "login_90" to { ctx -> hasConsecutiveDays(ctx.launches, 90) },
-        "login_180" to { ctx -> hasConsecutiveDays(ctx.launches, 180) },
-        "login_365" to { ctx -> hasConsecutiveDays(ctx.launches, 365) },
+        "login_1" to { ctx -> ctx.sortedLaunches.isNotEmpty() },
+        "login_3" to { ctx -> ctx.maxConsecutiveLaunchDays >= 3 },
+        "login_7" to { ctx -> ctx.maxConsecutiveLaunchDays >= 7 },
+        "login_30" to { ctx -> ctx.maxConsecutiveLaunchDays >= 30 },
+        "login_90" to { ctx -> ctx.maxConsecutiveLaunchDays >= 90 },
+        "login_180" to { ctx -> ctx.maxConsecutiveLaunchDays >= 180 },
+        "login_365" to { ctx -> ctx.maxConsecutiveLaunchDays >= 365 },
         "nosmoke_1d" to { ctx -> hasSmokeFreeDuration(ctx, TimeUnit.DAYS.toMillis(1)) },
         "nosmoke_3d" to { ctx -> hasSmokeFreeDuration(ctx, TimeUnit.DAYS.toMillis(3)) },
         "nosmoke_1w" to { ctx -> hasSmokeFreeDuration(ctx, TimeUnit.DAYS.toMillis(7)) },
@@ -85,148 +175,78 @@ class AchievementsManager {
         "nosmoke_6m" to { ctx -> hasSmokeFreeDuration(ctx, TimeUnit.DAYS.toMillis(180)) },
         "nosmoke_1y" to { ctx -> hasSmokeFreeDuration(ctx, TimeUnit.DAYS.toMillis(365)) },
         "secret_night_owl" to { ctx ->
-            ctx.entries.any { timestamp ->
-                val hour = Calendar.getInstance().apply { timeInMillis = timestamp }.get(Calendar.HOUR_OF_DAY)
-                hour in 3..4
-            }
+            ctx.sortedEntries.any { ts -> isNightOwlTime(ts, ctx.zoneId) }
         },
-        "secret_morning_ritual" to { ctx -> hasMorningRitualStreak(ctx.entries, 5) },
+        "secret_morning_ritual" to { ctx ->
+            hasMorningRitualStreak(ctx.sortedEntries, 5, ctx.zoneId)
+        },
         "secret_synchronization" to { ctx ->
-            ctx.entries.any { timestamp ->
-                val cal = Calendar.getInstance().apply { timeInMillis = timestamp }
-                val hour = cal.get(Calendar.HOUR_OF_DAY)
-                val min = cal.get(Calendar.MINUTE)
-                (hour == 0 || hour == 12) && min == 0
-            }
+            ctx.sortedEntries.any { ts -> isSynchronizationTime(ts, ctx.zoneId) }
         },
-        "secret_punctuality" to { ctx -> hasPunctualIntervals(ctx.entries) },
+        "secret_punctuality" to { ctx -> hasPunctualIntervals(ctx.sortedEntries) },
         "secret_hesitant" to { ctx -> ctx.hasCancelledWithin10s },
-        "secret_explorer" to { ctx -> ctx.themeLangChangesToday >= 3 },
+        "secret_explorer" to { ctx -> ctx.themeLangChangesToday > 3 },
         "secret_archivist" to { ctx -> ctx.hasMadeBackup },
-        "secret_analytics_collector" to { ctx -> ctx.analyticsVisitsToday >= 10 },
+        "secret_analytics_collector" to { ctx -> ctx.analyticsVisitsToday > 10 },
         "secret_double_damage" to { ctx ->
-            val sorted = ctx.entries.sorted()
-            sorted.zipWithNext().any { (t1, t2) -> (t2 - t1) in 1 until (10 * 60 * 1000L) }
+            findDoubleDamageDate(ctx.sortedEntries) != null
         },
         "secret_inflation" to { ctx -> ctx.hasChangedPackPrice },
         "secret_crisis" to { ctx ->
-            if (ctx.dailyLimit <= 0) false
-            else {
-                val dayCounts = ctx.entries.groupBy { timestamp ->
-                    val cal = Calendar.getInstance().apply { timeInMillis = timestamp }
-                    cal.get(Calendar.YEAR) * 1000 + cal.get(Calendar.DAY_OF_YEAR)
-                }.mapValues { it.value.size }
-                dayCounts.values.any { it == ctx.dailyLimit }
+            if (ctx.dailyLimit <= 0) {
+                false
+            } else {
+                val today = toLocalDate(ctx.nowMillis, ctx.zoneId)
+                ctx.entriesCountByDay.any { (day, count) ->
+                    day.isBefore(today) && count == ctx.dailyLimit
+                }
             }
         },
         "secret_blind_eye" to { ctx ->
-            if (ctx.dailyLimit <= 0) false
-            else {
-                val dayCounts = ctx.entries.groupBy { timestamp ->
-                    val cal = Calendar.getInstance().apply { timeInMillis = timestamp }
-                    cal.get(Calendar.YEAR) * 1000 + cal.get(Calendar.DAY_OF_YEAR)
-                }.mapValues { it.value.size }
-                dayCounts.values.any { it >= ctx.dailyLimit + 5 }
+            if (ctx.dailyLimit <= 0) {
+                false
+            } else {
+                ctx.entriesCountByDay.values.any { it >= ctx.dailyLimit + 5 }
             }
         }
     )
 
-    private fun hasConsecutiveDays(dates: List<Long>, requiredConsecutiveDays: Int): Boolean {
-        if (dates.isEmpty()) return false
-
-        val sortedDays = dates.map {
-            val cal = Calendar.getInstance().apply { timeInMillis = it }
-            cal.set(Calendar.HOUR_OF_DAY, 0)
-            cal.set(Calendar.MINUTE, 0)
-            cal.set(Calendar.SECOND, 0)
-            cal.set(Calendar.MILLISECOND, 0)
-            cal.timeInMillis
-        }.distinct().sorted()
-
-        var currentStreak = 1
-        var maxStreak = 1
-
-        for (i in 1 until sortedDays.size) {
-            val daysDiff = daysBetween(sortedDays[i - 1], sortedDays[i])
-            if (daysDiff == 1L) {
-                currentStreak++
-                if (currentStreak > maxStreak) maxStreak = currentStreak
-            } else if (daysDiff > 1L) {
-                currentStreak = 1
-            }
-        }
-
-        return maxStreak >= requiredConsecutiveDays
+    private fun isNightOwlTime(timestamp: Long, zoneId: ZoneId): Boolean {
+        return minuteOfDay(timestamp, zoneId) in NIGHT_OWL_START_MINUTE..NIGHT_OWL_END_MINUTE
     }
 
-    private fun hasMorningRitualStreak(entries: List<Long>, targetDays: Int): Boolean {
-        if (entries.isEmpty()) return false
-        val dayEarliestMinutes = entries.groupBy { timestamp ->
-            val cal = Calendar.getInstance().apply { timeInMillis = timestamp }
-            cal.set(Calendar.HOUR_OF_DAY, 0)
-            cal.set(Calendar.MINUTE, 0)
-            cal.set(Calendar.SECOND, 0)
-            cal.set(Calendar.MILLISECOND, 0)
-            cal.timeInMillis
-        }.mapValues { (_, timestamps) ->
-            timestamps.minOf { ts ->
-                val cal = Calendar.getInstance().apply { timeInMillis = ts }
-                cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)
-            }
-        }
+    private fun isSynchronizationTime(timestamp: Long, zoneId: ZoneId): Boolean {
+        val minOfDay = minuteOfDay(timestamp, zoneId)
+        return minOfDay == 0 || minOfDay == 12 * 60
+    }
 
-        val validDays = dayEarliestMinutes.filterValues { it <= 7 * 60 }.keys.sorted()
-        if (validDays.isEmpty()) return false
+    private fun hasConsecutiveDays(
+        dates: List<Long>,
+        requiredConsecutiveDays: Int,
+        zoneId: ZoneId = ZoneId.systemDefault()
+    ): Boolean {
+        return calculateMaxConsecutiveDays(dates, zoneId) >= requiredConsecutiveDays
+    }
 
-        var currentStreak = 1
-        var maxStreak = 1
-
-        for (i in 1 until validDays.size) {
-            val daysDiff = daysBetween(validDays[i - 1], validDays[i])
-            if (daysDiff == 1L) {
-                currentStreak++
-                if (currentStreak > maxStreak) maxStreak = currentStreak
-            } else {
-                currentStreak = 1
-            }
-        }
-
-        return maxStreak >= targetDays
+    private fun hasMorningRitualStreak(
+        entries: List<Long>,
+        targetDays: Int,
+        zoneId: ZoneId = ZoneId.systemDefault()
+    ): Boolean {
+        return findMorningRitualDate(entries, targetDays, zoneId) != null
     }
 
     private fun hasPunctualIntervals(entries: List<Long>): Boolean {
-        if (entries.size < 3) return false
-        val sorted = entries.sorted()
-        for (i in 0 until sorted.size - 2) {
-            val diff1 = sorted[i + 1] - sorted[i]
-            val diff2 = sorted[i + 2] - sorted[i + 1]
-            if (diff1 >= 5 * 60 * 1000L && abs(diff1 - diff2) <= 2 * 60 * 1000L) {
-                return true
-            }
-        }
-        return false
+        return findPunctualDate(entries) != null
     }
 
     private fun hasSmokeFreeDuration(ctx: AchievementContext, duration: Long): Boolean {
-        if (ctx.timeWithoutSmoking >= duration) return true
-        val sorted = ctx.entries.sorted()
-        if (sorted.isNotEmpty()) {
-            val firstLaunch = ctx.launches.minOrNull()
-            if (firstLaunch != null && sorted.first() - firstLaunch >= duration) {
-                return true
-            }
-            for (i in 0 until sorted.size - 1) {
-                if (sorted[i + 1] - sorted[i] >= duration) {
-                    return true
-                }
-            }
-        }
-        return false
+        return ctx.maxSmokeFreeDurationMs >= duration
     }
 
     fun calculateUnlockedAchievements(ctx: AchievementContext): Set<String> {
         val unlocked = mutableSetOf<String>()
-        achievementsList.forEach { achievement ->
+        for (achievement in achievementsList) {
             val condition = conditions[achievement.id]
             if (condition?.invoke(ctx) == true) {
                 unlocked.add(achievement.id)
@@ -235,19 +255,27 @@ class AchievementsManager {
         return unlocked
     }
 
-    fun calculateUnlockedAchievements(entries: List<Long>, launches: List<Long>): Set<String> {
-        val lastEntry = entries.maxOrNull()
-        val now = System.currentTimeMillis()
+    fun calculateUnlockedAchievements(
+        entries: List<Long>,
+        launches: List<Long>,
+        zoneId: ZoneId = ZoneId.systemDefault(),
+        nowMillis: Long = System.currentTimeMillis()
+    ): Set<String> {
+        val sortedEntries = if (entries.isAscending()) entries else entries.sorted()
+        val sortedLaunches = if (launches.isAscending()) launches else launches.sorted()
+        val lastEntry = sortedEntries.lastOrNull()
         val timeWithoutSmoking = if (lastEntry != null) {
-            (now - lastEntry).coerceAtLeast(0L)
+            (nowMillis - lastEntry).coerceAtLeast(0L)
         } else {
-            val firstLaunch = launches.minOrNull()
-            if (firstLaunch != null) (now - firstLaunch).coerceAtLeast(0L) else 0L
+            val firstLaunch = sortedLaunches.firstOrNull()
+            if (firstLaunch != null) (nowMillis - firstLaunch).coerceAtLeast(0L) else 0L
         }
         val ctx = AchievementContext(
             timeWithoutSmoking = timeWithoutSmoking,
-            entries = entries,
-            launches = launches
+            entries = sortedEntries,
+            launches = sortedLaunches,
+            nowMillis = nowMillis,
+            zoneId = zoneId
         )
         return calculateUnlockedAchievements(ctx)
     }
@@ -259,49 +287,60 @@ class AchievementsManager {
         val remainingDisplay: String? = null
     )
 
-    fun getAchievementProgress(achievementId: String, entries: List<Long>, launches: List<Long>): AchievementProgress {
-        val now = System.currentTimeMillis()
-        val timeWithoutSmoking = if (entries.isNotEmpty()) {
-            (now - entries.maxOrNull()!!).coerceAtLeast(0L)
-        } else {
-            launches.minOrNull()?.let { (now - it).coerceAtLeast(0L) } ?: 0L
-        }
-        val smokeFreeDays = (timeWithoutSmoking / TimeUnit.DAYS.toMillis(1)).toInt()
-        val smokeFreeHours = (timeWithoutSmoking / TimeUnit.HOURS.toMillis(1)).toInt()
-
+    fun getAchievementProgress(
+        achievementId: String,
+        entries: List<Long>,
+        launches: List<Long>,
+        zoneId: ZoneId = ZoneId.systemDefault(),
+        nowMillis: Long = System.currentTimeMillis()
+    ): AchievementProgress {
         return when (achievementId) {
             "login_1" -> {
                 val curr = if (launches.isNotEmpty()) 1 else 0
                 AchievementProgress(curr.toFloat(), "$curr", "1")
             }
-            "login_3" -> calcLoginProgress(launches, 3)
-            "login_7" -> calcLoginProgress(launches, 7)
-            "login_30" -> calcLoginProgress(launches, 30)
-            "login_90" -> calcLoginProgress(launches, 90)
-            "login_180" -> calcLoginProgress(launches, 180)
-            "login_365" -> calcLoginProgress(launches, 365)
-            "nosmoke_1d" -> {
-                val fraction = (timeWithoutSmoking.toFloat() / TimeUnit.DAYS.toMillis(1)).coerceIn(0f, 1f)
-                val remainingHours = (24 - smokeFreeHours).coerceAtLeast(0)
-                AchievementProgress(
-                    fraction = fraction,
-                    currentDisplay = "${smokeFreeHours}h",
-                    targetDisplay = "24h",
-                    remainingDisplay = if (remainingHours > 0) "${remainingHours}h" else null
-                )
+            "login_3" -> calcLoginProgress(launches, 3, zoneId)
+            "login_7" -> calcLoginProgress(launches, 7, zoneId)
+            "login_30" -> calcLoginProgress(launches, 30, zoneId)
+            "login_90" -> calcLoginProgress(launches, 90, zoneId)
+            "login_180" -> calcLoginProgress(launches, 180, zoneId)
+            "login_365" -> calcLoginProgress(launches, 365, zoneId)
+            "nosmoke_1d", "nosmoke_3d", "nosmoke_1w",
+            "nosmoke_1m", "nosmoke_3m", "nosmoke_6m", "nosmoke_1y" -> {
+                val bestSmokeFreeMs = calculateMaxSmokeFreeDuration(entries, launches, nowMillis)
+                val smokeFreeDays = (bestSmokeFreeMs / TimeUnit.DAYS.toMillis(1)).toInt()
+                val smokeFreeHours = (bestSmokeFreeMs / TimeUnit.HOURS.toMillis(1)).toInt()
+                when (achievementId) {
+                    "nosmoke_1d" -> {
+                        val fraction = (bestSmokeFreeMs.toFloat() / TimeUnit.DAYS.toMillis(1)).coerceIn(0f, 1f)
+                        val cappedHours = smokeFreeHours.coerceIn(0, 24)
+                        val remainingHours = (24 - cappedHours).coerceAtLeast(0)
+                        AchievementProgress(
+                            fraction = fraction,
+                            currentDisplay = "${cappedHours}h",
+                            targetDisplay = "24h",
+                            remainingDisplay = if (remainingHours > 0) "${remainingHours}h" else null
+                        )
+                    }
+                    "nosmoke_3d" -> calcSmokeFreeDaysProgress(bestSmokeFreeMs, smokeFreeDays, 3)
+                    "nosmoke_1w" -> calcSmokeFreeDaysProgress(bestSmokeFreeMs, smokeFreeDays, 7)
+                    "nosmoke_1m" -> calcSmokeFreeDaysProgress(bestSmokeFreeMs, smokeFreeDays, 30)
+                    "nosmoke_3m" -> calcSmokeFreeDaysProgress(bestSmokeFreeMs, smokeFreeDays, 90)
+                    "nosmoke_6m" -> calcSmokeFreeDaysProgress(bestSmokeFreeMs, smokeFreeDays, 180)
+                    "nosmoke_1y" -> calcSmokeFreeDaysProgress(bestSmokeFreeMs, smokeFreeDays, 365)
+                    else -> AchievementProgress(0f, "0", "1")
+                }
             }
-            "nosmoke_3d" -> calcSmokeFreeDaysProgress(timeWithoutSmoking, smokeFreeDays, 3)
-            "nosmoke_1w" -> calcSmokeFreeDaysProgress(timeWithoutSmoking, smokeFreeDays, 7)
-            "nosmoke_1m" -> calcSmokeFreeDaysProgress(timeWithoutSmoking, smokeFreeDays, 30)
-            "nosmoke_3m" -> calcSmokeFreeDaysProgress(timeWithoutSmoking, smokeFreeDays, 90)
-            "nosmoke_6m" -> calcSmokeFreeDaysProgress(timeWithoutSmoking, smokeFreeDays, 180)
-            "nosmoke_1y" -> calcSmokeFreeDaysProgress(timeWithoutSmoking, smokeFreeDays, 365)
             else -> AchievementProgress(0f, "0", "1")
         }
     }
 
-    private fun calcLoginProgress(dates: List<Long>, target: Int): AchievementProgress {
-        val maxStreak = calculateMaxConsecutiveDays(dates)
+    private fun calcLoginProgress(
+        dates: List<Long>,
+        target: Int,
+        zoneId: ZoneId = ZoneId.systemDefault()
+    ): AchievementProgress {
+        val maxStreak = calculateMaxConsecutiveDays(dates, zoneId).coerceAtMost(target)
         val fraction = (maxStreak.toFloat() / target).coerceIn(0f, 1f)
         val rem = (target - maxStreak).coerceAtLeast(0)
         return AchievementProgress(
@@ -312,194 +351,120 @@ class AchievementsManager {
         )
     }
 
-    private fun calcSmokeFreeDaysProgress(timeWithoutSmoking: Long, currentDays: Int, targetDays: Int): AchievementProgress {
+    private fun calcSmokeFreeDaysProgress(
+        bestSmokeFreeMs: Long,
+        currentDays: Int,
+        targetDays: Int
+    ): AchievementProgress {
         val targetMillis = TimeUnit.DAYS.toMillis(targetDays.toLong())
-        val fraction = (timeWithoutSmoking.toFloat() / targetMillis).coerceIn(0f, 1f)
-        val rem = (targetDays - currentDays).coerceAtLeast(0)
+        val fraction = (bestSmokeFreeMs.toFloat() / targetMillis).coerceIn(0f, 1f)
+        val cappedDays = currentDays.coerceIn(0, targetDays)
+        val rem = (targetDays - cappedDays).coerceAtLeast(0)
         return AchievementProgress(
             fraction = fraction,
-            currentDisplay = "$currentDays",
+            currentDisplay = "$cappedDays",
             targetDisplay = "$targetDays",
             remainingDisplay = if (rem > 0) "$rem" else null
         )
     }
 
-    private fun calculateMaxConsecutiveDays(dates: List<Long>): Int {
-        if (dates.isEmpty()) return 0
-        val sortedDays = dates.map {
-            Calendar.getInstance().apply {
-                timeInMillis = it
-                set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-            }.timeInMillis
-        }.distinct().sorted()
-        var currentStreak = 1
-        var maxStreak = 1
-        for (i in 1 until sortedDays.size) {
-            val daysDiff = daysBetween(sortedDays[i - 1], sortedDays[i])
-            if (daysDiff == 1L) { currentStreak++; if (currentStreak > maxStreak) maxStreak = currentStreak }
-            else if (daysDiff > 1L) currentStreak = 1
-        }
-        return maxStreak
-    }
-
-    fun progressFraction(achievementId: String, entries: List<Long>, launches: List<Long>): Float {
-        val now = System.currentTimeMillis()
-        val timeWithoutSmoking = if (entries.isNotEmpty()) {
-            (now - entries.maxOrNull()!!).coerceAtLeast(0L)
-        } else {
-            launches.minOrNull()?.let { (now - it).coerceAtLeast(0L) } ?: 0L
-        }
-        return when (achievementId) {
-            "login_1"   -> if (launches.isNotEmpty()) 1f else 0f
-            "login_3"   -> consecutiveDaysFraction(launches, 3)
-            "login_7"   -> consecutiveDaysFraction(launches, 7)
-            "login_30"  -> consecutiveDaysFraction(launches, 30)
-            "login_90"  -> consecutiveDaysFraction(launches, 90)
-            "login_180" -> consecutiveDaysFraction(launches, 180)
-            "login_365" -> consecutiveDaysFraction(launches, 365)
-            "nosmoke_1d" -> (timeWithoutSmoking.toFloat() / TimeUnit.DAYS.toMillis(1)).coerceIn(0f, 1f)
-            "nosmoke_3d" -> (timeWithoutSmoking.toFloat() / TimeUnit.DAYS.toMillis(3)).coerceIn(0f, 1f)
-            "nosmoke_1w" -> (timeWithoutSmoking.toFloat() / TimeUnit.DAYS.toMillis(7)).coerceIn(0f, 1f)
-            "nosmoke_1m" -> (timeWithoutSmoking.toFloat() / TimeUnit.DAYS.toMillis(30)).coerceIn(0f, 1f)
-            "nosmoke_3m" -> (timeWithoutSmoking.toFloat() / TimeUnit.DAYS.toMillis(90)).coerceIn(0f, 1f)
-            "nosmoke_6m" -> (timeWithoutSmoking.toFloat() / TimeUnit.DAYS.toMillis(180)).coerceIn(0f, 1f)
-            "nosmoke_1y" -> (timeWithoutSmoking.toFloat() / TimeUnit.DAYS.toMillis(365)).coerceIn(0f, 1f)
-            else -> 0f
-        }
-    }
-
-    private fun consecutiveDaysFraction(dates: List<Long>, target: Int): Float {
-        val maxStreak = calculateMaxConsecutiveDays(dates)
-        return (maxStreak.toFloat() / target).coerceIn(0f, 1f)
-    }
-
-    fun sendNotificationForAchievement(context: Context, achievementId: String) {
-        val achievement = achievementsList.find { it.id == achievementId } ?: return
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            return
-        }
-
-        val title = context.getString(achievement.titleResId)
-        val desc = context.getString(achievement.descResId)
-        val icon = if (achievement.category == AchievementCategory.NO_SMOKE) {
-            R.drawable.ic_crosscigarette
-        } else {
-            R.drawable.ic_cigarettebase
-        }
-
-        val builder = NotificationCompat.Builder(context, SmokingTrackerApp.CHANNEL_ID)
-            .setSmallIcon(icon)
-            .setContentTitle(context.getString(R.string.notification_title, title))
-            .setContentText(desc)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-
-        with(NotificationManagerCompat.from(context)) {
-            try {
-                notify(achievement.id.hashCode(), builder.build())
-            } catch (e: SecurityException) {
-            }
-        }
+    fun progressFraction(
+        achievementId: String,
+        entries: List<Long>,
+        launches: List<Long>,
+        zoneId: ZoneId = ZoneId.systemDefault(),
+        nowMillis: Long = System.currentTimeMillis()
+    ): Float {
+        return getAchievementProgress(achievementId, entries, launches, zoneId, nowMillis).fraction
     }
 
     fun estimateHistoricalUnlockTimestamp(
         achievementId: String,
         entries: List<Long>,
         launches: List<Long>,
-        dailyLimit: Int = 0
+        dailyLimit: Int = 0,
+        zoneId: ZoneId = ZoneId.systemDefault(),
+        nowMillis: Long = System.currentTimeMillis()
     ): Long? {
-        val now = System.currentTimeMillis()
-        val sortedEntries = entries.sorted()
-        val sortedLaunches = launches.sorted()
+        val sortedEntries = if (entries.isAscending()) entries else entries.sorted()
+        val sortedLaunches = if (launches.isAscending()) launches else launches.sorted()
 
         return when (achievementId) {
-            "login_1" -> sortedLaunches.firstOrNull() ?: sortedEntries.firstOrNull() ?: now
-            "login_3" -> findStreakDate(sortedLaunches, 3) ?: sortedLaunches.firstOrNull() ?: now
-            "login_7" -> findStreakDate(sortedLaunches, 7) ?: sortedLaunches.firstOrNull() ?: now
-            "login_30" -> findStreakDate(sortedLaunches, 30) ?: sortedLaunches.firstOrNull() ?: now
-            "login_90" -> findStreakDate(sortedLaunches, 90) ?: sortedLaunches.firstOrNull() ?: now
-            "login_180" -> findStreakDate(sortedLaunches, 180) ?: sortedLaunches.firstOrNull() ?: now
-            "login_365" -> findStreakDate(sortedLaunches, 365) ?: sortedLaunches.firstOrNull() ?: now
+            "login_1" -> sortedLaunches.firstOrNull() ?: sortedEntries.firstOrNull()
+            "login_3" -> findStreakDate(sortedLaunches, 3, zoneId)
+            "login_7" -> findStreakDate(sortedLaunches, 7, zoneId)
+            "login_30" -> findStreakDate(sortedLaunches, 30, zoneId)
+            "login_90" -> findStreakDate(sortedLaunches, 90, zoneId)
+            "login_180" -> findStreakDate(sortedLaunches, 180, zoneId)
+            "login_365" -> findStreakDate(sortedLaunches, 365, zoneId)
 
-            "nosmoke_1d" -> findSmokeFreeCrossingDate(sortedEntries, sortedLaunches, TimeUnit.DAYS.toMillis(1), now)
-            "nosmoke_3d" -> findSmokeFreeCrossingDate(sortedEntries, sortedLaunches, TimeUnit.DAYS.toMillis(3), now)
-            "nosmoke_1w" -> findSmokeFreeCrossingDate(sortedEntries, sortedLaunches, TimeUnit.DAYS.toMillis(7), now)
-            "nosmoke_1m" -> findSmokeFreeCrossingDate(sortedEntries, sortedLaunches, TimeUnit.DAYS.toMillis(30), now)
-            "nosmoke_3m" -> findSmokeFreeCrossingDate(sortedEntries, sortedLaunches, TimeUnit.DAYS.toMillis(90), now)
-            "nosmoke_6m" -> findSmokeFreeCrossingDate(sortedEntries, sortedLaunches, TimeUnit.DAYS.toMillis(180), now)
-            "nosmoke_1y" -> findSmokeFreeCrossingDate(sortedEntries, sortedLaunches, TimeUnit.DAYS.toMillis(365), now)
+            "nosmoke_1d" -> findSmokeFreeCrossingDate(sortedEntries, sortedLaunches, TimeUnit.DAYS.toMillis(1), nowMillis)
+            "nosmoke_3d" -> findSmokeFreeCrossingDate(sortedEntries, sortedLaunches, TimeUnit.DAYS.toMillis(3), nowMillis)
+            "nosmoke_1w" -> findSmokeFreeCrossingDate(sortedEntries, sortedLaunches, TimeUnit.DAYS.toMillis(7), nowMillis)
+            "nosmoke_1m" -> findSmokeFreeCrossingDate(sortedEntries, sortedLaunches, TimeUnit.DAYS.toMillis(30), nowMillis)
+            "nosmoke_3m" -> findSmokeFreeCrossingDate(sortedEntries, sortedLaunches, TimeUnit.DAYS.toMillis(90), nowMillis)
+            "nosmoke_6m" -> findSmokeFreeCrossingDate(sortedEntries, sortedLaunches, TimeUnit.DAYS.toMillis(180), nowMillis)
+            "nosmoke_1y" -> findSmokeFreeCrossingDate(sortedEntries, sortedLaunches, TimeUnit.DAYS.toMillis(365), nowMillis)
 
             "secret_night_owl" -> {
-                sortedEntries.firstOrNull { ts ->
-                    val hour = Calendar.getInstance().apply { timeInMillis = ts }.get(Calendar.HOUR_OF_DAY)
-                    hour in 3..4
-                } ?: sortedLaunches.firstOrNull() ?: now
+                sortedEntries.firstOrNull { ts -> isNightOwlTime(ts, zoneId) }
             }
             "secret_morning_ritual" -> {
-                findMorningRitualDate(sortedEntries, 5) ?: sortedLaunches.firstOrNull() ?: now
+                findMorningRitualDate(sortedEntries, 5, zoneId)
             }
             "secret_synchronization" -> {
-                sortedEntries.firstOrNull { ts ->
-                    val cal = Calendar.getInstance().apply { timeInMillis = ts }
-                    val hour = cal.get(Calendar.HOUR_OF_DAY)
-                    val min = cal.get(Calendar.MINUTE)
-                    (hour == 0 || hour == 12) && min == 0
-                } ?: sortedLaunches.firstOrNull() ?: now
+                sortedEntries.firstOrNull { ts -> isSynchronizationTime(ts, zoneId) }
             }
             "secret_punctuality" -> {
-                findPunctualDate(sortedEntries) ?: sortedLaunches.firstOrNull() ?: now
+                findPunctualDate(sortedEntries)
             }
             "secret_double_damage" -> {
-                for (i in 0 until sortedEntries.size - 1) {
-                    val diff = sortedEntries[i + 1] - sortedEntries[i]
-                    if (diff in 1 until (10 * 60 * 1000L)) {
-                        return sortedEntries[i + 1]
-                    }
-                }
-                sortedLaunches.firstOrNull() ?: now
+                findDoubleDamageDate(sortedEntries)
             }
             "secret_crisis" -> {
                 if (dailyLimit > 0) {
-                    findDailyLimitDate(sortedEntries, dailyLimit, false) ?: sortedLaunches.firstOrNull() ?: now
+                    findDailyLimitDate(sortedEntries, dailyLimit, isAtLeast = false, zoneId = zoneId, nowMillis = nowMillis)
                 } else {
-                    sortedLaunches.firstOrNull() ?: now
+                    null
                 }
             }
             "secret_blind_eye" -> {
                 if (dailyLimit > 0) {
-                    findDailyLimitDate(sortedEntries, dailyLimit + 5, true) ?: sortedLaunches.firstOrNull() ?: now
+                    findDailyLimitDate(sortedEntries, dailyLimit + 5, isAtLeast = true, zoneId = zoneId, nowMillis = nowMillis)
                 } else {
-                    sortedLaunches.firstOrNull() ?: now
+                    null
                 }
             }
-            else -> sortedLaunches.firstOrNull() ?: sortedEntries.firstOrNull() ?: now
+            else -> null
         }
     }
 
-    private fun findStreakDate(dates: List<Long>, targetDays: Int): Long? {
-        if (dates.isEmpty()) return null
-        val daysWithTimestamp = dates.groupBy { ts ->
-            Calendar.getInstance().apply {
-                timeInMillis = ts
-                set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-            }.timeInMillis
-        }.toSortedMap()
+    internal fun findStreakDate(
+        dates: List<Long>,
+        targetDays: Int,
+        zoneId: ZoneId = ZoneId.systemDefault()
+    ): Long? {
+        if (targetDays <= 0 || dates.isEmpty()) return null
+        val sorted = if (dates.isAscending()) dates else dates.sorted()
+        if (targetDays == 1) return sorted.first()
 
-        val sortedDayKeys = daysWithTimestamp.keys.toList()
+        var prevDay = toLocalDate(sorted[0], zoneId)
         var currentStreak = 1
-        for (i in 1 until sortedDayKeys.size) {
-            val daysDiff = daysBetween(sortedDayKeys[i - 1], sortedDayKeys[i])
+
+        for (i in 1 until sorted.size) {
+            val ts = sorted[i]
+            val day = toLocalDate(ts, zoneId)
+            if (day == prevDay) continue
+            val daysDiff = daysBetween(prevDay, day)
             if (daysDiff == 1L) {
                 currentStreak++
-                if (currentStreak == targetDays) {
-                    return daysWithTimestamp[sortedDayKeys[i]]?.minOrNull() ?: sortedDayKeys[i]
+                if (currentStreak >= targetDays) {
+                    return ts
                 }
             } else if (daysDiff > 1L) {
                 currentStreak = 1
             }
+            prevDay = day
         }
         return null
     }
@@ -508,13 +473,18 @@ class AchievementsManager {
         sortedEntries: List<Long>,
         sortedLaunches: List<Long>,
         duration: Long,
-        now: Long
-    ): Long {
-        if (sortedEntries.isEmpty()) {
-            val start = sortedLaunches.firstOrNull() ?: (now - duration)
-            return (start + duration).coerceAtMost(now)
-        }
+        nowMillis: Long
+    ): Long? {
         val firstLaunch = sortedLaunches.firstOrNull()
+        if (sortedEntries.isEmpty()) {
+            if (firstLaunch == null) return null
+            return if (nowMillis - firstLaunch >= duration) {
+                (firstLaunch + duration).coerceAtMost(nowMillis)
+            } else {
+                null
+            }
+        }
+
         if (firstLaunch != null && sortedEntries.first() - firstLaunch >= duration) {
             return firstLaunch + duration
         }
@@ -525,69 +495,109 @@ class AchievementsManager {
             }
         }
         val lastEntry = sortedEntries.last()
-        if (now - lastEntry >= duration) {
-            return lastEntry + duration
+        if (nowMillis - lastEntry >= duration) {
+            return (lastEntry + duration).coerceAtMost(nowMillis)
         }
-        return (lastEntry + duration).coerceAtMost(now)
+        return null
     }
 
-    private fun findMorningRitualDate(entries: List<Long>, targetDays: Int): Long? {
-        val dayEarliest = entries.groupBy { ts ->
-            Calendar.getInstance().apply {
-                timeInMillis = ts
-                set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-            }.timeInMillis
-        }.mapValues { (_, timestamps) ->
-            timestamps.filter { ts ->
-                val cal = Calendar.getInstance().apply { timeInMillis = ts }
-                (cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)) <= 7 * 60
-            }.minOrNull()
-        }.filterValues { it != null }
+    private fun findMorningRitualDate(
+        entries: List<Long>,
+        targetDays: Int,
+        zoneId: ZoneId = ZoneId.systemDefault()
+    ): Long? {
+        if (targetDays <= 0 || entries.isEmpty()) return null
+        val sorted = if (entries.isAscending()) entries else entries.sorted()
 
-        val validDays = dayEarliest.keys.sorted()
+        // Find the earliest cigarette of each day and keep only days where it falls in [04:00, 07:00)
+        val validDayTimestamps = ArrayList<Pair<LocalDate, Long>>()
+        var currentDay: LocalDate? = null
+
+        for (ts in sorted) {
+            val day = toLocalDate(ts, zoneId)
+            if (day != currentDay) {
+                currentDay = day
+                val minOfDay = minuteOfDay(ts, zoneId)
+                if (minOfDay in MORNING_RITUAL_START_MINUTE until MORNING_RITUAL_END_MINUTE) {
+                    validDayTimestamps.add(day to ts)
+                }
+            }
+        }
+
+        if (validDayTimestamps.isEmpty()) return null
+        if (targetDays == 1) return validDayTimestamps.first().second
+
         var currentStreak = 1
-        for (i in 1 until validDays.size) {
-            val diff = daysBetween(validDays[i - 1], validDays[i])
+        for (i in 1 until validDayTimestamps.size) {
+            val diff = daysBetween(validDayTimestamps[i - 1].first, validDayTimestamps[i].first)
             if (diff == 1L) {
                 currentStreak++
-                if (currentStreak == targetDays) {
-                    return dayEarliest[validDays[i]]
+                if (currentStreak >= targetDays) {
+                    return validDayTimestamps[i].second
                 }
-            } else {
+            } else if (diff > 1L) {
                 currentStreak = 1
             }
         }
         return null
     }
 
-    private fun findPunctualDate(entries: List<Long>): Long? {
+    internal fun findPunctualDate(entries: List<Long>): Long? {
         if (entries.size < 3) return null
-        for (i in 0 until entries.size - 2) {
-            val diff1 = entries[i + 1] - entries[i]
-            val diff2 = entries[i + 2] - entries[i + 1]
-            if (diff1 >= 5 * 60 * 1000L && abs(diff1 - diff2) <= 2 * 60 * 1000L) {
-                return entries[i + 2]
+        val sorted = if (entries.isAscending()) entries else entries.sorted()
+        for (i in 0 until sorted.size - 2) {
+            val diff1 = sorted[i + 1] - sorted[i]
+            val diff2 = sorted[i + 2] - sorted[i + 1]
+            if (diff1 in MIN_PUNCTUAL_INTERVAL_MS..MAX_PUNCTUAL_INTERVAL_MS &&
+                diff2 in MIN_PUNCTUAL_INTERVAL_MS..MAX_PUNCTUAL_INTERVAL_MS &&
+                (diff1 / MIN_PUNCTUAL_INTERVAL_MS) == (diff2 / MIN_PUNCTUAL_INTERVAL_MS) &&
+                abs(diff1 - diff2) < PUNCTUAL_TOLERANCE_MS
+            ) {
+                return sorted[i + 2]
             }
         }
         return null
     }
 
-    private fun findDailyLimitDate(entries: List<Long>, targetCount: Int, isAtLeast: Boolean): Long? {
-        val days = entries.groupBy { ts ->
-            Calendar.getInstance().apply {
-                timeInMillis = ts
-                set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-            }.timeInMillis
-        }.toSortedMap()
+    private fun findDoubleDamageDate(entries: List<Long>): Long? {
+        if (entries.size < 2) return null
+        val sorted = if (entries.isAscending()) entries else entries.sorted()
+        for (i in 0 until sorted.size - 1) {
+            val diff = sorted[i + 1] - sorted[i]
+            if (diff in 0L until DOUBLE_DAMAGE_WINDOW_MS) {
+                return sorted[i + 1]
+            }
+        }
+        return null
+    }
 
-        for ((_, dayEntries) in days) {
-            val sortedDayEntries = dayEntries.sorted()
-            if (isAtLeast && sortedDayEntries.size >= targetCount) {
-                return sortedDayEntries[targetCount - 1]
-            } else if (!isAtLeast && sortedDayEntries.size == targetCount) {
-                return sortedDayEntries.last()
+    private fun findDailyLimitDate(
+        entries: List<Long>,
+        targetCount: Int,
+        isAtLeast: Boolean,
+        zoneId: ZoneId = ZoneId.systemDefault(),
+        nowMillis: Long = System.currentTimeMillis()
+    ): Long? {
+        if (targetCount <= 0 || entries.isEmpty()) return null
+        val sorted = if (entries.isAscending()) entries else entries.sorted()
+        val today = toLocalDate(nowMillis, zoneId)
+
+        val byDay = LinkedHashMap<LocalDate, MutableList<Long>>()
+        for (ts in sorted) {
+            val day = toLocalDate(ts, zoneId)
+            byDay.getOrPut(day) { ArrayList() }.add(ts)
+        }
+
+        for ((day, dayEntries) in byDay) {
+            if (isAtLeast) {
+                if (dayEntries.size >= targetCount) {
+                    return dayEntries[targetCount - 1]
+                }
+            } else {
+                // For exact daily limit match (secret_crisis), only evaluate completed days
+                if (day.isBefore(today) && dayEntries.size == targetCount) {
+                    return dayEntries.last()
+                }
             }
         }
         return null
