@@ -11,7 +11,7 @@ android {
     defaultConfig {
         applicationId = "com.smokingtracker"
         minSdk = 26
-        targetSdk = 37
+        targetSdk = 36
         versionCode = 20000
         versionName = "2.0.0"
 
@@ -23,6 +23,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -60,7 +64,7 @@ android {
     }
 
     lint {
-        abortOnError = false
+        abortOnError = true
         disable += setOf("ObsoleteSdkInt", "AndroidGradlePluginVersion")
     }
 }
@@ -87,6 +91,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.ui.test.junit4)
+
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
@@ -100,6 +105,7 @@ dependencies {
 
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
+    implementation(libs.coil.compose)
 }
 
 
