@@ -24,15 +24,19 @@
             android:id="@+id/tv_widget_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
             android:text="@string/widget_last_smoke"
             android:textColor="@color/widget_secondary_text_color"
             android:textSize="11sp" />
 
-        <TextView
+        <Chronometer
             android:id="@+id/tv_widget_timer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:singleLine="true"
             android:textColor="@color/widget_primary_text_color"
             android:textSize="19sp"
             android:textStyle="bold"
@@ -43,6 +47,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:singleLine="true"
             android:textColor="@color/widget_accent_color"
             android:textSize="11sp"
             android:textStyle="bold"
@@ -66,7 +72,9 @@
                 android:id="@+id/img_cookie_bg_resist"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:contentDescription="@null" />
+                android:contentDescription="@null"
+                android:src="@drawable/bg_widget_preview_cookie"
+                android:tint="@color/widget_pill_bg_color" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -93,7 +101,9 @@
                 android:id="@+id/img_cookie_bg"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:contentDescription="@null" />
+                android:contentDescription="@null"
+                android:src="@drawable/bg_widget_preview_cookie"
+                android:tint="@color/widget_pill_bg_color" />
 
             <LinearLayout
                 android:layout_width="match_parent"

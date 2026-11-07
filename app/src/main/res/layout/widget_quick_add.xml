@@ -18,7 +18,9 @@
             android:id="@+id/img_cookie_bg"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@null" />
+            android:contentDescription="@null"
+            android:src="@drawable/bg_widget_preview_cookie"
+            android:tint="@color/widget_pill_bg_color" />
 
         <LinearLayout
             android:layout_width="match_parent"
