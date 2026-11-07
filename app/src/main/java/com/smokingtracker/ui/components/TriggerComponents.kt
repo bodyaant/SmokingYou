@@ -56,14 +56,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.SheetValue
-import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,6 +75,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -661,10 +664,7 @@ fun TriggerDetailBottomSheet(
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val locale = LocalLocale.current.platformLocale
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val triggerType = TriggerType.fromKey(triggerKey)
     val triggerName = triggerType?.let { stringResource(it.labelResId) } ?: triggerKey
@@ -683,8 +683,8 @@ fun TriggerDetailBottomSheet(
     val peakHour = hourlyCounts.indices.maxByOrNull { hourlyCounts[it] } ?: 0
     val peakHourCount = hourlyCounts[peakHour]
 
-    var selectedHour by remember { mutableStateOf<Int?>(null) }
-    var selectedQuadrant by remember { mutableStateOf<Int?>(null) }
+    var selectedHour by rememberSaveable { mutableStateOf<Int?>(null) }
+    var selectedQuadrant by rememberSaveable { mutableStateOf<Int?>(null) }
 
     val cal = Calendar.getInstance()
     val nightCount = remember(triggerEntities) {
@@ -979,6 +979,10 @@ fun TriggerDetailBottomSheet(
                                 modifier = Modifier
                                     .weight(1f)
                                     .fillMaxHeight()
+                                    .semantics(mergeDescendants = true) {
+                                        contentDescription = String.format(locale, "%02d:00–%02d:00: %d", hour, (hour + 1) % 24, count)
+                                        selected = isSelected
+                                    }
                                     .clickable(
                                         interactionSource = remember { MutableInteractionSource() },
                                         indication = null

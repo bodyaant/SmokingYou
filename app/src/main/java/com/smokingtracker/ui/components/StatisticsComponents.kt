@@ -65,13 +65,13 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.SheetValue
-import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -301,7 +301,7 @@ fun LifeReclaimedBentoCard(
     }
 
     val infiniteTransition = rememberInfiniteTransition(label = "ekgTransition")
-    val heartScale by infiniteTransition.animateFloat(
+    val heartScaleState = infiniteTransition.animateFloat(
         initialValue = 1f,
         targetValue = 1.15f,
         animationSpec = infiniteRepeatable(
@@ -310,7 +310,7 @@ fun LifeReclaimedBentoCard(
         ),
         label = "heartPulse"
     )
-    val ekgPhase by infiniteTransition.animateFloat(
+    val ekgPhaseState = infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
@@ -319,6 +319,7 @@ fun LifeReclaimedBentoCard(
         ),
         label = "ekgPhase"
     )
+    val ekgPath = remember { Path() }
 
     Card(
         modifier = modifier
@@ -344,8 +345,9 @@ fun LifeReclaimedBentoCard(
             ) {
                 Box(
                     modifier = Modifier.graphicsLayer {
-                        scaleX = heartScale
-                        scaleY = heartScale
+                        val scale = heartScaleState.value
+                        scaleX = scale
+                        scaleY = scale
                     }
                 ) {
                     Surface(
@@ -396,13 +398,14 @@ fun LifeReclaimedBentoCard(
             ) {
                 val width = size.width
                 val height = size.height
+                if (width <= 0f || height <= 0f) return@Canvas
                 val midY = height * 0.5f
 
-                val ekgPath = Path()
+                ekgPath.rewind()
                 ekgPath.moveTo(0f, midY)
 
                 val cycleCount = 3
-                val cycleWidth = width / cycleCount.toFloat()
+                val cycleWidth = (width / cycleCount.toFloat()).coerceAtLeast(1f)
 
                 for (i in 0 until cycleCount) {
                     val startX = i * cycleWidth
@@ -424,7 +427,7 @@ fun LifeReclaimedBentoCard(
                     style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
                 )
 
-                val dotX = width * ekgPhase
+                val dotX = width * ekgPhaseState.value
                 val cycleIndex = (dotX / cycleWidth).toInt().coerceIn(0, cycleCount - 1)
                 val localX = dotX - (cycleIndex * cycleWidth)
                 val normX = localX / cycleWidth
@@ -717,7 +720,8 @@ fun StreakBentoCard(
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val strokeWidth = 5.dp.toPx()
-                val radius = (size.minDimension - strokeWidth - 16.dp.toPx()) / 2f
+                val radius = ((size.minDimension - strokeWidth - 16.dp.toPx()) / 2f).coerceAtLeast(0f)
+                if (radius <= 0f) return@Canvas
                 val arcCenter = Offset(size.width / 2f, size.height / 2f)
 
                 drawCircle(
@@ -1215,10 +1219,7 @@ fun LifeReclaimedBottomSheet(
     avoidedCigarettes: Int,
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
     val formattedTime = formatMinutesShort(lifeMinutes, context)
 
@@ -1343,23 +1344,32 @@ fun MoneySavedBottomSheet(
     packPrice: Float,
     packSize: Int,
     dailyAvg: Float,
+    dailyLimit: Int = 0,
+    baselineDailyAvg: Int = 0,
+    trackingDays: Int = 1,
     savingsGoalTitle: String = "",
     savingsGoalAmount: Float = 0f,
     onSaveSavingsGoal: (String, Float) -> Unit = { _, _ -> },
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val pricePerCig = if (packSize > 0) packPrice / packSize.toFloat() else 0f
-    val dailyExpense = dailyAvg * pricePerCig
-    val monthlyProj = dailyExpense * 30f
-    val halfYearProj = dailyExpense * 182.5f
-    val yearProj = dailyExpense * 365f
+    val referenceDailyTarget = when {
+        dailyLimit > 0 -> dailyLimit.toFloat()
+        baselineDailyAvg > 0 -> baselineDailyAvg.toFloat()
+        else -> 0f
+    }
+    val dailySavedRate = when {
+        referenceDailyTarget > 0f -> (referenceDailyTarget - dailyAvg.coerceAtLeast(0f)).coerceAtLeast(0f) * pricePerCig
+        trackingDays > 0 && moneySaved > 0f -> moneySaved / trackingDays.coerceAtLeast(1).toFloat()
+        else -> 0f
+    }
+    val monthlyProj = dailySavedRate * 30f
+    val halfYearProj = dailySavedRate * 182.5f
+    val yearProj = dailySavedRate * 365f
 
-    var goalName by remember(savingsGoalTitle) { mutableStateOf(savingsGoalTitle) }
-    var goalAmountStr by remember(savingsGoalAmount) {
+    var goalName by rememberSaveable(savingsGoalTitle) { mutableStateOf(savingsGoalTitle) }
+    var goalAmountStr by rememberSaveable(savingsGoalAmount) {
         mutableStateOf(if (savingsGoalAmount > 0f) String.format(Locale.getDefault(), "%.0f", savingsGoalAmount) else "")
     }
 
@@ -1482,7 +1492,7 @@ fun MoneySavedBottomSheet(
 
                     OutlinedTextField(
                         value = goalName,
-                        onValueChange = { goalName = it },
+                        onValueChange = { if (it.length <= 60) goalName = it },
                         label = { Text(stringResource(R.string.stats_goal_name_label)) },
                         placeholder = { Text(stringResource(R.string.stats_goal_name_hint)) },
                         singleLine = true,
@@ -1492,7 +1502,12 @@ fun MoneySavedBottomSheet(
 
                     OutlinedTextField(
                         value = goalAmountStr,
-                        onValueChange = { goalAmountStr = it },
+                        onValueChange = { input ->
+                            val normalized = input.replace(',', '.')
+                            if (normalized.length <= 10 && normalized.count { it == '.' } <= 1 && normalized.all { it.isDigit() || it == '.' }) {
+                                goalAmountStr = input
+                            }
+                        },
                         label = { Text(stringResource(R.string.stats_goal_amount_label)) },
                         trailingIcon = { Text(currencySymbol, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(end = 12.dp)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -1501,15 +1516,20 @@ fun MoneySavedBottomSheet(
                         modifier = Modifier.fillMaxWidth()
                     )
 
+                    val parsedAmount = goalAmountStr.replace(',', '.').toFloatOrNull() ?: 0f
+                    val isGoalValid = goalName.isNotBlank() && parsedAmount.isFinite() && parsedAmount > 0f
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Button(
                             onClick = {
-                                val amount = goalAmountStr.replace(',', '.').toFloatOrNull() ?: 0f
-                                onSaveSavingsGoal(goalName.trim(), amount)
+                                if (isGoalValid) {
+                                    onSaveSavingsGoal(goalName.trim(), parsedAmount)
+                                }
                             },
+                            enabled = isGoalValid,
                             shape = RoundedCornerShape(14.dp),
                             modifier = Modifier.weight(1f)
                         ) {
@@ -1597,10 +1617,7 @@ fun StreakDetailBottomSheet(
     longestStreakDays: Int,
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val milestones = listOf(1, 3, 7, 14, 30, 90, 365)
     val nextMilestone = milestones.firstOrNull { it > currentStreakDays } ?: (currentStreakDays + 30)
@@ -1735,10 +1752,7 @@ fun WhoRecoveryBottomSheet(
     timeElapsedMinutes: Float,
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val completedCount = milestones.count { timeElapsedMinutes >= it.targetMinutes }
     val percent = if (milestones.isNotEmpty()) (completedCount * 100) / milestones.size else 0
     val activeIndex = milestones.indexOfFirst { timeElapsedMinutes < it.targetMinutes }
@@ -1829,7 +1843,10 @@ fun WhoRecoveryBottomSheet(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
-                itemsIndexed(milestones) { index, milestone ->
+                itemsIndexed(
+                    items = milestones,
+                    key = { _, milestone -> milestone.labelResId }
+                ) { index, milestone ->
                     val isCompleted = timeElapsedMinutes >= milestone.targetMinutes
                     val isActive = index == activeIndex
                     val progress = (timeElapsedMinutes / milestone.targetMinutes).coerceIn(0f, 1f)
@@ -1927,10 +1944,7 @@ fun ConsumptionDetailBottomSheet(
     totalTrackingDays: Int,
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -2054,10 +2068,7 @@ fun ResistedCravingsBottomSheet(
     currencySymbol: String,
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -2139,10 +2150,7 @@ fun AverageIntervalBottomSheet(
     onDismissRequest: () -> Unit
 ) {
     val context = LocalContext.current
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -2303,10 +2311,7 @@ fun PackYearsBottomSheet(
     riskLevel: StatisticsManager.PackYearsRiskLevel,
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val (riskColor, riskTitleRes, riskDescRes) = when (riskLevel) {
         StatisticsManager.PackYearsRiskLevel.LOW -> Triple(

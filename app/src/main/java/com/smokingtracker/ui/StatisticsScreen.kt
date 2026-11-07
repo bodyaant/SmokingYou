@@ -49,7 +49,9 @@ import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,6 +69,7 @@ import com.smokingtracker.StatisticsData
 import com.smokingtracker.StatisticsManager
 import com.smokingtracker.StatisticsViewModel
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import com.smokingtracker.ui.components.AverageIntervalBentoCard
 import com.smokingtracker.ui.components.AverageIntervalBottomSheet
 import com.smokingtracker.ui.components.ConsumptionDetailBottomSheet
@@ -98,6 +101,8 @@ import java.util.Locale
 fun StatisticsScreen(viewModel: StatisticsViewModel = koinViewModel(), onBack: () -> Unit, onNavigateToSettings: (() -> Unit)? = null) {
     val entries by viewModel.smokingEntries.collectAsStateWithLifecycle()
     val resistedEntries by viewModel.resistedEntries.collectAsStateWithLifecycle()
+    val resistedTimestamps by viewModel.resistedTimestamps.collectAsStateWithLifecycle()
+    val firstAppLaunchDate by viewModel.firstAppLaunchDate.collectAsStateWithLifecycle()
     val dailyLimit by viewModel.dailyLimit.collectAsStateWithLifecycle()
     val packPrice by viewModel.packPrice.collectAsStateWithLifecycle()
     val packSize by viewModel.packSize.collectAsStateWithLifecycle()
@@ -109,18 +114,42 @@ fun StatisticsScreen(viewModel: StatisticsViewModel = koinViewModel(), onBack: (
     val savingsGoalTitle by viewModel.savingsGoalTitle.collectAsStateWithLifecycle()
     val savingsGoalAmount by viewModel.savingsGoalAmount.collectAsStateWithLifecycle()
 
-    var showBaselineSheet by remember { mutableStateOf(false) }
+    var showBaselineSheet by rememberSaveable { mutableStateOf(false) }
+    val statisticsManager = viewModel.statisticsManager
 
-    val stats = remember(entries) { StatisticsManager().calculateStats(entries) }
+    val stats by produceState(
+        initialValue = StatisticsData.EMPTY,
+        entries,
+        firstAppLaunchDate,
+        statisticsManager
+    ) {
+        value = statisticsManager.calculateStatsAsync(
+            entries = entries,
+            trackingStartMillis = firstAppLaunchDate
+        )
+    }
 
-    val baselineAnalytics = remember(hasHistoricalBaseline, historicalStartDate, historicalDailyAvg, packPrice, packSize, entries) {
-        if (hasHistoricalBaseline) {
-            StatisticsManager().calculateBaselineAnalytics(
+    val baselineAnalytics by produceState<StatisticsManager.SmokingBaselineAnalytics?>(
+        initialValue = null,
+        hasHistoricalBaseline,
+        historicalStartDate,
+        historicalDailyAvg,
+        packPrice,
+        packSize,
+        entries,
+        resistedTimestamps,
+        firstAppLaunchDate,
+        statisticsManager
+    ) {
+        value = if (hasHistoricalBaseline) {
+            statisticsManager.calculateBaselineAnalyticsAsync(
                 startDate = historicalStartDate,
                 dailyAvg = historicalDailyAvg,
                 packPrice = packPrice,
                 packSize = packSize,
-                entries = entries
+                entries = entries,
+                resistedEntries = resistedTimestamps,
+                trackingStartMillis = firstAppLaunchDate
             )
         } else null
     }
@@ -165,7 +194,7 @@ fun StatisticsScreen(viewModel: StatisticsViewModel = koinViewModel(), onBack: (
             )
         }
     ) { paddingValues ->
-        if (entries.isEmpty() && resistedEntries.isEmpty() && baselineAnalytics == null) {
+        if (entries.isEmpty() && resistedEntries.isEmpty() && !hasHistoricalBaseline && baselineAnalytics == null) {
             Box(
                 modifier = Modifier.fillMaxSize().padding(paddingValues),
                 contentAlignment = Alignment.Center
@@ -178,6 +207,7 @@ fun StatisticsScreen(viewModel: StatisticsViewModel = koinViewModel(), onBack: (
                 stats = stats,
                 entries = entries,
                 resistedCount = resistedEntries.size,
+                trackingStartMillis = firstAppLaunchDate,
                 dailyLimit = dailyLimit,
                 packPrice = packPrice,
                 packSize = packSize,
@@ -189,7 +219,8 @@ fun StatisticsScreen(viewModel: StatisticsViewModel = koinViewModel(), onBack: (
                 savingsGoalAmount = savingsGoalAmount,
                 onSaveSavingsGoal = viewModel::saveSavingsGoal,
                 onOpenBaselineSheet = { showBaselineSheet = true },
-                onNavigateToSettings = onNavigateToSettings
+                onNavigateToSettings = onNavigateToSettings,
+                statisticsManager = statisticsManager
             )
         }
     }
@@ -202,6 +233,7 @@ fun StatisticsList(
     stats: StatisticsData,
     entries: List<Long>,
     resistedCount: Int = 0,
+    trackingStartMillis: Long? = null,
     dailyLimit: Int,
     packPrice: Float,
     packSize: Int,
@@ -214,7 +246,8 @@ fun StatisticsList(
     onSaveSavingsGoal: (String, Float) -> Unit = { _, _ -> },
     onOpenBaselineSheet: () -> Unit = {},
     onNavigateToSettings: (() -> Unit)? = null,
-    contentPadding: PaddingValues = PaddingValues(top = 16.dp, bottom = 120.dp)
+    contentPadding: PaddingValues = PaddingValues(top = 16.dp, bottom = 120.dp),
+    statisticsManager: StatisticsManager = koinInject()
 ) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
@@ -226,23 +259,37 @@ fun StatisticsList(
         stats.trackingSince?.let { dateFormat.format(Date(it)) } ?: noDataStr
     }
 
-    val lastCigaretteTime = entries.maxOrNull() ?: 0L
-    val timeElapsedMs = if (lastCigaretteTime > 0L) System.currentTimeMillis() - lastCigaretteTime else 0L
+    val lastCigaretteTime = remember(entries, trackingStartMillis) {
+        entries.maxOrNull() ?: trackingStartMillis ?: 0L
+    }
+    val timeElapsedMs = if (lastCigaretteTime > 0L) (System.currentTimeMillis() - lastCigaretteTime).coerceAtLeast(0L) else 0L
     val timeElapsedMinutes = (timeElapsedMs / (1000 * 60)).toFloat()
 
-    val currentStreakDays = remember(entries) { StatisticsManager().currentSmokeFreeStreakDays(entries) }
-    val streakCigarettesSaved = (currentStreakDays * dailyLimit).coerceAtLeast(0)
-    val streakMoneySaved = if (packSize > 0) streakCigarettesSaved.toFloat() * (packPrice / packSize.toFloat()) else 0f
-    val streakLifeMinutesSaved = streakCigarettesSaved * 11
+    val savingsData by produceState(
+        initialValue = StatisticsManager.SavingsData(resistedCount = resistedCount),
+        entries,
+        resistedCount,
+        dailyLimit,
+        packPrice,
+        packSize,
+        trackingStartMillis,
+        statisticsManager
+    ) {
+        value = statisticsManager.calculateSavingsAsync(
+            entries = entries,
+            resistedCount = resistedCount,
+            dailyLimit = dailyLimit,
+            packPrice = packPrice,
+            packSize = packSize,
+            trackingStartMillis = trackingStartMillis
+        )
+    }
 
-    val resistedMoneySaved = if (packSize > 0 && packPrice > 0f) {
-        resistedCount * (packPrice / packSize.toFloat())
-    } else 0f
-    val resistedLifeMinutes = resistedCount * 11
-
-    val totalMoneySaved = streakMoneySaved + resistedMoneySaved
-    val totalLifeMinutes = streakLifeMinutesSaved + resistedLifeMinutes
-    val totalAvoidedCigarettes = streakCigarettesSaved + resistedCount
+    val currentStreakDays = savingsData.currentStreakDays
+    val resistedMoneySaved = savingsData.resistedMoneySaved
+    val totalMoneySaved = savingsData.totalMoneySaved
+    val totalLifeMinutes = savingsData.totalLifeMinutes
+    val totalAvoidedCigarettes = savingsData.totalAvoidedCigarettes
 
     val currencySymbol = remember(currency) {
         when (currency) {
@@ -282,16 +329,22 @@ fun StatisticsList(
         whoMilestones.firstOrNull { timeElapsedMinutes < it.targetMinutes }
     }
 
-    val intervalData = remember(entries) { StatisticsManager().calculateSmokingIntervals(entries) }
+    val intervalData by produceState(
+        initialValue = StatisticsManager.SmokingIntervalData.EMPTY,
+        entries,
+        statisticsManager
+    ) {
+        value = statisticsManager.calculateSmokingIntervalsAsync(entries)
+    }
 
-    var showLifeSheet by remember { mutableStateOf(false) }
-    var showMoneySheet by remember { mutableStateOf(false) }
-    var showStreakSheet by remember { mutableStateOf(false) }
-    var showWhoSheet by remember { mutableStateOf(false) }
-    var showConsumptionSheet by remember { mutableStateOf(false) }
-    var showResistedSheet by remember { mutableStateOf(false) }
-    var showIntervalSheet by remember { mutableStateOf(false) }
-    var showPackYearsSheet by remember { mutableStateOf(false) }
+    var showLifeSheet by rememberSaveable { mutableStateOf(false) }
+    var showMoneySheet by rememberSaveable { mutableStateOf(false) }
+    var showStreakSheet by rememberSaveable { mutableStateOf(false) }
+    var showWhoSheet by rememberSaveable { mutableStateOf(false) }
+    var showConsumptionSheet by rememberSaveable { mutableStateOf(false) }
+    var showResistedSheet by rememberSaveable { mutableStateOf(false) }
+    var showIntervalSheet by rememberSaveable { mutableStateOf(false) }
+    var showPackYearsSheet by rememberSaveable { mutableStateOf(false) }
 
     LazyColumn(
         modifier = modifier
@@ -300,7 +353,7 @@ fun StatisticsList(
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item {
+        item(key = "stats_overview") {
             StatisticsOverviewCard(
                 totalCount = stats.totalCount,
                 avgPerDay = stats.avgPerDay,
@@ -312,7 +365,7 @@ fun StatisticsList(
         }
 
         if (baselineAnalytics != null) {
-            item {
+            item(key = "stats_baseline_card") {
                 Card(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                     shape = containerShape(RoundedCornerShape(24.dp)),
@@ -575,7 +628,7 @@ fun StatisticsList(
                 }
             }
         } else if (!hasHistoricalBaseline) {
-            item {
+            item(key = "stats_baseline_banner") {
                 Card(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                     shape = containerShape(RoundedCornerShape(24.dp)),
@@ -625,7 +678,7 @@ fun StatisticsList(
         }
 
         if (dailyLimit <= 0 || packPrice <= 0f) {
-            item {
+            item(key = "stats_savings_warning") {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = containerShape(RoundedCornerShape(24.dp)),
@@ -681,7 +734,7 @@ fun StatisticsList(
             }
         }
 
-        item {
+        item(key = "stats_bento_row_1") {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -704,7 +757,7 @@ fun StatisticsList(
             }
         }
 
-        item {
+        item(key = "stats_bento_row_2") {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -728,7 +781,7 @@ fun StatisticsList(
             }
         }
 
-        item {
+        item(key = "stats_bento_row_3") {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -748,7 +801,7 @@ fun StatisticsList(
             }
         }
 
-        item {
+        item(key = "stats_tracking_since") {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -797,6 +850,9 @@ fun StatisticsList(
             packPrice = packPrice,
             packSize = packSize,
             dailyAvg = stats.avgPerDay,
+            dailyLimit = dailyLimit,
+            baselineDailyAvg = baselineAnalytics?.baselineDailyAvg ?: 0,
+            trackingDays = stats.totalTrackingDays,
             savingsGoalTitle = savingsGoalTitle,
             savingsGoalAmount = savingsGoalAmount,
             onSaveSavingsGoal = onSaveSavingsGoal,

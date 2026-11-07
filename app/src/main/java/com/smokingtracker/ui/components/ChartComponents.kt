@@ -62,6 +62,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -87,6 +88,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.text.style.TextAlign
@@ -100,16 +104,21 @@ import com.smokingtracker.ui.theme.subContainer
 import com.smokingtracker.ui.theme.bouncyPress
 import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.rememberBouncyPress
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.YearMonth
 import java.time.format.TextStyle as JavaTextStyle
-import java.util.Calendar
-import java.util.Locale
+import java.time.temporal.WeekFields
 import kotlin.math.ceil
 import kotlin.math.roundToInt
+
+private val LimitDashPathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f), 0f)
+private val SelectionDashPathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f)
 
 enum class ChartViewStyle {
     BARS,
@@ -530,10 +539,16 @@ fun PillBarChart(
                         start = Offset(0f, y),
                         end = Offset(size.width, y),
                         strokeWidth = 1.6.dp.toPx(),
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f), 0f)
+                        pathEffect = LimitDashPathEffect
                     )
                 }
             }
+
+            val currentSelectedIndex by rememberUpdatedState(selectedIndex)
+            val currentTodayIndex by rememberUpdatedState(todayIndex)
+            val currentOnSelectIndex by rememberUpdatedState(onSelectIndex)
+            val currentVibrationEnabled by rememberUpdatedState(vibrationEnabled)
+            val cleanDayLabel = stringResource(R.string.chart_clean_day)
 
             Box(
                 modifier = Modifier
@@ -554,6 +569,7 @@ fun PillBarChart(
                             val isToday = todayIndex == index
                             val isFuture = todayIndex != null && index > todayIndex
                             val isOverLimit = !isFuture && isLimitApplicable && count > dailyLimit
+                            val isCleanDay = index in cleanDayIndices
                             val animFraction = barAnimations.getOrNull(index)?.value ?: 1f
 
                             val fullHeight = if (count > 0) {
@@ -574,10 +590,21 @@ fun PillBarChart(
                             }
                             val excessColor = if (isSelected) errorColor else errorColor.copy(alpha = 0.9f)
                             val limitHeight = barAreaHeight * animatedLimitRatio
+                            val label = xAxisLabels.getOrElse(index) { "$index" }
+                            val overLimitText = if (isOverLimit) {
+                                ", " + stringResource(R.string.graph_over_limit_badge, count - dailyLimit)
+                            } else if (isCleanDay) {
+                                ", $cleanDayLabel"
+                            } else ""
+                            val barDescription = "$label: ${stringResource(R.string.history_cigs_count_format, count.toString())}$overLimitText"
 
                             Column(
                                 modifier = Modifier
                                     .width(34.dp)
+                                    .semantics(mergeDescendants = true) {
+                                        contentDescription = barDescription
+                                        selected = isSelected
+                                    }
                                     .clickable(
                                         enabled = !isFuture,
                                         interactionSource = remember { MutableInteractionSource() },
@@ -633,7 +660,6 @@ fun PillBarChart(
 
                                 Spacer(Modifier.height(8.dp))
 
-                                val label = xAxisLabels.getOrElse(index) { "$index" }
                                 Text(
                                     text = label,
                                     style = MaterialTheme.typography.labelSmall.copy(
@@ -667,48 +693,53 @@ fun PillBarChart(
                         modifier = Modifier
                             .fillMaxWidth()
                             .pointerInput(dataPoints) {
-                                detectTapGestures(
-                                    onTap = { offset ->
-                                        val n = dataPoints.size
-                                        if (n > 0) {
-                                            val idx = ((offset.x / size.width) * n).toInt().coerceIn(0, n - 1)
-                                            if (todayIndex == null || idx <= todayIndex) {
-                                                val newSel = if (selectedIndex == idx) null else idx
-                                                onSelectIndex(newSel)
-                                                if (newSel != null) {
-                                                    HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
+                                coroutineScope {
+                                    launch {
+                                        detectTapGestures(
+                                            onTap = { offset ->
+                                                val n = dataPoints.size
+                                                if (n > 0 && size.width > 0) {
+                                                    val idx = ((offset.x / size.width) * n).toInt().coerceIn(0, n - 1)
+                                                    val tIdx = currentTodayIndex
+                                                    if (tIdx == null || idx <= tIdx) {
+                                                        val newSel = if (currentSelectedIndex == idx) null else idx
+                                                        currentOnSelectIndex(newSel)
+                                                        if (newSel != null) {
+                                                            HapticFeedbackHelper.performTick(currentVibrationEnabled, haptic, context)
+                                                        }
+                                                    }
                                                 }
                                             }
-                                        }
+                                        )
                                     }
-                                )
-                            }
-                            .pointerInput(dataPoints) {
-                                detectHorizontalDragGestures(
-                                    onDragStart = { offset ->
-                                        val n = dataPoints.size
-                                        if (n > 0) {
-                                            val idx = ((offset.x / size.width) * n).toInt().coerceIn(0, n - 1)
-                                            if (todayIndex == null || idx <= todayIndex) {
-                                                onSelectIndex(idx)
-                                                HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
-                                            }
-                                        }
-                                    },
-                                    onHorizontalDrag = { change, _ ->
-                                        change.consume()
-                                        val n = dataPoints.size
-                                        if (n > 0) {
-                                            val idx = ((change.position.x / size.width) * n).toInt().coerceIn(0, n - 1)
-                                            if (todayIndex == null || idx <= todayIndex) {
-                                                if (idx != selectedIndex) {
-                                                    onSelectIndex(idx)
-                                                    HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
+                                    launch {
+                                        detectHorizontalDragGestures(
+                                            onDragStart = { offset ->
+                                                val n = dataPoints.size
+                                                if (n > 0 && size.width > 0) {
+                                                    val idx = ((offset.x / size.width) * n).toInt().coerceIn(0, n - 1)
+                                                    val tIdx = currentTodayIndex
+                                                    if (tIdx == null || idx <= tIdx) {
+                                                        currentOnSelectIndex(idx)
+                                                        HapticFeedbackHelper.performTick(currentVibrationEnabled, haptic, context)
+                                                    }
+                                                }
+                                            },
+                                            onHorizontalDrag = { change, _ ->
+                                                change.consume()
+                                                val n = dataPoints.size
+                                                if (n > 0 && size.width > 0) {
+                                                    val idx = ((change.position.x / size.width) * n).toInt().coerceIn(0, n - 1)
+                                                    val tIdx = currentTodayIndex
+                                                    if ((tIdx == null || idx <= tIdx) && idx != currentSelectedIndex) {
+                                                        currentOnSelectIndex(idx)
+                                                        HapticFeedbackHelper.performTick(currentVibrationEnabled, haptic, context)
+                                                    }
                                                 }
                                             }
-                                        }
+                                        )
                                     }
-                                )
+                                }
                             }
                     ) {
                         val barWidth = when {
@@ -728,6 +759,7 @@ fun PillBarChart(
                                 val isToday = todayIndex == index
                                 val isFuture = todayIndex != null && index > todayIndex
                                 val isOverLimit = !isFuture && isLimitApplicable && count > dailyLimit
+                                val isCleanDay = index in cleanDayIndices
                                 val animFraction = barAnimations.getOrNull(index)?.value ?: 1f
 
                                 val fullHeight = if (count > 0) {
@@ -748,11 +780,22 @@ fun PillBarChart(
                                 }
                                 val excessColor = if (isSelected) errorColor else errorColor.copy(alpha = 0.9f)
                                 val limitHeight = barAreaHeight * animatedLimitRatio
+                                val label = xAxisLabels.getOrElse(index) { "$index" }
+                                val overLimitText = if (isOverLimit) {
+                                    ", " + stringResource(R.string.graph_over_limit_badge, count - dailyLimit)
+                                } else if (isCleanDay) {
+                                    ", $cleanDayLabel"
+                                } else ""
+                                val barDescription = "$label: ${stringResource(R.string.history_cigs_count_format, count.toString())}$overLimitText"
 
                                 Column(
                                     modifier = Modifier
                                         .weight(1f)
-                                        .fillMaxHeight(),
+                                        .fillMaxHeight()
+                                        .semantics(mergeDescendants = true) {
+                                            contentDescription = barDescription
+                                            selected = isSelected
+                                        },
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Bottom
                                 ) {
@@ -929,6 +972,14 @@ fun SmoothSplineLineChart(
 
     val barAreaHeight = chartHeight - 22.dp
 
+    val currentSelectedIndex by rememberUpdatedState(selectedIndex)
+    val currentTodayIndex by rememberUpdatedState(todayIndex)
+    val currentOnSelectIndex by rememberUpdatedState(onSelectIndex)
+    val currentVibrationEnabled by rememberUpdatedState(vibrationEnabled)
+
+    val splinePath = remember { Path() }
+    val fillPath = remember { Path() }
+
     Column(modifier = modifier.fillMaxWidth()) {
         Box(modifier = Modifier.fillMaxWidth()) {
             Column(
@@ -974,7 +1025,7 @@ fun SmoothSplineLineChart(
                         start = Offset(0f, limitY),
                         end = Offset(size.width, limitY),
                         strokeWidth = 1.6.dp.toPx(),
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f), 0f)
+                        pathEffect = LimitDashPathEffect
                     )
                 }
             }
@@ -999,18 +1050,19 @@ fun SmoothSplineLineChart(
                             modifier = Modifier
                                 .width(totalContentWidth)
                                 .height(barAreaHeight)
-                                .pointerInput(dataPoints, todayIndex) {
+                                .pointerInput(dataPoints) {
                                     detectTapGestures(
                                         onTap = { offset ->
                                             if (n > 0) {
                                                 val hPaddingPx = 8.dp.toPx()
                                                 val stridePx = (34.dp + 8.dp).toPx()
                                                 val idx = ((offset.x - hPaddingPx) / stridePx).toInt().coerceIn(0, n - 1)
-                                                if (todayIndex == null || idx <= todayIndex) {
-                                                    val newSel = if (selectedIndex == idx) null else idx
-                                                    onSelectIndex(newSel)
+                                                val tIdx = currentTodayIndex
+                                                if (tIdx == null || idx <= tIdx) {
+                                                    val newSel = if (currentSelectedIndex == idx) null else idx
+                                                    currentOnSelectIndex(newSel)
                                                     if (newSel != null) {
-                                                        HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
+                                                        HapticFeedbackHelper.performTick(currentVibrationEnabled, haptic, context)
                                                     }
                                                 }
                                             }
@@ -1018,7 +1070,7 @@ fun SmoothSplineLineChart(
                                     )
                                 }
                         ) {
-                            if (n < 2) return@Canvas
+                            if (n == 0) return@Canvas
                             val height = size.height
                             val progress = lineAnimProgress.value
                             val hPaddingPx = hPadding.toPx()
@@ -1032,50 +1084,52 @@ fun SmoothSplineLineChart(
                                 Offset(x, animatedY)
                             }
 
-                            val splinePath = Path()
-                            val fillPath = Path()
+                            if (n >= 2) {
+                                splinePath.rewind()
+                                fillPath.rewind()
 
-                            splinePath.moveTo(points[0].x, points[0].y)
-                            fillPath.moveTo(points[0].x, height)
-                            fillPath.lineTo(points[0].x, points[0].y)
+                                splinePath.moveTo(points[0].x, points[0].y)
+                                fillPath.moveTo(points[0].x, height)
+                                fillPath.lineTo(points[0].x, points[0].y)
 
-                            for (i in 0 until n - 1) {
-                                val p0 = if (i > 0) points[i - 1] else points[i]
-                                val p1 = points[i]
-                                val p2 = points[i + 1]
-                                val p3 = if (i + 2 < n) points[i + 2] else p2
+                                for (i in 0 until n - 1) {
+                                    val p0 = if (i > 0) points[i - 1] else points[i]
+                                    val p1 = points[i]
+                                    val p2 = points[i + 1]
+                                    val p3 = if (i + 2 < n) points[i + 2] else p2
 
-                                val cp1x = p1.x + (p2.x - p0.x) / 6f
-                                val cp1y = p1.y + (p2.y - p0.y) / 6f
-                                val cp2x = p2.x - (p3.x - p1.x) / 6f
-                                val cp2y = p2.y - (p3.y - p1.y) / 6f
+                                    val cp1x = p1.x + (p2.x - p0.x) / 6f
+                                    val cp1y = (p1.y + (p2.y - p0.y) / 6f).coerceIn(0f, height)
+                                    val cp2x = p2.x - (p3.x - p1.x) / 6f
+                                    val cp2y = (p2.y - (p3.y - p1.y) / 6f).coerceIn(0f, height)
 
-                                splinePath.cubicTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y)
-                                fillPath.cubicTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y)
-                            }
+                                    splinePath.cubicTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y)
+                                    fillPath.cubicTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y)
+                                }
 
-                            fillPath.lineTo(points.last().x, height)
-                            fillPath.close()
+                                fillPath.lineTo(points.last().x, height)
+                                fillPath.close()
 
-                            val gradientBrush = Brush.verticalGradient(
-                                colors = listOf(
-                                    primaryColor.copy(alpha = 0.35f * progress),
-                                    primaryColor.copy(alpha = 0.02f)
-                                ),
-                                startY = 0f,
-                                endY = height
-                            )
-                            drawPath(path = fillPath, brush = gradientBrush)
-
-                            drawPath(
-                                path = splinePath,
-                                color = primaryColor,
-                                style = Stroke(
-                                    width = 2.8.dp.toPx(),
-                                    cap = StrokeCap.Round,
-                                    join = StrokeJoin.Round
+                                val gradientBrush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        primaryColor.copy(alpha = 0.35f * progress),
+                                        primaryColor.copy(alpha = 0.02f)
+                                    ),
+                                    startY = 0f,
+                                    endY = height
                                 )
-                            )
+                                drawPath(path = fillPath, brush = gradientBrush)
+
+                                drawPath(
+                                    path = splinePath,
+                                    color = primaryColor,
+                                    style = Stroke(
+                                        width = 2.8.dp.toPx(),
+                                        cap = StrokeCap.Round,
+                                        join = StrokeJoin.Round
+                                    )
+                                )
+                            }
 
                             points.forEachIndexed { index, pt ->
                                 val isSelected = selectedIndex == index
@@ -1085,13 +1139,19 @@ fun SmoothSplineLineChart(
                                         start = Offset(pt.x, 0f),
                                         end = Offset(pt.x, height),
                                         strokeWidth = 1.dp.toPx(),
-                                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f)
+                                        pathEffect = SelectionDashPathEffect
                                     )
                                     drawCircle(
                                         color = primaryColor.copy(alpha = 0.25f),
                                         radius = 8.dp.toPx(),
                                         center = pt
                                     )
+                                    drawCircle(
+                                        color = primaryColor,
+                                        radius = 4.5.dp.toPx(),
+                                        center = pt
+                                    )
+                                } else if (n == 1) {
                                     drawCircle(
                                         color = primaryColor,
                                         radius = 4.5.dp.toPx(),
@@ -1114,9 +1174,14 @@ fun SmoothSplineLineChart(
                                 val isHighlighted = selectedIndex == index
                                 val isToday = todayIndex == index
                                 val isFuture = todayIndex != null && index > todayIndex
+                                val pointValue = dataPoints.getOrElse(index) { 0 }
                                 Column(
                                     modifier = Modifier
                                         .width(slotWidth)
+                                        .semantics(mergeDescendants = true) {
+                                            contentDescription = "$label: $pointValue"
+                                            selected = isHighlighted
+                                        }
                                         .clickable(
                                             enabled = !isFuture,
                                             interactionSource = remember { MutableInteractionSource() },
@@ -1167,104 +1232,114 @@ fun SmoothSplineLineChart(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(barAreaHeight)
-                                .pointerInput(dataPoints, todayIndex) {
-                                    detectTapGestures(
-                                        onTap = { offset ->
-                                            if (n > 0) {
-                                                val idx = ((offset.x / size.width) * n).toInt().coerceIn(0, n - 1)
-                                                if (todayIndex == null || idx <= todayIndex) {
-                                                    val newSel = if (selectedIndex == idx) null else idx
-                                                    onSelectIndex(newSel)
-                                                    if (newSel != null) {
-                                                        HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
+                                .pointerInput(dataPoints) {
+                                    coroutineScope {
+                                        launch {
+                                            detectTapGestures(
+                                                onTap = { offset ->
+                                                    if (n > 0 && size.width > 0) {
+                                                        val idx = ((offset.x / size.width) * n).toInt().coerceIn(0, n - 1)
+                                                        val tIdx = currentTodayIndex
+                                                        if (tIdx == null || idx <= tIdx) {
+                                                            val newSel = if (currentSelectedIndex == idx) null else idx
+                                                            currentOnSelectIndex(newSel)
+                                                            if (newSel != null) {
+                                                                HapticFeedbackHelper.performTick(currentVibrationEnabled, haptic, context)
+                                                            }
+                                                        }
                                                     }
                                                 }
-                                            }
+                                            )
                                         }
-                                    )
-                                }
-                                .pointerInput(dataPoints, todayIndex) {
-                                    detectHorizontalDragGestures(
-                                        onDragStart = { offset ->
-                                            if (n > 0) {
-                                                val idx = ((offset.x / size.width) * n).toInt().coerceIn(0, n - 1)
-                                                if (todayIndex == null || idx <= todayIndex) {
-                                                    onSelectIndex(idx)
-                                                    HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
-                                                }
-                                            }
-                                        },
-                                        onHorizontalDrag = { change, _ ->
-                                            change.consume()
-                                            if (n > 0) {
-                                                val idx = ((change.position.x / size.width) * n).toInt().coerceIn(0, n - 1)
-                                                if ((todayIndex == null || idx <= todayIndex) && idx != selectedIndex) {
-                                                    onSelectIndex(idx)
-                                                    HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
-                                                }
-                                            }
-                                        },
-                                        onDragEnd = {},
-                                        onDragCancel = {}
-                                    )
+                                        launch {
+                                            detectHorizontalDragGestures(
+                                                onDragStart = { offset ->
+                                                    if (n > 0 && size.width > 0) {
+                                                        val idx = ((offset.x / size.width) * n).toInt().coerceIn(0, n - 1)
+                                                        val tIdx = currentTodayIndex
+                                                        if (tIdx == null || idx <= tIdx) {
+                                                            currentOnSelectIndex(idx)
+                                                            HapticFeedbackHelper.performTick(currentVibrationEnabled, haptic, context)
+                                                        }
+                                                    }
+                                                },
+                                                onHorizontalDrag = { change, _ ->
+                                                    change.consume()
+                                                    if (n > 0 && size.width > 0) {
+                                                        val idx = ((change.position.x / size.width) * n).toInt().coerceIn(0, n - 1)
+                                                        val tIdx = currentTodayIndex
+                                                        if ((tIdx == null || idx <= tIdx) && idx != currentSelectedIndex) {
+                                                            currentOnSelectIndex(idx)
+                                                            HapticFeedbackHelper.performTick(currentVibrationEnabled, haptic, context)
+                                                        }
+                                                    }
+                                                },
+                                                onDragEnd = {},
+                                                onDragCancel = {}
+                                            )
+                                        }
+                                    }
                                 }
                         ) {
-                            if (n < 2) return@Canvas
+                            if (n == 0) return@Canvas
                             val width = size.width
                             val height = size.height
                             val progress = lineAnimProgress.value
+                            val slotWidthPx = width / n.toFloat()
 
                             val points = dataPoints.mapIndexed { index, value ->
-                                val x = (index.toFloat() / (n - 1).toFloat()) * width
+                                val x = (index + 0.5f) * slotWidthPx
                                 val targetY = height * (1f - (value.toFloat() / maxGridValue).coerceIn(0f, 1f))
                                 val animatedY = height - (height - targetY) * progress
                                 Offset(x, animatedY)
                             }
 
-                            val splinePath = Path()
-                            val fillPath = Path()
+                            if (n >= 2) {
+                                splinePath.rewind()
+                                fillPath.rewind()
 
-                            splinePath.moveTo(points[0].x, points[0].y)
-                            fillPath.moveTo(points[0].x, height)
-                            fillPath.lineTo(points[0].x, points[0].y)
+                                splinePath.moveTo(points[0].x, points[0].y)
+                                fillPath.moveTo(points[0].x, height)
+                                fillPath.lineTo(points[0].x, points[0].y)
 
-                            for (i in 0 until n - 1) {
-                                val p0 = if (i > 0) points[i - 1] else points[i]
-                                val p1 = points[i]
-                                val p2 = points[i + 1]
-                                val p3 = if (i + 2 < n) points[i + 2] else p2
+                                for (i in 0 until n - 1) {
+                                    val p0 = if (i > 0) points[i - 1] else points[i]
+                                    val p1 = points[i]
+                                    val p2 = points[i + 1]
+                                    val p3 = if (i + 2 < n) points[i + 2] else p2
 
-                                val cp1x = p1.x + (p2.x - p0.x) / 6f
-                                val cp1y = p1.y + (p2.y - p0.y) / 6f
-                                val cp2x = p2.x - (p3.x - p1.x) / 6f
-                                val cp2y = p2.y - (p3.y - p1.y) / 6f
+                                    val cp1x = p1.x + (p2.x - p0.x) / 6f
+                                    val cp1y = (p1.y + (p2.y - p0.y) / 6f).coerceIn(0f, height)
+                                    val cp2x = p2.x - (p3.x - p1.x) / 6f
+                                    val cp2y = (p2.y - (p3.y - p1.y) / 6f).coerceIn(0f, height)
 
-                                splinePath.cubicTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y)
-                                fillPath.cubicTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y)
-                            }
+                                    splinePath.cubicTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y)
+                                    fillPath.cubicTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y)
+                                }
 
-                            fillPath.lineTo(points.last().x, height)
-                            fillPath.close()
+                                fillPath.lineTo(points.last().x, height)
+                                fillPath.close()
 
-                            val gradientBrush = Brush.verticalGradient(
-                                colors = listOf(
-                                    primaryColor.copy(alpha = 0.35f * progress),
-                                    primaryColor.copy(alpha = 0.02f)
-                                ),
-                                startY = 0f,
-                                endY = height
-                            )
-                            drawPath(path = fillPath, brush = gradientBrush)
-
-                            drawPath(
-                                path = splinePath,
-                                color = primaryColor,
-                                style = Stroke(
-                                    width = 2.8.dp.toPx(),
-                                    cap = StrokeCap.Round,
-                                    join = StrokeJoin.Round
+                                val gradientBrush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        primaryColor.copy(alpha = 0.35f * progress),
+                                        primaryColor.copy(alpha = 0.02f)
+                                    ),
+                                    startY = 0f,
+                                    endY = height
                                 )
-                            )
+                                drawPath(path = fillPath, brush = gradientBrush)
+
+                                drawPath(
+                                    path = splinePath,
+                                    color = primaryColor,
+                                    style = Stroke(
+                                        width = 2.8.dp.toPx(),
+                                        cap = StrokeCap.Round,
+                                        join = StrokeJoin.Round
+                                    )
+                                )
+                            }
 
                             points.forEachIndexed { index, pt ->
                                 val isSelected = selectedIndex == index
@@ -1274,7 +1349,7 @@ fun SmoothSplineLineChart(
                                         start = Offset(pt.x, 0f),
                                         end = Offset(pt.x, height),
                                         strokeWidth = 1.dp.toPx(),
-                                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f)
+                                        pathEffect = SelectionDashPathEffect
                                     )
                                     drawCircle(
                                         color = primaryColor.copy(alpha = 0.25f),
@@ -1290,7 +1365,7 @@ fun SmoothSplineLineChart(
                                     val isFuture = todayIndex != null && index > todayIndex
                                     drawCircle(
                                         color = if (isFuture) primaryColor.copy(alpha = 0.25f) else primaryColor,
-                                        radius = 2.5.dp.toPx(),
+                                        radius = if (n == 1) 4.5.dp.toPx() else 2.5.dp.toPx(),
                                         center = pt
                                     )
                                 }
@@ -1308,9 +1383,14 @@ fun SmoothSplineLineChart(
                                     val isHighlighted = selectedIndex == index
                                     val isToday = todayIndex == index
                                     val isFuture = todayIndex != null && index > todayIndex
+                                    val pointValue = dataPoints.getOrElse(index) { 0 }
                                     Column(
                                         modifier = Modifier
                                             .weight(1f)
+                                            .semantics(mergeDescendants = true) {
+                                                contentDescription = "$label: $pointValue"
+                                                selected = isHighlighted
+                                            }
                                             .clickable(
                                                 enabled = !isFuture,
                                                 interactionSource = remember { MutableInteractionSource() },
@@ -1391,6 +1471,7 @@ fun MonthCalendarHeatmap(
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
+    val locale = LocalLocale.current.platformLocale
 
     val palette = rememberChartColorPalette()
     val primaryColor = palette.primary
@@ -1402,38 +1483,28 @@ fun MonthCalendarHeatmap(
     val surfaceContainerHighest = palette.surfaceContainerHighest
     val onSurfaceVariant = palette.onSurfaceVariant
 
-    val todayCal = remember { Calendar.getInstance() }
-    val isCurrentMonth = year == todayCal.get(Calendar.YEAR) && (month - 1) == todayCal.get(Calendar.MONTH)
-    val isFutureMonth = year > todayCal.get(Calendar.YEAR) || (year == todayCal.get(Calendar.YEAR) && (month - 1) > todayCal.get(Calendar.MONTH))
-    val currentDayOfMonth = todayCal.get(Calendar.DAY_OF_MONTH)
-
-    val cal = remember(year, month) {
-        Calendar.getInstance().apply {
-            set(Calendar.YEAR, year)
-            set(Calendar.MONTH, month - 1)
-            set(Calendar.DAY_OF_MONTH, 1)
-        }
+    val todayDate = remember { LocalDate.now() }
+    val yearMonth = remember(year, month) {
+        YearMonth.of(year, month.coerceIn(1, 12))
     }
+    val isCurrentMonth = yearMonth.year == todayDate.year && yearMonth.monthValue == todayDate.monthValue
+    val isFutureMonth = yearMonth.isAfter(YearMonth.from(todayDate))
+    val currentDayOfMonth = todayDate.dayOfMonth
 
-    val daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
-    val rawFirstDayOfWeek = cal.get(Calendar.DAY_OF_WEEK)
-    val leadingBlanks = (rawFirstDayOfWeek + 5) % 7
+    val firstDayOfWeek = remember(locale) { WeekFields.of(locale).firstDayOfWeek }
+    val daysInMonth = yearMonth.lengthOfMonth()
+    val firstOfMonthDow = yearMonth.atDay(1).dayOfWeek
+    val leadingBlanks = (firstOfMonthDow.value - firstDayOfWeek.value + 7) % 7
 
     val maxCount = remember(countsByDay, dailyLimit) {
         val observed = countsByDay.values.maxOrNull() ?: 1
         maxOf(observed, if (dailyLimit > 0) dailyLimit else 1).coerceAtLeast(1)
     }
 
-    val dayHeaders = remember {
-        listOf(
-            DayOfWeek.MONDAY,
-            DayOfWeek.TUESDAY,
-            DayOfWeek.WEDNESDAY,
-            DayOfWeek.THURSDAY,
-            DayOfWeek.FRIDAY,
-            DayOfWeek.SATURDAY,
-            DayOfWeek.SUNDAY
-        ).map { it.getDisplayName(JavaTextStyle.NARROW, Locale.getDefault()) }
+    val dayHeaders = remember(locale, firstDayOfWeek) {
+        (0..6).map { offset ->
+            firstDayOfWeek.plus(offset.toLong()).getDisplayName(JavaTextStyle.NARROW, locale)
+        }
     }
 
     Column(
@@ -1506,6 +1577,8 @@ fun MonthCalendarHeatmap(
 
                         CalendarDayCell(
                             dayNumber = dayNumber,
+                            count = count,
+                            hasData = hasData,
                             isFuture = isFuture,
                             isSelected = isSelected,
                             isToday = isToday,
@@ -1527,6 +1600,8 @@ fun MonthCalendarHeatmap(
 @Composable
 private fun CalendarDayCell(
     dayNumber: Int,
+    count: Int,
+    hasData: Boolean,
     isFuture: Boolean,
     isSelected: Boolean,
     isToday: Boolean,
@@ -1596,6 +1671,10 @@ private fun CalendarDayCell(
                     Modifier.border(borderWidth, borderColor, RoundedCornerShape(percent = cornerPercent))
                 } else Modifier
             )
+            .semantics(mergeDescendants = true) {
+                contentDescription = if (hasData && !isFuture) "$dayNumber: $count" else "$dayNumber"
+                selected = isSelected
+            }
             .bouncyPress(bouncy)
             .clickable(
                 enabled = !isFuture,
