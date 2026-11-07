@@ -11,6 +11,10 @@ import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,11 +41,9 @@ fun TaperingCheckInBottomSheet(
     onDismiss: () -> Unit,
     vibrationEnabled: Boolean = true
 ) {
-    val newLimit = (currentLimit - 1).coerceAtLeast(0)
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    val newLimit = (currentLimit - 1).coerceAtLeast(1)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var actionTaken by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
@@ -242,9 +244,13 @@ fun TaperingCheckInBottomSheet(
             ) {
                 Button(
                     onClick = {
-                        HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
-                        onReduceLimit()
+                        if (!actionTaken) {
+                            actionTaken = true
+                            HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
+                            onReduceLimit()
+                        }
                     },
+                    enabled = !actionTaken,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary
@@ -268,9 +274,13 @@ fun TaperingCheckInBottomSheet(
 
                 OutlinedButton(
                     onClick = {
-                        HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
-                        onKeepLimit()
+                        if (!actionTaken) {
+                            actionTaken = true
+                            HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                            onKeepLimit()
+                        }
                     },
+                    enabled = !actionTaken,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
@@ -284,9 +294,13 @@ fun TaperingCheckInBottomSheet(
 
                 TextButton(
                     onClick = {
-                        HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
-                        onSnooze()
+                        if (!actionTaken) {
+                            actionTaken = true
+                            HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                            onSnooze()
+                        }
                     },
+                    enabled = !actionTaken,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(44.dp)

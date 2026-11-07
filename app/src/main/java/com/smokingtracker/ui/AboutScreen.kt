@@ -70,7 +70,17 @@ fun AboutScreen(onBack: () -> Unit) {
 
     val copyToClipboard: (String) -> Unit = { address ->
         clipboardManager.setText(AnnotatedString(address))
-        Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+            Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val openSafeUri: (String) -> Unit = { url ->
+        try {
+            uriHandler.openUri(url)
+        } catch (_: Exception) {
+            Toast.makeText(context, url, Toast.LENGTH_SHORT).show()
+        }
     }
 
     Scaffold(
@@ -199,14 +209,14 @@ fun AboutScreen(onBack: () -> Unit) {
                             text = stringResource(R.string.link_github),
                             iconRes = R.drawable.ic_github
                         ) {
-                            uriHandler.openUri("https://github.com/bodyaant/SmokingYou")
+                            openSafeUri("https://github.com/bodyaant/SmokingYou")
                         }
                         Spacer(modifier = Modifier.height(12.dp))
                         LinkPill(
                             text = stringResource(R.string.link_telegram),
                             iconRes = R.drawable.ic_telegram
                         ) {
-                            uriHandler.openUri("https://t.me/SmokingYouApp")
+                            openSafeUri("https://t.me/SmokingYouApp")
                         }
 
                         HorizontalDivider(
@@ -228,7 +238,7 @@ fun AboutScreen(onBack: () -> Unit) {
                             containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                             contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                         ) {
-                            uriHandler.openUri("https://boosty.to/bodyaant")
+                            openSafeUri("https://boosty.to/bodyaant")
                         }
 
                         Spacer(modifier = Modifier.height(20.dp))
@@ -394,19 +404,19 @@ fun CryptoWalletItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            FilledTonalIconButton(
-                onClick = onCopy,
-                modifier = Modifier.size(36.dp),
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(36.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.ContentCopy,
-                    contentDescription = stringResource(R.string.copy_address),
-                    modifier = Modifier.size(16.dp)
-                )
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.ContentCopy,
+                        contentDescription = stringResource(R.string.copy_address),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
         }
     }

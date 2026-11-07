@@ -41,6 +41,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,16 +72,17 @@ fun WidgetSettingsBottomSheet(
     vibrationEnabled: Boolean = true,
     onDismissRequest: () -> Unit
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
     var selectedOption by rememberSaveable { mutableStateOf(WidgetOption.TIMER_3X1) }
+    var lastPinRequestMs by remember { mutableLongStateOf(0L) }
 
     fun requestPin(providerClass: Class<*>) {
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (now - lastPinRequestMs < 1000L) return
+        lastPinRequestMs = now
         HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
         val appWidgetManager = AppWidgetManager.getInstance(context)
         if (appWidgetManager.isRequestPinAppWidgetSupported) {
@@ -219,7 +224,11 @@ fun WidgetSettingsBottomSheet(
                         },
                         modifier = Modifier
                             .weight(animatedWeight)
-                            .height(48.dp),
+                            .height(48.dp)
+                            .semantics {
+                                selected = isSelected
+                                role = Role.Tab
+                            },
                         shape = RoundedCornerShape(
                             topStart = startR,
                             bottomStart = startR,

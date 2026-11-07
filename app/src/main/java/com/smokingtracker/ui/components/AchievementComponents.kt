@@ -68,6 +68,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.smokingtracker.AchievementCategory
@@ -171,7 +173,8 @@ fun BadgeMedallion(
     isUnlocked: Boolean,
     modifier: Modifier = Modifier,
     isSecret: Boolean = false,
-    size: Dp = 56.dp
+    size: Dp = 56.dp,
+    contentDescription: String? = null
 ) {
     val shape = badgeShape(id)
     val icon = remember(id, isSecret, isUnlocked) { badgeIcon(id, isSecret, isUnlocked) }
@@ -182,6 +185,11 @@ fun BadgeMedallion(
             .size(size)
             .clip(shape)
             .background(bgBrush)
+            .then(
+                if (contentDescription != null) {
+                    Modifier.semantics { this.contentDescription = contentDescription }
+                } else Modifier
+            )
             .then(
                 if (!isUnlocked) {
                     Modifier.border(
@@ -314,10 +322,9 @@ fun ConfettiBurst(
         progress.animateTo(1f, tween(durationMillis = 2200, easing = LinearEasing))
     }
 
-    val t = progress.value
-    if (t >= 1f) return
-
     Canvas(modifier = modifier) {
+        val t = progress.value
+        if (t >= 1f) return@Canvas
         val w = size.width
         val h = size.height
         particles.forEach { p ->

@@ -119,7 +119,7 @@ fun AppearanceSettingsScreen(
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
             verticalArrangement = Arrangement.spacedBy(containerGroupGap())
         ) {
-            item {
+            item(key = "header_theme") {
                 Text(
                     text = stringResource(R.string.settings_theme),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -128,7 +128,7 @@ fun AppearanceSettingsScreen(
                 )
             }
 
-            item {
+            item(key = "card_theme") {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = containerShape(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp), ContainerGroupPosition.FIRST),
@@ -178,7 +178,7 @@ fun AppearanceSettingsScreen(
                 }
             }
 
-            item {
+            item(key = "card_amoled") {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = containerShape(RoundedCornerShape(8.dp), ContainerGroupPosition.MIDDLE),
@@ -226,7 +226,7 @@ fun AppearanceSettingsScreen(
                 }
             }
 
-            item {
+            item(key = "card_vibration") {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = containerShape(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp), ContainerGroupPosition.LAST),
@@ -277,7 +277,7 @@ fun AppearanceSettingsScreen(
                 }
             }
 
-            item {
+            item(key = "header_color_preset") {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = stringResource(R.string.settings_color_preset),
@@ -287,7 +287,7 @@ fun AppearanceSettingsScreen(
                 )
             }
 
-            item {
+            item(key = "card_color_preset") {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = containerShape(RoundedCornerShape(24.dp)),
@@ -344,7 +344,7 @@ fun AppearanceSettingsScreen(
                 }
             }
 
-            item {
+            item(key = "header_app_icon") {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = stringResource(R.string.settings_app_icon),
@@ -354,7 +354,7 @@ fun AppearanceSettingsScreen(
                 )
             }
 
-            item {
+            item(key = "card_app_icon") {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = containerShape(RoundedCornerShape(24.dp)),
@@ -397,7 +397,7 @@ fun AppearanceSettingsScreen(
                 }
             }
 
-            item {
+            item(key = "header_font") {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = stringResource(R.string.settings_font),
@@ -407,7 +407,7 @@ fun AppearanceSettingsScreen(
                 )
             }
 
-            item {
+            item(key = "card_font") {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = containerShape(RoundedCornerShape(24.dp)),
@@ -826,15 +826,11 @@ fun FontSelectionSection(
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                 }
-                                val fontWeightSliderState = rememberSliderState(
-                                    value = customFontWeight.toFloat(),
-                                    steps = 17,
-                                    trackRange = 100f..1000f
-                                ).also { it.value = customFontWeight.toFloat() }
-
                                 Slider(
-                                    state = fontWeightSliderState,
-                                    onValueChange = { onCustomFontWeightChange(it.toInt()) }
+                                    value = customFontWeight.toFloat().coerceIn(100f, 1000f),
+                                    onValueChange = { onCustomFontWeightChange(it.toInt()) },
+                                    valueRange = 100f..1000f,
+                                    steps = 17
                                 )
                             }
 
@@ -855,15 +851,11 @@ fun FontSelectionSection(
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                 }
-                                val fontWidthSliderState = rememberSliderState(
-                                    value = customFontWidth,
-                                    steps = 24,
-                                    trackRange = 25f..150f
-                                ).also { it.value = customFontWidth }
-
                                 Slider(
-                                    state = fontWidthSliderState,
-                                    onValueChange = { onCustomFontWidthChange(it) }
+                                    value = customFontWidth.coerceIn(25f, 150f),
+                                    onValueChange = { onCustomFontWidthChange(it) },
+                                    valueRange = 25f..150f,
+                                    steps = 24
                                 )
                             }
 
@@ -884,15 +876,11 @@ fun FontSelectionSection(
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                 }
-                                val fontRoundnessSliderState = rememberSliderState(
-                                    value = customFontRoundness,
-                                    steps = 19,
-                                    trackRange = 0f..100f
-                                ).also { it.value = customFontRoundness }
-
                                 Slider(
-                                    state = fontRoundnessSliderState,
-                                    onValueChange = { onCustomFontRoundnessChange(it) }
+                                    value = customFontRoundness.coerceIn(0f, 100f),
+                                    onValueChange = { onCustomFontRoundnessChange(it) },
+                                    valueRange = 0f..100f,
+                                    steps = 19
                                 )
                             }
                         }

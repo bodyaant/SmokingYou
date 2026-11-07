@@ -54,6 +54,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -68,9 +69,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.smokingtracker.AchievementsManager
 import com.smokingtracker.HomeViewModel
 import com.smokingtracker.R
 import com.smokingtracker.StatisticsManager
+import com.smokingtracker.startOfDayMillis
+import com.smokingtracker.startOfTodayMillis
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -104,6 +109,8 @@ fun HomeScreen(
         unlockedAchievements = unlockedAchievements,
         taperingIntervalDays = taperingIntervalDays,
         viewModel = viewModel,
+        statisticsManager = viewModel.statisticsManager,
+        achievementsManager = viewModel.achievementsManager,
         vibrationEnabled = vibrationEnabled,
         onNavigateToAchievements = onNavigateToAchievements,
         onNavigateToGraphs = onNavigateToGraphs
@@ -127,80 +134,78 @@ internal fun HomeScreenContent(
     unlockedAchievements: Set<String> = emptySet(),
     taperingIntervalDays: Int = 7,
     viewModel: HomeViewModel? = null,
+    statisticsManager: StatisticsManager = remember(viewModel) { viewModel?.statisticsManager ?: StatisticsManager() },
+    achievementsManager: AchievementsManager = remember(viewModel) { viewModel?.achievementsManager ?: AchievementsManager() },
     vibrationEnabled: Boolean = true,
     onNavigateToAchievements: () -> Unit = {},
     onNavigateToGraphs: (String) -> Unit = {}
 ) {
-    var currentDate by remember { mutableStateOf(Calendar.getInstance()) }
+    var currentDateMillis by rememberSaveable { mutableLongStateOf(System.currentTimeMillis()) }
+    val currentDate = remember(currentDateMillis) {
+        Calendar.getInstance().apply { timeInMillis = currentDateMillis }
+    }
 
-    var timePassedText by remember { mutableStateOf("") }
-    val calculatingText = stringResource(R.string.time_calculating)
-    val invalidEntryText = stringResource(R.string.invalid_future_entry)
-    val startTrackingText = stringResource(R.string.start_tracking)
-    
-    val formatHm = stringResource(R.string.duration_hm)
-    val formatHms = stringResource(R.string.duration_hms)
-    val formatMs = stringResource(R.string.duration_ms)
-    
-    var showLimitWarning by remember { mutableStateOf(false) }
+    var showLimitWarning by rememberSaveable { mutableStateOf(false) }
     var isProcessingAdd by remember { mutableStateOf(false) }
-    var showDatePicker by remember { mutableStateOf(false) }
-    var showTriggerDialog by remember { mutableStateOf(false) }
-    var showMindfulPauseDialog by remember { mutableStateOf(false) }
-    var mindfulPauseTrigger by remember { mutableStateOf<String?>(null) }
-    var showAddTriggerDialog by remember { mutableStateOf(false) }
+    var lastAddActionTimeMs by remember { mutableLongStateOf(0L) }
+    var showDatePicker by rememberSaveable { mutableStateOf(false) }
+    var showTriggerDialog by rememberSaveable { mutableStateOf(false) }
+    var mindfulPauseTrigger by rememberSaveable { mutableStateOf<String?>(null) }
+    var showAddTriggerDialog by rememberSaveable { mutableStateOf(false) }
     val allEntities by viewModel?.allSmokingEntities?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(emptyList()) }
     val showTaperingCheckIn by viewModel?.showTaperingCheckIn?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(false) }
     val activeTriggers by viewModel?.activeTriggers?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(TriggerType.allEntries().map { TriggerItem.fromBuiltIn(it) }) }
     val customTriggers by viewModel?.customTriggers?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(emptyList()) }
-    var pendingLogTime by remember { mutableLongStateOf(0L) }
-    var pendingTriggerToLog by remember { mutableStateOf<String?>(null) }
-    var startInMindfulPause by remember { mutableStateOf(false) }
+    var pendingLogTime by rememberSaveable { mutableLongStateOf(0L) }
+    var pendingTriggerToLog by rememberSaveable { mutableStateOf<String?>(null) }
+    var startInMindfulPause by rememberSaveable { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    var undoSnackbarJob by remember { mutableStateOf<Job?>(null) }
 
     val context = androidx.compose.ui.platform.LocalContext.current
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     val locale = LocalLocale.current.platformLocale
 
+    val resolveSelectedDateTimestamp: () -> Long = {
+        val now = Calendar.getInstance()
+        val entryDate = Calendar.getInstance().apply { timeInMillis = currentDateMillis }
+        entryDate.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY))
+        entryDate.set(Calendar.MINUTE, now.get(Calendar.MINUTE))
+        entryDate.set(Calendar.SECOND, now.get(Calendar.SECOND))
+        entryDate.set(Calendar.MILLISECOND, now.get(Calendar.MILLISECOND))
+        if (entryDate.timeInMillis <= now.timeInMillis) entryDate.timeInMillis else now.timeInMillis
+    }
+
+    val resolveEffectiveLogTime: () -> Long = {
+        if (pendingLogTime > 0L) pendingLogTime else resolveSelectedDateTimestamp()
+    }
+
     val resistedSuccessMsg = stringResource(R.string.resisted_craving_success)
+    LaunchedEffect(currentDateMillis, viewModel) {
+        viewModel?.setSelectedDate(currentDateMillis)
+    }
     LaunchedEffect(viewModel) {
         viewModel?.fabActionEvents?.collect { action ->
             when (action) {
                 is com.smokingtracker.HomeFabUiAction.OpenSmokedDialog -> {
-                    val now = Calendar.getInstance()
-                    val entryDate = currentDate.clone() as Calendar
-                    entryDate.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY))
-                    entryDate.set(Calendar.MINUTE, now.get(Calendar.MINUTE))
-                    entryDate.set(Calendar.SECOND, now.get(Calendar.SECOND))
-                    entryDate.set(Calendar.MILLISECOND, now.get(Calendar.MILLISECOND))
-                    pendingLogTime = if (entryDate.timeInMillis <= now.timeInMillis) entryDate.timeInMillis else now.timeInMillis
+                    pendingLogTime = resolveSelectedDateTimestamp()
                     startInMindfulPause = false
                     showTriggerDialog = true
                 }
                 is com.smokingtracker.HomeFabUiAction.OpenMindfulPauseDialog -> {
-                    val now = Calendar.getInstance()
-                    val entryDate = currentDate.clone() as Calendar
-                    entryDate.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY))
-                    entryDate.set(Calendar.MINUTE, now.get(Calendar.MINUTE))
-                    entryDate.set(Calendar.SECOND, now.get(Calendar.SECOND))
-                    entryDate.set(Calendar.MILLISECOND, now.get(Calendar.MILLISECOND))
-                    pendingLogTime = if (entryDate.timeInMillis <= now.timeInMillis) entryDate.timeInMillis else now.timeInMillis
+                    pendingLogTime = resolveSelectedDateTimestamp()
                     mindfulPauseTrigger = null
                     startInMindfulPause = true
                     showTriggerDialog = true
                 }
                 is com.smokingtracker.HomeFabUiAction.ResistedCraving -> {
                     com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
-                    val now = Calendar.getInstance()
-                    val entryDate = currentDate.clone() as Calendar
-                    entryDate.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY))
-                    entryDate.set(Calendar.MINUTE, now.get(Calendar.MINUTE))
-                    entryDate.set(Calendar.SECOND, now.get(Calendar.SECOND))
-                    entryDate.set(Calendar.MILLISECOND, now.get(Calendar.MILLISECOND))
-                    val logTime = if (entryDate.timeInMillis <= now.timeInMillis) entryDate.timeInMillis else now.timeInMillis
-                    viewModel.addResistedEntry(null, logTime)
+                    if (!action.alreadyRecorded) {
+                        val logTime = resolveSelectedDateTimestamp()
+                        viewModel.addResistedEntry(null, logTime)
+                    }
                     scope.launch {
                         snackbarHostState.showSnackbar(
                             AppSnackbarVisuals(
@@ -216,7 +221,7 @@ internal fun HomeScreenContent(
         }
     }
 
-    val selectedDateEntries = remember(entries, currentDate) {
+    val selectedDateEntries = remember(entries, currentDateMillis) {
         val currentYear = currentDate.get(Calendar.YEAR)
         val currentDay = currentDate.get(Calendar.DAY_OF_YEAR)
         val checkCal = Calendar.getInstance()
@@ -228,16 +233,20 @@ internal fun HomeScreenContent(
     }
 
     val attemptLogSmoking: (String?) -> Unit = { triggerKey ->
-        if (dailyLimit in 1..selectedDateEntries.size) {
-            pendingTriggerToLog = triggerKey
-            showLimitWarning = true
-        } else {
-            com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
-            if (pendingLogTime > 0L) {
-                viewModel?.addSmokingEntryWithTrigger(pendingLogTime, triggerKey)
+        val nowMs = System.currentTimeMillis()
+        if (!isProcessingAdd && (nowMs - lastAddActionTimeMs) >= 400L) {
+            if (dailyLimit in 1..selectedDateEntries.size) {
+                pendingTriggerToLog = triggerKey
+                showLimitWarning = true
+            } else {
+                isProcessingAdd = true
+                lastAddActionTimeMs = nowMs
+                com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
+                val targetLogTime = resolveEffectiveLogTime()
+                viewModel?.addSmokingEntryWithTrigger(targetLogTime, triggerKey)
+                showTriggerDialog = false
+                isProcessingAdd = false
             }
-            showTriggerDialog = false
-            isProcessingAdd = false
         }
     }
 
@@ -280,41 +289,11 @@ internal fun HomeScreenContent(
         }
     }
 
-    LaunchedEffect(entries, formatHm, formatHms, formatMs, locale) {
-        timePassedText = calculatingText
-        while (true) {
-            val lastEntry = entries.maxOrNull()
-            if (lastEntry != null) {
-                val now = System.currentTimeMillis()
-                val diff = now - lastEntry
-                
-              if (diff < 0) {
-                    timePassedText = invalidEntryText
-                } else {
-                    val hours = TimeUnit.MILLISECONDS.toHours(diff)
-                    val minutes = TimeUnit.MILLISECONDS.toMinutes(diff) % 60
-                    val seconds = TimeUnit.MILLISECONDS.toSeconds(diff) % 60
-                    
-                    timePassedText = when {
-                        hours >= 24 -> String.format(locale, formatHm, hours, minutes)
-                        hours > 0 -> String.format(locale, formatHms, hours, minutes, seconds)
-                        else -> String.format(locale, formatMs, minutes, seconds)
-                    }
-                }
-            } else {
-                timePassedText = startTrackingText
-            }
-            delay(1000)
-        }
-    }
-
     val dateFormat = remember(locale) { SimpleDateFormat("d MMMM yyyy", locale) }
-    val selectedDateStr = dateFormat.format(currentDate.time)
-    
-    val isToday = remember(currentDate) {
-        val now = Calendar.getInstance()
-        currentDate.get(Calendar.YEAR) == now.get(Calendar.YEAR) &&
-        currentDate.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)
+    val selectedDateStr = remember(currentDateMillis, dateFormat) { dateFormat.format(Date(currentDateMillis)) }
+
+    val canGoNext = remember(currentDateMillis) {
+        startOfDayMillis(currentDateMillis) < startOfTodayMillis()
     }
                   
     if (showLimitWarning) {
@@ -360,12 +339,13 @@ internal fun HomeScreenContent(
                 Button(
                     enabled = !isProcessingAdd,
                     onClick = {
-                        if (!isProcessingAdd) {
+                        val nowMs = System.currentTimeMillis()
+                        if (!isProcessingAdd && (nowMs - lastAddActionTimeMs) >= 400L) {
                             com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                             isProcessingAdd = true
-                            if (pendingLogTime > 0L) {
-                                viewModel?.addSmokingEntryWithTrigger(pendingLogTime, pendingTriggerToLog)
-                            }
+                            lastAddActionTimeMs = nowMs
+                            val targetLogTime = resolveEffectiveLogTime()
+                            viewModel?.addSmokingEntryWithTrigger(targetLogTime, pendingTriggerToLog)
                             showLimitWarning = false
                             showTriggerDialog = false
                             isProcessingAdd = false
@@ -396,7 +376,7 @@ internal fun HomeScreenContent(
 
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = currentDate.timeInMillis,
+            initialSelectedDateMillis = currentDateMillis,
             selectableDates = object : SelectableDates {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                     return utcTimeMillis <= System.currentTimeMillis()
@@ -415,8 +395,7 @@ internal fun HomeScreenContent(
                     onClick = {
                         com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                         datePickerState.selectedDateMillis?.let { millis ->
-                            val newCal = Calendar.getInstance().apply { timeInMillis = millis }
-                            currentDate = newCal
+                            currentDateMillis = millis.coerceAtMost(System.currentTimeMillis())
                         }
                         showDatePicker = false
                     }
@@ -437,11 +416,8 @@ internal fun HomeScreenContent(
     }
 
     if (showTriggerDialog) {
-        val triggerSheetState = rememberBottomSheetState(
-            initialValue = SheetValue.Hidden,
-            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-        )
-        var isMindfulPauseActive by remember(showTriggerDialog) { mutableStateOf(startInMindfulPause) }
+        val triggerSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        var isMindfulPauseActive by rememberSaveable(showTriggerDialog) { mutableStateOf(startInMindfulPause) }
 
         ModalBottomSheet(
             onDismissRequest = {
@@ -481,7 +457,8 @@ internal fun HomeScreenContent(
                             startInMindfulPause = false
                         },
                         onSuccess = { trigger ->
-                            viewModel?.addResistedEntry(trigger)
+                            val targetLogTime = resolveEffectiveLogTime()
+                            viewModel?.addResistedEntry(trigger, targetLogTime)
                             showTriggerDialog = false
                             isProcessingAdd = false
                             isMindfulPauseActive = false
@@ -713,23 +690,6 @@ internal fun HomeScreenContent(
         }
     }
 
-    if (showMindfulPauseDialog) {
-        MindfulPauseDialog(
-            selectedTrigger = mindfulPauseTrigger,
-            vibrationEnabled = vibrationEnabled,
-            onDismiss = { showMindfulPauseDialog = false },
-            onSuccess = { trigger ->
-                viewModel?.addResistedEntry(trigger)
-                showMindfulPauseDialog = false
-            },
-            onFailure = { trigger ->
-                val logTime = if (pendingLogTime > 0L) pendingLogTime else System.currentTimeMillis()
-                viewModel?.addSmokingEntryWithTrigger(logTime, trigger)
-                showMindfulPauseDialog = false
-            }
-        )
-    }
-
     if (showTaperingCheckIn) {
         TaperingCheckInBottomSheet(
             currentLimit = dailyLimit,
@@ -741,17 +701,6 @@ internal fun HomeScreenContent(
             vibrationEnabled = vibrationEnabled
         )
     }
-
-    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-    val pulseAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.3f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "pulse_alpha"
-    )
 
     val undoDeleteStr = stringResource(R.string.undo_delete)
     val undoStr = stringResource(R.string.undo)
@@ -860,8 +809,15 @@ internal fun HomeScreenContent(
                                 contentDescription = stringResource(R.string.settings_achievements),
                                 modifier = Modifier.size(18.dp)
                             )
+                            val allAchIds = remember(achievementsManager) {
+                                achievementsManager.achievementsList.map { it.id }.toSet()
+                            }
+                            val validUnlockedCount = remember(unlockedAchievements, allAchIds) {
+                                unlockedAchievements.count { it in allAchIds }
+                            }
+                            val totalAchievementsCount = allAchIds.size
                             Text(
-                                text = "${unlockedAchievements.size}/${com.smokingtracker.AchievementsManager().achievementsList.size}",
+                                text = "$validUnlockedCount/$totalAchievementsCount",
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
                             )
                         }
@@ -881,6 +837,7 @@ internal fun HomeScreenContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(14.dp))
+                val lastSmokedTimestamp = remember(entries) { entries.maxOrNull() }
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
@@ -895,36 +852,7 @@ internal fun HomeScreenContent(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = pulseAlpha))
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(R.string.time_past_label),
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(6.dp))
-                        val heroTextStyle = when {
-                            timePassedText.length > 16 -> MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold)
-                            timePassedText.length > 10 -> MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold)
-                            else -> MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold)
-                        }
-                        Text(
-                            text = timePassedText,
-                            style = heroTextStyle,
-                            color = MaterialTheme.colorScheme.primary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        HeroTimerSection(lastEntryTimestamp = lastSmokedTimestamp)
 
                         if (dailyLimit > 0) {
                             val progress = (selectedDateEntries.size.toFloat() / dailyLimit.toFloat()).coerceIn(0f, 1f)
@@ -976,8 +904,12 @@ internal fun HomeScreenContent(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                val weeklyCount = remember(entries, currentDate) { StatisticsManager().getWeeklyCount(entries, currentDate) }
-                val monthlyCount = remember(entries, currentDate) { StatisticsManager().getMonthlyCount(entries, currentDate) }
+                val weeklyCount = remember(entries, currentDate, statisticsManager) {
+                    statisticsManager.getWeeklyCount(entries, currentDate)
+                }
+                val monthlyCount = remember(entries, currentDate, statisticsManager) {
+                    statisticsManager.getMonthlyCount(entries, currentDate)
+                }
 
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -1032,20 +964,20 @@ internal fun HomeScreenContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
-                        .pointerInput(currentDate, isToday) {
+                        .pointerInput(currentDateMillis, canGoNext) {
                             detectHorizontalDragGestures(
                                 onDragStart = { totalDragX = 0f },
                                 onDragEnd = {
                                     if (totalDragX > 80f) {
                                         com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
-                                        val newDate = currentDate.clone() as Calendar
+                                        val newDate = Calendar.getInstance().apply { timeInMillis = currentDateMillis }
                                         newDate.add(Calendar.DAY_OF_YEAR, -1)
-                                        currentDate = newDate
-                                    } else if (totalDragX < -80f && !isToday) {
+                                        currentDateMillis = newDate.timeInMillis
+                                    } else if (totalDragX < -80f && canGoNext) {
                                         com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
-                                        val newDate = currentDate.clone() as Calendar
+                                        val newDate = Calendar.getInstance().apply { timeInMillis = currentDateMillis }
                                         newDate.add(Calendar.DAY_OF_YEAR, 1)
-                                        currentDate = newDate
+                                        currentDateMillis = newDate.timeInMillis.coerceAtMost(System.currentTimeMillis())
                                     }
                                     totalDragX = 0f
                                 },
@@ -1084,9 +1016,9 @@ internal fun HomeScreenContent(
                         onClick = {
                             prevBouncy.bounce()
                             com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
-                            val newDate = currentDate.clone() as Calendar
+                            val newDate = Calendar.getInstance().apply { timeInMillis = currentDateMillis }
                             newDate.add(Calendar.DAY_OF_YEAR, -1)
-                            currentDate = newDate
+                            currentDateMillis = newDate.timeInMillis
                         },
                         shape = MaterialShapes.Cookie9Sided.toShape(),
                         color = MaterialTheme.colorScheme.secondaryContainer,
@@ -1148,16 +1080,18 @@ internal fun HomeScreenContent(
 
                     Surface(
                         onClick = {
-                            nextBouncy.bounce()
-                            com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
-                            val newDate = currentDate.clone() as Calendar
-                            newDate.add(Calendar.DAY_OF_YEAR, 1)
-                            currentDate = newDate
+                            if (canGoNext) {
+                                nextBouncy.bounce()
+                                com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
+                                val newDate = Calendar.getInstance().apply { timeInMillis = currentDateMillis }
+                                newDate.add(Calendar.DAY_OF_YEAR, 1)
+                                currentDateMillis = newDate.timeInMillis.coerceAtMost(System.currentTimeMillis())
+                            }
                         },
-                        enabled = !isToday,
+                        enabled = canGoNext,
                         shape = MaterialShapes.Cookie9Sided.toShape(),
-                        color = if (!isToday) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = if (!isToday) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        color = if (canGoNext) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = if (canGoNext) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         interactionSource = nextInteractionSource,
                         modifier = Modifier
                             .size(48.dp)
@@ -1171,7 +1105,7 @@ internal fun HomeScreenContent(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                val selectedDateAllEntities = remember(allEntities, currentDate) {
+                val selectedDateAllEntities = remember(allEntities, currentDateMillis) {
                     val currentYear = currentDate.get(Calendar.YEAR)
                     val currentDay = currentDate.get(Calendar.DAY_OF_YEAR)
                     val checkCal = Calendar.getInstance()
@@ -1208,20 +1142,20 @@ internal fun HomeScreenContent(
                             .fillMaxWidth()
                             .weight(1f)
                             .padding(bottom = 88.dp, start = 4.dp, end = 4.dp)
-                            .pointerInput(currentDate, isToday) {
+                            .pointerInput(currentDateMillis, canGoNext) {
                                 detectHorizontalDragGestures(
                                     onDragStart = { totalDragX = 0f },
                                     onDragEnd = {
                                         if (totalDragX > 80f) {
                                             com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
-                                            val newDate = currentDate.clone() as Calendar
+                                            val newDate = Calendar.getInstance().apply { timeInMillis = currentDateMillis }
                                             newDate.add(Calendar.DAY_OF_YEAR, -1)
-                                            currentDate = newDate
-                                        } else if (totalDragX < -80f && !isToday) {
+                                            currentDateMillis = newDate.timeInMillis
+                                        } else if (totalDragX < -80f && canGoNext) {
                                             com.smokingtracker.ui.theme.HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
-                                            val newDate = currentDate.clone() as Calendar
+                                            val newDate = Calendar.getInstance().apply { timeInMillis = currentDateMillis }
                                             newDate.add(Calendar.DAY_OF_YEAR, 1)
-                                            currentDate = newDate
+                                            currentDateMillis = newDate.timeInMillis.coerceAtMost(System.currentTimeMillis())
                                         }
                                         totalDragX = 0f
                                     },
@@ -1293,39 +1227,50 @@ internal fun HomeScreenContent(
                             val screenWidthPx = remember(windowInfo) {
                                 windowInfo.containerSize.width.toFloat()
                             }
-                            var latestDismissOffset by remember { mutableFloatStateOf(0f) }
+                            val handleEntryDeletion: () -> Unit = {
+                                viewModel?.removeSmokingEntry(entity.id, entity.timestamp, entity.isResisted)
+                                undoSnackbarJob?.cancel()
+                                snackbarHostState.currentSnackbarData?.dismiss()
+                                undoSnackbarJob = scope.launch {
+                                    val result = snackbarHostState.showSnackbar(
+                                        AppSnackbarVisuals(
+                                            message = undoDeleteStr,
+                                            actionLabel = undoStr,
+                                            duration = SnackbarDuration.Short,
+                                            icon = Icons.Filled.Delete,
+                                            isError = true
+                                        )
+                                    )
+                                    if (result == SnackbarResult.ActionPerformed) {
+                                        if (entity.isResisted) {
+                                            viewModel?.addResistedEntry(entity.trigger, entity.timestamp)
+                                        } else {
+                                            viewModel?.addSmokingEntryWithTrigger(entity.timestamp, entity.trigger)
+                                        }
+                                    }
+                                }
+                            }
+                            @Suppress("DEPRECATION")
+                            lateinit var dismissStateRef: SwipeToDismissBoxState
                             @Suppress("DEPRECATION")
                             val dismissState = rememberSwipeToDismissBoxState(
                                 positionalThreshold = { distance -> distance * 0.85f },
                                 confirmValueChange = { dismissValue ->
                                     if (dismissValue == SwipeToDismissBoxValue.StartToEnd || dismissValue == SwipeToDismissBoxValue.EndToStart) {
                                         val minThreshold = screenWidthPx * 0.67f
-                                        if (latestDismissOffset < minThreshold) {
+                                        val currentAbsOffset = kotlin.math.abs(runCatching { dismissStateRef.requireOffset() }.getOrDefault(0f))
+                                        if (currentAbsOffset < minThreshold) {
                                             false
                                         } else {
                                             com.smokingtracker.ui.theme.HapticFeedbackHelper.performHeavyThreshold(vibrationEnabled, haptic, context)
-                                            scope.launch {
-                                                viewModel?.removeSmokingEntry(entity.id, entity.timestamp)
-                                                val result = snackbarHostState.showSnackbar(
-                                                    message = undoDeleteStr,
-                                                    actionLabel = undoStr,
-                                                    duration = SnackbarDuration.Short
-                                                )
-                                                if (result == SnackbarResult.ActionPerformed) {
-                                                    if (entity.isResisted) {
-                                                        viewModel?.addResistedEntry(entity.trigger, entity.timestamp)
-                                                    } else {
-                                                        viewModel?.addSmokingEntryWithTrigger(entity.timestamp, entity.trigger)
-                                                    }
-                                                }
-                                            }
+                                            handleEntryDeletion()
                                             true
                                         }
                                     } else {
                                         true
                                     }
                                 }
-                            )
+                            ).also { dismissStateRef = it }
 
                             SwipeToDismissBox(
                                 state = dismissState,
@@ -1337,7 +1282,6 @@ internal fun HomeScreenContent(
                                     val alignment = if (isEndToStart) Alignment.CenterEnd else Alignment.CenterStart
                                     val currentOffset = runCatching { dismissState.requireOffset() }.getOrDefault(0f)
                                     val absOffset = kotlin.math.abs(currentOffset)
-                                    latestDismissOffset = absOffset
                                     val absOffsetDp = with(LocalDensity.current) { absOffset.toDp() }
 
                                     Box(
@@ -1377,21 +1321,7 @@ internal fun HomeScreenContent(
                                 vibrationEnabled = vibrationEnabled,
                                 onDelete = {
                                     com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
-                                    scope.launch {
-                                        viewModel?.removeSmokingEntry(entity.id, entity.timestamp)
-                                        val result = snackbarHostState.showSnackbar(
-                                            message = undoDeleteStr,
-                                            actionLabel = undoStr,
-                                            duration = SnackbarDuration.Short
-                                        )
-                                        if (result == SnackbarResult.ActionPerformed) {
-                                            if (entity.isResisted) {
-                                                viewModel?.addResistedEntry(entity.trigger, entity.timestamp)
-                                            } else {
-                                                viewModel?.addSmokingEntryWithTrigger(entity.timestamp, entity.trigger)
-                                            }
-                                        }
-                                    }
+                                    handleEntryDeletion()
                                 },
                                 onEdit = { newTime ->
                                     viewModel?.editSmokingEntry(entity.id, entity.timestamp, newTime)
@@ -1407,6 +1337,86 @@ internal fun HomeScreenContent(
         }
         }
     }
+}
+
+@Composable
+private fun HeroTimerSection(lastEntryTimestamp: Long?) {
+    val calculatingText = stringResource(R.string.time_calculating)
+    val invalidEntryText = stringResource(R.string.invalid_future_entry)
+    val startTrackingText = stringResource(R.string.start_tracking)
+    val formatHm = stringResource(R.string.duration_hm)
+    val formatHms = stringResource(R.string.duration_hms)
+    val formatMs = stringResource(R.string.duration_ms)
+    val locale = LocalLocale.current.platformLocale
+
+    var timePassedText by remember { mutableStateOf(calculatingText) }
+
+    LaunchedEffect(lastEntryTimestamp, formatHm, formatHms, formatMs, locale, calculatingText, invalidEntryText, startTrackingText) {
+        while (true) {
+            if (lastEntryTimestamp != null) {
+                val now = System.currentTimeMillis()
+                val diff = now - lastEntryTimestamp
+                if (diff < 0) {
+                    timePassedText = invalidEntryText
+                } else {
+                    val hours = TimeUnit.MILLISECONDS.toHours(diff)
+                    val minutes = TimeUnit.MILLISECONDS.toMinutes(diff) % 60
+                    val seconds = TimeUnit.MILLISECONDS.toSeconds(diff) % 60
+                    timePassedText = when {
+                        hours >= 24 -> String.format(locale, formatHm, hours, minutes)
+                        hours > 0 -> String.format(locale, formatHms, hours, minutes, seconds)
+                        else -> String.format(locale, formatMs, minutes, seconds)
+                    }
+                }
+            } else {
+                timePassedText = startTrackingText
+            }
+            delay(1000)
+        }
+    }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse_alpha"
+    )
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .graphicsLayer { alpha = pulseAlpha }
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = stringResource(R.string.time_past_label),
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+        )
+    }
+    Spacer(modifier = Modifier.height(6.dp))
+    val heroTextStyle = when {
+        timePassedText.length > 16 -> MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold)
+        timePassedText.length > 10 -> MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold)
+        else -> MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold)
+    }
+    Text(
+        text = timePassedText,
+        style = heroTextStyle,
+        color = MaterialTheme.colorScheme.primary,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth()
+    )
 }
 
 @Composable
@@ -1506,8 +1516,8 @@ fun EntryItem(
 ) {
     val locale = LocalLocale.current.platformLocale
     val timeStr = remember(entryTime, locale) { SimpleDateFormat("HH:mm", locale).format(Date(entryTime)) }
-    var isExpanded by remember { mutableStateOf(false) }
-    var showTimePicker by remember { mutableStateOf(false) }
+    var isExpanded by rememberSaveable(entryTime) { mutableStateOf(false) }
+    var showTimePicker by rememberSaveable(entryTime) { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     val futureDateError = if (!LocalInspectionMode.current) stringResource(R.string.edit_future_time_error) else ""
@@ -1537,6 +1547,8 @@ fun EntryItem(
                         val newCal = Calendar.getInstance().apply { timeInMillis = entryTime }
                         newCal.set(Calendar.HOUR_OF_DAY, timePickerState.hour)
                         newCal.set(Calendar.MINUTE, timePickerState.minute)
+                        newCal.set(Calendar.SECOND, 0)
+                        newCal.set(Calendar.MILLISECOND, 0)
                         if (newCal.timeInMillis > System.currentTimeMillis()) {
                             android.widget.Toast.makeText(context, futureDateError, android.widget.Toast.LENGTH_SHORT).show()
                         } else {

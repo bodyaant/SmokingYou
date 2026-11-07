@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.NavigationItemIconPosition
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +23,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,6 +45,38 @@ import com.smokingtracker.R
 import com.smokingtracker.ui.components.HomeFabButton
 import com.smokingtracker.ui.components.HomeFabMenuOverlay
 import com.smokingtracker.ui.components.UpdateDialog
+import com.smokingtracker.ui.theme.HapticFeedbackHelper
+import kotlin.math.abs
+
+@Stable
+private class FabAnchorCoordinates {
+    var rootSize by mutableStateOf(IntSize.Zero)
+    var fabRightPx by mutableFloatStateOf(0f)
+    var fabTopPx by mutableFloatStateOf(0f)
+}
+
+@Composable
+private fun BoxScope.FabMenuOverlayHost(
+    isExpanded: Boolean,
+    onDismiss: () -> Unit,
+    anchor: FabAnchorCoordinates,
+    vibrationEnabled: Boolean,
+    onMindfulPause: () -> Unit,
+    onResisted: () -> Unit,
+    onSmoked: () -> Unit
+) {
+    HomeFabMenuOverlay(
+        isExpanded = isExpanded,
+        onDismiss = onDismiss,
+        rootSize = anchor.rootSize,
+        fabRightPx = anchor.fabRightPx,
+        fabTopPx = anchor.fabTopPx,
+        vibrationEnabled = vibrationEnabled,
+        onMindfulPause = onMindfulPause,
+        onResisted = onResisted,
+        onSmoked = onSmoked
+    )
+}
 
 sealed class Screen(val route: String, val titleResId: Int, val icon: ImageVector) {
     data object Registration : Screen("registration", R.string.registration_title, Icons.Filled.Home)
@@ -66,8 +101,7 @@ fun MainApp(viewModel: MainViewModel) {
     val updateCheckState by viewModel.updateCheckState.collectAsStateWithLifecycle()
     val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
 
-    var showUpdateDialog by remember { mutableStateOf(false) }
-    var latestRelease by remember { mutableStateOf<com.smokingtracker.data.manager.GitHubRelease?>(null) }
+    var updateDialogDismissed by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(checkUpdatesOnStart) {
         if (checkUpdatesOnStart) {
@@ -77,21 +111,19 @@ fun MainApp(viewModel: MainViewModel) {
 
     LaunchedEffect(updateCheckState) {
         if (updateCheckState is UpdateCheckState.NewUpdate) {
-            latestRelease = (updateCheckState as UpdateCheckState.NewUpdate).release
-            showUpdateDialog = true
+            updateDialogDismissed = false
         }
     }
 
-    if (showUpdateDialog) {
-        latestRelease?.let { release ->
-            UpdateDialog(
-                release = release,
-                onDismissRequest = {
-                    showUpdateDialog = false
-                    viewModel.resetUpdateCheckState()
-                }
-            )
-        }
+    val activeRelease = (updateCheckState as? UpdateCheckState.NewUpdate)?.release
+    if (!updateDialogDismissed && activeRelease != null) {
+        UpdateDialog(
+            release = activeRelease,
+            onDismissRequest = {
+                updateDialogDismissed = true
+                viewModel.resetUpdateCheckState()
+            }
+        )
     }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -104,11 +136,9 @@ fun MainApp(viewModel: MainViewModel) {
                        currentRoute != Screen.AppearanceSettings.route
 
     val isHomeScreen = currentRoute?.substringBefore("?") == Screen.Home.route
-    var isFabMenuExpanded by remember { mutableStateOf(false) }
+    var isFabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
-    var rootSize by remember { mutableStateOf(IntSize.Zero) }
-    var fabRightPx by remember { mutableFloatStateOf(0f) }
-    var fabTopPx by remember { mutableFloatStateOf(0f) }
+    val fabAnchor = remember { FabAnchorCoordinates() }
 
     LaunchedEffect(isHomeScreen) {
         if (!isHomeScreen) {
@@ -121,30 +151,35 @@ fun MainApp(viewModel: MainViewModel) {
         return
     }
 
-    val startDest = if (isRegistered == true) Screen.Home.route else Screen.Registration.route
+    val startDest = remember { if (isRegistered == true) Screen.Home.route else Screen.Registration.route }
 
     LaunchedEffect(isRegistered, currentRoute) {
         if (isRegistered == false && currentRoute != null && currentRoute != Screen.Registration.route) {
             navController.navigate(Screen.Registration.route) {
-                popUpTo(0) { inclusive = true }
+                popUpTo(navController.graph.id) { inclusive = true }
+                launchSingleTop = true
             }
         } else if (isRegistered == true && currentRoute == Screen.Registration.route) {
             navController.navigate(Screen.Home.route) {
                 popUpTo(Screen.Registration.route) { inclusive = true }
+                launchSingleTop = true
             }
         }
     }
 
     val pendingAchievementPopup by achievementsViewModel.pendingAchievementPopup.collectAsStateWithLifecycle()
 
-    if (currentRoute != Screen.Registration.route) {
+    if (currentRoute != Screen.Registration.route && currentRoute != Screen.Achievements.route) {
         pendingAchievementPopup?.let { achievement ->
             AchievementUnlockDialog(
                 achievement = achievement,
                 vibrationEnabled = vibrationEnabled,
                 onDismiss = { achievementsViewModel.dismissAchievementPopup() },
                 onNavigateToAchievements = {
-                    navController.navigate(Screen.Achievements.route)
+                    achievementsViewModel.clearAchievementPopupQueue()
+                    navController.navigate(Screen.Achievements.route) {
+                        launchSingleTop = true
+                    }
                 }
             )
         }
@@ -153,10 +188,14 @@ fun MainApp(viewModel: MainViewModel) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .onGloballyPositioned { rootSize = it.size }
+            .onGloballyPositioned { coordinates ->
+                if (fabAnchor.rootSize != coordinates.size) {
+                    fabAnchor.rootSize = coordinates.size
+                }
+            }
     ) {
         Scaffold(
-            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal),
             modifier = Modifier.fillMaxSize()
         ) { innerPadding ->
             val subScreens = setOf(
@@ -177,7 +216,9 @@ fun MainApp(viewModel: MainViewModel) {
             NavHost(
                 navController = navController,
                 startDestination = startDest,
-                modifier = Modifier.padding(innerPadding),
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding),
                 enterTransition = {
                     val fromRoute = initialState.destination.route
                     val toRoute = targetState.destination.route
@@ -288,7 +329,11 @@ fun MainApp(viewModel: MainViewModel) {
                     HomeScreen(
                         viewModel = homeViewModel,
                         vibrationEnabled = vibrationEnabled,
-                        onNavigateToAchievements = { navController.navigate(Screen.Achievements.route) },
+                        onNavigateToAchievements = {
+                            navController.navigate(Screen.Achievements.route) {
+                                launchSingleTop = true
+                            }
+                        },
                         onNavigateToGraphs = { target ->
                             statisticsViewModel.setGraphScrollTarget(target)
                             navController.navigate(Screen.Graph.route) {
@@ -313,24 +358,39 @@ fun MainApp(viewModel: MainViewModel) {
                 }
                 composable(Screen.Personal.route) {
                     PersonalScreen(
-                        onNavigateToAbout = { navController.navigate(Screen.About.route) },
-                        onNavigateToAchievements = { navController.navigate(Screen.Achievements.route) },
-                        onNavigateToStatistics = { navController.navigate(Screen.Statistics.route) },
-                        onNavigateToAppearance = { navController.navigate(Screen.AppearanceSettings.route) }
+                        onNavigateToAbout = {
+                            navController.navigate(Screen.About.route) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onNavigateToAchievements = {
+                            navController.navigate(Screen.Achievements.route) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onNavigateToStatistics = {
+                            navController.navigate(Screen.Statistics.route) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onNavigateToAppearance = {
+                            navController.navigate(Screen.AppearanceSettings.route) {
+                                launchSingleTop = true
+                            }
+                        }
                     )
                 }
                 composable(Screen.About.route) {
                     AboutScreen(onBack = { navController.navigateUp() })
                 }
                 composable(Screen.Achievements.route) {
-                    AchievementsScreen(viewModel = achievementsViewModel, onBack = { navController.popBackStack() })
+                    AchievementsScreen(viewModel = achievementsViewModel, onBack = { navController.navigateUp() })
                 }
                 composable(Screen.Statistics.route) {
                     StatisticsScreen(
                         viewModel = statisticsViewModel,
-                        onBack = { navController.popBackStack() },
+                        onBack = { navController.navigateUp() },
                         onNavigateToSettings = {
-                            navController.popBackStack()
                             navController.navigate(Screen.Personal.route) {
                                 popUpTo(Screen.Home.route) { saveState = true }
                                 launchSingleTop = true
@@ -340,17 +400,15 @@ fun MainApp(viewModel: MainViewModel) {
                     )
                 }
                 composable(Screen.AppearanceSettings.route) {
-                    AppearanceSettingsScreen(onBack = { navController.popBackStack() })
+                    AppearanceSettingsScreen(onBack = { navController.navigateUp() })
                 }
             }
         }
 
-        HomeFabMenuOverlay(
+        FabMenuOverlayHost(
             isExpanded = isFabMenuExpanded && isHomeScreen,
             onDismiss = { isFabMenuExpanded = false },
-            rootSize = rootSize,
-            fabRightPx = fabRightPx,
-            fabTopPx = fabTopPx,
+            anchor = fabAnchor,
             vibrationEnabled = vibrationEnabled,
             onMindfulPause = { homeViewModel.triggerFabMindfulPause() },
             onResisted = { homeViewModel.triggerFabResisted() },
@@ -408,8 +466,14 @@ fun MainApp(viewModel: MainViewModel) {
                                 vibrationEnabled = vibrationEnabled,
                                 modifier = Modifier.onGloballyPositioned { coordinates ->
                                     val pos = coordinates.positionInRoot()
-                                    fabRightPx = pos.x + coordinates.size.width
-                                    fabTopPx = pos.y
+                                    val newRight = pos.x + coordinates.size.width
+                                    val newTop = pos.y
+                                    if (abs(fabAnchor.fabRightPx - newRight) > 0.5f) {
+                                        fabAnchor.fabRightPx = newRight
+                                    }
+                                    if (abs(fabAnchor.fabTopPx - newTop) > 0.5f) {
+                                        fabAnchor.fabTopPx = newTop
+                                    }
                                 }
                             )
                         }
@@ -430,6 +494,8 @@ fun BottomNavigationBar(
     val items = listOf(Screen.Home, Screen.Graph, Screen.Personal)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
 
     HorizontalFloatingToolbar(
         expanded = true,
@@ -448,6 +514,7 @@ fun BottomNavigationBar(
                 selected = selected,
                 onClick = {
                     if (currentRoute?.substringBefore("?") != screen.route) {
+                        HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                         navController.navigate(screen.route) {
                             popUpTo(Screen.Home.route) { saveState = true }
                             launchSingleTop = true

@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -17,6 +18,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@Stable
 class BouncyPressState(
     val scale: State<Float>,
     val rotation: State<Float>,
@@ -119,7 +121,15 @@ fun rememberBouncyPress(
         }
     }
 
-    LaunchedEffect(interactionSource, targetScale, targetRotation) {
+    LaunchedEffect(
+        interactionSource,
+        targetScale,
+        targetRotation,
+        minHoldTimeMs,
+        compressStiffness,
+        releaseDampingRatio,
+        releaseStiffness
+    ) {
         interactionSource.interactions.collect { interaction ->
             when (interaction) {
                 is PressInteraction.Press -> {
@@ -185,24 +195,28 @@ fun rememberBouncyPress(
                     tracker.isCurrentlyPressed = false
                     tracker.compressJob?.cancel()
                     tracker.releaseJob?.cancel()
-                    launch {
-                        scale.animateTo(
-                            targetValue = 1f,
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioNoBouncy,
-                                stiffness = Spring.StiffnessMedium
-                            )
-                        )
-                    }
-                    if (targetRotation != 0f || rotation.value != 0f) {
-                        launch {
-                            rotation.animateTo(
-                                targetValue = 0f,
-                                animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioNoBouncy,
-                                    stiffness = Spring.StiffnessMedium
+                    tracker.releaseJob = launch {
+                        coroutineScope {
+                            launch {
+                                scale.animateTo(
+                                    targetValue = 1f,
+                                    animationSpec = spring(
+                                        dampingRatio = Spring.DampingRatioNoBouncy,
+                                        stiffness = Spring.StiffnessMedium
+                                    )
                                 )
-                            )
+                            }
+                            if (targetRotation != 0f || rotation.value != 0f) {
+                                launch {
+                                    rotation.animateTo(
+                                        targetValue = 0f,
+                                        animationSpec = spring(
+                                            dampingRatio = Spring.DampingRatioNoBouncy,
+                                            stiffness = Spring.StiffnessMedium
+                                        )
+                                    )
+                                }
+                            }
                         }
                     }
                 }

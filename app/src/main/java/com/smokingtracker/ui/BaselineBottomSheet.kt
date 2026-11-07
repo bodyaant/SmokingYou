@@ -44,10 +44,7 @@ fun BaselineBottomSheet(
     onDismissRequest: () -> Unit,
     vibrationEnabled: Boolean = true
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
 
@@ -215,21 +212,17 @@ fun BaselineBottomSheet(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    val dailyAvgSliderState = rememberSliderState(
-                        value = dailyAvg.toFloat(),
-                        steps = 38,
-                        trackRange = 1f..40f
-                    ).also { it.value = dailyAvg.toFloat() }
-
                     Slider(
-                        state = dailyAvgSliderState,
+                        value = dailyAvg.toFloat().coerceIn(1f, 50f),
                         onValueChange = {
-                            val newVal = it.roundToInt().coerceIn(1, 40)
+                            val newVal = it.roundToInt().coerceIn(1, 50)
                             if (newVal != dailyAvg) {
                                 dailyAvg = newVal
                                 HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                             }
-                        }
+                        },
+                        valueRange = 1f..50f,
+                        steps = 48
                     )
 
                     Spacer(modifier = Modifier.height(6.dp))
@@ -332,14 +325,8 @@ fun BaselineBottomSheet(
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    val yearsSmokedSliderState = rememberSliderState(
-                        value = yearsSmokedInt.toFloat().coerceIn(1f, 30f),
-                        steps = 28,
-                        trackRange = 1f..30f
-                    ).also { it.value = yearsSmokedInt.toFloat().coerceIn(1f, 30f) }
-
                     Slider(
-                        state = yearsSmokedSliderState,
+                        value = yearsSmokedInt.toFloat().coerceIn(1f, 30f),
                         onValueChange = { newYears ->
                             val y = newYears.roundToInt().coerceIn(1, 30)
                             if (y != yearsSmokedInt) {
@@ -347,7 +334,9 @@ fun BaselineBottomSheet(
                                 selectedStartDate = cal.timeInMillis
                                 HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                             }
-                        }
+                        },
+                        valueRange = 1f..30f,
+                        steps = 28
                     )
                 }
             }
@@ -514,7 +503,12 @@ fun BaselineBottomSheet(
 
     if (showDatePickerDialog) {
         val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = selectedStartDate
+            initialSelectedDateMillis = selectedStartDate.coerceAtMost(System.currentTimeMillis()),
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    return utcTimeMillis <= System.currentTimeMillis()
+                }
+            }
         )
         DatePickerDialog(
             onDismissRequest = { showDatePickerDialog = false },
@@ -525,7 +519,9 @@ fun BaselineBottomSheet(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        datePickerState.selectedDateMillis?.let { selectedStartDate = it }
+                        datePickerState.selectedDateMillis?.let {
+                            selectedStartDate = it.coerceAtMost(System.currentTimeMillis())
+                        }
                         showDatePickerDialog = false
                     }
                 ) {

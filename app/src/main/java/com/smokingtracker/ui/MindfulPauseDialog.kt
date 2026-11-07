@@ -9,9 +9,12 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreTime
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.SmokingRooms
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -22,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import com.smokingtracker.R
+import com.smokingtracker.ui.theme.HapticFeedbackHelper
 import com.smokingtracker.ui.theme.containerShape
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -35,10 +39,7 @@ fun MindfulPauseDialog(
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberBottomSheetState(
-            initialValue = SheetValue.Hidden,
-            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-        ),
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = if (MaterialTheme.colorScheme.surfaceContainerLow == Color.White) {
             MaterialTheme.colorScheme.surface
         } else {
@@ -68,11 +69,12 @@ fun MindfulPauseContent(
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
-    var totalSeconds by remember { mutableIntStateOf(15) }
-    var secondsRemaining by remember { mutableIntStateOf(15) }
-    var elapsedTimeMs by remember { mutableLongStateOf(0L) }
-    var isTimerRunning by remember { mutableStateOf(true) }
-    var isTimerFinished by remember { mutableStateOf(false) }
+    var totalSeconds by rememberSaveable { mutableIntStateOf(15) }
+    var secondsRemaining by rememberSaveable { mutableIntStateOf(15) }
+    var elapsedTimeMs by rememberSaveable { mutableLongStateOf(0L) }
+    var isTimerRunning by rememberSaveable { mutableStateOf(true) }
+    var isTimerFinished by rememberSaveable { mutableStateOf(false) }
+    var isActionHandled by rememberSaveable { mutableStateOf(false) }
 
     val motivationalTips = remember {
         listOf(
@@ -84,7 +86,7 @@ fun MindfulPauseContent(
         )
     }
 
-    var tipIndex by remember { mutableIntStateOf(0) }
+    var tipIndex by rememberSaveable { mutableIntStateOf(0) }
 
     val breathingPhaseText = when ((totalSeconds - secondsRemaining) % 12) {
         in 0..3 -> stringResource(R.string.mindful_pause_breathe_in)
@@ -110,20 +112,15 @@ fun MindfulPauseContent(
             secondsRemaining = 0
             isTimerRunning = false
             isTimerFinished = true
-            try {
-                com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
         }
     }
-
-    val progress = (elapsedTimeMs.toFloat() / (totalSeconds * 1000f)).coerceIn(0f, 1f)
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
             .padding(bottom = 24.dp, top = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -161,7 +158,10 @@ fun MindfulPauseContent(
                 .padding(16.dp)
         ) {
             CircularWavyProgressIndicator(
-                progress = { progress },
+                progress = {
+                    val totalMs = (totalSeconds * 1000f).coerceAtLeast(1f)
+                    (elapsedTimeMs.toFloat() / totalMs).coerceIn(0f, 1f)
+                },
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
@@ -270,9 +270,13 @@ fun MindfulPauseContent(
             ) {
                 Button(
                     onClick = {
-                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
-                        onSuccess(selectedTrigger)
+                        if (!isActionHandled) {
+                            isActionHandled = true
+                            HapticFeedbackHelper.performSuccess(vibrationEnabled, haptic, context)
+                            onSuccess(selectedTrigger)
+                        }
                     },
+                    enabled = !isActionHandled,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary
@@ -292,9 +296,13 @@ fun MindfulPauseContent(
 
                 TextButton(
                     onClick = {
-                        com.smokingtracker.ui.theme.HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
-                        onFailure(selectedTrigger)
+                        if (!isActionHandled) {
+                            isActionHandled = true
+                            HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                            onFailure(selectedTrigger)
+                        }
                     },
+                    enabled = !isActionHandled,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(

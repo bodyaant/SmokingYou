@@ -26,6 +26,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -55,10 +57,7 @@ fun TriggerManagementBottomSheet(
     onDismissRequest: () -> Unit,
     vibrationEnabled: Boolean = true
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
     var triggerToDelete by rememberSaveable { mutableStateOf<String?>(null) }
 
@@ -441,14 +440,22 @@ fun AddTriggerDialog(
         }
     }
 
-    val isDuplicate = remember(formattedName, customTriggers) {
+    val isDuplicate = remember(formattedName, customTriggers, context) {
         if (formattedName.isEmpty()) false else {
             customTriggers.any { it.equals(formattedName, ignoreCase = true) } ||
-            TriggerType.allEntries().any { it.key.equals(formattedName, ignoreCase = true) }
+            TriggerType.allEntries().any {
+                it.key.equals(formattedName, ignoreCase = true) ||
+                    context.getString(it.labelResId).equals(formattedName, ignoreCase = true)
+            }
         }
     }
 
     val isValid = formattedName.isNotBlank() && !isDuplicate && formattedName.length <= 30
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -482,7 +489,9 @@ fun AddTriggerDialog(
                         }
                     ),
                     shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
                     supportingText = {
                         Row(
                             modifier = Modifier.fillMaxWidth(),

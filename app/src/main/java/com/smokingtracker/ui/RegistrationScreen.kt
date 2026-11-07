@@ -5,7 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Analytics
@@ -93,6 +95,7 @@ fun RegistrationScreenContent(onRegister: () -> Unit) {
                 .fillMaxSize()
                 .statusBarsPadding()
                 .navigationBarsPadding()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
@@ -107,7 +110,10 @@ fun RegistrationScreenContent(onRegister: () -> Unit) {
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier
                         .size(84.dp)
-                        .scale(pulseScale),
+                        .graphicsLayer {
+                            scaleX = pulseScale
+                            scaleY = pulseScale
+                        },
                     shadowElevation = 4.dp
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -213,7 +219,10 @@ fun RegistrationScreenContent(onRegister: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
-                        .scale(scale),
+                        .graphicsLayer {
+                            scaleX = scale
+                            scaleY = scale
+                        },
                     interactionSource = interactionSource,
                     shape = containerShape(RoundedCornerShape(20.dp)),
                     colors = ButtonDefaults.buttonColors(

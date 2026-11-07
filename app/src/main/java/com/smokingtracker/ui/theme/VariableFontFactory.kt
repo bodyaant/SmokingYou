@@ -1,5 +1,6 @@
 package com.smokingtracker.ui.theme
 
+import android.util.LruCache
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
@@ -9,6 +10,7 @@ import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.smokingtracker.R
+import java.util.concurrent.ConcurrentHashMap
 
 @OptIn(ExperimentalTextApi::class)
 data class FontAxes(
@@ -34,15 +36,27 @@ enum class GSFlexPreset {
 }
 
 object VariableFontFactory {
-    
+
+    private data class CustomTypographyKey(
+        val weight: Int,
+        val widthTenths: Int,
+        val roundnessTenths: Int
+    )
+
+    private val presetTypographyCache = ConcurrentHashMap<GSFlexPreset, Typography>()
+    private val customTypographyCache = LruCache<CustomTypographyKey, Typography>(16)
+
     fun createTypography(presetName: String): Typography {
-        val preset = try {
-            GSFlexPreset.valueOf(presetName)
-        } catch (e: Exception) {
-            GSFlexPreset.ZENITH
+        val preset = GSFlexPreset.entries.firstOrNull { it.name == presetName } ?: GSFlexPreset.ZENITH
+        return createTypography(preset)
+    }
+
+    fun createTypography(preset: GSFlexPreset): Typography {
+        val canonicalPreset = if (preset == GSFlexPreset.WIDE) GSFlexPreset.ZENITH else preset
+        return presetTypographyCache.getOrPut(canonicalPreset) {
+            val p = getPresetAxes(canonicalPreset)
+            createExpressiveTypography(p.first, p.second, p.third)
         }
-        val p = getPresetAxes(preset)
-        return createExpressiveTypography(p.first, p.second, p.third)
     }
 
     fun createCustomTypography(
@@ -50,6 +64,15 @@ object VariableFontFactory {
         width: Float = 100f,
         roundness: Float = 0f
     ): Typography {
+        val key = CustomTypographyKey(
+            weight = weight.coerceIn(100, 1000),
+            widthTenths = (width * 10f).toInt(),
+            roundnessTenths = (roundness * 10f).toInt()
+        )
+        synchronized(customTypographyCache) {
+            customTypographyCache.get(key)?.let { return it }
+        }
+
         val displayWeight = (weight * 1.5f).coerceIn(100f, 1000f)
         val headlineWeight = (weight * 1.25f).coerceIn(100f, 1000f)
         val bodyWeight = weight.toFloat().coerceIn(100f, 1000f)
@@ -58,11 +81,15 @@ object VariableFontFactory {
         val headlineAxes = FontAxes(headlineWeight, width, 28f, 0f, 0f, roundness)
         val bodyAxes = FontAxes(bodyWeight, width, 16f, 0f, 0f, roundness)
 
-        return createExpressiveTypography(
+        val created = createExpressiveTypography(
             displayAxes.toVariationSettings(),
             headlineAxes.toVariationSettings(),
             bodyAxes.toVariationSettings()
         )
+        synchronized(customTypographyCache) {
+            customTypographyCache.put(key, created)
+        }
+        return created
     }
 
     fun getPresetFontAxes(preset: GSFlexPreset): Triple<FontAxes, FontAxes, FontAxes> {

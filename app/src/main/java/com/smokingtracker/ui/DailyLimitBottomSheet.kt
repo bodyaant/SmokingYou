@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,9 +37,8 @@ import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
 import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.subContainer
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,12 +54,10 @@ fun DailyLimitBottomSheet(
     onDismissRequest: () -> Unit,
     vibrationEnabled: Boolean = true
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
+    val currentLocale = LocalLocale.current.platformLocale
 
     var limitEnabled by rememberSaveable { mutableStateOf(dailyLimit > 0) }
     var limitValue by rememberSaveable { mutableIntStateOf(if (dailyLimit > 0) dailyLimit else 10) }
@@ -239,21 +237,17 @@ fun DailyLimitBottomSheet(
                                 }
                             }
 
-                            val limitSliderState = rememberSliderState(
-                                value = limitValue.toFloat().coerceIn(1f, 40f),
-                                steps = 38,
-                                trackRange = 1f..40f
-                            ).also { it.value = limitValue.toFloat().coerceIn(1f, 40f) }
-
                             Slider(
-                                state = limitSliderState,
+                                value = limitValue.toFloat().coerceIn(1f, 60f),
                                 onValueChange = {
-                                    val rounded = it.roundToInt()
+                                    val rounded = it.roundToInt().coerceIn(1, 60)
                                     if (rounded != limitValue) {
                                         limitValue = rounded
                                         HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                                     }
                                 },
+                                valueRange = 1f..60f,
+                                steps = 58,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
@@ -485,21 +479,17 @@ fun DailyLimitBottomSheet(
                                             }
                                         }
 
-                                        val taperingIntervalSliderState = rememberSliderState(
-                                            value = taperingInterval.toFloat(),
-                                            steps = 10,
-                                            trackRange = 3f..14f
-                                        ).also { it.value = taperingInterval.toFloat() }
-
                                         Slider(
-                                            state = taperingIntervalSliderState,
+                                            value = taperingInterval.toFloat().coerceIn(3f, 14f),
                                             onValueChange = {
-                                                val rounded = it.roundToInt()
+                                                val rounded = it.roundToInt().coerceIn(3, 14)
                                                 if (rounded != taperingInterval) {
                                                     taperingInterval = rounded
                                                     HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
                                                 }
                                             },
+                                            valueRange = 3f..14f,
+                                            steps = 10,
                                             modifier = Modifier.fillMaxWidth()
                                         )
                                     }
@@ -507,11 +497,9 @@ fun DailyLimitBottomSheet(
                                     val totalDaysToZero = remember(limitValue, taperingInterval) {
                                         (limitValue * taperingInterval).coerceAtLeast(taperingInterval)
                                     }
-                                    val targetDateStr = remember(totalDaysToZero) {
-                                        val cal = Calendar.getInstance().apply {
-                                            add(Calendar.DAY_OF_YEAR, totalDaysToZero)
-                                        }
-                                        SimpleDateFormat("d MMMM", Locale.getDefault()).format(cal.time)
+                                    val targetDateStr = remember(totalDaysToZero, currentLocale) {
+                                        val targetDate = LocalDate.now().plusDays(totalDaysToZero.toLong())
+                                        DateTimeFormatter.ofPattern("d MMMM", currentLocale).format(targetDate)
                                     }
 
                                     Card(

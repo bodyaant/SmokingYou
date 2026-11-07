@@ -14,8 +14,10 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Backup
@@ -37,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.smokingtracker.BackupRestoreUiState
 import com.smokingtracker.R
 
 enum class BackupRestoreState {
@@ -54,36 +57,54 @@ private val UriSaver = Saver<Uri?, String>(
 @Composable
 fun BackupBottomSheet(
     onDismissRequest: () -> Unit,
-    onBackupData: (Uri, onSuccess: () -> Unit, onError: () -> Unit) -> Unit
+    onBackupData: (Uri, onSuccess: () -> Unit, onError: () -> Unit) -> Unit,
+    operationState: BackupRestoreUiState = BackupRestoreUiState.Idle,
+    onResetOperationState: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var selectedUri by rememberSaveable(stateSaver = UriSaver) { mutableStateOf<Uri?>(null) }
-    var backupState by rememberSaveable { mutableStateOf(BackupRestoreState.CHOOSE_FILE) }
+    var localState by rememberSaveable { mutableStateOf(BackupRestoreState.CHOOSE_FILE) }
+
+    val backupState = when (operationState) {
+        is BackupRestoreUiState.Loading -> BackupRestoreState.LOADING
+        is BackupRestoreUiState.Done -> BackupRestoreState.DONE
+        is BackupRestoreUiState.Error -> BackupRestoreState.CHOOSE_FILE
+        is BackupRestoreUiState.Idle -> localState
+    }
+    val errorMessage = (operationState as? BackupRestoreUiState.Error)?.message
 
     val backupLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
         uri?.let {
             selectedUri = it
-            backupState = BackupRestoreState.CHOOSE_FILE
+            localState = BackupRestoreState.CHOOSE_FILE
+            onResetOperationState()
         }
     }
 
-    val selectedFileName = remember(selectedUri) {
-        selectedUri?.getFileName(context)
+    val selectedFileName by produceState<String?>(initialValue = null, selectedUri) {
+        value = selectedUri?.let { uri ->
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                uri.getFileName(context)
+            }
+        }
     }
 
     BackupRestoreBottomSheetTemplate(
         state = backupState,
-        onDismissRequest = onDismissRequest,
+        onDismissRequest = {
+            onResetOperationState()
+            onDismissRequest()
+        },
         openPicker = { backupLauncher.launch("smoking_tracker_backup.json") },
         onStartAction = {
             selectedUri?.let { uri ->
-                backupState = BackupRestoreState.LOADING
+                localState = BackupRestoreState.LOADING
                 onBackupData(
                     uri,
-                    { backupState = BackupRestoreState.DONE },
-                    { backupState = BackupRestoreState.CHOOSE_FILE }
+                    { localState = BackupRestoreState.DONE },
+                    { localState = BackupRestoreState.CHOOSE_FILE }
                 )
             }
         },
@@ -99,7 +120,8 @@ fun BackupBottomSheet(
             stringResource(R.string.backup_start_action)
         },
         selectedFileName = selectedFileName,
-        pickerIcon = Icons.Filled.Folder
+        pickerIcon = Icons.Filled.Folder,
+        errorMessage = errorMessage
     )
 }
 
@@ -107,37 +129,109 @@ fun BackupBottomSheet(
 @Composable
 fun RestoreBottomSheet(
     onDismissRequest: () -> Unit,
-    onRestoreData: (Uri, onSuccess: () -> Unit, onError: () -> Unit) -> Unit
+    onRestoreData: (Uri, onSuccess: () -> Unit, onError: () -> Unit) -> Unit,
+    operationState: BackupRestoreUiState = BackupRestoreUiState.Idle,
+    onResetOperationState: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var selectedUri by rememberSaveable(stateSaver = UriSaver) { mutableStateOf<Uri?>(null) }
-    var restoreState by rememberSaveable { mutableStateOf(BackupRestoreState.CHOOSE_FILE) }
+    var localState by rememberSaveable { mutableStateOf(BackupRestoreState.CHOOSE_FILE) }
+
+    val restoreState = when (operationState) {
+        is BackupRestoreUiState.Loading -> BackupRestoreState.LOADING
+        is BackupRestoreUiState.Done -> BackupRestoreState.DONE
+        is BackupRestoreUiState.Error -> BackupRestoreState.CHOOSE_FILE
+        is BackupRestoreUiState.Idle -> localState
+    }
+    val errorMessage = (operationState as? BackupRestoreUiState.Error)?.message
 
     val restoreLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let {
             selectedUri = it
-            restoreState = BackupRestoreState.CHOOSE_FILE
+            localState = BackupRestoreState.CHOOSE_FILE
+            onResetOperationState()
         }
     }
 
-    val selectedFileName = remember(selectedUri) {
-        selectedUri?.getFileName(context)
+    val selectedFileName by produceState<String?>(initialValue = null, selectedUri) {
+        value = selectedUri?.let { uri ->
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                uri.getFileName(context)
+            }
+        }
+    }
+
+    var showRestoreConfirmDialog by rememberSaveable { mutableStateOf(false) }
+
+    if (showRestoreConfirmDialog && selectedUri != null) {
+        AlertDialog(
+            onDismissRequest = { showRestoreConfirmDialog = false },
+            shape = RoundedCornerShape(28.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.Restore,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = stringResource(R.string.restore_dialog_title),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    textAlign = TextAlign.Center
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.restore_dialog_desc),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showRestoreConfirmDialog = false
+                        selectedUri?.let { uri ->
+                            localState = BackupRestoreState.LOADING
+                            onRestoreData(
+                                uri,
+                                { localState = BackupRestoreState.DONE },
+                                { localState = BackupRestoreState.CHOOSE_FILE }
+                            )
+                        }
+                    },
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text(stringResource(R.string.restore_start_action), fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showRestoreConfirmDialog = false },
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text(stringResource(R.string.backup_restore_cancel))
+                }
+            }
+        )
     }
 
     BackupRestoreBottomSheetTemplate(
         state = restoreState,
-        onDismissRequest = onDismissRequest,
+        onDismissRequest = {
+            onResetOperationState()
+            onDismissRequest()
+        },
         openPicker = { restoreLauncher.launch(arrayOf("application/json")) },
         onStartAction = {
-            selectedUri?.let { uri ->
-                restoreState = BackupRestoreState.LOADING
-                onRestoreData(
-                    uri,
-                    { restoreState = BackupRestoreState.DONE },
-                    { restoreState = BackupRestoreState.CHOOSE_FILE }
-                )
+            if (selectedUri != null) {
+                showRestoreConfirmDialog = true
             }
         },
         headerIcon = Icons.Filled.Restore,
@@ -152,7 +246,8 @@ fun RestoreBottomSheet(
             stringResource(R.string.restore_start_action)
         },
         selectedFileName = selectedFileName,
-        pickerIcon = Icons.AutoMirrored.Filled.InsertDriveFile
+        pickerIcon = Icons.AutoMirrored.Filled.InsertDriveFile,
+        errorMessage = errorMessage
     )
 }
 
@@ -169,12 +264,10 @@ private fun BackupRestoreBottomSheetTemplate(
     fileSelectorPrompt: String,
     actionButtonText: String,
     selectedFileName: String?,
-    pickerIcon: ImageVector
+    pickerIcon: ImageVector,
+    errorMessage: String? = null
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val animatedCardBg by animateColorAsState(
         targetValue = when (state) {
@@ -198,6 +291,8 @@ private fun BackupRestoreBottomSheetTemplate(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp, top = 8.dp)
         ) {
@@ -319,6 +414,17 @@ private fun BackupRestoreBottomSheetTemplate(
                 )
             }
 
+            if (!errorMessage.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = errorMessage,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
             Spacer(modifier = Modifier.height(28.dp))
 
             Row(
@@ -365,13 +471,17 @@ private fun BackupRestoreBottomSheetTemplate(
 private fun Uri.getFileName(context: Context): String {
     var fileName: String? = null
     if (this.scheme == "content") {
-        context.contentResolver.query(this, null, null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                if (nameIndex != -1) {
-                    fileName = cursor.getString(nameIndex)
+        try {
+            context.contentResolver.query(this, null, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (nameIndex != -1) {
+                        fileName = cursor.getString(nameIndex)
+                    }
                 }
             }
+        } catch (_: Exception) {
+            fileName = null
         }
     }
     if (fileName == null) {

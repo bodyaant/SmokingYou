@@ -1,17 +1,15 @@
 package com.smokingtracker.ui
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -20,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.smokingtracker.AchievementData
 import com.smokingtracker.R
+import com.smokingtracker.ui.components.BadgeMedallion
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
 import com.smokingtracker.ui.theme.containerShape
 
@@ -37,18 +36,17 @@ fun AchievementUnlockDialog(
         HapticFeedbackHelper.performAchievementUnlock(vibrationEnabled, context)
     }
 
-    var scaleAnim by remember { mutableFloatStateOf(0.3f) }
-    val animatedScale by animateFloatAsState(
-        targetValue = scaleAnim,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "scale"
-    )
+    val animatedScale = remember(achievement.id) { Animatable(0.3f) }
 
-    LaunchedEffect(Unit) {
-        scaleAnim = 1.0f
+    LaunchedEffect(achievement.id) {
+        animatedScale.snapTo(0.3f)
+        animatedScale.animateTo(
+            targetValue = 1.0f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow
+            )
+        )
     }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -56,7 +54,10 @@ fun AchievementUnlockDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .scale(animatedScale),
+                .graphicsLayer {
+                    scaleX = animatedScale.value
+                    scaleY = animatedScale.value
+                },
             shape = containerShape(RoundedCornerShape(28.dp)),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
@@ -65,24 +66,18 @@ fun AchievementUnlockDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .clip(MaterialShapes.Cookie12Sided.toShape())
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.EmojiEvents,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
+                BadgeMedallion(
+                    id = achievement.id,
+                    category = achievement.category,
+                    isUnlocked = true,
+                    isSecret = achievement.isSecret,
+                    size = 76.dp
+                )
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,

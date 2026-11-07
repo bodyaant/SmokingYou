@@ -1,68 +1,65 @@
 package com.smokingtracker
 
 import android.content.Context
+import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.lifecycleScope
-import com.smokingtracker.data.preferences.ThemePreferences
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.smokingtracker.data.ThemePreference
 import com.smokingtracker.ui.MainApp
 import com.smokingtracker.ui.theme.AppTheme
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.first
-import org.koin.android.ext.android.inject
-import org.koin.androidx.compose.koinViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.smokingtracker.ui.theme.LocalVibrationEnabled
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
 
-    private val themePreferences: ThemePreferences by inject()
+    private val viewModel: MainViewModel by viewModel()
 
     override fun attachBaseContext(base: Context) {
-        super.attachBaseContext(base)
+        val localizedContext = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            val prefs = base.getSharedPreferences(LOCALE_PREFS_NAME, Context.MODE_PRIVATE)
+            val savedLanguageTag = prefs.getString(KEY_LANGUAGE_TAG, null)
+            if (!savedLanguageTag.isNullOrBlank()) {
+                val locale = Locale.forLanguageTag(savedLanguageTag)
+                Locale.setDefault(locale)
+                val config = Configuration(base.resources.configuration)
+                config.setLocale(locale)
+                base.createConfigurationContext(config)
+            } else {
+                base
+            }
+        } else {
+            base
+        }
+        super.attachBaseContext(localizedContext)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        var initialThemeLoaded by mutableStateOf(false)
-        splashScreen.setKeepOnScreenCondition { !initialThemeLoaded }
-
-        lifecycleScope.launch {
-            themePreferences.appTheme.first()
-            initialThemeLoaded = true
+        splashScreen.setKeepOnScreenCondition {
+            viewModel.uiState.value.isRegistered == null
         }
 
         enableEdgeToEdge()
 
         setContent {
-            if (!initialThemeLoaded) return@setContent
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-            val viewModel: MainViewModel = koinViewModel()
-
-            val themePreference by viewModel.themePreference.collectAsStateWithLifecycle()
-            val fontPreset by viewModel.fontPreset.collectAsStateWithLifecycle()
-            val amoledTheme by viewModel.amoledTheme.collectAsStateWithLifecycle()
-            val colorPreset by viewModel.colorPreset.collectAsStateWithLifecycle()
-            val useCustomVariableFont by viewModel.useCustomVariableFont.collectAsStateWithLifecycle()
-            val customFontWeight by viewModel.customFontWeight.collectAsStateWithLifecycle()
-            val customFontWidth by viewModel.customFontWidth.collectAsStateWithLifecycle()
-            val customFontRoundness by viewModel.customFontRoundness.collectAsStateWithLifecycle()
-            val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
-
-            val useDarkTheme = when (themePreference) {
+            val useDarkTheme = when (uiState.themePreference) {
                 ThemePreference.LIGHT -> false
                 ThemePreference.DARK -> true
                 ThemePreference.SYSTEM -> isSystemInDarkTheme()
@@ -70,16 +67,16 @@ class MainActivity : ComponentActivity() {
 
             AppTheme(
                 useDarkTheme = useDarkTheme,
-                fontPreset = fontPreset,
-                amoledThemeEnabled = amoledTheme,
-                colorPreset = colorPreset,
-                useCustomVariableFont = useCustomVariableFont,
-                customFontWeight = customFontWeight,
-                customFontWidth = customFontWidth,
-                customFontRoundness = customFontRoundness
+                fontPreset = uiState.fontPreset,
+                amoledThemeEnabled = uiState.amoledTheme,
+                colorPreset = uiState.colorPreset,
+                useCustomVariableFont = uiState.useCustomVariableFont,
+                customFontWeight = uiState.customFontWeight,
+                customFontWidth = uiState.customFontWidth,
+                customFontRoundness = uiState.customFontRoundness
             ) {
-                androidx.compose.runtime.CompositionLocalProvider(
-                    com.smokingtracker.ui.theme.LocalVibrationEnabled provides vibrationEnabled
+                CompositionLocalProvider(
+                    LocalVibrationEnabled provides uiState.vibrationEnabled
                 ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
@@ -90,5 +87,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        const val LOCALE_PREFS_NAME = "app_locale_prefs"
+        const val KEY_LANGUAGE_TAG = "language_tag"
     }
 }

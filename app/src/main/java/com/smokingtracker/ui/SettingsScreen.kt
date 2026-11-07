@@ -28,6 +28,7 @@ import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.containerPadding
 import com.smokingtracker.ui.theme.containerGroupGap
 import com.smokingtracker.ui.theme.ContainerGroupPosition
+import com.smokingtracker.ui.theme.findActivity
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -39,6 +40,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.animation.core.spring
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,6 +51,8 @@ import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.smokingtracker.BackupRestoreEvent
+import com.smokingtracker.BackupRestoreUiState
 import com.smokingtracker.SettingsViewModel
 import com.smokingtracker.UpdateCheckState
 import com.smokingtracker.R
@@ -92,6 +96,37 @@ fun PersonalScreen(
     val widgetShowResistButton by viewModel.widgetShowResistButton.collectAsStateWithLifecycle()
     val showLimitOnGraph by viewModel.showLimitOnGraph.collectAsStateWithLifecycle()
     val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
+    val backupOperationState by viewModel.backupOperationState.collectAsStateWithLifecycle()
+    val restoreOperationState by viewModel.restoreOperationState.collectAsStateWithLifecycle()
+
+    val context = LocalContext.current
+    val backupSuccessStr = stringResource(R.string.backup_success)
+    val backupErrorStr = stringResource(R.string.backup_error)
+    val restoreSuccessStr = stringResource(R.string.restore_success)
+    val restoreErrorStr = stringResource(R.string.restore_error)
+
+    LaunchedEffect(viewModel) {
+        viewModel.backupRestoreEvents.collect { event ->
+            when (event) {
+                is BackupRestoreEvent.BackupSuccess -> {
+                    Toast.makeText(context, backupSuccessStr, Toast.LENGTH_SHORT).show()
+                }
+                is BackupRestoreEvent.BackupError -> {
+                    val detail = event.message?.takeIf { it.isNotBlank() }
+                    val msg = if (detail != null) "$backupErrorStr: $detail" else backupErrorStr
+                    Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                }
+                is BackupRestoreEvent.RestoreSuccess -> {
+                    Toast.makeText(context, restoreSuccessStr, Toast.LENGTH_SHORT).show()
+                }
+                is BackupRestoreEvent.RestoreError -> {
+                    val detail = event.message?.takeIf { it.isNotBlank() }
+                    val msg = if (detail != null) "$restoreErrorStr: $detail" else restoreErrorStr
+                    Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
 
     PersonalScreenContent(
         themePreference = themePreference,
@@ -114,6 +149,10 @@ fun PersonalScreen(
         notificationShowResistButton = notificationShowResistButton,
         widgetShowResistButton = widgetShowResistButton,
         vibrationEnabled = vibrationEnabled,
+        backupOperationState = backupOperationState,
+        restoreOperationState = restoreOperationState,
+        onResetBackupState = viewModel::resetBackupOperationState,
+        onResetRestoreState = viewModel::resetRestoreOperationState,
         onAddCustomTrigger = viewModel::addCustomTrigger,
         onRemoveCustomTrigger = viewModel::removeCustomTrigger,
         onToggleDefaultTrigger = viewModel::toggleDefaultTrigger,
@@ -174,6 +213,10 @@ fun PersonalScreenContent(
     widgetShowResistButton: Boolean = true,
     showLimitOnGraph: Boolean = true,
     vibrationEnabled: Boolean = true,
+    backupOperationState: BackupRestoreUiState = BackupRestoreUiState.Idle,
+    restoreOperationState: BackupRestoreUiState = BackupRestoreUiState.Idle,
+    onResetBackupState: () -> Unit = {},
+    onResetRestoreState: () -> Unit = {},
     onAddCustomTrigger: (String, (String?) -> Unit) -> Unit = { _, _ -> },
     onRemoveCustomTrigger: (String) -> Unit = {},
     onToggleDefaultTrigger: (String, Boolean) -> Unit = { _, _ -> },
@@ -246,6 +289,10 @@ fun PersonalScreenContent(
             widgetShowResistButton = widgetShowResistButton,
             showLimitOnGraph = showLimitOnGraph,
             vibrationEnabled = vibrationEnabled,
+            backupOperationState = backupOperationState,
+            restoreOperationState = restoreOperationState,
+            onResetBackupState = onResetBackupState,
+            onResetRestoreState = onResetRestoreState,
             onAddCustomTrigger = onAddCustomTrigger,
             onRemoveCustomTrigger = onRemoveCustomTrigger,
             onToggleDefaultTrigger = onToggleDefaultTrigger,
@@ -310,6 +357,10 @@ fun SettingsTab(
     widgetShowResistButton: Boolean = true,
     showLimitOnGraph: Boolean = true,
     vibrationEnabled: Boolean = true,
+    backupOperationState: BackupRestoreUiState = BackupRestoreUiState.Idle,
+    restoreOperationState: BackupRestoreUiState = BackupRestoreUiState.Idle,
+    onResetBackupState: () -> Unit = {},
+    onResetRestoreState: () -> Unit = {},
     onAddCustomTrigger: (String, (String?) -> Unit) -> Unit = { _, _ -> },
     onRemoveCustomTrigger: (String) -> Unit = {},
     onToggleDefaultTrigger: (String, Boolean) -> Unit = { _, _ -> },
@@ -340,16 +391,16 @@ fun SettingsTab(
     onClearBaseline: () -> Unit = {},
     onResetAllData: () -> Unit = {}
 ) {
-    var showLanguageDialog by remember { mutableStateOf(false) }
-    var showLimitDialog by remember { mutableStateOf(false) }
-    var showPackDialog by remember { mutableStateOf(false) }
-    var showBaselineSheet by remember { mutableStateOf(false) }
-    var showWidgetDialog by remember { mutableStateOf(false) }
-    var showBackupSheet by remember { mutableStateOf(false) }
-    var showRestoreSheet by remember { mutableStateOf(false) }
-    var showTriggerManagementSheet by remember { mutableStateOf(false) }
-    var showNotificationSettingsSheet by remember { mutableStateOf(false) }
-    var showResetDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
+    var showLimitDialog by rememberSaveable { mutableStateOf(false) }
+    var showPackDialog by rememberSaveable { mutableStateOf(false) }
+    var showBaselineSheet by rememberSaveable { mutableStateOf(false) }
+    var showWidgetDialog by rememberSaveable { mutableStateOf(false) }
+    var showBackupSheet by rememberSaveable { mutableStateOf(false) }
+    var showRestoreSheet by rememberSaveable { mutableStateOf(false) }
+    var showTriggerManagementSheet by rememberSaveable { mutableStateOf(false) }
+    var showNotificationSettingsSheet by rememberSaveable { mutableStateOf(false) }
+    var showResetDialog by rememberSaveable { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -385,38 +436,28 @@ fun SettingsTab(
 
     if (showBackupSheet) {
         BackupBottomSheet(
-            onDismissRequest = { showBackupSheet = false },
+            onDismissRequest = {
+                onResetBackupState()
+                showBackupSheet = false
+            },
+            operationState = backupOperationState,
+            onResetOperationState = onResetBackupState,
             onBackupData = { uri, onSuccess, onError ->
-                onBackupData(
-                    uri,
-                    {
-                        Toast.makeText(context, backupSuccessStr, Toast.LENGTH_SHORT).show()
-                        onSuccess()
-                    },
-                    {
-                        Toast.makeText(context, backupErrorStr, Toast.LENGTH_SHORT).show()
-                        onError()
-                    }
-                )
+                onBackupData(uri, onSuccess, onError)
             }
         )
     }
 
     if (showRestoreSheet) {
         RestoreBottomSheet(
-            onDismissRequest = { showRestoreSheet = false },
+            onDismissRequest = {
+                onResetRestoreState()
+                showRestoreSheet = false
+            },
+            operationState = restoreOperationState,
+            onResetOperationState = onResetRestoreState,
             onRestoreData = { uri, onSuccess, onError ->
-                onRestoreData(
-                    uri,
-                    {
-                        Toast.makeText(context, restoreSuccessStr, Toast.LENGTH_SHORT).show()
-                        onSuccess()
-                    },
-                    {
-                        Toast.makeText(context, restoreErrorStr, Toast.LENGTH_SHORT).show()
-                        onError()
-                    }
-                )
+                onRestoreData(uri, onSuccess, onError)
             }
         )
     }
@@ -468,7 +509,7 @@ fun SettingsTab(
         )
         ModalBottomSheet(
             onDismissRequest = { showLanguageDialog = false },
-            sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden),
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ) {
             Column(
@@ -647,7 +688,7 @@ fun SettingsTab(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
         verticalArrangement = Arrangement.spacedBy(containerGroupGap())
     ) {
-        item {
+        item(key = "section_interface") {
             Text(
                 text = stringResource(R.string.settings_section_interface),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -655,7 +696,7 @@ fun SettingsTab(
                 modifier = Modifier.padding(top = 12.dp, bottom = 8.dp, start = 8.dp)
             )
         }
-        item {
+        item(key = "appearance") {
             SettingItem(
                 icon = Icons.Filled.Brightness4,
                 title = stringResource(R.string.settings_appearance),
@@ -665,7 +706,7 @@ fun SettingsTab(
                 onClick = onNavigateToAppearance
             )
         }
-        item {
+        item(key = "language") {
             val langDisplay = currentPlatformLocale.getDisplayLanguage(currentPlatformLocale).replaceFirstChar { it.uppercase() }
             SettingItem(
                 icon = Icons.Filled.Language,
@@ -676,7 +717,7 @@ fun SettingsTab(
                 onClick = { showLanguageDialog = true }
             )
         }
-        item {
+        item(key = "widgets") {
             SettingItem(
                 icon = Icons.Filled.Widgets,
                 title = stringResource(R.string.settings_widgets_title),
@@ -687,7 +728,7 @@ fun SettingsTab(
             )
         }
 
-        item {
+        item(key = "section_notifications") {
             Text(
                 text = stringResource(R.string.settings_section_notifications),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -695,7 +736,7 @@ fun SettingsTab(
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 8.dp)
             )
         }
-        item {
+        item(key = "ongoing_notification") {
             val notifStatus = if (ongoingNotificationEnabled) {
                 stringResource(
                     R.string.notification_status_enabled_format,
@@ -714,7 +755,7 @@ fun SettingsTab(
             )
         }
 
-        item {
+        item(key = "section_goals") {
             Text(
                 text = stringResource(R.string.settings_section_goals),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -722,7 +763,7 @@ fun SettingsTab(
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 8.dp)
             )
         }
-        item {
+        item(key = "daily_limit") {
             val limitSubtitle = if (dailyLimit > 0) {
                 if (taperingPlanEnabled) {
                     stringResource(R.string.daily_limit_subtitle_with_tapering, dailyLimit, taperingIntervalDays)
@@ -741,7 +782,7 @@ fun SettingsTab(
                 onClick = { showLimitDialog = true }
             )
         }
-        item {
+        item(key = "baseline") {
             val yearsSmoked = if (historicalStartDate > 0L) {
                 val days = java.util.concurrent.TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() - historicalStartDate)
                 (days / 365).toInt()
@@ -761,7 +802,7 @@ fun SettingsTab(
                 onClick = { showBaselineSheet = true }
             )
         }
-        item {
+        item(key = "triggers") {
             val activeTriggerCount = remember(customTriggers, disabledDefaultTriggers) {
                 (com.smokingtracker.data.TriggerType.allEntries().size - disabledDefaultTriggers.size) + customTriggers.size
             }
@@ -774,7 +815,7 @@ fun SettingsTab(
                 onClick = { showTriggerManagementSheet = true }
             )
         }
-        item {
+        item(key = "pack_params") {
             val packSubtitle = if (packPrice > 0f) {
                 val formattedPrice = if (packPrice % 1f == 0f) packPrice.toInt().toString() else packPrice.toString()
                 val pricePerCig = if (packSize > 0) packPrice / packSize else 0f
@@ -795,7 +836,7 @@ fun SettingsTab(
             )
         }
 
-        item {
+        item(key = "section_data") {
             Text(
                 text = stringResource(R.string.settings_data),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -803,7 +844,7 @@ fun SettingsTab(
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 8.dp)
             )
         }
-        item {
+        item(key = "backup") {
             SettingItem(
                 icon = Icons.Filled.Backup,
                 title = stringResource(R.string.settings_backup),
@@ -813,7 +854,7 @@ fun SettingsTab(
                 onClick = { showBackupSheet = true }
             )
         }
-        item {
+        item(key = "restore") {
             SettingItem(
                 icon = Icons.Filled.Restore,
                 title = stringResource(R.string.settings_restore),
@@ -823,7 +864,7 @@ fun SettingsTab(
                 onClick = { showRestoreSheet = true }
             )
         }
-        item {
+        item(key = "reset_data") {
             SettingItem(
                 icon = Icons.Filled.RestartAlt,
                 title = stringResource(R.string.settings_reset_data),
@@ -834,7 +875,7 @@ fun SettingsTab(
             )
         }
 
-        item {
+        item(key = "section_info") {
             Text(
                 text = stringResource(R.string.settings_info),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -842,7 +883,7 @@ fun SettingsTab(
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 8.dp)
             )
         }
-        item {
+        item(key = "about") {
             SettingItem(
                 icon = Icons.Filled.Info,
                 title = stringResource(R.string.about_app),
@@ -852,7 +893,7 @@ fun SettingsTab(
                 onClick = onNavigateToAbout
             )
         }
-        item {
+        item(key = "check_updates") {
             SettingItem(
                 icon = Icons.Filled.SystemUpdate,
                 title = stringResource(R.string.settings_check_updates),
@@ -862,7 +903,7 @@ fun SettingsTab(
                 onClick = onCheckForUpdates
             )
         }
-        item {
+        item(key = "check_updates_on_start") {
             SettingItemWithSwitch(
                 icon = Icons.Filled.SystemUpdate,
                 title = stringResource(R.string.settings_check_updates_on_start),
@@ -995,7 +1036,7 @@ fun SettingItemContent(
             }
         }
         Spacer(modifier = Modifier.width(16.dp))
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -1015,14 +1056,18 @@ fun changeLanguage(context: android.content.Context, languageTag: String) {
         context.getSystemService(LocaleManager::class.java)
             .applicationLocales = LocaleList.forLanguageTags(languageTag)
     } else {
+        context.applicationContext
+            .getSharedPreferences(com.smokingtracker.MainActivity.LOCALE_PREFS_NAME, android.content.Context.MODE_PRIVATE)
+            .edit()
+            .putString(com.smokingtracker.MainActivity.KEY_LANGUAGE_TAG, languageTag)
+            .apply()
         val locale = java.util.Locale.forLanguageTag(languageTag)
         java.util.Locale.setDefault(locale)
         val config = android.content.res.Configuration(context.resources.configuration)
         config.setLocale(locale)
         @Suppress("DEPRECATION")
         context.resources.updateConfiguration(config, context.resources.displayMetrics)
-        val activity = context as? android.app.Activity
-        activity?.recreate()
+        context.findActivity()?.recreate()
     }
 }
 

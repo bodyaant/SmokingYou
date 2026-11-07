@@ -40,8 +40,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.ToggleFloatingActionButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
@@ -55,6 +58,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 @Composable
@@ -70,6 +74,8 @@ fun BoxScope.HomeFabMenuOverlay(
     onSmoked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var actionTriggered by remember(isExpanded) { mutableStateOf(false) }
+
     if (isExpanded) {
         BackHandler {
             onDismiss()
@@ -113,23 +119,33 @@ fun BoxScope.HomeFabMenuOverlay(
                 .align(Alignment.BottomEnd)
                 .padding(
                     end = with(density) { (rootSize.width - fabRightPx).coerceAtLeast(0f).toDp() },
-                    bottom = with(density) { (rootSize.height - fabTopPx + 12.dp.toPx()).toDp() }
+                    bottom = with(density) { (rootSize.height - fabTopPx + 12.dp.toPx()).coerceAtLeast(0f).toDp() }
                 )
         ) {
             FabMenuItemsColumn(
                 onMindfulPause = {
-                    onDismiss()
-                    HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
-                    onMindfulPause()
+                    if (isExpanded && !actionTriggered) {
+                        actionTriggered = true
+                        onDismiss()
+                        HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                        onMindfulPause()
+                    }
                 },
                 onResisted = {
-                    onDismiss()
-                    onResisted()
+                    if (isExpanded && !actionTriggered) {
+                        actionTriggered = true
+                        onDismiss()
+                        HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                        onResisted()
+                    }
                 },
                 onSmoked = {
-                    onDismiss()
-                    HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
-                    onSmoked()
+                    if (isExpanded && !actionTriggered) {
+                        actionTriggered = true
+                        onDismiss()
+                        HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
+                        onSmoked()
+                    }
                 }
             )
         }
@@ -148,9 +164,11 @@ fun HomeFabButton(
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val squishProgress = remember { Animatable(1f) }
+    var squishJob by remember { mutableStateOf<Job?>(null) }
 
     val triggerSquish: () -> Unit = {
-        scope.launch {
+        squishJob?.cancel()
+        squishJob = scope.launch {
             squishProgress.animateTo(
                 targetValue = 0.82f,
                 animationSpec = tween(70, easing = LinearEasing)

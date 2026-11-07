@@ -1,10 +1,13 @@
 package com.smokingtracker.ui.theme
 
 import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -24,6 +27,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -31,6 +35,12 @@ import androidx.core.view.WindowCompat
 import androidx.compose.ui.tooling.preview.Preview
 import com.smokingtracker.data.ColorPreset
 import com.smokingtracker.data.FontPreset
+
+tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
 
 private val LightColors = lightColorScheme(
     primary = md_theme_light_primary,
@@ -584,71 +594,85 @@ fun AppTheme(
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
-    val baseColors = when (colorPreset) {
-        ColorPreset.FOREST_SAGE -> if (useDarkTheme) SageDarkColors else SageLightColors
-        ColorPreset.SUNSET_ROSE -> if (useDarkTheme) RoseDarkColors else RoseLightColors
-        ColorPreset.OCEAN_DEEP -> if (useDarkTheme) OceanDarkColors else OceanLightColors
-        ColorPreset.PURPLE_NEBULA -> if (useDarkTheme) PurpleDarkColors else PurpleLightColors
-        ColorPreset.AMBER_GOLD -> if (useDarkTheme) AmberDarkColors else AmberLightColors
-        ColorPreset.CRIMSON_BERRY -> if (useDarkTheme) CrimsonDarkColors else CrimsonLightColors
-        ColorPreset.SLATE_MONO -> if (useDarkTheme) SlateDarkColors else SlateLightColors
-        ColorPreset.SYSTEM -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val dynamic = if (useDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-                dynamic.ensureDynamicContrast()
-            } else {
-                if (useDarkTheme) DarkColors else LightColors
+    val finalColors = remember(colorPreset, useDarkTheme, amoledThemeEnabled, context) {
+        val baseColors = when (colorPreset) {
+            ColorPreset.FOREST_SAGE -> if (useDarkTheme) SageDarkColors else SageLightColors
+            ColorPreset.SUNSET_ROSE -> if (useDarkTheme) RoseDarkColors else RoseLightColors
+            ColorPreset.OCEAN_DEEP -> if (useDarkTheme) OceanDarkColors else OceanLightColors
+            ColorPreset.PURPLE_NEBULA -> if (useDarkTheme) PurpleDarkColors else PurpleLightColors
+            ColorPreset.AMBER_GOLD -> if (useDarkTheme) AmberDarkColors else AmberLightColors
+            ColorPreset.CRIMSON_BERRY -> if (useDarkTheme) CrimsonDarkColors else CrimsonLightColors
+            ColorPreset.SLATE_MONO -> if (useDarkTheme) SlateDarkColors else SlateLightColors
+            ColorPreset.SYSTEM -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    val dynamic = if (useDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+                    dynamic.ensureDynamicContrast()
+                } else {
+                    if (useDarkTheme) DarkColors else LightColors
+                }
             }
         }
-    }
 
-    val finalColors = if (useDarkTheme) {
-        if (amoledThemeEnabled) {
-            baseColors.copy(
-                background = Color.Black,
-                surface = Color.Black,
-                surfaceDim = Color.Black,
-                surfaceContainerLowest = Color.Black,
-                surfaceContainerLow = Color(0xFF121212),
-                surfaceContainer = Color(0xFF181818),
-                surfaceContainerHigh = Color(0xFF222222),
-                surfaceContainerHighest = Color(0xFF2C2C2C),
-                surfaceVariant = Color(0xFF282828),
-                outlineVariant = Color(0xFF383838)
-            )
+        if (useDarkTheme) {
+            if (amoledThemeEnabled) {
+                baseColors.copy(
+                    background = Color.Black,
+                    surface = Color.Black,
+                    surfaceDim = Color.Black,
+                    surfaceContainerLowest = Color.Black,
+                    surfaceContainerLow = lerp(Color(0xFF0E0E0E), baseColors.surfaceContainerLow, 0.35f),
+                    surfaceContainer = lerp(Color(0xFF141414), baseColors.surfaceContainer, 0.38f),
+                    surfaceContainerHigh = lerp(Color(0xFF1E1E1E), baseColors.surfaceContainerHigh, 0.40f),
+                    surfaceContainerHighest = lerp(Color(0xFF282828), baseColors.surfaceContainerHighest, 0.42f),
+                    surfaceVariant = lerp(Color(0xFF242424), baseColors.surfaceVariant, 0.40f),
+                    outlineVariant = lerp(Color(0xFF343434), baseColors.outlineVariant, 0.40f)
+                )
+            } else {
+                baseColors
+            }
         } else {
-            baseColors
+            val lowContainer = lerp(baseColors.surface, Color.White, 0.45f)
+            val midContainer = Color.White
+            val highContainer = lerp(Color.White, baseColors.surfaceContainerHighest, 0.35f)
+            baseColors.copy(
+                background = baseColors.surfaceContainerLow,
+                surface = baseColors.surfaceContainerLow,
+                surfaceContainerLowest = baseColors.surfaceContainerLow,
+                surfaceContainerLow = lowContainer,
+                surfaceContainer = midContainer,
+                surfaceContainerHigh = highContainer
+            )
         }
-    } else {
-        baseColors.copy(
-            background = baseColors.surfaceContainerLow,
-            surface = baseColors.surfaceContainerLow,
-            surfaceContainerLowest = baseColors.surfaceContainerLow,
-            surfaceContainer = Color.White,
-            surfaceContainerLow = Color.White,
-            surfaceContainerHigh = Color.White
-        )
     }
 
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val window = (view.context as Activity).window
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !useDarkTheme
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !useDarkTheme
+            val window = view.context.findActivity()?.window ?: return@SideEffect
+            val insetsController = WindowCompat.getInsetsController(window, view)
+            insetsController.isAppearanceLightStatusBars = !useDarkTheme
+            insetsController.isAppearanceLightNavigationBars = !useDarkTheme
         }
     }
 
-    val typography = if (useCustomVariableFont && fontPreset != FontPreset.SYSTEM) {
-        VariableFontFactory.createCustomTypography(customFontWeight, customFontWidth, customFontRoundness)
-    } else {
-        when (fontPreset) {
-            FontPreset.SYSTEM -> androidx.compose.material3.Typography()
-            FontPreset.ZENITH, FontPreset.WIDE -> VariableFontFactory.createTypography("ZENITH")
-            FontPreset.NEO -> VariableFontFactory.createTypography("NEO")
-            FontPreset.COMPACT -> VariableFontFactory.createTypography("COMPACT")
-            FontPreset.AIRY -> VariableFontFactory.createTypography("AIRY")
-            FontPreset.OUTFIT -> AppTypography
+    val typography = remember(
+        useCustomVariableFont,
+        fontPreset,
+        customFontWeight,
+        customFontWidth,
+        customFontRoundness
+    ) {
+        if (useCustomVariableFont && fontPreset != FontPreset.SYSTEM) {
+            VariableFontFactory.createCustomTypography(customFontWeight, customFontWidth, customFontRoundness)
+        } else {
+            when (fontPreset) {
+                FontPreset.SYSTEM -> DefaultMaterialTypography
+                FontPreset.ZENITH, FontPreset.WIDE -> VariableFontFactory.createTypography(GSFlexPreset.ZENITH)
+                FontPreset.NEO -> VariableFontFactory.createTypography(GSFlexPreset.NEO)
+                FontPreset.COMPACT -> VariableFontFactory.createTypography(GSFlexPreset.COMPACT)
+                FontPreset.AIRY -> VariableFontFactory.createTypography(GSFlexPreset.AIRY)
+                FontPreset.OUTFIT -> AppTypography
+            }
         }
     }
 
@@ -658,6 +682,8 @@ fun AppTheme(
         content = content
     )
 }
+
+private val DefaultMaterialTypography = androidx.compose.material3.Typography()
 
 val ColorScheme.subContainer: Color
     get() = if (surface.luminance() < 0.5f) {

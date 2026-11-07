@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -25,10 +26,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.smokingtracker.R
@@ -49,6 +56,32 @@ private val AVAILABLE_CURRENCIES = listOf(
     CurrencyInfo("BYN", "Br")
 )
 
+private fun sanitizePriceInput(raw: String): String {
+    val normalized = raw.replace(',', '.')
+    val sb = StringBuilder()
+    var hasDot = false
+    var decimals = 0
+    for (ch in normalized) {
+        if (ch.isDigit()) {
+            if (hasDot) {
+                if (decimals < 2) {
+                    sb.append(ch)
+                    decimals++
+                }
+            } else if (sb.length < 7) {
+                sb.append(ch)
+            }
+        } else if (ch == '.' && !hasDot) {
+            if (sb.isEmpty()) {
+                sb.append('0')
+            }
+            sb.append('.')
+            hasDot = true
+        }
+    }
+    return sb.toString()
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PackSettingsBottomSheet(
@@ -60,16 +93,14 @@ fun PackSettingsBottomSheet(
     onDismissRequest: () -> Unit,
     vibrationEnabled: Boolean = true
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
+    val focusManager = LocalFocusManager.current
     val locale = LocalLocale.current.platformLocale
 
     val initialPriceStr = remember(packPrice) {
-        if (packPrice > 0f) {
+        if (packPrice > 0f && packPrice.isFinite()) {
             if (packPrice % 1f == 0f) packPrice.toInt().toString() else packPrice.toString()
         } else ""
     }
@@ -82,15 +113,16 @@ fun PackSettingsBottomSheet(
     var selectedStandardSize by rememberSaveable { mutableIntStateOf(if (packSize in standardSizes) packSize else 20) }
     var customSizeInput by rememberSaveable { mutableStateOf(if (packSize !in standardSizes) packSize.toString() else "") }
 
-    val priceVal = priceInput.toFloatOrNull() ?: 0f
+    val parsedPrice = priceInput.toFloatOrNull()
+    val priceVal = if (parsedPrice != null && parsedPrice.isFinite()) parsedPrice else 0f
     val currentSizeVal = if (isCustomSize) {
         customSizeInput.toIntOrNull() ?: 0
     } else {
         selectedStandardSize
     }
 
-    val priceValid = priceInput.isEmpty() || (priceInput.toFloatOrNull() != null && priceVal >= 0f)
-    val sizeValid = currentSizeVal > 0
+    val priceValid = priceInput.isEmpty() || (parsedPrice != null && parsedPrice.isFinite() && parsedPrice in 0f..1_000_000f)
+    val sizeValid = currentSizeVal in 1..1000
 
     val pricePerCig = if (sizeValid && priceVal > 0f) priceVal / currentSizeVal else 0f
     val dailyCost = if (dailyLimit > 0) pricePerCig * dailyLimit else 0f
@@ -117,6 +149,7 @@ fun PackSettingsBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(start = 20.dp, end = 20.dp, bottom = 28.dp, top = 4.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -226,9 +259,15 @@ fun PackSettingsBottomSheet(
             OutlinedTextField(
                 value = priceInput,
                 onValueChange = { input ->
-                    priceInput = input.filter { it.isDigit() || it == '.' || it == ',' }.replace(',', '.')
+                    priceInput = sanitizePriceInput(input)
                 },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = if (isCustomSize) ImeAction.Next else ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { focusManager.clearFocus() }
+                ),
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text(stringResource(R.string.settings_pack_price)) },
                 leadingIcon = {
@@ -284,7 +323,11 @@ fun PackSettingsBottomSheet(
                             },
                             modifier = Modifier
                                 .weight(1f)
-                                .height(42.dp),
+                                .height(42.dp)
+                                .semantics {
+                                    selected = isSelected
+                                    role = Role.RadioButton
+                                },
                             shape = containerShape(RoundedCornerShape(12.dp)),
                             color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer,
                             contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
@@ -307,7 +350,11 @@ fun PackSettingsBottomSheet(
                         },
                         modifier = Modifier
                             .weight(1.2f)
-                            .height(42.dp),
+                            .height(42.dp)
+                            .semantics {
+                                selected = isCustomSize
+                                role = Role.RadioButton
+                            },
                         shape = containerShape(RoundedCornerShape(12.dp)),
                         color = if (isCustomSize) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer,
                         contentColor = if (isCustomSize) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
@@ -330,8 +377,14 @@ fun PackSettingsBottomSheet(
                 ) {
                     OutlinedTextField(
                         value = customSizeInput,
-                        onValueChange = { customSizeInput = it.filter { c -> c.isDigit() } },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        onValueChange = { customSizeInput = it.filter { c -> c.isDigit() }.take(4) },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = { focusManager.clearFocus() }
+                        ),
                         modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                         label = { Text(stringResource(R.string.settings_pack_size)) },
                         leadingIcon = {
@@ -369,7 +422,12 @@ fun PackSettingsBottomSheet(
                                 HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                                 selectedCurrency = curr.code
                             },
-                            modifier = Modifier.height(40.dp),
+                            modifier = Modifier
+                                .height(40.dp)
+                                .semantics {
+                                    selected = isSelected
+                                    role = Role.RadioButton
+                                },
                             shape = containerShape(RoundedCornerShape(12.dp)),
                             color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer,
                             contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
