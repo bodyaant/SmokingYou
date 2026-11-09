@@ -13,6 +13,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -1372,6 +1374,7 @@ fun MoneySavedBottomSheet(
     var goalAmountStr by rememberSaveable(savingsGoalAmount) {
         mutableStateOf(if (savingsGoalAmount > 0f) String.format(Locale.getDefault(), "%.0f", savingsGoalAmount) else "")
     }
+    var showSupportSheet by remember { mutableStateOf(false) }
 
     val hasGoal = savingsGoalAmount > 0f && savingsGoalTitle.isNotBlank()
     val goalProgress = if (savingsGoalAmount > 0f) (moneySaved / savingsGoalAmount).coerceIn(0f, 1f) else 0f
@@ -1392,6 +1395,7 @@ fun MoneySavedBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .navigationBarsPadding()
                 .padding(horizontal = 24.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)
@@ -1605,8 +1609,22 @@ fun MoneySavedBottomSheet(
                 )
             }
 
+            if (moneySaved > 0f) {
+                val formattedSaved = "${String.format(locale, "%.2f", moneySaved)} $currencySymbol"
+                MoneySavedSupportBanner(
+                    moneySavedFormatted = formattedSaved,
+                    onTreatClick = { showSupportSheet = true }
+                )
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    if (showSupportSheet) {
+        SupportBottomSheet(
+            onDismissRequest = { showSupportSheet = false }
+        )
     }
 }
 

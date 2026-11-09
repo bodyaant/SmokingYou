@@ -651,4 +651,17 @@
     <string name="reset_data_dialog_title">Сбросить все данные?</string>
     <string name="reset_data_dialog_message">Вся история курения, статистика, цели и достижения будут безвозвратно удалены. Вы вернётесь на начальный экран.</string>
     <string name="reset_data_dialog_confirm">Сбросить</string>
+
+    <string name="support_dev_title">Поддержать разработчика</string>
+    <string name="support_dev_subtitle">SmokingYou бесплатен и развивается без рекламы. Поддержите проект приятным угощением!</string>
+    <string name="support_tier_energy">Энергетик</string>
+    <string name="support_tier_energy_desc">~1 пачка сигарет</string>
+    <string name="support_tier_lunch">Вкусный обед</string>
+    <string name="support_tier_lunch_desc">~3–4 пачки сигарет</string>
+    <string name="support_tier_fullhouse">Фулл-Хаус комбо</string>
+    <string name="support_tier_fullhouse_desc">~блок сигарет</string>
+    <string name="support_saved_money_title">Вы сберегли уже %1$s!</string>
+    <string name="support_saved_money_subtitle">Эти деньги не ушли на сигареты. Хотите угостить автора за полезный трекер?</string>
+    <string name="support_treat_button">Угостить автора</string>
+    <string name="support_payment_boosty_desc">Карты РФ, зарубежные карты, PayPal</string>
 </resources>

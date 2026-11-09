@@ -655,4 +655,17 @@
     <string name="reset_data_dialog_title">Reset all data?</string>
     <string name="reset_data_dialog_message">All smoking history, statistics, goals, and achievements will be permanently deleted. You will return to the welcome screen.</string>
     <string name="reset_data_dialog_confirm">Reset</string>
+
+    <string name="support_dev_title">Support the Developer</string>
+    <string name="support_dev_subtitle">SmokingYou is free, open-source and ad-free. Fuel the development with a small treat!</string>
+    <string name="support_tier_energy">Energy Drink</string>
+    <string name="support_tier_energy_desc">~1 pack of cigarettes</string>
+    <string name="support_tier_lunch">Delicious Lunch</string>
+    <string name="support_tier_lunch_desc">~3–4 packs of cigarettes</string>
+    <string name="support_tier_fullhouse">FullHouse Combo</string>
+    <string name="support_tier_fullhouse_desc">~carton of cigarettes</string>
+    <string name="support_saved_money_title">You\'ve saved %1$s!</string>
+    <string name="support_saved_money_subtitle">These funds didn\'t go up in smoke. Consider treating the author?</string>
+    <string name="support_treat_button">Treat the developer</string>
+    <string name="support_payment_boosty_desc">Cards (RU/Worldwide), PayPal</string>
 </resources>

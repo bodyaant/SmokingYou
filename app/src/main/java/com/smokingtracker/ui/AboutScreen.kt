@@ -40,10 +40,12 @@ import androidx.compose.ui.unit.dp
 import android.widget.Toast
 import com.smokingtracker.BuildConfig
 import com.smokingtracker.R
+import com.smokingtracker.ui.components.SupportBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AboutScreen(onBack: () -> Unit) {
+    var showSupportSheet by remember { mutableStateOf(false) }
     val cookieShape = MaterialShapes.Cookie12Sided.toShape()
     val uriHandler = LocalUriHandler.current
     @Suppress("DEPRECATION")
@@ -233,6 +235,17 @@ fun AboutScreen(onBack: () -> Unit) {
                         Spacer(modifier = Modifier.height(16.dp))
 
                         SupportLinkPill(
+                            text = stringResource(R.string.support_dev_title),
+                            icon = Icons.Filled.Favorite,
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ) {
+                            showSupportSheet = true
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        SupportLinkPill(
                             text = stringResource(R.string.support_boosty),
                             icon = Icons.Filled.Favorite,
                             containerColor = MaterialTheme.colorScheme.tertiaryContainer,
@@ -274,6 +287,12 @@ fun AboutScreen(onBack: () -> Unit) {
                 }
             }
         }
+    }
+
+    if (showSupportSheet) {
+        SupportBottomSheet(
+            onDismissRequest = { showSupportSheet = false }
+        )
     }
 }
 
