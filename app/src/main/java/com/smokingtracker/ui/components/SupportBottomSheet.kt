@@ -108,7 +108,6 @@ fun SupportBottomSheet(
                 .padding(horizontal = 24.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -132,7 +131,6 @@ fun SupportBottomSheet(
                 }
             }
 
-            // Tiers horizontal scroll
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -177,9 +175,7 @@ fun SupportBottomSheet(
                 }
             }
 
-            // Payment methods section
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Boosty Card
                 Card(
                     onClick = { openSafeUri("https://boosty.to/bodyaant") },
                     shape = RoundedCornerShape(20.dp),
@@ -232,7 +228,6 @@ fun SupportBottomSheet(
                     }
                 }
 
-                // Crypto Wallets
                 Text(
                     text = stringResource(R.string.crypto_wallets),
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),

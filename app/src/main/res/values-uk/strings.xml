@@ -558,6 +558,7 @@
     <string name="ach_progress_remaining">Залишилося: %1$s</string>
     <string name="ach_unlocked_date">Отримано %1$s</string>
     <string name="ach_close">Закрити</string>
+    <string name="ach_share">Поділитися</string>
 
     <string name="stats_sheet_life_title">Збережено часу життя</string>
     <string name="stats_sheet_life_fact_title">Клінічне дослідження BMJ</string>

@@ -563,6 +563,7 @@
     <string name="ach_progress_remaining">Kalan: %1$s</string>
     <string name="ach_unlocked_date">%1$s tarihinde açıldı</string>
     <string name="ach_close">Kapat</string>
+    <string name="ach_share">Paylaş</string>
 
     <string name="stats_sheet_life_title">Geri Kazanılan Yaşam Süresi</string>
     <string name="stats_sheet_life_fact_title">BMJ Klinik Araştırması</string>

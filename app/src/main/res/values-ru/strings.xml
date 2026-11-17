@@ -560,6 +560,7 @@
     <string name="ach_progress_remaining">Осталось: %1$s</string>
     <string name="ach_unlocked_date">Получено %1$s</string>
     <string name="ach_close">Закрыть</string>
+    <string name="ach_share">Поделиться</string>
 
     <string name="stats_sheet_life_title">Сохранено времени жизни</string>
     <string name="stats_sheet_life_fact_title">Клиническое исследование BMJ</string>

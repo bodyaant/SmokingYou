@@ -553,6 +553,7 @@
     <string name="ach_progress_remaining">剩余：%1$s</string>
     <string name="ach_unlocked_date">解锁于 %1$s</string>
     <string name="ach_close">关闭</string>
+    <string name="ach_share">分享</string>
 
     <string name="stats_sheet_life_title">挽回的生命时间</string>
     <string name="stats_sheet_life_fact_title">英国医学杂志 (BMJ) 临床研究</string>

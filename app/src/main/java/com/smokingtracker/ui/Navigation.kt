@@ -1,9 +1,33 @@
 package com.smokingtracker.ui
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Brightness4
@@ -11,26 +35,20 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.NavigationItemIconPosition
-import androidx.compose.runtime.*
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -39,44 +57,16 @@ import androidx.navigation.compose.rememberNavController
 import com.smokingtracker.AchievementsViewModel
 import com.smokingtracker.HomeViewModel
 import com.smokingtracker.MainViewModel
-import com.smokingtracker.StatisticsViewModel
-import com.smokingtracker.UpdateCheckState
 import com.smokingtracker.R
+import com.smokingtracker.StatisticsViewModel
 import com.smokingtracker.ui.components.HomeFabButton
-import com.smokingtracker.ui.components.HomeFabMenuOverlay
-import com.smokingtracker.ui.components.UpdateDialog
-import com.smokingtracker.ui.theme.HapticFeedbackHelper
-import kotlin.math.abs
-
-@Stable
-private class FabAnchorCoordinates {
-    var rootSize by mutableStateOf(IntSize.Zero)
-    var fabRightPx by mutableFloatStateOf(0f)
-    var fabTopPx by mutableFloatStateOf(0f)
-}
-
-@Composable
-private fun BoxScope.FabMenuOverlayHost(
-    isExpanded: Boolean,
-    onDismiss: () -> Unit,
-    anchor: FabAnchorCoordinates,
-    vibrationEnabled: Boolean,
-    onMindfulPause: () -> Unit,
-    onResisted: () -> Unit,
-    onSmoked: () -> Unit
-) {
-    HomeFabMenuOverlay(
-        isExpanded = isExpanded,
-        onDismiss = onDismiss,
-        rootSize = anchor.rootSize,
-        fabRightPx = anchor.fabRightPx,
-        fabTopPx = anchor.fabTopPx,
-        vibrationEnabled = vibrationEnabled,
-        onMindfulPause = onMindfulPause,
-        onResisted = onResisted,
-        onSmoked = onSmoked
-    )
-}
+import com.smokingtracker.ui.navigation.BottomNavigationBar
+import com.smokingtracker.ui.navigation.GlobalOverlayHost
+import com.smokingtracker.ui.navigation.rememberFabAnchorCoordinates
+import com.smokingtracker.ui.navigation.shouldShowBottomBar
+import com.smokingtracker.ui.navigation.trackFabPosition
+import com.smokingtracker.ui.navigation.trackRootSize
+import org.koin.androidx.compose.koinViewModel
 
 sealed class Screen(val route: String, val titleResId: Int, val icon: ImageVector) {
     data object Registration : Screen("registration", R.string.registration_title, Icons.Filled.Home)
@@ -92,59 +82,19 @@ sealed class Screen(val route: String, val titleResId: Int, val icon: ImageVecto
 @Composable
 fun MainApp(viewModel: MainViewModel) {
     val navController = rememberNavController()
-    val homeViewModel: HomeViewModel = org.koin.androidx.compose.koinViewModel()
-    val statisticsViewModel: StatisticsViewModel = org.koin.androidx.compose.koinViewModel()
-    val achievementsViewModel: AchievementsViewModel = org.koin.androidx.compose.koinViewModel()
+    val homeViewModel: HomeViewModel = koinViewModel()
+    val statisticsViewModel: StatisticsViewModel = koinViewModel()
+    val achievementsViewModel: AchievementsViewModel = koinViewModel()
+
     val isRegistered by viewModel.isRegistered.collectAsStateWithLifecycle()
-
-    val checkUpdatesOnStart by viewModel.checkUpdatesOnStart.collectAsStateWithLifecycle()
-    val updateCheckState by viewModel.updateCheckState.collectAsStateWithLifecycle()
     val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
-
-    var updateDialogDismissed by rememberSaveable { mutableStateOf(false) }
-
-    LaunchedEffect(checkUpdatesOnStart) {
-        if (checkUpdatesOnStart) {
-            viewModel.checkForUpdates(isManual = false)
-        }
-    }
-
-    LaunchedEffect(updateCheckState) {
-        if (updateCheckState is UpdateCheckState.NewUpdate) {
-            updateDialogDismissed = false
-        }
-    }
-
-    val activeRelease = (updateCheckState as? UpdateCheckState.NewUpdate)?.release
-    if (!updateDialogDismissed && activeRelease != null) {
-        UpdateDialog(
-            release = activeRelease,
-            onDismissRequest = {
-                updateDialogDismissed = true
-                viewModel.resetUpdateCheckState()
-            }
-        )
-    }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-
-    val showBottomBar = currentRoute != Screen.Registration.route && 
-                       currentRoute != Screen.About.route &&
-                       currentRoute != Screen.Achievements.route &&
-                       currentRoute != Screen.Statistics.route &&
-                       currentRoute != Screen.AppearanceSettings.route
-
     val isHomeScreen = currentRoute?.substringBefore("?") == Screen.Home.route
+
     var isFabMenuExpanded by rememberSaveable { mutableStateOf(false) }
-
-    val fabAnchor = remember { FabAnchorCoordinates() }
-
-    LaunchedEffect(isHomeScreen) {
-        if (!isHomeScreen) {
-            isFabMenuExpanded = false
-        }
-    }
+    val fabAnchor = rememberFabAnchorCoordinates()
 
     if (isRegistered == null) {
         Box(modifier = Modifier.fillMaxSize())
@@ -167,253 +117,43 @@ fun MainApp(viewModel: MainViewModel) {
         }
     }
 
-    val pendingAchievementPopup by achievementsViewModel.pendingAchievementPopup.collectAsStateWithLifecycle()
-
-    if (currentRoute != Screen.Registration.route && currentRoute != Screen.Achievements.route) {
-        pendingAchievementPopup?.let { achievement ->
-            AchievementUnlockDialog(
-                achievement = achievement,
-                vibrationEnabled = vibrationEnabled,
-                onDismiss = { achievementsViewModel.dismissAchievementPopup() },
-                onNavigateToAchievements = {
-                    achievementsViewModel.clearAchievementPopupQueue()
-                    navController.navigate(Screen.Achievements.route) {
-                        launchSingleTop = true
-                    }
-                }
-            )
-        }
-    }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .onGloballyPositioned { coordinates ->
-                if (fabAnchor.rootSize != coordinates.size) {
-                    fabAnchor.rootSize = coordinates.size
-                }
-            }
+            .trackRootSize(fabAnchor)
     ) {
         Scaffold(
             contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal),
             modifier = Modifier.fillMaxSize()
         ) { innerPadding ->
-            val subScreens = setOf(
-                Screen.About.route,
-                Screen.Achievements.route,
-                Screen.Statistics.route,
-                Screen.AppearanceSettings.route
-            )
-            val mainTabs = listOf(Screen.Home.route, Screen.Graph.route, Screen.Personal.route)
-
-            fun getTabIndex(route: String?): Int {
-                val cleanRoute = route?.substringBefore("?")
-                return mainTabs.indexOf(cleanRoute)
-            }
-
-            val springSpec = spring<IntOffset>(dampingRatio = 0.85f, stiffness = 400f)
-
-            NavHost(
+            AppNavHost(
                 navController = navController,
                 startDestination = startDest,
+                viewModel = viewModel,
+                homeViewModel = homeViewModel,
+                statisticsViewModel = statisticsViewModel,
+                achievementsViewModel = achievementsViewModel,
+                vibrationEnabled = vibrationEnabled,
                 modifier = Modifier
                     .padding(innerPadding)
-                    .consumeWindowInsets(innerPadding),
-                enterTransition = {
-                    val fromRoute = initialState.destination.route
-                    val toRoute = targetState.destination.route
-                    val fromIndex = getTabIndex(fromRoute)
-                    val toIndex = getTabIndex(toRoute)
-
-                    if (toRoute in subScreens) {
-                        slideIntoContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                            animationSpec = springSpec
-                        ) + fadeIn(animationSpec = tween(250))
-                    } else if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
-                        val direction = if (toIndex > fromIndex) {
-                            AnimatedContentTransitionScope.SlideDirection.Start
-                        } else {
-                            AnimatedContentTransitionScope.SlideDirection.End
-                        }
-                        slideIntoContainer(
-                            towards = direction,
-                            animationSpec = springSpec
-                        ) + fadeIn(animationSpec = tween(250))
-                    } else {
-                        fadeIn(animationSpec = tween(250)) + scaleIn(initialScale = 0.96f, animationSpec = tween(250))
-                    }
-                },
-                exitTransition = {
-                    val fromRoute = initialState.destination.route
-                    val toRoute = targetState.destination.route
-                    val fromIndex = getTabIndex(fromRoute)
-                    val toIndex = getTabIndex(toRoute)
-
-                    if (toRoute in subScreens) {
-                        slideOutOfContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                            animationSpec = springSpec
-                        ) + fadeOut(animationSpec = tween(200))
-                    } else if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
-                        val direction = if (toIndex > fromIndex) {
-                            AnimatedContentTransitionScope.SlideDirection.Start
-                        } else {
-                            AnimatedContentTransitionScope.SlideDirection.End
-                        }
-                        slideOutOfContainer(
-                            towards = direction,
-                            animationSpec = springSpec
-                        ) + fadeOut(animationSpec = tween(200))
-                    } else {
-                        fadeOut(animationSpec = tween(200))
-                    }
-                },
-                popEnterTransition = {
-                    val fromRoute = initialState.destination.route
-                    val toRoute = targetState.destination.route
-                    val fromIndex = getTabIndex(fromRoute)
-                    val toIndex = getTabIndex(toRoute)
-
-                    if (fromRoute in subScreens) {
-                        slideIntoContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.End,
-                            animationSpec = springSpec
-                        ) + fadeIn(animationSpec = tween(250))
-                    } else if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
-                        val direction = if (toIndex > fromIndex) {
-                            AnimatedContentTransitionScope.SlideDirection.Start
-                        } else {
-                            AnimatedContentTransitionScope.SlideDirection.End
-                        }
-                        slideIntoContainer(
-                            towards = direction,
-                            animationSpec = springSpec
-                        ) + fadeIn(animationSpec = tween(250))
-                    } else {
-                        fadeIn(animationSpec = tween(250)) + scaleIn(initialScale = 0.96f, animationSpec = tween(250))
-                    }
-                },
-                popExitTransition = {
-                    val fromRoute = initialState.destination.route
-                    val toRoute = targetState.destination.route
-                    val fromIndex = getTabIndex(fromRoute)
-                    val toIndex = getTabIndex(toRoute)
-
-                    if (fromRoute in subScreens) {
-                        slideOutOfContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.End,
-                            animationSpec = springSpec
-                        ) + fadeOut(animationSpec = tween(200))
-                    } else if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
-                        val direction = if (toIndex > fromIndex) {
-                            AnimatedContentTransitionScope.SlideDirection.Start
-                        } else {
-                            AnimatedContentTransitionScope.SlideDirection.End
-                        }
-                        slideOutOfContainer(
-                            towards = direction,
-                            animationSpec = springSpec
-                        ) + fadeOut(animationSpec = tween(200))
-                    } else {
-                        fadeOut(animationSpec = tween(200))
-                    }
-                }
-            ) {
-                composable(Screen.Registration.route) {
-                    RegistrationScreen(
-                        onRegister = { viewModel.registerUser() }
-                    )
-                }
-                composable(Screen.Home.route) {
-                    HomeScreen(
-                        viewModel = homeViewModel,
-                        vibrationEnabled = vibrationEnabled,
-                        onNavigateToAchievements = {
-                            navController.navigate(Screen.Achievements.route) {
-                                launchSingleTop = true
-                            }
-                        },
-                        onNavigateToGraphs = { target ->
-                            statisticsViewModel.setGraphScrollTarget(target)
-                            navController.navigate(Screen.Graph.route) {
-                                popUpTo(Screen.Home.route) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
-                }
-                composable(Screen.Graph.route) {
-                    GraphScreen(
-                        viewModel = statisticsViewModel,
-                        onNavigateToSettings = {
-                            navController.navigate(Screen.Personal.route) {
-                                popUpTo(Screen.Home.route) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
-                }
-                composable(Screen.Personal.route) {
-                    PersonalScreen(
-                        onNavigateToAbout = {
-                            navController.navigate(Screen.About.route) {
-                                launchSingleTop = true
-                            }
-                        },
-                        onNavigateToAchievements = {
-                            navController.navigate(Screen.Achievements.route) {
-                                launchSingleTop = true
-                            }
-                        },
-                        onNavigateToStatistics = {
-                            navController.navigate(Screen.Statistics.route) {
-                                launchSingleTop = true
-                            }
-                        },
-                        onNavigateToAppearance = {
-                            navController.navigate(Screen.AppearanceSettings.route) {
-                                launchSingleTop = true
-                            }
-                        }
-                    )
-                }
-                composable(Screen.About.route) {
-                    AboutScreen(onBack = { navController.navigateUp() })
-                }
-                composable(Screen.Achievements.route) {
-                    AchievementsScreen(viewModel = achievementsViewModel, onBack = { navController.navigateUp() })
-                }
-                composable(Screen.Statistics.route) {
-                    StatisticsScreen(
-                        viewModel = statisticsViewModel,
-                        onBack = { navController.navigateUp() },
-                        onNavigateToSettings = {
-                            navController.navigate(Screen.Personal.route) {
-                                popUpTo(Screen.Home.route) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
-                }
-                composable(Screen.AppearanceSettings.route) {
-                    AppearanceSettingsScreen(onBack = { navController.navigateUp() })
-                }
-            }
+                    .consumeWindowInsets(innerPadding)
+            )
         }
 
-        FabMenuOverlayHost(
-            isExpanded = isFabMenuExpanded && isHomeScreen,
-            onDismiss = { isFabMenuExpanded = false },
-            anchor = fabAnchor,
+        GlobalOverlayHost(
+            mainViewModel = viewModel,
+            achievementsViewModel = achievementsViewModel,
+            homeViewModel = homeViewModel,
+            navController = navController,
+            currentRoute = currentRoute,
             vibrationEnabled = vibrationEnabled,
-            onMindfulPause = { homeViewModel.triggerFabMindfulPause() },
-            onResisted = { homeViewModel.triggerFabResisted() },
-            onSmoked = { homeViewModel.triggerFabSmoked() }
+            isHomeScreen = isHomeScreen,
+            isFabMenuExpanded = isFabMenuExpanded,
+            onDismissFabMenu = { isFabMenuExpanded = false },
+            fabAnchor = fabAnchor
         )
+
+        val showBottomBar = shouldShowBottomBar(currentRoute)
 
         Box(
             modifier = Modifier
@@ -425,11 +165,11 @@ fun MainApp(viewModel: MainViewModel) {
             AnimatedVisibility(
                 visible = showBottomBar,
                 enter = slideInVertically(
-                    initialOffsetY = { it }, 
+                    initialOffsetY = { it },
                     animationSpec = spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessLow)
                 ) + fadeIn(tween(300)),
                 exit = slideOutVertically(
-                    targetOffsetY = { it }, 
+                    targetOffsetY = { it },
                     animationSpec = tween(300)
                 ) + fadeOut(tween(300))
             ) {
@@ -464,17 +204,7 @@ fun MainApp(viewModel: MainViewModel) {
                                 isExpanded = isFabMenuExpanded,
                                 onToggle = { isFabMenuExpanded = !isFabMenuExpanded },
                                 vibrationEnabled = vibrationEnabled,
-                                modifier = Modifier.onGloballyPositioned { coordinates ->
-                                    val pos = coordinates.positionInRoot()
-                                    val newRight = pos.x + coordinates.size.width
-                                    val newTop = pos.y
-                                    if (abs(fabAnchor.fabRightPx - newRight) > 0.5f) {
-                                        fabAnchor.fabRightPx = newRight
-                                    }
-                                    if (abs(fabAnchor.fabTopPx - newTop) > 0.5f) {
-                                        fabAnchor.fabTopPx = newTop
-                                    }
-                                }
+                                modifier = Modifier.trackFabPosition(fabAnchor)
                             )
                         }
                     }
@@ -484,112 +214,218 @@ fun MainApp(viewModel: MainViewModel) {
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun BottomNavigationBar(
+fun AppNavHost(
     navController: NavHostController,
-    modifier: Modifier = Modifier,
-    vibrationEnabled: Boolean = true
+    startDestination: String,
+    viewModel: MainViewModel,
+    homeViewModel: HomeViewModel,
+    statisticsViewModel: StatisticsViewModel,
+    achievementsViewModel: AchievementsViewModel,
+    vibrationEnabled: Boolean,
+    modifier: Modifier = Modifier
 ) {
-    val items = listOf(Screen.Home, Screen.Graph, Screen.Personal)
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-    val haptic = LocalHapticFeedback.current
-    val context = LocalContext.current
+    val subScreens = setOf(
+        Screen.About.route,
+        Screen.Achievements.route,
+        Screen.Statistics.route,
+        Screen.AppearanceSettings.route
+    )
+    val mainTabs = listOf(Screen.Home.route, Screen.Graph.route, Screen.Personal.route)
 
-    HorizontalFloatingToolbar(
-        expanded = true,
-        modifier = modifier
-            .animateContentSize()
-            .height(68.dp),
-        shape = RoundedCornerShape(100),
-        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 3.dp),
-        colors = FloatingToolbarDefaults.standardFloatingToolbarColors(
-            toolbarContainerColor = MaterialTheme.colorScheme.primaryContainer
-        )
+    fun getTabIndex(route: String?): Int {
+        val cleanRoute = route?.substringBefore("?")
+        return mainTabs.indexOf(cleanRoute)
+    }
+
+    val springSpec = spring<IntOffset>(dampingRatio = 0.85f, stiffness = 400f)
+
+    NavHost(
+        navController = navController,
+        startDestination = startDestination,
+        modifier = modifier,
+        enterTransition = {
+            val fromRoute = initialState.destination.route
+            val toRoute = targetState.destination.route
+            val fromIndex = getTabIndex(fromRoute)
+            val toIndex = getTabIndex(toRoute)
+
+            if (toRoute in subScreens) {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                    animationSpec = springSpec
+                ) + fadeIn(animationSpec = tween(250))
+            } else if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
+                val direction = if (toIndex > fromIndex) {
+                    AnimatedContentTransitionScope.SlideDirection.Start
+                } else {
+                    AnimatedContentTransitionScope.SlideDirection.End
+                }
+                slideIntoContainer(
+                    towards = direction,
+                    animationSpec = springSpec
+                ) + fadeIn(animationSpec = tween(250))
+            } else {
+                fadeIn(animationSpec = tween(250)) + scaleIn(initialScale = 0.96f, animationSpec = tween(250))
+            }
+        },
+        exitTransition = {
+            val fromRoute = initialState.destination.route
+            val toRoute = targetState.destination.route
+            val fromIndex = getTabIndex(fromRoute)
+            val toIndex = getTabIndex(toRoute)
+
+            if (toRoute in subScreens) {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                    animationSpec = springSpec
+                ) + fadeOut(animationSpec = tween(200))
+            } else if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
+                val direction = if (toIndex > fromIndex) {
+                    AnimatedContentTransitionScope.SlideDirection.Start
+                } else {
+                    AnimatedContentTransitionScope.SlideDirection.End
+                }
+                slideOutOfContainer(
+                    towards = direction,
+                    animationSpec = springSpec
+                ) + fadeOut(animationSpec = tween(200))
+            } else {
+                fadeOut(animationSpec = tween(200))
+            }
+        },
+        popEnterTransition = {
+            val fromRoute = initialState.destination.route
+            val toRoute = targetState.destination.route
+            val fromIndex = getTabIndex(fromRoute)
+            val toIndex = getTabIndex(toRoute)
+
+            if (fromRoute in subScreens) {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.End,
+                    animationSpec = springSpec
+                ) + fadeIn(animationSpec = tween(250))
+            } else if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
+                val direction = if (toIndex > fromIndex) {
+                    AnimatedContentTransitionScope.SlideDirection.Start
+                } else {
+                    AnimatedContentTransitionScope.SlideDirection.End
+                }
+                slideIntoContainer(
+                    towards = direction,
+                    animationSpec = springSpec
+                ) + fadeIn(animationSpec = tween(250))
+            } else {
+                fadeIn(animationSpec = tween(250)) + scaleIn(initialScale = 0.96f, animationSpec = tween(250))
+            }
+        },
+        popExitTransition = {
+            val fromRoute = initialState.destination.route
+            val toRoute = targetState.destination.route
+            val fromIndex = getTabIndex(fromRoute)
+            val toIndex = getTabIndex(toRoute)
+
+            if (fromRoute in subScreens) {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.End,
+                    animationSpec = springSpec
+                ) + fadeOut(animationSpec = tween(200))
+            } else if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
+                val direction = if (toIndex > fromIndex) {
+                    AnimatedContentTransitionScope.SlideDirection.Start
+                } else {
+                    AnimatedContentTransitionScope.SlideDirection.End
+                }
+                slideOutOfContainer(
+                    towards = direction,
+                    animationSpec = springSpec
+                ) + fadeOut(animationSpec = tween(200))
+            } else {
+                fadeOut(animationSpec = tween(200))
+            }
+        }
     ) {
-        items.forEach { screen ->
-            val selected = currentRoute?.substringBefore("?") == screen.route
-            ShortNavigationBarItem(
-                selected = selected,
-                onClick = {
-                    if (currentRoute?.substringBefore("?") != screen.route) {
-                        HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
-                        navController.navigate(screen.route) {
-                            popUpTo(Screen.Home.route) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                },
-                icon = {
-                    val extraHeight by animateDpAsState(
-                        targetValue = if (selected) 12.dp else 0.dp,
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioLowBouncy,
-                            stiffness = Spring.StiffnessLow
-                        ),
-                        label = "indicatorHeight"
-                    )
-                    Box(
-                        modifier = Modifier.height(24.dp + extraHeight),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = screen.icon,
-                            contentDescription = stringResource(screen.titleResId),
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                },
-                label = {
-                    AnimatedVisibility(
-                        visible = selected,
-                        enter = fadeIn() + slideInHorizontally(
-                            initialOffsetX = { -15 },
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioLowBouncy,
-                                stiffness = Spring.StiffnessLow
-                            )
-                        ) + expandHorizontally(
-                            expandFrom = Alignment.Start,
-                            clip = false
-                        ),
-                        exit = fadeOut() + slideOutHorizontally(
-                            targetOffsetX = { -15 }
-                        ) + shrinkHorizontally(
-                            shrinkTowards = Alignment.Start,
-                            clip = false
-                        )
-                    ) {
-                        Text(
-                            text = stringResource(screen.titleResId),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.ExtraBold,
-                            maxLines = 1,
-                            modifier = Modifier.padding(start = 2.dp, end = 4.dp)
-                        )
-                    }
-                },
-                iconPosition = NavigationItemIconPosition.Start,
-                colors = ShortNavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.onPrimary,
-                    selectedTextColorStartIconPosition = MaterialTheme.colorScheme.onPrimary,
-                    selectedTextColorTopIconPosition = MaterialTheme.colorScheme.onPrimary,
-                    selectedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    unselectedTextColor = Color.Transparent
-                ),
-                modifier = Modifier
-                    .padding(horizontal = 4.dp)
-                    .fillMaxHeight()
+        composable(Screen.Registration.route) {
+            RegistrationScreen(
+                onRegister = { viewModel.registerUser() }
             )
         }
+        composable(Screen.Home.route) {
+            HomeScreen(
+                viewModel = homeViewModel,
+                vibrationEnabled = vibrationEnabled,
+                onNavigateToAchievements = {
+                    navController.navigate(Screen.Achievements.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToGraphs = { target ->
+                    statisticsViewModel.setGraphScrollTarget(target)
+                    navController.navigate(Screen.Graph.route) {
+                        popUpTo(Screen.Home.route) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+        composable(Screen.Graph.route) {
+            GraphScreen(
+                viewModel = statisticsViewModel,
+                onNavigateToSettings = {
+                    navController.navigate(Screen.Personal.route) {
+                        popUpTo(Screen.Home.route) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+        composable(Screen.Personal.route) {
+            PersonalScreen(
+                onNavigateToAbout = {
+                    navController.navigate(Screen.About.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToAchievements = {
+                    navController.navigate(Screen.Achievements.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToStatistics = {
+                    navController.navigate(Screen.Statistics.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToAppearance = {
+                    navController.navigate(Screen.AppearanceSettings.route) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+        composable(Screen.About.route) {
+            AboutScreen(onBack = { navController.navigateUp() })
+        }
+        composable(Screen.Achievements.route) {
+            AchievementsScreen(viewModel = achievementsViewModel, onBack = { navController.navigateUp() })
+        }
+        composable(Screen.Statistics.route) {
+            StatisticsScreen(
+                viewModel = statisticsViewModel,
+                onBack = { navController.navigateUp() },
+                onNavigateToSettings = {
+                    navController.navigate(Screen.Personal.route) {
+                        popUpTo(Screen.Home.route) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+        composable(Screen.AppearanceSettings.route) {
+            AppearanceSettingsScreen(onBack = { navController.navigateUp() })
+        }
     }
-}
-
-@Preview
-@Composable
-fun BottomNavigationBarPreview() {
-    BottomNavigationBar(navController = rememberNavController())
 }

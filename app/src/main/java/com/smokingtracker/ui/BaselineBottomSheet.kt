@@ -22,12 +22,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.smokingtracker.R
+import com.smokingtracker.domain.statistics.BaselinePreviewData
+import com.smokingtracker.domain.statistics.PackYearsRiskLevel
+import com.smokingtracker.domain.statistics.SavingsCalculator
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
 import com.smokingtracker.ui.theme.containerShape
 import com.smokingtracker.ui.theme.subContainer
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,33 +71,19 @@ fun BaselineBottomSheet(
     }
 
     var selectedStartDate by rememberSaveable { mutableLongStateOf(defaultStartDate) }
-    var dailyAvg by rememberSaveable { mutableIntStateOf(if (historicalDailyAvg > 0) historicalDailyAvg.coerceIn(1, 50) else 20) }
+    var dailyAvg by rememberSaveable {
+        mutableIntStateOf(if (historicalDailyAvg > 0) historicalDailyAvg.coerceIn(1, 50) else 20)
+    }
     var showDatePickerDialog by rememberSaveable { mutableStateOf(false) }
     var showResetConfirmation by rememberSaveable { mutableStateOf(false) }
 
-    val now = remember { System.currentTimeMillis() }
-    val totalDays = remember(selectedStartDate, now) {
-        val diffMs = (now - selectedStartDate).coerceAtLeast(0L)
-        TimeUnit.MILLISECONDS.toDays(diffMs).toInt().coerceAtLeast(1)
-    }
-    val yearsSmokedFloat = remember(totalDays) {
-        (totalDays / 365.25f).coerceAtLeast(0.1f)
-    }
-    val yearsSmokedInt = remember(totalDays) { totalDays / 365 }
-    val monthsSmokedInt = remember(totalDays) { (totalDays % 365) / 30 }
-
-    val packYears = remember(dailyAvg, yearsSmokedFloat) {
-        (dailyAvg / 20.0f) * yearsSmokedFloat
-    }
-
-    val pricePerCig = remember(packPrice, packSize) {
-        if (packSize > 0) (packPrice / packSize).toDouble() else 0.0
-    }
-    val estimatedPastCigarettes = remember(totalDays, dailyAvg) {
-        (totalDays.toLong() * dailyAvg).coerceAtLeast(0L)
-    }
-    val estimatedPastCost = remember(estimatedPastCigarettes, pricePerCig) {
-        estimatedPastCigarettes * pricePerCig
+    val baselinePreview = remember(selectedStartDate, dailyAvg, packPrice, packSize) {
+        SavingsCalculator.calculateBaselinePreview(
+            startDate = selectedStartDate,
+            dailyAvg = dailyAvg,
+            packPrice = packPrice,
+            packSize = packSize
+        )
     }
 
     val locale = LocalLocale.current.platformLocale
@@ -311,7 +299,11 @@ fun BaselineBottomSheet(
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = stringResource(R.string.baseline_years_months_format, yearsSmokedInt, monthsSmokedInt),
+                                    text = stringResource(
+                                        R.string.baseline_years_months_format,
+                                        baselinePreview.yearsInt,
+                                        baselinePreview.monthsInt
+                                    ),
                                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                                 )
                             }
@@ -321,15 +313,15 @@ fun BaselineBottomSheet(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     Text(
-                        text = stringResource(R.string.baseline_years_format, yearsSmokedInt),
+                        text = stringResource(R.string.baseline_years_format, baselinePreview.yearsInt),
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Slider(
-                        value = yearsSmokedInt.toFloat().coerceIn(1f, 30f),
+                        value = baselinePreview.yearsInt.toFloat().coerceIn(1f, 30f),
                         onValueChange = { newYears ->
                             val y = newYears.roundToInt().coerceIn(1, 30)
-                            if (y != yearsSmokedInt) {
+                            if (y != baselinePreview.yearsInt) {
                                 val cal = Calendar.getInstance().apply { add(Calendar.YEAR, -y) }
                                 selectedStartDate = cal.timeInMillis
                                 HapticFeedbackHelper.performTick(vibrationEnabled, haptic, context)
@@ -341,127 +333,11 @@ fun BaselineBottomSheet(
                 }
             }
 
-            val riskLevelColor = when {
-                packYears < 10f -> MaterialTheme.colorScheme.primary
-                packYears < 20f -> MaterialTheme.colorScheme.tertiary
-                else -> MaterialTheme.colorScheme.error
-            }
-            val riskLevelContainer = when {
-                packYears < 10f -> MaterialTheme.colorScheme.primaryContainer
-                packYears < 20f -> MaterialTheme.colorScheme.tertiaryContainer
-                else -> MaterialTheme.colorScheme.errorContainer
-            }
-            val riskLevelOnContainer = when {
-                packYears < 10f -> MaterialTheme.colorScheme.onPrimaryContainer
-                packYears < 20f -> MaterialTheme.colorScheme.onTertiaryContainer
-                else -> MaterialTheme.colorScheme.onErrorContainer
-            }
-            val riskLevelText = when {
-                packYears < 10f -> stringResource(R.string.baseline_risk_low)
-                packYears < 20f -> stringResource(R.string.baseline_risk_moderate)
-                else -> stringResource(R.string.baseline_risk_high)
-            }
-            val riskLevelDesc = when {
-                packYears < 10f -> stringResource(R.string.baseline_risk_low_desc)
-                packYears < 20f -> stringResource(R.string.baseline_risk_moderate_desc)
-                else -> stringResource(R.string.baseline_risk_high_desc)
-            }
-
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                ),
-                shape = containerShape(RoundedCornerShape(20.dp)),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.MedicalServices,
-                                contentDescription = null,
-                                tint = riskLevelColor,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(R.string.baseline_pack_years_title),
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                            )
-                        }
-
-                        Surface(
-                            shape = CircleShape,
-                            color = riskLevelContainer
-                        ) {
-                            Text(
-                                text = riskLevelText,
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = riskLevelOnContainer,
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    Text(
-                        text = stringResource(R.string.baseline_pack_years_value, packYears),
-                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Text(
-                        text = riskLevelDesc,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column {
-                            Text(
-                                text = stringResource(R.string.history_preview_total_cigs),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = stringResource(
-                                    R.string.history_cigs_count_format,
-                                    String.format(locale, "%,d", estimatedPastCigarettes)
-                                ),
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text(
-                                text = stringResource(R.string.history_preview_total_cost),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = String.format(locale, "%,.0f %s", estimatedPastCost, currencySymbol),
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                }
-            }
+            BaselineRiskStatsCard(
+                preview = baselinePreview,
+                currencySymbol = currencySymbol,
+                locale = locale
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -490,7 +366,11 @@ fun BaselineBottomSheet(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Icon(imageVector = Icons.Default.DeleteOutline, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(
+                        imageVector = Icons.Default.DeleteOutline,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = stringResource(R.string.baseline_reset_button),
@@ -563,3 +443,4 @@ fun BaselineBottomSheet(
         )
     }
 }
+

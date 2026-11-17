@@ -1,19 +1,24 @@
 package com.smokingtracker.ui
 
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
-import android.widget.Toast
-import androidx.compose.animation.*
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,42 +31,45 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Widgets
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import com.smokingtracker.R
 import com.smokingtracker.ui.theme.HapticFeedbackHelper
 import com.smokingtracker.ui.theme.containerShape
-import com.smokingtracker.widget.CookieShapeDrawable
-import com.smokingtracker.widget.QuickAddWidgetProvider
-import com.smokingtracker.widget.TimerWidgetProvider
-
-private enum class WidgetOption {
-    TIMER_3X1,
-    QUICK_ADD_1X1
-}
+import com.smokingtracker.ui.widget.WidgetFeatureBadges
+import com.smokingtracker.ui.widget.WidgetOption
+import com.smokingtracker.ui.widget.WidgetPreviewCard
+import com.smokingtracker.widget.WidgetPinningHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,25 +85,6 @@ fun WidgetSettingsBottomSheet(
     val haptic = LocalHapticFeedback.current
 
     var selectedOption by rememberSaveable { mutableStateOf(WidgetOption.TIMER_3X1) }
-    var lastPinRequestMs by remember { mutableLongStateOf(0L) }
-
-    fun requestPin(providerClass: Class<*>) {
-        val now = android.os.SystemClock.elapsedRealtime()
-        if (now - lastPinRequestMs < 1000L) return
-        lastPinRequestMs = now
-        HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
-        val appWidgetManager = AppWidgetManager.getInstance(context)
-        if (appWidgetManager.isRequestPinAppWidgetSupported) {
-            val myProvider = ComponentName(context, providerClass)
-            appWidgetManager.requestPinAppWidget(myProvider, null, null)
-        } else {
-            Toast.makeText(
-                context,
-                R.string.widget_pin_unsupported_toast,
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -264,112 +253,13 @@ fun WidgetSettingsBottomSheet(
                 }
             }
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = containerShape(RoundedCornerShape(24.dp)),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(6.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
-                            )
-                            Text(
-                                text = stringResource(R.string.widget_preview_screen_title),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                letterSpacing = 0.5.sp
-                            )
-                        }
+            WidgetPreviewCard(
+                selectedOption = selectedOption,
+                widgetShowResistButton = widgetShowResistButton,
+                dailyLimit = dailyLimit
+            )
 
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        ) {
-                            Text(
-                                text = if (selectedOption == WidgetOption.TIMER_3X1) "3 × 1" else "1 × 1",
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
-
-                    AnimatedContent(
-                        targetState = selectedOption,
-                        transitionSpec = {
-                            fadeIn(animationSpec = tween(220)) + scaleIn(initialScale = 0.95f, animationSpec = tween(220)) togetherWith
-                                    fadeOut(animationSpec = tween(180)) + scaleOut(targetScale = 0.95f, animationSpec = tween(180))
-                        },
-                        label = "widget_preview_content"
-                    ) { option ->
-                        when (option) {
-                            WidgetOption.TIMER_3X1 -> {
-                                TimerWidgetPreview(
-                                    widgetShowResistButton = widgetShowResistButton,
-                                    dailyLimit = dailyLimit
-                                )
-                            }
-                            WidgetOption.QUICK_ADD_1X1 -> {
-                                QuickAddWidgetPreview()
-                            }
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier.padding(top = 18.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        repeat(3) { index ->
-                            val active = (selectedOption == WidgetOption.TIMER_3X1 && index == 0) ||
-                                    (selectedOption == WidgetOption.QUICK_ADD_1X1 && index == 1)
-                            Box(
-                                modifier = Modifier
-                                    .height(4.dp)
-                                    .width(if (active) 14.dp else 4.dp)
-                                    .clip(RoundedCornerShape(2.dp))
-                                    .background(if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                            )
-                        }
-                    }
-                }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                if (selectedOption == WidgetOption.TIMER_3X1) {
-                    FeatureBadge(text = stringResource(R.string.widget_feature_bg_update), modifier = Modifier.weight(1f))
-                    FeatureBadge(text = stringResource(R.string.action_resisted_craving), modifier = Modifier.weight(1f))
-                    FeatureBadge(text = stringResource(R.string.widget_feature_one_tap), modifier = Modifier.weight(1f))
-                } else {
-                    FeatureBadge(text = stringResource(R.string.widget_feature_one_tap), modifier = Modifier.weight(1f))
-                    FeatureBadge(text = stringResource(R.string.widget_feature_instant), modifier = Modifier.weight(1.3f))
-                    FeatureBadge(text = "1×1 Launcher", modifier = Modifier.weight(1f))
-                }
-            }
+            WidgetFeatureBadges(selectedOption = selectedOption)
 
             if (selectedOption == WidgetOption.TIMER_3X1) {
                 Card(
@@ -477,9 +367,12 @@ fun WidgetSettingsBottomSheet(
 
             Button(
                 onClick = {
-                    when (selectedOption) {
-                        WidgetOption.TIMER_3X1 -> requestPin(TimerWidgetProvider::class.java)
-                        WidgetOption.QUICK_ADD_1X1 -> requestPin(QuickAddWidgetProvider::class.java)
+                    val dispatched = when (selectedOption) {
+                        WidgetOption.TIMER_3X1 -> WidgetPinningHelper.requestPinTimerWidget(context)
+                        WidgetOption.QUICK_ADD_1X1 -> WidgetPinningHelper.requestPinQuickAddWidget(context)
+                    }
+                    if (dispatched) {
+                        HapticFeedbackHelper.performClick(vibrationEnabled, haptic, context)
                     }
                 },
                 shape = RoundedCornerShape(16.dp),
@@ -522,247 +415,5 @@ fun WidgetSettingsBottomSheet(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun FeatureBadge(
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        shape = RoundedCornerShape(10.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        modifier = modifier
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp)
-        )
-    }
-}
-
-@Composable
-private fun TimerWidgetPreview(
-    widgetShowResistButton: Boolean,
-    dailyLimit: Int
-) {
-    val context = LocalContext.current
-    val widgetBgColor = colorResource(R.color.widget_bg_color)
-    val widgetPrimaryTextColor = colorResource(R.color.widget_primary_text_color)
-    val widgetSecondaryTextColor = colorResource(R.color.widget_secondary_text_color)
-    val widgetAccentColor = colorResource(R.color.widget_accent_color)
-    val widgetShieldAccentColor = colorResource(R.color.widget_shield_accent_color)
-
-    val pillBgColorInt = ContextCompat.getColor(context, R.color.widget_pill_bg_color)
-    val cookieBitmap = remember(pillBgColorInt) {
-        CookieShapeDrawable.createCookieBitmap(context, 48, pillBgColorInt, petals = 12).asImageBitmap()
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(12.dp, shape = RoundedCornerShape(24.dp), clip = false)
-            .clip(RoundedCornerShape(24.dp))
-            .background(widgetBgColor)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.widget_last_smoke),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = widgetSecondaryTextColor,
-                    fontSize = 11.sp
-                )
-                Text(
-                    text = "1${stringResource(R.string.widget_unit_h)} 25${stringResource(R.string.widget_unit_m)}",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = widgetPrimaryTextColor,
-                    fontSize = 19.sp,
-                    modifier = Modifier.padding(vertical = 1.dp)
-                )
-                val countText = if (dailyLimit > 0) {
-                    stringResource(R.string.widget_today_limit_format, 4, dailyLimit)
-                } else {
-                    stringResource(R.string.widget_today_count, 4)
-                }
-                Text(
-                    text = countText,
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = widgetAccentColor,
-                    fontSize = 11.sp
-                )
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                AnimatedVisibility(
-                    visible = widgetShowResistButton,
-                    enter = fadeIn(tween(180)) + expandHorizontally(
-                        animationSpec = spring(stiffness = 500f),
-                        expandFrom = Alignment.End
-                    ),
-                    exit = fadeOut(tween(140)) + shrinkHorizontally(
-                        animationSpec = spring(stiffness = 500f),
-                        shrinkTowards = Alignment.End
-                    )
-                ) {
-                    Box(
-                        modifier = Modifier.size(48.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            bitmap = cookieBitmap,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_shield),
-                            contentDescription = stringResource(R.string.action_resisted_craving),
-                            tint = widgetShieldAccentColor,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-                }
-
-                Box(
-                    modifier = Modifier.size(48.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        bitmap = cookieBitmap,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_cigarettebase),
-                            contentDescription = null,
-                            tint = widgetAccentColor,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Text(
-                            text = "+1",
-                            color = widgetAccentColor,
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
-                            lineHeight = 10.sp
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun QuickAddWidgetPreview() {
-    val context = LocalContext.current
-    val widgetBgColor = colorResource(R.color.widget_bg_color)
-    val widgetAccentColor = colorResource(R.color.widget_accent_color)
-    val pillBgColorInt = ContextCompat.getColor(context, R.color.widget_pill_bg_color)
-    val cookieBitmap = remember(pillBgColorInt) {
-        CookieShapeDrawable.createCookieBitmap(context, 50, pillBgColorInt, petals = 12).asImageBitmap()
-    }
-
-    Row(
-        modifier = Modifier.padding(vertical = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(18.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        MockLauncherIcon(iconTint = Color(0xFF5C6BC0), label = "Phone")
-
-        Box(
-            modifier = Modifier
-                .size(72.dp)
-                .shadow(12.dp, shape = RoundedCornerShape(22.dp), clip = false)
-                .clip(RoundedCornerShape(22.dp))
-                .background(widgetBgColor)
-                .padding(4.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Box(
-                    modifier = Modifier.size(44.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        bitmap = cookieBitmap,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_cigarettebase),
-                        contentDescription = null,
-                        tint = widgetAccentColor,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                Text(
-                    text = "+1",
-                    color = widgetAccentColor,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    lineHeight = 12.sp,
-                    modifier = Modifier.padding(top = 1.dp)
-                )
-            }
-        }
-
-        MockLauncherIcon(iconTint = Color(0xFF26A69A), label = "Chat")
-    }
-}
-
-@Composable
-private fun MockLauncherIcon(
-    iconTint: Color,
-    label: String
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.size(72.dp)
-    ) {
-        Surface(
-            shape = RoundedCornerShape(18.dp),
-            color = iconTint.copy(alpha = 0.25f),
-            modifier = Modifier.size(48.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Box(
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clip(CircleShape)
-                        .background(iconTint.copy(alpha = 0.7f))
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-            fontSize = 10.sp
-        )
     }
 }

@@ -1,66 +1,42 @@
 package com.smokingtracker.ui
 
-import android.app.LocaleManager
-import android.os.Build
-import android.os.LocaleList
+import android.content.Context
+import android.net.Uri
 import android.widget.Toast
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.Backup
-import androidx.compose.material.icons.filled.Brightness4
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Restore
-import androidx.compose.material.icons.filled.RestartAlt
-import androidx.compose.material.icons.filled.Psychology
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.History
-import androidx.compose.ui.text.style.TextAlign
-import com.smokingtracker.ui.theme.containerShape
-import com.smokingtracker.ui.theme.containerPadding
-import com.smokingtracker.ui.theme.containerGroupGap
-import com.smokingtracker.ui.theme.ContainerGroupPosition
-import com.smokingtracker.ui.theme.findActivity
-import androidx.compose.material.icons.filled.Widgets
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.togetherWith
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.animation.core.spring
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.smokingtracker.BackupRestoreEvent
 import com.smokingtracker.BackupRestoreUiState
+import com.smokingtracker.R
 import com.smokingtracker.SettingsViewModel
 import com.smokingtracker.UpdateCheckState
-import com.smokingtracker.R
 import com.smokingtracker.data.FontPreset
 import com.smokingtracker.data.ThemePreference
-import androidx.compose.material.icons.filled.SystemUpdate
-import java.util.Locale
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.smokingtracker.ui.settings.SettingsTab
+import com.smokingtracker.ui.settings.components.SettingItem as NewSettingItem
+import com.smokingtracker.ui.settings.components.SettingItemContent as NewSettingItemContent
+import com.smokingtracker.ui.settings.components.SettingItemWithSwitch as NewSettingItemWithSwitch
+import com.smokingtracker.ui.settings.components.SwitchThumb as NewSwitchThumb
+import com.smokingtracker.ui.theme.ContainerGroupPosition
+import com.smokingtracker.util.LocaleHelper
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -229,15 +205,15 @@ fun PersonalScreenContent(
     onNotificationShowAddButtonChange: (Boolean) -> Unit = {},
     onNotificationShowResistButtonChange: (Boolean) -> Unit = {},
     onWidgetShowResistButtonChange: (Boolean) -> Unit = {},
-    onThemeChange: (ThemePreference) -> Unit,
-    onSetDailyLimit: (Int) -> Unit,
-    onFontPresetChange: (FontPreset) -> Unit,
-    onUpdatePackDetails: (Float, Int, String) -> Unit,
-    onCheckUpdatesOnStartChange: (Boolean) -> Unit,
-    onCheckForUpdates: () -> Unit,
-    onResetUpdateCheckState: () -> Unit,
-    onBackupData: (android.net.Uri, () -> Unit, () -> Unit) -> Unit,
-    onRestoreData: (android.net.Uri, () -> Unit, () -> Unit) -> Unit,
+    onThemeChange: (ThemePreference) -> Unit = {},
+    onSetDailyLimit: (Int) -> Unit = {},
+    onFontPresetChange: (FontPreset) -> Unit = {},
+    onUpdatePackDetails: (Float, Int, String) -> Unit = { _, _, _ -> },
+    onCheckUpdatesOnStartChange: (Boolean) -> Unit = {},
+    onCheckForUpdates: () -> Unit = {},
+    onResetUpdateCheckState: () -> Unit = {},
+    onBackupData: (Uri, () -> Unit, () -> Unit) -> Unit = { _, _, _ -> },
+    onRestoreData: (Uri, () -> Unit, () -> Unit) -> Unit = { _, _, _ -> },
     onRecordLanguageChange: (String) -> Unit = {},
     onNavigateToAbout: () -> Unit = {},
     onNavigateToAchievements: () -> Unit = {},
@@ -329,592 +305,8 @@ fun PersonalScreenContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SettingsTab(
-    modifier: Modifier = Modifier,
-    currentTheme: ThemePreference,
-    dailyLimit: Int,
-    currentFontPreset: FontPreset,
-    packPrice: Float,
-    packSize: Int,
-    currency: String,
-    checkUpdatesOnStart: Boolean,
-    updateCheckState: UpdateCheckState,
-    taperingPlanEnabled: Boolean = false,
-    taperingIntervalDays: Int = 7,
-    hasHistoricalBaseline: Boolean = false,
-    historicalStartDate: Long = 0L,
-    historicalDailyAvg: Int = 0,
-    customTriggers: List<String> = emptyList(),
-    disabledDefaultTriggers: Set<String> = emptySet(),
-    ongoingNotificationEnabled: Boolean = false,
-    notificationLowPriority: Boolean = true,
-    notificationShowTimer: Boolean = true,
-    notificationShowProgress: Boolean = true,
-    notificationShowAddButton: Boolean = true,
-    notificationShowResistButton: Boolean = false,
-    widgetShowResistButton: Boolean = true,
-    showLimitOnGraph: Boolean = true,
-    vibrationEnabled: Boolean = true,
-    backupOperationState: BackupRestoreUiState = BackupRestoreUiState.Idle,
-    restoreOperationState: BackupRestoreUiState = BackupRestoreUiState.Idle,
-    onResetBackupState: () -> Unit = {},
-    onResetRestoreState: () -> Unit = {},
-    onAddCustomTrigger: (String, (String?) -> Unit) -> Unit = { _, _ -> },
-    onRemoveCustomTrigger: (String) -> Unit = {},
-    onToggleDefaultTrigger: (String, Boolean) -> Unit = { _, _ -> },
-    onSetTaperingPlanSettings: (Boolean, Int) -> Unit = { _, _ -> },
-    onSetShowLimitOnGraph: (Boolean) -> Unit = {},
-    onOngoingNotificationEnabledChange: (Boolean) -> Unit = {},
-    onNotificationLowPriorityChange: (Boolean) -> Unit = {},
-    onNotificationShowTimerChange: (Boolean) -> Unit = {},
-    onNotificationShowProgressChange: (Boolean) -> Unit = {},
-    onNotificationShowAddButtonChange: (Boolean) -> Unit = {},
-    onNotificationShowResistButtonChange: (Boolean) -> Unit = {},
-    onWidgetShowResistButtonChange: (Boolean) -> Unit = {},
-    onThemeChange: (ThemePreference) -> Unit,
-    onSetDailyLimit: (Int) -> Unit,
-    onFontPresetChange: (FontPreset) -> Unit,
-    onUpdatePackDetails: (Float, Int, String) -> Unit,
-    onCheckUpdatesOnStartChange: (Boolean) -> Unit,
-    onCheckForUpdates: () -> Unit,
-    onResetUpdateCheckState: () -> Unit,
-    onBackupData: (android.net.Uri, () -> Unit, () -> Unit) -> Unit,
-    onRestoreData: (android.net.Uri, () -> Unit, () -> Unit) -> Unit,
-    onRecordLanguageChange: (String) -> Unit = {},
-    onNavigateToAbout: () -> Unit,
-    onNavigateToAchievements: () -> Unit,
-    onNavigateToStatistics: () -> Unit,
-    onNavigateToAppearance: () -> Unit,
-    onSaveBaseline: (Long, Int) -> Unit = { _, _ -> },
-    onClearBaseline: () -> Unit = {},
-    onResetAllData: () -> Unit = {}
-) {
-    var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
-    var showLimitDialog by rememberSaveable { mutableStateOf(false) }
-    var showPackDialog by rememberSaveable { mutableStateOf(false) }
-    var showBaselineSheet by rememberSaveable { mutableStateOf(false) }
-    var showWidgetDialog by rememberSaveable { mutableStateOf(false) }
-    var showBackupSheet by rememberSaveable { mutableStateOf(false) }
-    var showRestoreSheet by rememberSaveable { mutableStateOf(false) }
-    var showTriggerManagementSheet by rememberSaveable { mutableStateOf(false) }
-    var showNotificationSettingsSheet by rememberSaveable { mutableStateOf(false) }
-    var showResetDialog by rememberSaveable { mutableStateOf(false) }
-
-    val context = LocalContext.current
-
-    val checkingStr = stringResource(R.string.update_checking)
-    val noUpdatesStr = stringResource(R.string.update_no_updates)
-    val errorStr = stringResource(R.string.update_error)
-
-    LaunchedEffect(updateCheckState) {
-        when (val state = updateCheckState) {
-            is UpdateCheckState.Checking -> {
-                Toast.makeText(context, checkingStr, Toast.LENGTH_SHORT).show()
-            }
-            is UpdateCheckState.NoUpdate -> {
-                Toast.makeText(context, noUpdatesStr, Toast.LENGTH_SHORT).show()
-                onResetUpdateCheckState()
-            }
-            is UpdateCheckState.Error -> {
-                Toast.makeText(context, String.format(errorStr, state.message), Toast.LENGTH_LONG).show()
-                onResetUpdateCheckState()
-            }
-            else -> {}
-        }
-    }
-
-    val currentPlatformLocale = LocalLocale.current.platformLocale
-    val currentLocale = currentPlatformLocale.language
-
-    val backupSuccessStr = stringResource(R.string.backup_success)
-    val backupErrorStr = stringResource(R.string.backup_error)
-    val restoreSuccessStr = stringResource(R.string.restore_success)
-    val restoreErrorStr = stringResource(R.string.restore_error)
-    val savedStr = stringResource(R.string.settings_saved)
-
-    if (showBackupSheet) {
-        BackupBottomSheet(
-            onDismissRequest = {
-                onResetBackupState()
-                showBackupSheet = false
-            },
-            operationState = backupOperationState,
-            onResetOperationState = onResetBackupState,
-            onBackupData = { uri, onSuccess, onError ->
-                onBackupData(uri, onSuccess, onError)
-            }
-        )
-    }
-
-    if (showRestoreSheet) {
-        RestoreBottomSheet(
-            onDismissRequest = {
-                onResetRestoreState()
-                showRestoreSheet = false
-            },
-            operationState = restoreOperationState,
-            onResetOperationState = onResetRestoreState,
-            onRestoreData = { uri, onSuccess, onError ->
-                onRestoreData(uri, onSuccess, onError)
-            }
-        )
-    }
-
-    if (showTriggerManagementSheet) {
-        TriggerManagementBottomSheet(
-            customTriggers = customTriggers,
-            disabledDefaultTriggers = disabledDefaultTriggers,
-            onAddCustomTrigger = onAddCustomTrigger,
-            onRemoveCustomTrigger = onRemoveCustomTrigger,
-            onToggleDefaultTrigger = onToggleDefaultTrigger,
-            onDismissRequest = { showTriggerManagementSheet = false },
-            vibrationEnabled = vibrationEnabled
-        )
-    }
-
-    if (showNotificationSettingsSheet) {
-        NotificationSettingsBottomSheet(
-            enabled = ongoingNotificationEnabled,
-            onEnabledChange = onOngoingNotificationEnabledChange,
-            lowPriority = notificationLowPriority,
-            onLowPriorityChange = onNotificationLowPriorityChange,
-            showTimer = notificationShowTimer,
-            onShowTimerChange = onNotificationShowTimerChange,
-            showProgress = notificationShowProgress,
-            onShowProgressChange = onNotificationShowProgressChange,
-            showAddButton = notificationShowAddButton,
-            onShowAddButtonChange = onNotificationShowAddButtonChange,
-            showResistButton = notificationShowResistButton,
-            onShowResistButtonChange = onNotificationShowResistButtonChange,
-            dailyLimit = dailyLimit,
-            onDismissRequest = { showNotificationSettingsSheet = false },
-            vibrationEnabled = vibrationEnabled
-        )
-    }
-
-    if (showLanguageDialog) {
-        val languages = listOf(
-            "en" to "English",
-            "ru" to "Русский",
-            "es" to "Español",
-            "de" to "Deutsch",
-            "fr" to "Français",
-            "tr" to "Türkçe",
-            "it" to "Italiano",
-            "pt" to "Português",
-            "uk" to "Українська",
-            "zh" to "中文"
-        )
-        ModalBottomSheet(
-            onDismissRequest = { showLanguageDialog = false },
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(start = 24.dp, end = 24.dp, bottom = 48.dp, top = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(R.string.language_dialog_title),
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
-
-                languages.forEachIndexed { index, (langCode, langName) ->
-                    val groupPosition = when (index) {
-                        0 -> ContainerGroupPosition.FIRST
-                        languages.lastIndex -> ContainerGroupPosition.LAST
-                        else -> ContainerGroupPosition.MIDDLE
-                    }
-                    val shape = containerShape(
-                        when (index) {
-                            0 -> RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp)
-                            languages.lastIndex -> RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp)
-                            else -> RoundedCornerShape(8.dp)
-                        },
-                        groupPosition
-                    )
-                    val isSelected = currentLocale == langCode
-
-                    Surface(
-                        onClick = {
-                            changeLanguage(context, langCode)
-                            onRecordLanguageChange(langCode)
-                            showLanguageDialog = false
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = shape,
-                        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-                                else MaterialTheme.colorScheme.surfaceContainer
-                    ) {
-                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = langName,
-                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-                                modifier = Modifier.weight(1f),
-                                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                                        else MaterialTheme.colorScheme.onSurface
-                            )
-                            if (isSelected) {
-                                Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
-                            }
-                        }
-                    }
-
-                    if (index < languages.lastIndex) {
-                        Spacer(modifier = Modifier.height(containerGroupGap()))
-                    }
-                }
-            }
-        }
-    }
-
-    if (showLimitDialog) {
-        DailyLimitBottomSheet(
-            dailyLimit = dailyLimit,
-            taperingPlanEnabled = taperingPlanEnabled,
-            taperingIntervalDays = taperingIntervalDays,
-            showLimitOnGraph = showLimitOnGraph,
-            onSetDailyLimit = onSetDailyLimit,
-            onSetTaperingPlanSettings = onSetTaperingPlanSettings,
-            onSetShowLimitOnGraph = onSetShowLimitOnGraph,
-            onDismissRequest = { showLimitDialog = false },
-            vibrationEnabled = vibrationEnabled
-        )
-    }
-
-    if (showPackDialog) {
-        PackSettingsBottomSheet(
-            packPrice = packPrice,
-            packSize = packSize,
-            currency = currency,
-            dailyLimit = dailyLimit,
-            onUpdatePackDetails = onUpdatePackDetails,
-            onDismissRequest = { showPackDialog = false },
-            vibrationEnabled = vibrationEnabled
-        )
-    }
-
-    if (showBaselineSheet) {
-        BaselineBottomSheet(
-            hasBaseline = hasHistoricalBaseline,
-            historicalStartDate = historicalStartDate,
-            historicalDailyAvg = historicalDailyAvg,
-            packPrice = packPrice,
-            packSize = packSize,
-            currency = currency,
-            onSaveBaseline = onSaveBaseline,
-            onClearBaseline = onClearBaseline,
-            onDismissRequest = { showBaselineSheet = false },
-            vibrationEnabled = vibrationEnabled
-        )
-    }
-
-    if (showWidgetDialog) {
-        WidgetSettingsBottomSheet(
-            widgetShowResistButton = widgetShowResistButton,
-            onWidgetShowResistButtonChange = onWidgetShowResistButtonChange,
-            dailyLimit = dailyLimit,
-            vibrationEnabled = vibrationEnabled,
-            onDismissRequest = { showWidgetDialog = false }
-        )
-    }
-
-    if (showResetDialog) {
-        AlertDialog(
-            onDismissRequest = { showResetDialog = false },
-            shape = containerShape(RoundedCornerShape(28.dp)),
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            icon = {
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                    modifier = Modifier.size(52.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Filled.RestartAlt,
-                            contentDescription = null,
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-                }
-            },
-            title = {
-                Text(
-                    text = stringResource(R.string.reset_data_dialog_title),
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    textAlign = TextAlign.Center
-                )
-            },
-            text = {
-                Text(
-                    text = stringResource(R.string.reset_data_dialog_message),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showResetDialog = false
-                        onResetAllData()
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError
-                    )
-                ) {
-                    Text(stringResource(R.string.reset_data_dialog_confirm), fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showResetDialog = false }) {
-                    Text(stringResource(R.string.dialog_cancel), fontWeight = FontWeight.Bold)
-                }
-            }
-        )
-    }
-
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
-        verticalArrangement = Arrangement.spacedBy(containerGroupGap())
-    ) {
-        item(key = "section_interface") {
-            Text(
-                text = stringResource(R.string.settings_section_interface),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 12.dp, bottom = 8.dp, start = 8.dp)
-            )
-        }
-        item(key = "appearance") {
-            SettingItem(
-                icon = Icons.Filled.Brightness4,
-                title = stringResource(R.string.settings_appearance),
-                subtitle = stringResource(R.string.settings_appearance_desc),
-                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp),
-                groupPosition = ContainerGroupPosition.FIRST,
-                onClick = onNavigateToAppearance
-            )
-        }
-        item(key = "language") {
-            val langDisplay = currentPlatformLocale.getDisplayLanguage(currentPlatformLocale).replaceFirstChar { it.uppercase() }
-            SettingItem(
-                icon = Icons.Filled.Language,
-                title = stringResource(R.string.settings_language),
-                subtitle = langDisplay,
-                shape = RoundedCornerShape(8.dp),
-                groupPosition = ContainerGroupPosition.MIDDLE,
-                onClick = { showLanguageDialog = true }
-            )
-        }
-        item(key = "widgets") {
-            SettingItem(
-                icon = Icons.Filled.Widgets,
-                title = stringResource(R.string.settings_widgets_title),
-                subtitle = stringResource(R.string.settings_widgets_desc),
-                shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
-                groupPosition = ContainerGroupPosition.LAST,
-                onClick = { showWidgetDialog = true }
-            )
-        }
-
-        item(key = "section_notifications") {
-            Text(
-                text = stringResource(R.string.settings_section_notifications),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 8.dp)
-            )
-        }
-        item(key = "ongoing_notification") {
-            val notifStatus = if (ongoingNotificationEnabled) {
-                stringResource(
-                    R.string.notification_status_enabled_format,
-                    stringResource(if (notificationLowPriority) R.string.notification_priority_low else R.string.notification_priority_default)
-                )
-            } else {
-                stringResource(R.string.notification_status_disabled)
-            }
-            SettingItem(
-                icon = Icons.Filled.Notifications,
-                title = stringResource(R.string.settings_ongoing_notification_title),
-                subtitle = notifStatus,
-                shape = RoundedCornerShape(24.dp),
-                groupPosition = ContainerGroupPosition.SINGLE,
-                onClick = { showNotificationSettingsSheet = true }
-            )
-        }
-
-        item(key = "section_goals") {
-            Text(
-                text = stringResource(R.string.settings_section_goals),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 8.dp)
-            )
-        }
-        item(key = "daily_limit") {
-            val limitSubtitle = if (dailyLimit > 0) {
-                if (taperingPlanEnabled) {
-                    stringResource(R.string.daily_limit_subtitle_with_tapering, dailyLimit, taperingIntervalDays)
-                } else {
-                    stringResource(R.string.daily_limit_active_subtitle, dailyLimit)
-                }
-            } else {
-                stringResource(R.string.daily_limit_off_subtitle)
-            }
-            SettingItem(
-                icon = Icons.Default.Speed,
-                title = stringResource(R.string.settings_daily_limit),
-                subtitle = limitSubtitle,
-                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp),
-                groupPosition = ContainerGroupPosition.FIRST,
-                onClick = { showLimitDialog = true }
-            )
-        }
-        item(key = "baseline") {
-            val yearsSmoked = if (historicalStartDate > 0L) {
-                val days = java.util.concurrent.TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() - historicalStartDate)
-                (days / 365).toInt()
-            } else 0
-            val baselineSubtitle = if (hasHistoricalBaseline && historicalDailyAvg > 0) {
-                val yearsStr = stringResource(R.string.baseline_years_format, yearsSmoked)
-                stringResource(R.string.settings_baseline_subtitle_active, historicalDailyAvg, yearsStr)
-            } else {
-                stringResource(R.string.settings_baseline_subtitle_off)
-            }
-            SettingItem(
-                icon = Icons.Default.History,
-                title = stringResource(R.string.settings_baseline_title),
-                subtitle = baselineSubtitle,
-                shape = RoundedCornerShape(8.dp),
-                groupPosition = ContainerGroupPosition.MIDDLE,
-                onClick = { showBaselineSheet = true }
-            )
-        }
-        item(key = "triggers") {
-            val activeTriggerCount = remember(customTriggers, disabledDefaultTriggers) {
-                (com.smokingtracker.data.TriggerType.allEntries().size - disabledDefaultTriggers.size) + customTriggers.size
-            }
-            SettingItem(
-                icon = Icons.Filled.Psychology,
-                title = stringResource(R.string.trigger_management_title),
-                subtitle = stringResource(R.string.trigger_active_count, activeTriggerCount),
-                shape = RoundedCornerShape(8.dp),
-                groupPosition = ContainerGroupPosition.MIDDLE,
-                onClick = { showTriggerManagementSheet = true }
-            )
-        }
-        item(key = "pack_params") {
-            val packSubtitle = if (packPrice > 0f) {
-                val formattedPrice = if (packPrice % 1f == 0f) packPrice.toInt().toString() else packPrice.toString()
-                val pricePerCig = if (packSize > 0) packPrice / packSize else 0f
-                val formattedPerCig = String.format(currentPlatformLocale, "%.2f", pricePerCig)
-                val base = stringResource(R.string.settings_pack_subtitle_pattern, formattedPrice, currency, packSize)
-                val rate = stringResource(R.string.pack_subtitle_piece_rate, formattedPerCig, currency)
-                "$base • $rate"
-            } else {
-                stringResource(R.string.settings_tap_configure)
-            }
-            SettingItem(
-                icon = Icons.Default.AccountBalanceWallet,
-                title = stringResource(R.string.settings_pack_params),
-                subtitle = packSubtitle,
-                shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
-                groupPosition = ContainerGroupPosition.LAST,
-                onClick = { showPackDialog = true }
-            )
-        }
-
-        item(key = "section_data") {
-            Text(
-                text = stringResource(R.string.settings_data),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 8.dp)
-            )
-        }
-        item(key = "backup") {
-            SettingItem(
-                icon = Icons.Filled.Backup,
-                title = stringResource(R.string.settings_backup),
-                subtitle = stringResource(R.string.backup_desc),
-                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp),
-                groupPosition = ContainerGroupPosition.FIRST,
-                onClick = { showBackupSheet = true }
-            )
-        }
-        item(key = "restore") {
-            SettingItem(
-                icon = Icons.Filled.Restore,
-                title = stringResource(R.string.settings_restore),
-                subtitle = stringResource(R.string.restore_desc),
-                shape = RoundedCornerShape(8.dp),
-                groupPosition = ContainerGroupPosition.MIDDLE,
-                onClick = { showRestoreSheet = true }
-            )
-        }
-        item(key = "reset_data") {
-            SettingItem(
-                icon = Icons.Filled.RestartAlt,
-                title = stringResource(R.string.settings_reset_data),
-                subtitle = stringResource(R.string.settings_reset_data_desc),
-                shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
-                groupPosition = ContainerGroupPosition.LAST,
-                onClick = { showResetDialog = true }
-            )
-        }
-
-        item(key = "section_info") {
-            Text(
-                text = stringResource(R.string.settings_info),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 8.dp)
-            )
-        }
-        item(key = "about") {
-            SettingItem(
-                icon = Icons.Filled.Info,
-                title = stringResource(R.string.about_app),
-                subtitle = stringResource(R.string.about_app_desc),
-                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp),
-                groupPosition = ContainerGroupPosition.FIRST,
-                onClick = onNavigateToAbout
-            )
-        }
-        item(key = "check_updates") {
-            SettingItem(
-                icon = Icons.Filled.SystemUpdate,
-                title = stringResource(R.string.settings_check_updates),
-                subtitle = stringResource(R.string.settings_check_updates_desc),
-                shape = RoundedCornerShape(8.dp),
-                groupPosition = ContainerGroupPosition.MIDDLE,
-                onClick = onCheckForUpdates
-            )
-        }
-        item(key = "check_updates_on_start") {
-            SettingItemWithSwitch(
-                icon = Icons.Filled.SystemUpdate,
-                title = stringResource(R.string.settings_check_updates_on_start),
-                subtitle = stringResource(R.string.settings_check_updates_on_start_desc),
-                checked = checkUpdatesOnStart,
-                onCheckedChange = onCheckUpdatesOnStartChange,
-                shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
-                groupPosition = ContainerGroupPosition.LAST
-            )
-        }
-    }
+fun changeLanguage(context: Context, languageTag: String) {
+    LocaleHelper.changeLanguage(context, languageTag)
 }
 
 @Composable
@@ -924,74 +316,23 @@ fun SettingItemWithSwitch(
     subtitle: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(28.dp),
+    shape: Shape = RoundedCornerShape(28.dp),
     groupPosition: ContainerGroupPosition = ContainerGroupPosition.SINGLE
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = containerShape(shape, groupPosition),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onCheckedChange(!checked) }
-                .padding(containerPadding(20.dp, 18.dp)),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
-                contentColor = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(40.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
-                }
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-                thumbContent = { SwitchThumb(checked) },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                    checkedTrackColor = MaterialTheme.colorScheme.primary
-                )
-            )
-        }
-    }
+    NewSettingItemWithSwitch(
+        icon = icon,
+        title = title,
+        subtitle = subtitle,
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        shape = shape,
+        groupPosition = groupPosition
+    )
 }
 
 @Composable
 fun SwitchThumb(checked: Boolean) {
-    AnimatedContent(
-        targetState = checked,
-        transitionSpec = {
-            scaleIn(animationSpec = spring(dampingRatio = 0.8f, stiffness = 400f)) togetherWith
-                    scaleOut(animationSpec = spring(dampingRatio = 0.8f, stiffness = 400f))
-        },
-        label = "switch_thumb_icon"
-    ) { isChecked ->
-        Icon(
-            imageVector = if (isChecked) Icons.Filled.Check else Icons.Filled.Close,
-            contentDescription = null,
-            modifier = Modifier.size(SwitchDefaults.IconSize)
-        )
-    }
+    NewSwitchThumb(checked)
 }
 
 @Composable
@@ -999,17 +340,18 @@ fun SettingItem(
     icon: ImageVector,
     title: String,
     subtitle: String,
-    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(28.dp),
+    shape: Shape = RoundedCornerShape(28.dp),
     groupPosition: ContainerGroupPosition = ContainerGroupPosition.SINGLE,
     onClick: (() -> Unit)? = null
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = containerShape(shape, groupPosition),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
-    ) {
-        SettingItemContent(icon = icon, title = title, subtitle = subtitle, onClick = onClick)
-    }
+    NewSettingItem(
+        icon = icon,
+        title = title,
+        subtitle = subtitle,
+        shape = shape,
+        groupPosition = groupPosition,
+        onClick = onClick
+    )
 }
 
 @Composable
@@ -1019,55 +361,10 @@ fun SettingItemContent(
     subtitle: String,
     onClick: (() -> Unit)? = null
 ) {
-    val rowModifier = Modifier
-        .fillMaxWidth()
-        .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-        .padding(containerPadding(20.dp, 18.dp))
-
-    Row(modifier = rowModifier, verticalAlignment = Alignment.CenterVertically) {
-        Surface(
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
-            contentColor = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(40.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
-            }
-        }
-        Spacer(modifier = Modifier.width(16.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
+    NewSettingItemContent(
+        icon = icon,
+        title = title,
+        subtitle = subtitle,
+        onClick = onClick
+    )
 }
-
-fun changeLanguage(context: android.content.Context, languageTag: String) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        context.getSystemService(LocaleManager::class.java)
-            .applicationLocales = LocaleList.forLanguageTags(languageTag)
-    } else {
-        context.applicationContext
-            .getSharedPreferences(com.smokingtracker.MainActivity.LOCALE_PREFS_NAME, android.content.Context.MODE_PRIVATE)
-            .edit()
-            .putString(com.smokingtracker.MainActivity.KEY_LANGUAGE_TAG, languageTag)
-            .apply()
-        val locale = java.util.Locale.forLanguageTag(languageTag)
-        java.util.Locale.setDefault(locale)
-        val config = android.content.res.Configuration(context.resources.configuration)
-        config.setLocale(locale)
-        @Suppress("DEPRECATION")
-        context.resources.updateConfiguration(config, context.resources.displayMetrics)
-        context.findActivity()?.recreate()
-    }
-}
-

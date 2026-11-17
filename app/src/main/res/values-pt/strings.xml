@@ -567,6 +567,7 @@
     <string name="ach_progress_remaining">Restante: %1$s</string>
     <string name="ach_unlocked_date">Desbloqueado em %1$s</string>
     <string name="ach_close">Fechar</string>
+    <string name="ach_share">Compartilhar</string>
 
     <string name="stats_sheet_life_title">Tempo de vida recuperado</string>
     <string name="stats_sheet_life_fact_title">Estudo clínico do BMJ</string>

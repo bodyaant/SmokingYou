@@ -564,6 +564,7 @@
     <string name="ach_progress_remaining">Remaining: %1$s</string>
     <string name="ach_unlocked_date">Unlocked on %1$s</string>
     <string name="ach_close">Close</string>
+    <string name="ach_share">Share</string>
 
     <string name="stats_sheet_life_title">Life Reclaimed</string>
     <string name="stats_sheet_life_fact_title">BMJ Clinical Research</string>
